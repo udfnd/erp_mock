@@ -11,27 +11,10 @@ import TertiaryNav from './TertiaryNav';
 
 type HeaderVisibility = 'full' | 'compact' | 'hidden';
 
-type VisibilityMap = {
-  secondary: keyof typeof styles.secondaryNavWrapper;
-  tertiary: keyof typeof styles.tertiaryNavWrapper;
-};
-
-const getVisibilityMap = (state: HeaderVisibility): VisibilityMap => {
-  switch (state) {
-    case 'hidden':
-      return { secondary: 'hidden', tertiary: 'hidden' };
-    case 'compact':
-      return { secondary: 'hidden', tertiary: 'visible' };
-    case 'full':
-    default:
-      return { secondary: 'visible', tertiary: 'visible' };
-  }
-};
-
 export default function ErpLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const params = useParams();
-  const scrollContainerRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const lastScrollTop = useRef(0);
   const [headerVisibility, setHeaderVisibility] = useState<HeaderVisibility>('full');
 
@@ -63,12 +46,11 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
   }, [activeSecondaryItem]);
 
   useEffect(() => {
-    const scrollEl = scrollContainerRef.current;
-    if (!scrollEl) return;
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
 
     const handleScroll = () => {
-      const currentTop = scrollEl.scrollTop;
-
+      const currentTop = contentEl.scrollTop;
       if (currentTop <= 0) {
         setHeaderVisibility('full');
       } else if (currentTop > lastScrollTop.current) {
@@ -80,36 +62,24 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
       lastScrollTop.current = currentTop;
     };
 
-    lastScrollTop.current = scrollEl.scrollTop;
-    scrollEl.addEventListener('scroll', handleScroll, { passive: true });
+    lastScrollTop.current = contentEl.scrollTop;
+    contentEl.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      scrollEl.removeEventListener('scroll', handleScroll);
+      contentEl.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
   useEffect(() => {
     lastScrollTop.current = 0;
-    const scrollEl = scrollContainerRef.current;
-    if (!scrollEl) {
-      return;
+
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'auto' });
     }
-
-    scrollEl.scrollTo({ top: 0, behavior: 'auto' });
-    let frame: number | null = null;
-
-    frame = window.requestAnimationFrame(() => {
-      setHeaderVisibility('full');
-    });
-
-    return () => {
-      if (frame !== null) {
-        window.cancelAnimationFrame(frame);
-      }
-    };
   }, [pathname]);
 
-  const visibility = getVisibilityMap(headerVisibility);
+  const secondaryVisibility = headerVisibility === 'full' ? 'visible' : 'hidden';
+  const tertiaryVisibility = headerVisibility === 'hidden' ? 'hidden' : 'visible';
 
   return (
     <div className={styles.container}>
@@ -117,25 +87,18 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
       <div className={styles.mainWrapper}>
         <header className={styles.header}>
           {currentSecondaryNavItems.length > 0 ? (
-            <div className={styles.secondaryNavWrapper[visibility.secondary]}>
+            <div className={styles.secondaryNavWrapper[secondaryVisibility]}>
               <SecondaryNav navItems={currentSecondaryNavItems} />
             </div>
           ) : null}
-
           {currentTertiaryNavItems.length > 0 ? (
-            <div className={styles.tertiaryNavWrapper[visibility.tertiary]}>
+            <div className={styles.tertiaryNavWrapper[tertiaryVisibility]}>
               <TertiaryNav navItems={currentTertiaryNavItems} />
             </div>
           ) : null}
         </header>
-
-        <main
-          ref={scrollContainerRef}
-          className={styles.content}
-          id="erp-main-content"
-          tabIndex={-1}
-        >
-          <div className={styles.contentInner}>{children}</div>
+        <main ref={contentRef} className={styles.content}>
+          {children}
         </main>
       </div>
     </div>
