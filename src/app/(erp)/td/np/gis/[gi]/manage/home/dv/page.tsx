@@ -1,43 +1,62 @@
-import {
-  descriptionDetail,
-  descriptionItem,
-  descriptionList,
-  eyebrow,
-  pageContainer,
-  sectionCard,
-  sectionDescription,
-  sectionTitle,
-  descriptionTerm,
-} from '@/app/(erp)/pageShell.css';
+'use client';
 
-export default function GiManageHomeDvPage() {
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { getGigwan } from '@/api/gigwan';
+import HomeIcon from '@/components/icons/Home';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
+
+import * as styles from './page.style.css';
+
+export default function GigwanManageHomePage() {
+  useRequireAuth();
+
+  const params = useParams<{ gi: string }>();
+  const gi = params?.gi;
+  const [gigwanName, setGigwanName] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!gi) return;
+
+    let isMounted = true;
+    const fetchGigwan = async () => {
+      try {
+        const gigwan = await getGigwan(gi);
+        if (isMounted) {
+          setGigwanName(gigwan.name);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError('기관 정보를 불러올 수 없습니다.');
+        }
+      }
+    };
+
+    fetchGigwan();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [gi]);
+
   return (
-    <div className={pageContainer}>
-      <section className={sectionCard}>
+    <section className={styles.container}>
+      <div className={styles.hero}>
+        <div className={styles.iconWrapper}>
+          <HomeIcon width={40} height={40} />
+        </div>
         <div>
-          <p className={eyebrow}>기관 · 데이터 뷰</p>
-          <h1 className={sectionTitle}>기관 홈 대시보드</h1>
+          <h1 className={styles.title}>{gigwanName ? `${gigwanName} 홈` : '기관 홈'}</h1>
+          <p className={styles.subtitle}>기관 관리를 위한 대시보드를 준비하고 있습니다.</p>
         </div>
-        <p className={sectionDescription}>
-          기관 운영 현황을 한눈에 파악하고 주요 KPI를 점검할 수 있는 홈 화면입니다.
-        </p>
-        <div className={descriptionList}>
-          <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>주요 위젯</h2>
-            <p className={descriptionDetail}>
-              당일 일정, 수강생 현황, 미처리 업무 등 기관 운영자가 매일 확인해야 하는 정보를
-              집중 배치합니다.
-            </p>
-          </div>
-          <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>탐색 동선</h2>
-            <p className={descriptionDetail}>
-              위젯별로 상세 페이지로 연결되는 링크를 제공해, 주요 업무 페이지로 빠르게 이동할 수
-              있도록 구성합니다.
-            </p>
-          </div>
-        </div>
-      </section>
-    </div>
+      </div>
+      <p className={styles.content}>
+        {error
+          ? `${error} 새로고침 후 다시 시도해주세요.`
+          : '환영합니다! 곧 더 많은 정보를 이곳에서 확인하실 수 있습니다.'}
+      </p>
+    </section>
   );
 }
