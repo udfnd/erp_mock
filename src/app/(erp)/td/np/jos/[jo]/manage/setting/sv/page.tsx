@@ -10,28 +10,28 @@ import {
   descriptionTerm,
 } from '@/app/(erp)/pageShell.css';
 
-export default function GiPermissionGroupsLvPage() {
+export default function JoManageSettingSvPage() {
   return (
     <div className={pageContainer}>
       <section className={sectionCard}>
         <div>
-          <p className={eyebrow}>기관 · 권한 그룹</p>
-          <h1 className={sectionTitle}>권한 그룹 라이브러리</h1>
+          <p className={eyebrow}>조직 · 설정</p>
+          <h1 className={sectionTitle}>조직 운영 설정</h1>
         </div>
         <p className={sectionDescription}>
-          역할 기반 권한을 템플릿으로 묶어 관리하고, 사용자에게 일괄 적용할 수 있게 합니다.
+          강의실 배정, 커리큘럼, 담당 강사 등 조직별 운영 정보를 관리합니다.
         </p>
         <div className={descriptionList}>
           <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>권한 템플릿</h2>
+            <h2 className={descriptionTerm}>시간표 템플릿</h2>
             <p className={descriptionDetail}>
-              강사, 부원장, 행정 담당 등 역할별 기본 권한 세트를 정의하고 버전을 관리합니다.
+              학기/분기별 시간표 템플릿을 구성하고, 휴강·보강 일정을 관리합니다.
             </p>
           </div>
           <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>적용 현황</h2>
+            <h2 className={descriptionTerm}>담당 강사</h2>
             <p className={descriptionDetail}>
-              각 권한 그룹이 적용된 사용자 수와 최근 변경 내역을 추적하여 유지 보수 효율을 높입니다.
+              강사 배정 및 담당 교과 변경 이력을 추적하여 안정적인 수업 운영을 지원합니다.
             </p>
           </div>
         </div>
