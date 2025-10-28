@@ -2,13 +2,18 @@ import { style } from '@vanilla-extract/css';
 
 import { typography as typoData } from './typo';
 
-type TypoKeys = keyof typeof typoData;
+const createTypographyStyles = <T extends Record<string, Parameters<typeof style>[0]>>(
+  styles: T,
+) => {
+  const entries = (Object.keys(styles) as Array<keyof T>).map((key) => [
+    key,
+    style(styles[key]),
+  ]);
 
-export const typography = Object.keys(typoData).reduce(
-  (acc, key) => {
-    const typedKey = key as TypoKeys;
-    acc[typedKey] = style(typoData[typedKey]);
-    return acc;
-  },
-  {} as Record<TypoKeys, string>,
-);
+  return Object.fromEntries(entries) as { readonly [K in keyof T]: string };
+};
+
+export const typography = createTypographyStyles(typoData);
+
+export type TypographyClassNames = typeof typography;
+export type TypographyKey = keyof typeof typography;
