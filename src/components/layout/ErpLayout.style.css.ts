@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 
 import { themeVars } from '@/design/theme.css';
 
@@ -6,7 +6,7 @@ export const container = style({
   display: 'flex',
   height: '100vh',
   width: '100vw',
-  background: themeVars.palette.cgrey10,
+  background: themeVars.palette.cgrey25,
   overflow: 'hidden',
 });
 
@@ -15,20 +15,60 @@ export const mainWrapper = style({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+  background: themeVars.palette.cgrey10,
 });
 
 export const header = style({
   flexShrink: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 0,
+  position: 'relative',
+  zIndex: 10,
+  boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
+});
+
+const secondaryWrapperBase = style({
+  overflow: 'hidden',
+  transition: 'max-height 0.24s ease, opacity 0.24s ease',
+  willChange: 'max-height, opacity',
+});
+
+export const secondaryNavWrapper = styleVariants({
+  visible: [secondaryWrapperBase, { maxHeight: '96px', opacity: 1 }],
+  hidden: [secondaryWrapperBase, { maxHeight: 0, opacity: 0, pointerEvents: 'none' }],
+});
+
+const tertiaryWrapperBase = style({
+  overflow: 'hidden',
+  transition: 'max-height 0.24s ease, opacity 0.24s ease',
+  willChange: 'max-height, opacity',
+});
+
+export const tertiaryNavWrapper = styleVariants({
+  visible: [tertiaryWrapperBase, { maxHeight: '80px', opacity: 1 }],
+  hidden: [tertiaryWrapperBase, { maxHeight: 0, opacity: 0, pointerEvents: 'none' }],
 });
 
 export const content = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '24px 32px',
+  padding: `${themeVars.spacing['2xl']} ${themeVars.spacing['2xl']}`,
+  scrollBehavior: 'smooth',
 
   '@media': {
     '(max-width: 959px)': {
-      padding: '16px',
+      padding: `${themeVars.spacing.base} ${themeVars.spacing.base}`,
     },
   },
+});
+
+export const contentInner = style({
+  margin: '0 auto',
+  width: '100%',
+  maxWidth: '1200px',
+  minHeight: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing['2xl'],
 });
