@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 import { useGigwanQuery } from '@/api/gigwan';
 import { Home as HomeIcon } from '@/components/icons';
-import { useAuth } from '@/state/auth/AuthContext';
+import { useAuth } from '@/state/auth';
 
 import * as styles from './page.style.css';
 
@@ -23,7 +23,7 @@ export default function GigwanHomePage() {
   useEffect(() => {
     if (!isReady) return;
     if (!isAuthenticated) {
-      router.replace('/enter-code');
+      router.replace('/td/g');
       return;
     }
     if (state.gigwanNanoId && state.gigwanNanoId !== gigwanNanoId) {

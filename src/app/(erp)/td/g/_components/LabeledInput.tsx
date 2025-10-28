@@ -11,7 +11,7 @@ import {
   label as labelStyle,
   labelWrapper,
   requiredAsterisk,
-} from './Textfield.style.css';
+} from '@/design/components/Textfield.style.css';
 
 type InputWrapperOptions = Exclude<Parameters<typeof inputWrapperRecipe>[0], undefined>;
 type HelperTextOptions = Exclude<Parameters<typeof helperTextRecipe>[0], undefined>;
@@ -19,10 +19,12 @@ type HelperTextOptions = Exclude<Parameters<typeof helperTextRecipe>[0], undefin
 type InputWrapperStatus = NonNullable<InputWrapperOptions['status']>;
 type HelperTextStatus = NonNullable<HelperTextOptions['status']>;
 
-export type InputFieldProps = Omit<
+type BaseInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   'size' | 'onChange' | 'defaultValue'
-> & {
+>;
+
+export type LabeledInputProps = BaseInputProps & {
   label?: string;
   required?: boolean;
   value?: string;
@@ -33,7 +35,7 @@ export type InputFieldProps = Omit<
   containerClassName?: string;
 };
 
-export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
+const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
   (
     {
       label,
@@ -81,5 +83,6 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   },
 );
 
-InputField.displayName = 'InputField';
+LabeledInput.displayName = 'LabeledInput';
 
+export default LabeledInput;

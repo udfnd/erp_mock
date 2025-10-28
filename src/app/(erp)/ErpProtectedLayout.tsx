@@ -1,23 +1,21 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { ReactNode, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { ReactNode } from 'react';
 
 import ErpLayout from '@/components/layout/ErpLayout';
-import { useAuth } from '@/state/auth/AuthContext';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 
 export default function ErpProtectedLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const { isReady, isAuthenticated } = useAuth();
+  const pathname = usePathname();
+  const isAuthRoute = pathname?.startsWith('/td/g');
+  const auth = useAuthGuard({ disabled: isAuthRoute });
 
-  useEffect(() => {
-    if (!isReady) return;
-    if (!isAuthenticated) {
-      router.replace('/enter-code');
-    }
-  }, [isAuthenticated, isReady, router]);
+  if (isAuthRoute) {
+    return <>{children}</>;
+  }
 
-  if (!isAuthenticated) {
+  if (!auth.isReady || !auth.isAuthenticated) {
     return null;
   }
 
