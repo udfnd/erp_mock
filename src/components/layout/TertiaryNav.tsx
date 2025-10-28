@@ -23,17 +23,26 @@ export default function TertiaryNav({ navItems }: Props) {
       <ul className={styles.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
-          const isActive = pathname === href;
+          const isActive = href ? pathname === href : false;
 
           return (
             <li key={item.name} className={styles.navListItem}>
-              <Link
-                href={href}
-                className={styles.navLink[isActive ? 'active' : 'inactive']}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {item.name}
-              </Link>
+              {href ? (
+                <Link
+                  href={href}
+                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <span
+                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                  aria-disabled="true"
+                >
+                  {item.name}
+                </span>
+              )}
             </li>
           );
         })}

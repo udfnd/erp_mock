@@ -27,18 +27,30 @@ export default function PrimaryNav() {
             : undefined;
           const isActive = resolvedBasePath
             ? pathname.startsWith(resolvedBasePath)
-            : pathname === href;
+            : href
+                ? pathname === href
+                : false;
 
           return (
             <li key={item.name} className={styles.navListItem}>
-              <Link
-                href={href}
-                className={styles.navLink[isActive ? 'active' : 'inactive']}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <span className={styles.navIcon} aria-hidden />
-                <span className={styles.navLabel}>{item.name}</span>
-              </Link>
+              {href ? (
+                <Link
+                  href={href}
+                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <span className={styles.navIcon} aria-hidden />
+                  <span className={styles.navLabel}>{item.name}</span>
+                </Link>
+              ) : (
+                <span
+                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                  aria-disabled="true"
+                >
+                  <span className={styles.navIcon} aria-hidden />
+                  <span className={styles.navLabel}>{item.name}</span>
+                </span>
+              )}
             </li>
           );
         })}

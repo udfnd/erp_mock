@@ -22,7 +22,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
     return primaryNavItems.find((item) => {
       if (!item.basePath) return false;
       const resolvedBase = getDynamicHref(item.basePath, params);
-      return pathname.startsWith(resolvedBase);
+      return resolvedBase ? pathname.startsWith(resolvedBase) : false;
     });
   }, [pathname, params]);
 
@@ -37,7 +37,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
     return currentSecondaryNavItems.find((item) => {
       if (!item.basePath) return false;
       const dynamicBasePath = getDynamicHref(item.basePath, params);
-      return pathname.startsWith(dynamicBasePath);
+      return dynamicBasePath ? pathname.startsWith(dynamicBasePath) : false;
     });
   }, [pathname, params, currentSecondaryNavItems]);
 
