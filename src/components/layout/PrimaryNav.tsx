@@ -1,10 +1,8 @@
-'use client'; // useParams, usePathname 사용으로 'use client' 유지
+'use client';
 
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
-import { useMemo } from 'react';
 
-// vanilla-extract 스타일 import
 import { getDynamicHref, primaryNavItems } from './nav.data';
 import * as styles from './PrimaryNav.style.css';
 
@@ -12,42 +10,49 @@ export default function PrimaryNav() {
   const pathname = usePathname();
   const params = useParams();
 
-  const activePrimaryItem = useMemo(() => {
-    if (!params || Object.keys(params).length === 0) return null;
-    return primaryNavItems.find((item) => pathname.startsWith(item.basePath!));
-  }, [pathname, params]);
-
-  if (!params || Object.keys(params).length === 0) {
-    return null;
-  }
-
   return (
-    // styled 컴포넌트 대신 태그와 className 사용
-    <nav className={styles.navContainer}>
-      {/* TODO: 로고 영역 */}
-      <div className={styles.logoPlaceholder}></div>
+    <aside className={styles.navContainer} aria-label="기본 내비게이션">
+      <Link href="/" className={styles.brandArea} aria-label="ERP 홈">
+        <span className={styles.brandMark} aria-hidden>
+          ERP
+        </span>
+        <span className={styles.brandLabel}>Mock ERP</span>
+      </Link>
 
-      {primaryNavItems.map((item) => {
-        const isActive = activePrimaryItem?.basePath === item.basePath;
-        const href = getDynamicHref(item.href, params);
+      <ul className={styles.navList}>
+        {primaryNavItems.map((item) => {
+          const href = getDynamicHref(item.href, params);
+          const resolvedBasePath = item.basePath
+            ? getDynamicHref(item.basePath, params)
+            : undefined;
+          const isActive = resolvedBasePath
+            ? pathname.startsWith(resolvedBasePath)
+            : pathname === href;
 
-        return (
-          <Link
-            key={item.name}
-            href={href}
-            // styleVariants를 사용하여 조건부 클래스 적용
-            className={styles.navLink[isActive ? 'active' : 'inactive']}
-          >
-            <div className={styles.iconPlaceholder} />
-            <span className={styles.navLinkText}>{item.name}</span>
-          </Link>
-        );
-      })}
+          return (
+            <li key={item.name} className={styles.navListItem}>
+              <Link
+                href={href}
+                className={styles.navLink[isActive ? 'active' : 'inactive']}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <span className={styles.navIcon} aria-hidden />
+                <span className={styles.navLabel}>{item.name}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
 
-      <div className={styles.spacer} />
-
-      {/* TODO: 사용자 프로필 영역 */}
-      <div className={styles.profilePlaceholder}></div>
-    </nav>
+      <div className={styles.navFooter}>
+        <div className={styles.profileCard}>
+          <span className={styles.profileAvatar} aria-hidden />
+          <div className={styles.profileMeta}>
+            <span className={styles.profileName}>홍길동</span>
+            <span className={styles.profileRole}>관리자</span>
+          </div>
+        </div>
+      </div>
+    </aside>
   );
 }

@@ -1,4 +1,3 @@
-
 export type NavItem = {
   name: string;
   /** 동적 파라미터를 포함한 전체 경로 (예: /td/np/gis/[gi]/manage/home/dv) */
@@ -17,13 +16,17 @@ export type NavItem = {
  */
 export const getDynamicHref = (
   href: string,
-  params: { [key: string]: string | string[] | undefined },
+  params?: { [key: string]: string | string[] | undefined },
 ) => {
+  if (!params || Object.keys(params).length === 0) {
+    return href;
+  }
+
   let dynamicHref = href;
   Object.entries(params).forEach(([key, value]) => {
     if (typeof value === 'string') {
       dynamicHref = dynamicHref.replace(`[${key}]`, value);
-    } else if (Array.isArray(value)) {
+    } else if (Array.isArray(value) && value.length > 0) {
       dynamicHref = dynamicHref.replace(`[${key}]`, value[0]);
     }
   });
@@ -53,8 +56,8 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
       href: '/td/np/gis/[gi]/manage/home/dv',
       basePath: '/td/np/gis/[gi]/manage',
       items: [ // IA Depth 4
-        {name: '홈', href: '/td/np/gis/[gi]/manage/home/dv'},
-        {name: '기관 설정', href: '/td/np/gis/[gi]/manage/setting/sv'},
+        { name: '홈', href: '/td/np/gis/[gi]/manage/home/dv' },
+        { name: '기관 설정', href: '/td/np/gis/[gi]/manage/setting/sv' },
       ],
     },
     {
@@ -72,8 +75,8 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
       href: '/td/np/gis/[gi]/permissions/home/lv',
       basePath: '/td/np/gis/[gi]/permissions',
       items: [
-        {name: '권한들', href: '/td/np/gis/[gi]/permissions/home/lv'},
-        {name: '권한 그룹들', href: '/td/np/gis/[gi]/permissions/permission-groups/lv'},
+        { name: '권한들', href: '/td/np/gis/[gi]/permissions/home/lv' },
+        { name: '권한 그룹들', href: '/td/np/gis/[gi]/permissions/permission-groups/lv' },
       ],
     },
   ],
@@ -84,8 +87,8 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
       href: '/td/np/jos/[jo]/manage/home/dv',
       basePath: '/td/np/jos/[jo]/manage',
       items: [ // IA Depth 4
-        {name: '홈', href: '/td/np/jos/[jo]/manage/home/dv'},
-        {name: '조직 설정', href: '/td/np/jos/[jo]/manage/setting/sv'},
+        { name: '홈', href: '/td/np/jos/[jo]/manage/home/dv' },
+        { name: '조직 설정', href: '/td/np/jos/[jo]/manage/setting/sv' },
       ],
     },
     {
@@ -93,9 +96,9 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
       href: '/td/np/jos/[jo]/jawons/memos/lv',
       basePath: '/td/np/jos/[jo]/jawons',
       items: [
-        {name: '메모들', href: '/td/np/jos/[jo]/jawons/memos/lv'},
-        {name: '외부링크들', href: '/td/np/jos/[jo]/jawons/oebu-links/lv'},
-        {name: '주소들', href: '/td/np/jos/[jo]/jawons/jusos/lv'},
+        { name: '메모들', href: '/td/np/jos/[jo]/jawons/memos/lv' },
+        { name: '외부링크들', href: '/td/np/jos/[jo]/jawons/oebu-links/lv' },
+        { name: '주소들', href: '/td/np/jos/[jo]/jawons/jusos/lv' },
       ],
     },
   ],

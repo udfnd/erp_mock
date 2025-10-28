@@ -5,61 +5,80 @@ import { typography } from '@/design/typo.css';
 
 export const navContainer = style({
   display: 'flex',
-  gap: '20px',
-  padding: '0 32px',
+  alignItems: 'center',
+  padding: `0 ${themeVars.spacing['2xl']}`,
   background: themeVars.palette.white,
   boxShadow: themeVars.shadow.sm,
-  height: '48px',
-  alignItems: 'center',
+  minHeight: '52px',
+  boxSizing: 'border-box',
 
   '@media': {
     '(max-width: 959px)': {
-      padding: '0 16px',
-      overflowX: 'auto',
+      padding: `0 ${themeVars.spacing.base}`,
     },
   },
 });
 
-const navLinkBase = style({
-  position: 'relative',
+export const navList = style({
+  listStyle: 'none',
+  margin: 0,
+  padding: 0,
   display: 'flex',
-  alignItems: 'center',
-  height: '100%',
-  textDecoration: 'none',
-  whiteSpace: 'nowrap',
-
-  ':hover': {
-    color: themeVars.palette.cgrey700,
-  },
-
-  '::after': {
-    content: '""',
-    display: 'none',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '2px',
-    background: themeVars.palette.blue,
-  },
+  gap: themeVars.spacing.lg,
+  overflowX: 'auto',
+  width: '100%',
 });
+
+export const navListItem = style({
+  flexShrink: 0,
+});
+
+const navLinkBase = style([
+  typography.bodyM,
+  {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: `${themeVars.spacing.sm} 0`,
+    textDecoration: 'none',
+    color: themeVars.palette.cgrey400,
+    whiteSpace: 'nowrap',
+    transition: 'color 0.2s ease',
+
+    ':hover': {
+      color: themeVars.palette.cgrey600,
+    },
+
+    ':focus-visible': {
+      outline: `2px solid ${themeVars.palette.blue200}`,
+      outlineOffset: '4px',
+    },
+
+    '::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: '-12px',
+      height: '2px',
+      borderRadius: themeVars.radius.sm,
+      background: 'transparent',
+      transition: 'background 0.2s ease',
+    },
+  },
+]);
 
 export const navLink = styleVariants({
   active: [
     navLinkBase,
-    typography.bodySB, // 활성: bodySB
+    typography.bodySB,
     {
       color: themeVars.palette.cgrey700,
       '::after': {
-        display: 'block', // 활성 시 밑줄 표시
+        background: themeVars.palette.blue,
       },
     },
   ],
-  inactive: [
-    navLinkBase,
-    typography.bodyM, // 비활성: bodyM
-    {
-      color: themeVars.palette.cgrey400,
-    },
-  ],
+  inactive: [navLinkBase],
 });

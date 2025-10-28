@@ -3,7 +3,6 @@
 import { useParams, usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-// vanilla-extract 스타일 import
 import * as styles from './ErpLayout.style.css';
 import { getDynamicHref, primaryNavItems, secondaryNavItems } from './nav.data';
 import PrimaryNav from './PrimaryNav';
@@ -20,16 +19,20 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
   const [headerVisibility, setHeaderVisibility] = useState<HeaderVisibility>('full');
 
   const activePrimaryItem = useMemo(() => {
-    return primaryNavItems.find((item) => pathname.startsWith(item.basePath!));
-  }, [pathname]);
+    return primaryNavItems.find((item) => {
+      if (!item.basePath) return false;
+      const resolvedBase = getDynamicHref(item.basePath, params);
+      return pathname.startsWith(resolvedBase);
+    });
+  }, [pathname, params]);
 
   const currentSecondaryNavItems = useMemo(() => {
-    if (!activePrimaryItem) return [];
-    return secondaryNavItems[activePrimaryItem.basePath!] || [];
+    if (!activePrimaryItem?.basePath) return [];
+    return secondaryNavItems[activePrimaryItem.basePath] ?? [];
   }, [activePrimaryItem]);
 
   const activeSecondaryItem = useMemo(() => {
-    if (currentSecondaryNavItems.length === 0 || !params) return null;
+    if (currentSecondaryNavItems.length === 0) return null;
 
     return currentSecondaryNavItems.find((item) => {
       if (!item.basePath) return false;
@@ -39,7 +42,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, params, currentSecondaryNavItems]);
 
   const currentTertiaryNavItems = useMemo(() => {
-    return activeSecondaryItem?.items || [];
+    return activeSecondaryItem?.items ?? [];
   }, [activeSecondaryItem]);
 
   useEffect(() => {

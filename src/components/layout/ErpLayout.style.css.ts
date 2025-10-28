@@ -6,7 +6,7 @@ export const container = style({
   display: 'flex',
   height: '100vh',
   width: '100vw',
-  background: themeVars.palette.cgrey10,
+  background: themeVars.palette.cgrey25,
   overflow: 'hidden',
 });
 
@@ -52,11 +52,22 @@ export const tertiaryNavWrapper = styleVariants({
 export const content = style({
   flex: 1,
   overflowY: 'auto',
-  padding: '24px 32px',
+  padding: `${themeVars.spacing['2xl']} ${themeVars.spacing['2xl']}`,
+  scrollBehavior: 'smooth',
 
   '@media': {
     '(max-width: 959px)': {
-      padding: '16px',
+      padding: `${themeVars.spacing.base} ${themeVars.spacing.base}`,
     },
   },
+});
+
+export const contentInner = style({
+  margin: '0 auto',
+  width: '100%',
+  maxWidth: '1200px',
+  minHeight: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing['2xl'],
 });

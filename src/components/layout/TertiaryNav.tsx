@@ -19,21 +19,25 @@ export default function TertiaryNav({ navItems }: Props) {
   }
 
   return (
-    <nav className={styles.navContainer}>
-      {navItems.map((item) => {
-        const href = getDynamicHref(item.href, params);
-        const isActive = pathname === href;
+    <nav className={styles.navContainer} aria-label="세부 섹션 내비게이션">
+      <ul className={styles.navList}>
+        {navItems.map((item) => {
+          const href = getDynamicHref(item.href, params);
+          const isActive = pathname === href;
 
-        return (
-          <Link
-            key={item.name}
-            href={href}
-            className={styles.navLink[isActive ? 'active' : 'inactive']}
-          >
-            {item.name}
-          </Link>
-        );
-      })}
+          return (
+            <li key={item.name} className={styles.navListItem}>
+              <Link
+                href={href}
+                className={styles.navLink[isActive ? 'active' : 'inactive']}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {item.name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }
