@@ -10,28 +10,28 @@ import {
   descriptionTerm,
 } from '@/app/(erp)/pageShell.css';
 
-export default function GiPermissionGroupsLvPage() {
+export default function JoJawonsOebuLinksLvPage() {
   return (
     <div className={pageContainer}>
       <section className={sectionCard}>
         <div>
-          <p className={eyebrow}>기관 · 권한 그룹</p>
-          <h1 className={sectionTitle}>권한 그룹 라이브러리</h1>
+          <p className={eyebrow}>조직 · 자원</p>
+          <h1 className={sectionTitle}>외부 링크 보관함</h1>
         </div>
         <p className={sectionDescription}>
-          역할 기반 권한을 템플릿으로 묶어 관리하고, 사용자에게 일괄 적용할 수 있게 합니다.
+          수업 자료, 참고 영상, 업무 툴 등 외부 리소스를 한곳에서 관리합니다.
         </p>
         <div className={descriptionList}>
           <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>권한 템플릿</h2>
+            <h2 className={descriptionTerm}>링크 분류</h2>
             <p className={descriptionDetail}>
-              강사, 부원장, 행정 담당 등 역할별 기본 권한 세트를 정의하고 버전을 관리합니다.
+              카테고리와 즐겨찾기를 제공해 자주 사용하는 링크에 빠르게 접근할 수 있게 합니다.
             </p>
           </div>
           <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>적용 현황</h2>
+            <h2 className={descriptionTerm}>접근 제어</h2>
             <p className={descriptionDetail}>
-              각 권한 그룹이 적용된 사용자 수와 최근 변경 내역을 추적하여 유지 보수 효율을 높입니다.
+              조직 내 역할에 따라 노출 범위를 설정하고, 사용 기록을 확인합니다.
             </p>
           </div>
         </div>

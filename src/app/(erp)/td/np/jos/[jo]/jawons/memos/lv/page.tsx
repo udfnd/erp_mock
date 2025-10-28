@@ -10,28 +10,28 @@ import {
   descriptionTerm,
 } from '@/app/(erp)/pageShell.css';
 
-export default function GiPermissionGroupsLvPage() {
+export default function JoJawonsMemosLvPage() {
   return (
     <div className={pageContainer}>
       <section className={sectionCard}>
         <div>
-          <p className={eyebrow}>기관 · 권한 그룹</p>
-          <h1 className={sectionTitle}>권한 그룹 라이브러리</h1>
+          <p className={eyebrow}>조직 · 자원</p>
+          <h1 className={sectionTitle}>메모 리포지토리</h1>
         </div>
         <p className={sectionDescription}>
-          역할 기반 권한을 템플릿으로 묶어 관리하고, 사용자에게 일괄 적용할 수 있게 합니다.
+          조직 내부 공지, 회의록, 교육 노하우 등을 메모 형태로 축적하고 공유합니다.
         </p>
         <div className={descriptionList}>
           <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>권한 템플릿</h2>
+            <h2 className={descriptionTerm}>분류 체계</h2>
             <p className={descriptionDetail}>
-              강사, 부원장, 행정 담당 등 역할별 기본 권한 세트를 정의하고 버전을 관리합니다.
+              태그와 폴더를 활용해 메모를 정리하고, 검색과 권한 관리를 지원합니다.
             </p>
           </div>
           <div className={descriptionItem}>
-            <h2 className={descriptionTerm}>적용 현황</h2>
+            <h2 className={descriptionTerm}>협업 기능</h2>
             <p className={descriptionDetail}>
-              각 권한 그룹이 적용된 사용자 수와 최근 변경 내역을 추적하여 유지 보수 효율을 높입니다.
+              메모별 댓글과 확인 요청 기능을 제공해 구성원 간 협업 효율을 높입니다.
             </p>
           </div>
         </div>
