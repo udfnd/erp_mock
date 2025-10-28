@@ -2,13 +2,19 @@ import { style } from '@vanilla-extract/css';
 
 import { typography as typoData } from './typo';
 
-type TypoKeys = keyof typeof typoData;
+const createTypographyClasses = <Tokens extends Record<string, Parameters<typeof style>[0]>>(
+  tokens: Tokens,
+) => {
+  const result = {} as { [Key in keyof Tokens]: string };
 
-export const typography = Object.keys(typoData).reduce(
-  (acc, key) => {
-    const typedKey = key as TypoKeys;
-    acc[typedKey] = style(typoData[typedKey]);
-    return acc;
-  },
-  {} as Record<TypoKeys, string>,
-);
+  for (const key in tokens) {
+    if (Object.prototype.hasOwnProperty.call(tokens, key)) {
+      const typedKey = key as keyof Tokens;
+      result[typedKey] = style(tokens[typedKey]);
+    }
+  }
+
+  return result;
+};
+
+export const typography = createTypographyClasses(typoData);
