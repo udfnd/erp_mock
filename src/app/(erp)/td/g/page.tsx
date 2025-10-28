@@ -5,8 +5,9 @@ import { FormEvent, useCallback, useState } from 'react';
 
 import { getGigwan } from '@/api/gigwan';
 import { Progress } from '@/components/icons';
-import { Button, InputField } from '@/design';
+import { Button } from '@/design';
 
+import LabeledInput from './_components/LabeledInput';
 import * as styles from './page.style.css';
 
 export default function EnterCodePage() {
@@ -57,7 +58,7 @@ export default function EnterCodePage() {
           <p className={styles.description}>기관에서 발급 받은 8자리 코드를 입력해주세요.</p>
         </header>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <InputField
+          <LabeledInput
             autoFocus
             label="기관 코드"
             placeholder="코드 8자리를 입력하세요"

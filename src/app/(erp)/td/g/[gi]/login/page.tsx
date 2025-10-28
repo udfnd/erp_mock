@@ -6,10 +6,11 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSignInMutation } from '@/api/auth';
 import { useGigwanQuery } from '@/api/gigwan';
 import { Progress } from '@/components/icons';
-import { Button, InputField } from '@/design';
-import { useAuth } from '@/state/auth/AuthContext';
+import { Button } from '@/design';
+import { useAuth } from '@/state/auth';
 
 import * as styles from './page.style.css';
+import LabeledInput from '../../_components/LabeledInput';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -100,13 +101,13 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (!codeParam || codeParam.length !== 8) {
-      router.replace('/enter-code');
+      router.replace('/td/g');
     }
   }, [codeParam, router]);
 
   useEffect(() => {
     if (isGigwanError) {
-      router.replace('/enter-code');
+      router.replace('/td/g');
     }
   }, [isGigwanError, router]);
 
@@ -134,7 +135,7 @@ export default function SignInPage() {
           <p className={styles.subtitle}>{subtitle}</p>
         </header>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <InputField
+          <LabeledInput
             label="아이디"
             placeholder="아이디를 입력하세요"
             value={id}
@@ -143,7 +144,7 @@ export default function SignInPage() {
             autoFocus
             autoComplete="username"
           />
-          <InputField
+          <LabeledInput
             label="패스워드"
             placeholder="패스워드를 입력하세요"
             type="password"
