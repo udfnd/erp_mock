@@ -6,21 +6,21 @@ import { typography } from '@/design/typo.css';
 export const page = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '24px',
+  gap: themeVars.spacing.xl,
 });
 
 const panelBase = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
-  padding: '32px',
+  gap: themeVars.spacing.md,
+  padding: themeVars.spacing['2xl'],
   borderRadius: themeVars.radius.lg,
   background: themeVars.palette.white,
   boxShadow: themeVars.shadow.sm,
 
   '@media': {
     '(max-width: 959px)': {
-      padding: '24px',
+      padding: themeVars.spacing.xl,
     },
   },
 });
@@ -28,27 +28,29 @@ const panelBase = style({
 export const hero = style([
   panelBase,
   {
-    gap: '16px',
+    gap: themeVars.spacing.base,
   },
 ]);
 
 export const section = style([
   panelBase,
   {
-    padding: '28px 32px',
+    paddingBlock: themeVars.spacing.xl,
+    paddingInline: themeVars.spacing['2xl'],
 
     '@media': {
       '(max-width: 959px)': {
-        padding: '20px 24px',
+        paddingBlock: themeVars.spacing.lg,
+        paddingInline: themeVars.spacing.xl,
       },
     },
   },
 ]);
 
 export const title = style([
-  typography.heading3SB,
+  typography.titleB,
   {
-    color: themeVars.palette.cgrey800,
+    color: themeVars.palette.cgrey700,
   },
 ]);
 
@@ -63,17 +65,18 @@ export const description = style([
 export const meta = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: '8px',
+  gap: themeVars.spacing.sm,
 });
 
 export const metaChip = style([
-  typography.captionSB,
+  typography.captionB,
   {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
-    padding: '6px 10px',
-    borderRadius: themeVars.radius.round,
+    gap: themeVars.spacing.xs,
+    paddingBlock: themeVars.spacing.xs,
+    paddingInline: themeVars.spacing.sm,
+    borderRadius: themeVars.radius.xl,
     background: themeVars.palette.blue50,
     color: themeVars.palette.blue600,
   },
@@ -82,18 +85,18 @@ export const metaChip = style([
 export const sectionHeader = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '6px',
+  gap: themeVars.spacing.xs,
 });
 
 export const sectionTitle = style([
-  typography.heading4SB,
+  typography.titleSmallB,
   {
     color: themeVars.palette.cgrey700,
   },
 ]);
 
 export const sectionDescription = style([
-  typography.bodyS,
+  typography.bodySmallR,
   {
     color: themeVars.palette.cgrey400,
     lineHeight: 1.6,
@@ -103,27 +106,27 @@ export const sectionDescription = style([
 export const sectionBody = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '16px',
+  gap: themeVars.spacing.base,
 });
 
 export const cardGrid = style({
   display: 'grid',
-  gap: '16px',
+  gap: themeVars.spacing.base,
   gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
 });
 
 export const card = style([
-  typography.bodyS,
+  typography.bodySmallR,
   {
     minHeight: '120px',
     borderRadius: themeVars.radius.md,
     border: `1px dashed ${themeVars.palette.cgrey200}`,
-    background: themeVars.palette.cgrey25,
+    background: themeVars.palette.cgrey50,
     color: themeVars.palette.cgrey400,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    padding: '16px',
+    padding: themeVars.spacing.base,
   },
 ]);
