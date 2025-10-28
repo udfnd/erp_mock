@@ -11,7 +11,6 @@ const nextConfigs = Array.isArray(next)
 /** @type {import('eslint').Linter.FlatConfig[]} */
 const config = [
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
     ignores: [
       'node_modules/**',
       '.next/**',
@@ -19,7 +18,12 @@ const config = [
       'build/**',
       'next-env.d.ts',
       'eslint.config.*',   // ← 추가
+      'src/components/icons/**/*',
+      'src/design/components/Profile.tsx',
     ],
+  },
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

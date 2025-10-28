@@ -111,6 +111,25 @@ export const textareaRecipe = recipe({
   defaultVariants: { resize: 'normal' },
 });
 
+export const inputRecipe = recipe({
+  base: [
+    typography.bodyR,
+    {
+      width: '100%',
+      border: 'none',
+      outline: 'none',
+      padding: 0,
+      background: 'transparent',
+      color: themeVars.palette.black,
+      selectors: {
+        '&::placeholder': { color: themeVars.palette.cgrey300 },
+        '&:disabled': { color: themeVars.palette.cgrey400 },
+        '&:disabled::placeholder': { color: themeVars.palette.cgrey300 },
+      },
+    },
+  ],
+});
+
 export const footer = style({
   display: 'flex',
   flexDirection: 'row',
