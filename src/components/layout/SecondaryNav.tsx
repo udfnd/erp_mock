@@ -28,17 +28,28 @@ export default function SecondaryNav({ navItems }: Props) {
             : undefined;
           const isActive = resolvedBasePath
             ? pathname.startsWith(resolvedBasePath)
-            : pathname === href;
+            : href
+                ? pathname === href
+                : false;
 
           return (
             <li key={item.name} className={styles.navListItem}>
-              <Link
-                href={href}
-                className={styles.navLink[isActive ? 'active' : 'inactive']}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {item.name}
-              </Link>
+              {href ? (
+                <Link
+                  href={href}
+                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <span
+                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                  aria-disabled="true"
+                >
+                  {item.name}
+                </span>
+              )}
             </li>
           );
         })}

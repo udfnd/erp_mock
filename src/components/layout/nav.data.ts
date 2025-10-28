@@ -17,9 +17,11 @@ export type NavItem = {
 export const getDynamicHref = (
   href: string,
   params?: { [key: string]: string | string[] | undefined },
-) => {
+): string | null => {
+  const hasDynamicSegment = href.includes('[');
+
   if (!params || Object.keys(params).length === 0) {
-    return href;
+    return hasDynamicSegment ? null : href;
   }
 
   let dynamicHref = href;
@@ -30,7 +32,8 @@ export const getDynamicHref = (
       dynamicHref = dynamicHref.replace(`[${key}]`, value[0]);
     }
   });
-  return dynamicHref;
+
+  return dynamicHref.includes('[') ? null : dynamicHref;
 };
 
 // IA Depth 2: Primary Nav
