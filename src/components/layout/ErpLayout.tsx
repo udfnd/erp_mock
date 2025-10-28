@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, usePathname } from 'next/navigation';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // vanilla-extract 스타일 import
 import * as styles from './ErpLayout.style.css';
@@ -10,9 +10,14 @@ import PrimaryNav from './PrimaryNav';
 import SecondaryNav from './SecondaryNav';
 import TertiaryNav from './TertiaryNav';
 
+type HeaderVisibility = 'full' | 'compact' | 'hidden';
+
 export default function ErpLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const params = useParams();
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const lastScrollTop = useRef(0);
+  const [headerVisibility, setHeaderVisibility] = useState<HeaderVisibility>('full');
 
   const activePrimaryItem = useMemo(() => {
     return primaryNavItems.find((item) => pathname.startsWith(item.basePath!));
@@ -37,15 +42,61 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
     return activeSecondaryItem?.items || [];
   }, [activeSecondaryItem]);
 
+  useEffect(() => {
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+
+    const handleScroll = () => {
+      const currentTop = contentEl.scrollTop;
+      if (currentTop <= 0) {
+        setHeaderVisibility('full');
+      } else if (currentTop > lastScrollTop.current) {
+        setHeaderVisibility('hidden');
+      } else {
+        setHeaderVisibility('compact');
+      }
+
+      lastScrollTop.current = currentTop;
+    };
+
+    lastScrollTop.current = contentEl.scrollTop;
+    contentEl.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      contentEl.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    lastScrollTop.current = 0;
+
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [pathname]);
+
+  const secondaryVisibility = headerVisibility === 'full' ? 'visible' : 'hidden';
+  const tertiaryVisibility = headerVisibility === 'hidden' ? 'hidden' : 'visible';
+
   return (
     <div className={styles.container}>
       <PrimaryNav />
       <div className={styles.mainWrapper}>
         <header className={styles.header}>
-          <SecondaryNav navItems={currentSecondaryNavItems} />
-          <TertiaryNav navItems={currentTertiaryNavItems} />
+          {currentSecondaryNavItems.length > 0 ? (
+            <div className={styles.secondaryNavWrapper[secondaryVisibility]}>
+              <SecondaryNav navItems={currentSecondaryNavItems} />
+            </div>
+          ) : null}
+          {currentTertiaryNavItems.length > 0 ? (
+            <div className={styles.tertiaryNavWrapper[tertiaryVisibility]}>
+              <TertiaryNav navItems={currentTertiaryNavItems} />
+            </div>
+          ) : null}
         </header>
-        <main className={styles.content}>{children}</main>
+        <main ref={contentRef} className={styles.content}>
+          {children}
+        </main>
       </div>
     </div>
   );
