@@ -9,7 +9,7 @@ export const page = style({
   alignItems: 'center',
   justifyContent: 'center',
   background: themeVars.palette.cgrey10,
-  padding: themeVars.spacing['2xl'],
+  padding: themeVars.spacing.xxl,
 });
 
 export const card = style({
@@ -18,10 +18,10 @@ export const card = style({
   background: themeVars.palette.white,
   borderRadius: themeVars.radius.lg,
   boxShadow: themeVars.shadow.md,
-  padding: `${themeVars.spacing['2xl']} ${themeVars.spacing['2xl']}`,
+  padding: `${themeVars.spacing.xxl} ${themeVars.spacing.xxl}`,
   display: 'flex',
   flexDirection: 'column',
-  gap: themeVars.spacing['2xl'],
+  gap: themeVars.spacing.xxl,
 });
 
 export const header = style({

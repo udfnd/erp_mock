@@ -6,8 +6,8 @@ import { typography } from '@/design/typo.css';
 export const page = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: themeVars.spacing['2xl'],
-  padding: themeVars.spacing['2xl'],
+  gap: themeVars.spacing.xxl,
+  padding: themeVars.spacing.xxl,
 });
 
 export const header = style({
@@ -30,7 +30,7 @@ export const hero = style({
   display: 'flex',
   alignItems: 'center',
   gap: themeVars.spacing.base,
-  padding: `${themeVars.spacing['2xl']} ${themeVars.spacing['2xl']}`,
+  padding: `${themeVars.spacing.xxl} ${themeVars.spacing.xxl}`,
   borderRadius: themeVars.radius.lg,
   background: themeVars.palette.blue50,
 });

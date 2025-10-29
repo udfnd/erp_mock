@@ -37,7 +37,7 @@ export default function EnterCodePage() {
       setIsLoading(true);
       try {
         await getGigwan(code);
-        router.push(`/sign-in?code=${code}`);
+        router.push(`/td/g/[gi]/login?code=${code}`);
       } catch (error) {
         console.error('기관 코드 확인 실패', error);
         setErrorMessage('기관 코드를 확인해주세요.');

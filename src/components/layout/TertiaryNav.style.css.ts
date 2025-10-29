@@ -6,7 +6,7 @@ import { typography } from '@/design/typo.css';
 export const navContainer = style({
   display: 'flex',
   alignItems: 'center',
-  padding: `0 ${themeVars.spacing['2xl']}`,
+  padding: `0 ${themeVars.spacing.xxl}`,
   background: themeVars.palette.white,
   boxShadow: themeVars.shadow.sm,
   minHeight: '52px',

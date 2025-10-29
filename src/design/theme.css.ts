@@ -49,7 +49,7 @@ export const themeVars = createGlobalThemeContract(
       base: null,
       lg: null,
       xl: null,
-      '2xl': null,
+      xxl: null,
     },
   },
   (_value, path) => `th-${path.join('-')}`,
@@ -70,6 +70,6 @@ createGlobalTheme(':root', themeVars, {
     base: '16px',
     lg: '20px',
     xl: '24px',
-    '2xl': '32px',
+    xxl: '32px',
   },
 });

@@ -10,7 +10,7 @@ export const navContainer = style({
   display: 'flex',
   flexDirection: 'column',
   width: '256px',
-  padding: `${themeVars.spacing['2xl']} ${themeVars.spacing.lg}`,
+  padding: `${themeVars.spacing.xxl} ${themeVars.spacing.lg}`,
   background: `linear-gradient(180deg, ${themeVars.palette.cgrey700} 0%, ${themeVars.palette.cgrey600} 100%)`,
   color: themeVars.palette.white,
   gap: themeVars.spacing.xl,
@@ -22,7 +22,7 @@ export const navContainer = style({
   '@media': {
     [collapsedRange]: {
       width: '88px',
-      padding: `${themeVars.spacing['2xl']} ${themeVars.spacing.sm}`,
+      padding: `${themeVars.spacing.xxl} ${themeVars.spacing.sm}`,
       alignItems: 'center',
     },
     '(max-width: 959px)': {

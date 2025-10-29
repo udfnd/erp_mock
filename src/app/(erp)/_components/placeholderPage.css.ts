@@ -13,7 +13,7 @@ const panelBase = style({
   display: 'flex',
   flexDirection: 'column',
   gap: themeVars.spacing.md,
-  padding: themeVars.spacing['2xl'],
+  padding: themeVars.spacing.xxl,
   borderRadius: themeVars.radius.lg,
   background: themeVars.palette.white,
   boxShadow: themeVars.shadow.sm,
@@ -36,7 +36,7 @@ export const section = style([
   panelBase,
   {
     paddingBlock: themeVars.spacing.xl,
-    paddingInline: themeVars.spacing['2xl'],
+    paddingInline: themeVars.spacing.xxl,
 
     '@media': {
       '(max-width: 959px)': {

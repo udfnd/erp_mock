@@ -52,7 +52,7 @@ export const tertiaryNavWrapper = styleVariants({
 export const content = style({
   flex: 1,
   overflowY: 'auto',
-  padding: `${themeVars.spacing['2xl']} ${themeVars.spacing['2xl']}`,
+  padding: `${themeVars.spacing.xxl} ${themeVars.spacing.xxl}`,
   scrollBehavior: 'smooth',
 
   '@media': {
@@ -69,5 +69,5 @@ export const contentInner = style({
   minHeight: '100%',
   display: 'flex',
   flexDirection: 'column',
-  gap: themeVars.spacing['2xl'],
+  gap: themeVars.spacing.xxl,
 });
