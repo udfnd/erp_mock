@@ -1,8 +1,6 @@
 import clsx from 'clsx';
 import { memo } from 'react';
 
-import { Button } from '@/design/components/Button';
-
 import * as styles from './listViewPagination.css';
 
 type PageButton = {
@@ -12,6 +10,13 @@ type PageButton = {
   disabled?: boolean;
   active?: boolean;
 };
+
+const ICONS = {
+  first: '≪',
+  prev: '‹',
+  next: '›',
+  last: '≫',
+} as const;
 
 export type ListViewPaginationProps = {
   currentPage: number;
@@ -95,7 +100,13 @@ const PaginationButton = ({ type, page, label, disabled, active, onPageChange }:
 
   if (type === 'ellipsis') {
     return (
-      <button type="button" className={styles.ellipsis} onClick={handleClick}>
+      <button
+        type="button"
+        className={styles.ellipsis}
+        onClick={handleClick}
+        aria-label={label}
+        title={label}
+      >
         …
       </button>
     );
@@ -108,6 +119,8 @@ const PaginationButton = ({ type, page, label, disabled, active, onPageChange }:
         className={clsx(styles.pageButton, active && styles.activePageButton)}
         onClick={handleClick}
         aria-current={active ? 'page' : undefined}
+        aria-label={label}
+        title={label}
       >
         {page}
       </button>
@@ -115,19 +128,16 @@ const PaginationButton = ({ type, page, label, disabled, active, onPageChange }:
   }
 
   return (
-    <Button
-      styleType="outlined"
-      variant="secondary"
-      size="small"
+    <button
+      type="button"
+      className={styles.navigationButton}
       onClick={handleClick}
       disabled={disabled}
-      className={styles.arrowButton}
+      aria-label={label}
+      title={label}
     >
-      {type === 'first' ? '≪' : null}
-      {type === 'prev' ? '‹' : null}
-      {type === 'next' ? '›' : null}
-      {type === 'last' ? '≫' : null}
+      <span aria-hidden>{ICONS[type]}</span>
       <span className={styles.visuallyHidden}>{label}</span>
-    </Button>
+    </button>
   );
 };

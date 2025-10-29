@@ -25,6 +25,10 @@ export function ListViewLayout({
   sidePanel,
   emptyState,
 }: ListViewLayoutProps) {
+  const listContent = list ?? emptyState ?? null;
+  const shouldRenderSidePanel = Boolean(sidePanel);
+  const shouldRenderListSection = Boolean(filterBar) || Boolean(listContent);
+
   return (
     <div className={styles.page}>
       <div className={styles.mainArea}>
@@ -38,16 +42,21 @@ export function ListViewLayout({
             {headerActions ? <div className={styles.headerActions}>{headerActions}</div> : null}
           </div>
         </header>
-        {filterBar ? <div className={styles.filterBar}>{filterBar}</div> : null}
-        <section className={styles.listSection}>
-          {list}
-          {!list && emptyState}
-        </section>
+        {shouldRenderListSection ? (
+          <section className={styles.listSection}>
+            {filterBar ? <div className={styles.listSectionHeader}>{filterBar}</div> : null}
+            {listContent ? (
+              <div
+                className={filterBar ? styles.listSectionBody : styles.listSectionBodyStandalone}
+              >
+                {listContent}
+              </div>
+            ) : null}
+          </section>
+        ) : null}
         {pagination ? <footer className={styles.pagination}>{pagination}</footer> : null}
       </div>
-      <aside className={styles.sidePanel}>
-        {sidePanel ?? emptyState ?? <div className={styles.sidePanelPlaceholder}>우측 패널에 표시할 정보가 없습니다.</div>}
-      </aside>
+      {shouldRenderSidePanel ? <aside className={styles.sidePanel}>{sidePanel}</aside> : null}
     </div>
   );
 }

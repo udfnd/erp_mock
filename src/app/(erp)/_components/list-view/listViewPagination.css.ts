@@ -12,31 +12,49 @@ export const container = style({
 export const list = style({
   display: 'flex',
   alignItems: 'center',
-  gap: themeVars.spacing.sm,
+  gap: themeVars.spacing.xs,
   listStyle: 'none',
   padding: 0,
   margin: 0,
 });
 
+const buttonBase = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: 40,
+  height: 40,
+  padding: `0 ${themeVars.spacing.sm}`,
+  borderRadius: themeVars.radius.sm,
+  border: `1px solid ${themeVars.palette.cgrey200}`,
+  backgroundColor: themeVars.palette.white,
+  color: themeVars.palette.cgrey600,
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease',
+  selectors: {
+    '&:hover:not(:disabled)': {
+      backgroundColor: themeVars.palette.blue50,
+      borderColor: themeVars.palette.blue200,
+      color: themeVars.palette.blue600,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${themeVars.palette.blue300}`,
+      outlineOffset: 2,
+    },
+    '&:disabled': {
+      backgroundColor: themeVars.palette.cgrey50,
+      borderColor: themeVars.palette.cgrey200,
+      color: themeVars.palette.cgrey300,
+      cursor: 'not-allowed',
+    },
+  },
+});
+
 export const pageButton = style([
+  buttonBase,
   typography.bodyR,
   {
-    borderRadius: themeVars.radius.sm,
-    padding: `${themeVars.spacing.xs} ${themeVars.spacing.sm}`,
-    border: `1px solid ${themeVars.palette.cgrey200}`,
-    backgroundColor: themeVars.palette.white,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease',
-    selectors: {
-      '&:hover': {
-        backgroundColor: themeVars.palette.blue50,
-        borderColor: themeVars.palette.blue200,
-      },
-      '&:focus-visible': {
-        outline: `2px solid ${themeVars.palette.blue300}`,
-        outlineOffset: 2,
-      },
-    },
+    fontWeight: 500,
   },
 ]);
 
@@ -58,13 +76,15 @@ export const ellipsis = style([
       '&:hover': {
         color: themeVars.palette.blue600,
       },
+      '&:focus-visible': {
+        outline: `2px solid ${themeVars.palette.blue300}`,
+        outlineOffset: 2,
+      },
     },
   },
 ]);
 
-export const arrowButton = style({
-  minWidth: 40,
-});
+export const navigationButton = style([buttonBase, { fontSize: 18 }]);
 
 export const visuallyHidden = style({
   position: 'absolute',
