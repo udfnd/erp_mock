@@ -6,31 +6,43 @@ import { typography } from '@/design/typo.css';
 
 export const tableWrapper = style({
   width: '100%',
-  overflow: 'hidden',
 });
 
 export const table = style({
   width: '100%',
-  borderCollapse: 'collapse',
+  borderCollapse: 'separate',
+  borderSpacing: 0,
+  tableLayout: 'fixed',
+  selectors: {
+    '& thead tr': {
+      backgroundColor: themeVars.palette.cgrey50,
+    },
+    '& tbody tr:last-of-type td': {
+      borderBottom: 'none',
+    },
+  },
 });
 
 const baseHeaderCell = style([
   typography.captionB,
   {
     textAlign: 'left',
-    paddingBottom: themeVars.spacing.base,
+    padding: `${themeVars.spacing.base} ${themeVars.spacing.xl}`,
     color: themeVars.palette.cgrey500,
     borderBottom: `1px solid ${themeVars.palette.cgrey200}`,
+    verticalAlign: 'middle',
+    height: 52,
   },
 ]);
 
 const baseCell = style([
   typography.bodyR,
   {
-    paddingTop: themeVars.spacing.base,
-    paddingBottom: themeVars.spacing.base,
+    padding: `${themeVars.spacing.base} ${themeVars.spacing.xl}`,
     color: themeVars.palette.black,
     borderBottom: `1px solid ${themeVars.palette.cgrey100}`,
+    verticalAlign: 'middle',
+    backgroundColor: themeVars.palette.white,
   },
 ]);
 
@@ -47,16 +59,17 @@ export const cell = {
 };
 
 export const checkboxHeader = style({
-  width: 48,
-  paddingBottom: themeVars.spacing.base,
+  width: 64,
+  padding: `${themeVars.spacing.base} ${themeVars.spacing.lg}`,
   borderBottom: `1px solid ${themeVars.palette.cgrey200}`,
+  verticalAlign: 'middle',
 });
 
 export const checkboxCell = style({
-  width: 48,
-  paddingTop: themeVars.spacing.base,
-  paddingBottom: themeVars.spacing.base,
+  width: 64,
+  padding: `${themeVars.spacing.base} ${themeVars.spacing.lg}`,
   borderBottom: `1px solid ${themeVars.palette.cgrey100}`,
+  verticalAlign: 'middle',
 });
 
 export const row = recipe({
@@ -67,18 +80,37 @@ export const row = recipe({
       '&:hover': {
         backgroundColor: themeVars.palette.blue50,
       },
+      '&:hover td': {
+        backgroundColor: themeVars.palette.blue50,
+      },
     },
   },
   variants: {
     selected: {
       true: {
         backgroundColor: themeVars.palette.blue100,
+        selectors: {
+          '& td': {
+            backgroundColor: themeVars.palette.blue100,
+          },
+        },
       },
     },
     disabled: {
       true: {
         cursor: 'not-allowed',
         opacity: 0.6,
+        selectors: {
+          '&:hover': {
+            backgroundColor: 'transparent',
+          },
+          '& td': {
+            backgroundColor: themeVars.palette.white,
+          },
+          '&:hover td': {
+            backgroundColor: themeVars.palette.white,
+          },
+        },
       },
     },
   },
