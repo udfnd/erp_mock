@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 import { useJojiksQuery } from '@/api/jojik';
 import {
@@ -74,7 +75,7 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 export default function GiOrganizationsPage({ params }: PageProps) {
-  const { gi } = params;
+  const { gi } = useParams<{ gi: string }>();
 
   const { data, isLoading } = useJojiksQuery();
   const jojiks = useMemo<JojikListItemView[]>(() => data?.jojiks ?? [], [data]);
