@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, globalStyle } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 import { themeVars } from '@/design/theme.css';
@@ -13,14 +13,13 @@ export const table = style({
   borderCollapse: 'separate',
   borderSpacing: 0,
   tableLayout: 'fixed',
-  selectors: {
-    '& thead tr': {
-      backgroundColor: themeVars.palette.cgrey50,
-    },
-    '& tbody tr:last-of-type td': {
-      borderBottom: 'none',
-    },
-  },
+});
+
+globalStyle(`${table} thead tr`, {
+  backgroundColor: themeVars.palette.cgrey50,
+});
+globalStyle(`${table} tbody tr:last-of-type td`, {
+  borderBottom: 'none',
 });
 
 const baseHeaderCell = style([
@@ -72,48 +71,54 @@ export const checkboxCell = style({
   verticalAlign: 'middle',
 });
 
+const rowBase = style({
+  cursor: 'pointer',
+  transition: 'background-color 0.2s ease',
+});
+
 export const row = recipe({
-  base: {
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-    selectors: {
-      '&:hover': {
-        backgroundColor: themeVars.palette.blue50,
-      },
-      '&:hover td': {
-        backgroundColor: themeVars.palette.blue50,
-      },
-    },
-  },
+  base: [rowBase],
   variants: {
     selected: {
       true: {
         backgroundColor: themeVars.palette.blue100,
-        selectors: {
-          '& td': {
-            backgroundColor: themeVars.palette.blue100,
-          },
-        },
       },
+      false: {},
     },
     disabled: {
       true: {
         cursor: 'not-allowed',
         opacity: 0.6,
-        selectors: {
-          '&:hover': {
-            backgroundColor: 'transparent',
-          },
-          '& td': {
-            backgroundColor: themeVars.palette.white,
-          },
-          '&:hover td': {
-            backgroundColor: themeVars.palette.white,
-          },
-        },
       },
+      false: {},
     },
   },
+});
+
+globalStyle(`${rowBase}:hover`, {
+  backgroundColor: themeVars.palette.blue50,
+});
+globalStyle(`${rowBase}:hover td`, {
+  backgroundColor: themeVars.palette.blue50,
+});
+
+const rowSelected = row({ selected: true });
+globalStyle(`${rowSelected} td`, {
+  backgroundColor: themeVars.palette.blue100,
+});
+globalStyle(`${rowSelected}:hover td`, {
+  backgroundColor: themeVars.palette.blue100,
+});
+
+const rowDisabled = row({ disabled: true });
+globalStyle(`${rowDisabled}:hover`, {
+  backgroundColor: 'transparent',
+});
+globalStyle(`${rowDisabled} td`, {
+  backgroundColor: themeVars.palette.white,
+});
+globalStyle(`${rowDisabled}:hover td`, {
+  backgroundColor: themeVars.palette.white,
 });
 
 export const emptyRow = style({

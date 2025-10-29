@@ -23,7 +23,7 @@ import LabeledInput from '@/app/(erp)/td/g/_components/LabeledInput';
 import { Search as SearchIcon } from '@/components/icons';
 import { Button, Textfield } from '@/design';
 
-import * as styles from './css';
+import * as styles from './page.style.css';
 
 const PAGE_SIZE = 10;
 
