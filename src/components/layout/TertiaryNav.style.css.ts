@@ -7,7 +7,7 @@ export const navContainer = style({
   display: 'flex',
   alignItems: 'center',
   padding: `0 ${themeVars.spacing.xxl}`,
-  background: themeVars.palette.white,
+  background: themeVars.palette.cgrey10,
   boxShadow: themeVars.shadow.sm,
   minHeight: '52px',
   boxSizing: 'border-box',

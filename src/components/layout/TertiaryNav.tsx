@@ -1,7 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+
+import { Button } from '@/design';
 
 import { NavItem, getDynamicHref } from './nav.data';
 import * as styles from './TertiaryNav.style.css';
@@ -13,10 +14,9 @@ type Props = {
 export default function TertiaryNav({ navItems }: Props) {
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
 
-  if (!navItems || navItems.length === 0) {
-    return null;
-  }
+  if (!navItems || navItems.length === 0) return null;
 
   return (
     <nav className={styles.navContainer} aria-label="세부 섹션 내비게이션">
@@ -28,20 +28,18 @@ export default function TertiaryNav({ navItems }: Props) {
           return (
             <li key={item.name} className={styles.navListItem}>
               {href ? (
-                <Link
-                  href={href}
-                  className={styles.navLink[isActive ? 'active' : 'inactive']}
+                <Button
+                  size="small"
+                  variant={isActive ? 'secondary' : 'assistive'}
                   aria-current={isActive ? 'page' : undefined}
+                  onClick={() => router.push(href)}
                 >
                   {item.name}
-                </Link>
+                </Button>
               ) : (
-                <span
-                  className={styles.navLink[isActive ? 'active' : 'inactive']}
-                  aria-disabled="true"
-                >
+                <Button size="small" variant="assistive" disabled>
                   {item.name}
-                </span>
+                </Button>
               )}
             </li>
           );

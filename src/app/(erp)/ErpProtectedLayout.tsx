@@ -21,4 +21,3 @@ export default function ErpProtectedLayout({ children }: { children: ReactNode }
 
   return <ErpLayout>{children}</ErpLayout>;
 }
-

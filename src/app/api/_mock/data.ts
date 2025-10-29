@@ -38,4 +38,3 @@ export const mockAccounts: MockAccount[] = [
   { id: 'manager', password: 'teachita', gigwanNanoId: 'EDUPLAN', name: '김교육' },
   { id: 'nova', password: 'nova2024', gigwanNanoId: 'NOVA2024', name: '최이음' },
 ];
-

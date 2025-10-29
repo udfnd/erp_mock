@@ -16,7 +16,7 @@ type PageParams = {
 export default function GigwanHomePage() {
   const params = useParams<PageParams>();
   const router = useRouter();
-  const gigwanNanoId = Array.isArray(params?.gi) ? params?.gi[0] ?? '' : params?.gi ?? '';
+  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
 
   const { state, isReady, isAuthenticated } = useAuth();
 
@@ -35,7 +35,9 @@ export default function GigwanHomePage() {
     enabled: isAuthenticated && Boolean(gigwanNanoId),
   });
 
-  const heroTitle = gigwan ? `${gigwan.name}에 오신 것을 환영합니다.` : '기관 정보를 불러오는 중입니다.';
+  const heroTitle = gigwan
+    ? `${gigwan.name}에 오신 것을 환영합니다.`
+    : '기관 정보를 불러오는 중입니다.';
   const heroDescription = gigwan
     ? `기관 코드 ${gigwanNanoId}에 로그인한 관리자 화면입니다.`
     : '잠시만 기다려 주세요.';
@@ -58,4 +60,3 @@ export default function GigwanHomePage() {
     </div>
   );
 }
-

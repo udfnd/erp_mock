@@ -9,7 +9,12 @@ type PlaceholderPageProps = {
   children?: ReactNode;
 };
 
-export default function PlaceholderPage({ title, description, meta, children }: PlaceholderPageProps) {
+export default function PlaceholderPage({
+  title,
+  description,
+  meta,
+  children,
+}: PlaceholderPageProps) {
   return (
     <div className={styles.page}>
       <section className={styles.hero}>

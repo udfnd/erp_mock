@@ -16,15 +16,9 @@ export const header = style({
   gap: themeVars.spacing.xs,
 });
 
-export const title = style([
-  typography.titleSmallB,
-  { color: themeVars.palette.black },
-]);
+export const title = style([typography.titleSmallB, { color: themeVars.palette.black }]);
 
-export const subtitle = style([
-  typography.bodyR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const subtitle = style([typography.bodyR, { color: themeVars.palette.cgrey500 }]);
 
 export const hero = style({
   display: 'flex',
@@ -53,12 +47,6 @@ export const heroContent = style({
   gap: themeVars.spacing.xs,
 });
 
-export const heroTitle = style([
-  typography.bodyLargeB,
-  { color: themeVars.palette.blue600 },
-]);
+export const heroTitle = style([typography.bodyLargeB, { color: themeVars.palette.blue600 }]);
 
-export const heroDescription = style([
-  typography.bodyR,
-  { color: themeVars.palette.blue600 },
-]);
+export const heroDescription = style([typography.bodyR, { color: themeVars.palette.blue600 }]);

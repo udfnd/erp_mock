@@ -1,4 +1,7 @@
-import PlaceholderPage, { PlaceholderCard, PlaceholderSection } from '@/app/(erp)/_components/PlaceholderPage';
+import PlaceholderPage, {
+  PlaceholderCard,
+  PlaceholderSection,
+} from '@/app/(erp)/_components/PlaceholderPage';
 import * as placeholderStyles from '@/app/(erp)/_components/placeholderPage.css';
 
 type PageProps = {

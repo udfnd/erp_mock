@@ -1,6 +1,6 @@
 'use client';
 
-import { clsx } from 'clsx'; // pnpm add clsx 필요
+import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
 
 import { buttonBaseStyles, buttonRecipe, iconWrapper } from './Button.style.css';

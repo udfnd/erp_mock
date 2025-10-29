@@ -7,7 +7,6 @@ import { buttonBaseStyles, iconButtonRecipe } from './IconButton.style.css';
 
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 
-
 type IconButtonRecipeVariants = RecipeVariants<typeof iconButtonRecipe>;
 
 export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &

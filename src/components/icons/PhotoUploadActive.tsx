@@ -1,5 +1,5 @@
-import * as React from "react";
-import type { SVGProps } from "react";
+import * as React from 'react';
+import type { SVGProps } from 'react';
 const SvgPhotoUploadActive = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -9,31 +9,12 @@ const SvgPhotoUploadActive = (props: SVGProps<SVGSVGElement>) => (
     height="1em"
     {...props}
   >
-    <path
-      fill="currentColor"
-      d="M16.5 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"
-    />
-    <path
-      fill="#000"
-      fillOpacity={0.71}
-      d="M16.5 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"
-    />
-    <path
-      fill="#fff"
-      fillOpacity={0.66}
-      d="M16.5 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"
-    />
+    <path fill="currentColor" d="M16.5 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
+    <path fill="#000" fillOpacity={0.71} d="M16.5 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
+    <path fill="#fff" fillOpacity={0.66} d="M16.5 19a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
     <path fill="currentColor" d="M35 43a8 8 0 1 0 0-16 8 8 0 0 0 0 16" />
-    <path
-      fill="#000"
-      fillOpacity={0.8}
-      d="M35 43a8 8 0 1 0 0-16 8 8 0 0 0 0 16"
-    />
-    <path
-      fill="#fff"
-      fillOpacity={0.3}
-      d="M35 43a8 8 0 1 0 0-16 8 8 0 0 0 0 16"
-    />
+    <path fill="#000" fillOpacity={0.8} d="M35 43a8 8 0 1 0 0-16 8 8 0 0 0 0 16" />
+    <path fill="#fff" fillOpacity={0.3} d="M35 43a8 8 0 1 0 0-16 8 8 0 0 0 0 16" />
     <path
       fill="#fff"
       d="M38.5 33.65H36v-2.5c0-.28-.22-.5-.5-.5h-1c-.28 0-.5.22-.5.5v2.5h-2.5c-.28 0-.5.22-.5.5v1c0 .28.22.5.5.5H34v2.5c0 .28.22.5.5.5h1c.28 0 .5-.22.5-.5v-2.5h2.5c.28 0 .5-.22.5-.5v-1c0-.28-.22-.5-.5-.5"

@@ -1,10 +1,7 @@
 export type NavItem = {
   name: string;
-  /** 동적 파라미터를 포함한 전체 경로 (예: /td/np/gis/[gi]/manage/home/dv) */
   href: string;
-  /** TertiaryNav를 판단하기 위한 경로 패턴 (예: /td/np/gis/[gi]/manage) */
   basePath?: string;
-  /** 하위 내비게이션 아이템 */
   items?: NavItem[];
 };
 
@@ -36,29 +33,26 @@ export const getDynamicHref = (
   return dynamicHref.includes('[') ? null : dynamicHref;
 };
 
-// IA Depth 2: Primary Nav
 export const primaryNavItems: NavItem[] = [
   {
-    name: '기관 관리', // { 기관 }
+    name: '기관 관리',
     href: '/td/np/gis/[gi]',
     basePath: '/td/np/gis',
   },
   {
-    name: '조직 관리', // { 조직 }
+    name: '조직 관리',
     href: '/td/np/jos/[jo]',
     basePath: '/td/np/jos',
   },
 ];
 
-// IA Depth 3 & 4: Secondary & Tertiary Nav
 export const secondaryNavItems: Record<string, NavItem[]> = {
-  // '기관 관리'의 하위 메뉴
   '/td/np/gis': [
     {
-      name: '{기관명} 관리', // IA Depth 3
+      name: '{기관명} 관리',
       href: '/td/np/gis/[gi]/manage/home/dv',
       basePath: '/td/np/gis/[gi]/manage',
-      items: [ // IA Depth 4
+      items: [
         { name: '홈', href: '/td/np/gis/[gi]/manage/home/dv' },
         { name: '기관 설정', href: '/td/np/gis/[gi]/manage/setting/sv' },
       ],
@@ -67,11 +61,13 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
       name: '조직들',
       href: '/td/np/gis/[gi]/jojiks/home/lv',
       basePath: '/td/np/gis/[gi]/jojiks',
+      items: [{ name: '조직들', href: '/td/np/gis/[gi]/jojiks/home/lv' }],
     },
     {
       name: '사용자들',
       href: '/td/np/gis/[gi]/sayongjas/home/lv',
       basePath: '/td/np/gis/[gi]/sayongjas',
+      items: [{ name: '사용자들', href: '/td/np/gis/[gi]/sayongjas/home/lv' }],
     },
     {
       name: '권한들',
@@ -83,13 +79,13 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
       ],
     },
   ],
-  // '조직 관리'의 하위 메뉴
   '/td/np/jos': [
     {
       name: '{조직명} 관리', // IA Depth 3
       href: '/td/np/jos/[jo]/manage/home/dv',
       basePath: '/td/np/jos/[jo]/manage',
-      items: [ // IA Depth 4
+      items: [
+        // IA Depth 4
         { name: '홈', href: '/td/np/jos/[jo]/manage/home/dv' },
         { name: '조직 설정', href: '/td/np/jos/[jo]/manage/setting/sv' },
       ],

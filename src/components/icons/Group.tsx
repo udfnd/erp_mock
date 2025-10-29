@@ -1,5 +1,5 @@
-import * as React from "react";
-import type { SVGProps } from "react";
+import * as React from 'react';
+import type { SVGProps } from 'react';
 const SvgGroup = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -27,15 +27,8 @@ const SvgGroup = (props: SVGProps<SVGSVGElement>) => (
       fillOpacity={0.87}
       d="M10.9 11.5c-.99.08-1.88.47-2.59 1.091-.27.24-.52.5-.73.791a4.456 4.456 0 0 0-.83 2.603c0 2.493 2.02 4.515 4.5 4.515s4.5-2.022 4.5-4.515c0-.26-.03-.52-.08-.77-1.6-.231-3-1.082-3.94-2.313-.17-.21-.32-.44-.45-.681-.13-.23-.26-.47-.36-.721z"
     />
-    <path
-      fill="currentColor"
-      d="M16.25 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9"
-    />
-    <path
-      fill="#000"
-      fillOpacity={0.87}
-      d="M16.25 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9"
-    />
+    <path fill="currentColor" d="M16.25 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9" />
+    <path fill="#000" fillOpacity={0.87} d="M16.25 13.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9" />
   </svg>
 );
 export default SvgGroup;

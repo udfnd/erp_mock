@@ -11,7 +11,9 @@ export async function POST(request: Request) {
     const normalizedGigwanId = gigwanNanoId.toUpperCase();
     const account = mockAccounts.find(
       (item) =>
-        item.id === id && item.password === password && item.gigwanNanoId.toUpperCase() === normalizedGigwanId,
+        item.id === id &&
+        item.password === password &&
+        item.gigwanNanoId.toUpperCase() === normalizedGigwanId,
     );
 
     if (!account) {
@@ -24,4 +26,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Invalid request' }, { status: 400 });
   }
 }
-

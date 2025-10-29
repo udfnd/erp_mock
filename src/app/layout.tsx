@@ -1,6 +1,6 @@
 import { pretendard } from '@/fonts/pretendard';
 
-import Providers from './providers'; // 👈 오직 이 Client 래퍼만 사용
+import Providers from './providers';
 
 import './globals.css';
 

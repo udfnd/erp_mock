@@ -1,5 +1,5 @@
-import * as React from "react";
-import type { SVGProps } from "react";
+import * as React from 'react';
+import type { SVGProps } from 'react';
 const SvgPhotoUploadDefault = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -9,20 +9,9 @@ const SvgPhotoUploadDefault = (props: SVGProps<SVGSVGElement>) => (
     height="1em"
     {...props}
   >
-    <path
-      fill="currentColor"
-      d="M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"
-    />
-    <path
-      fill="#000"
-      fillOpacity={0.71}
-      d="M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"
-    />
-    <path
-      fill="#fff"
-      fillOpacity={0.66}
-      d="M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5"
-    />
+    <path fill="currentColor" d="M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
+    <path fill="#000" fillOpacity={0.71} d="M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
+    <path fill="#fff" fillOpacity={0.66} d="M17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
     <path
       fill="#A9AEC1"
       fillRule="evenodd"

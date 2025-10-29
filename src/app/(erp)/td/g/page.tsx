@@ -18,7 +18,10 @@ export default function EnterCodePage() {
 
   const handleChange = useCallback(
     (value: string) => {
-      const sanitized = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase();
+      const sanitized = value
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .slice(0, 8)
+        .toUpperCase();
       setCode((prev) => {
         if (errorMessage && sanitized !== prev) {
           setErrorMessage('');
@@ -81,4 +84,3 @@ export default function EnterCodePage() {
     </div>
   );
 }
-

@@ -5,24 +5,23 @@ import { typography } from '@/design/typo.css';
 
 const collapsedRange = '(min-width: 960px) and (max-width: 1279px)';
 
-export const navContainer = style({
+const navContainerBase = style({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  width: '256px',
-  padding: `${themeVars.spacing.xxl} ${themeVars.spacing.lg}`,
-  background: `linear-gradient(180deg, ${themeVars.palette.cgrey700} 0%, ${themeVars.palette.cgrey600} 100%)`,
-  color: themeVars.palette.white,
+  width: '200px',
+  padding: '10px 12px 24px',
+  background: themeVars.palette.cgrey10,
+  borderRight: `1px solid ${themeVars.palette.cgrey100}`,
+  color: themeVars.palette.black,
   gap: themeVars.spacing.xl,
-  borderRight: `1px solid ${themeVars.palette.cgrey600}`,
-  transition: 'width 0.2s ease-in-out',
+  transition: 'width 0.2s ease-in-out, padding 0.2s ease-in-out',
   height: '100vh',
   boxSizing: 'border-box',
-
   '@media': {
     [collapsedRange]: {
       width: '88px',
-      padding: `${themeVars.spacing.xxl} ${themeVars.spacing.sm}`,
+      padding: '8px',
       alignItems: 'center',
     },
     '(max-width: 959px)': {
@@ -31,62 +30,42 @@ export const navContainer = style({
   },
 });
 
-export const brandArea = style([
-  typography.bodySB,
+export const navContainerOpen = style([navContainerBase]);
+
+export const navContainerClosed = style([
+  navContainerBase,
   {
-    display: 'flex',
-    alignItems: 'center',
-    gap: themeVars.spacing.sm,
-    color: 'inherit',
-    textDecoration: 'none',
-    letterSpacing: '-0.01em',
-    padding: `0 ${themeVars.spacing.xs}`,
-
-    ':focus-visible': {
-      outline: `2px solid ${themeVars.palette.blue400}`,
-      outlineOffset: '4px',
-    },
-
-    '@media': {
-      [collapsedRange]: {
-        flexDirection: 'column',
-        gap: themeVars.spacing.xs,
-        padding: 0,
-      },
-    },
-  },
-]);
-
-export const brandMark = style([
-  typography.bodySB,
-  {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     width: '40px',
-    height: '40px',
-    borderRadius: themeVars.radius.md,
-    background: themeVars.palette.blue600,
-    fontWeight: 700,
-    letterSpacing: '0.08em',
+    padding: '8px',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
 ]);
 
-export const brandLabel = style([
-  typography.bodySB,
-  {
-    color: themeVars.palette.white,
-    whiteSpace: 'nowrap',
+export const toggleBar = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  width: '100%',
+});
 
-    '@media': {
-      [collapsedRange]: {
-        display: 'none',
-      },
-    },
+export const toggleButton = style({
+  appearance: 'none',
+  background: 'transparent',
+  border: 'none',
+  lineHeight: 0,
+  cursor: 'pointer',
+  ':focus-visible': {
+    outline: `2px solid ${themeVars.palette.blue400}`,
+    outlineOffset: '2px',
   },
-]);
+});
 
-export const navList = style({
+export const icon = style({
+  width: '24px',
+  height: '24px',
+});
+
+const navListBase = style({
   listStyle: 'none',
   margin: 0,
   padding: 0,
@@ -97,12 +76,27 @@ export const navList = style({
   width: '100%',
 });
 
+export const navList = styleVariants({
+  show: [navListBase],
+  hide: [navListBase, { display: 'none' }],
+});
+
+export const navChildList = style({
+  listStyle: 'none',
+  margin: 0,
+  padding: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.xs,
+  width: '100%',
+});
+
 export const navListItem = style({
   width: '100%',
 });
 
 const navLinkBase = style([
-  typography.bodySB,
+  typography.captionR,
   {
     display: 'flex',
     alignItems: 'center',
@@ -110,18 +104,12 @@ const navLinkBase = style([
     padding: `${themeVars.spacing.sm} ${themeVars.spacing.base}`,
     borderRadius: themeVars.radius.md,
     textDecoration: 'none',
-    color: themeVars.palette.cgrey100,
+    color: themeVars.palette.black,
     transition: 'background 0.2s ease, color 0.2s ease',
-
-    ':hover': {
-      background: 'rgba(255,255,255,0.08)',
-    },
-
     ':focus-visible': {
       outline: `2px solid ${themeVars.palette.blue400}`,
       outlineOffset: '4px',
     },
-
     '@media': {
       [collapsedRange]: {
         justifyContent: 'center',
@@ -131,29 +119,45 @@ const navLinkBase = style([
   },
 ]);
 
+export const navLinkDepth = styleVariants({
+  1: {},
+  2: { paddingLeft: '20px' },
+  3: { paddingLeft: '32px' },
+});
+
 export const navLink = styleVariants({
   active: [
     navLinkBase,
     {
-      color: themeVars.palette.white,
-      background: 'rgba(255,255,255,0.14)',
+      color: themeVars.palette.blue600,
+      background: themeVars.palette.blue200,
+      borderRadius: '8px',
+      ':hover': {
+        background: themeVars.palette.blue200,
+      },
     },
   ],
-  inactive: [navLinkBase],
+  inactive: [
+    navLinkBase,
+    {
+      ':hover': {
+        background: themeVars.palette.cgrey50,
+      },
+    },
+  ],
 });
 
 export const navIcon = style({
-  width: '28px',
-  height: '28px',
-  borderRadius: themeVars.radius.sm,
-  background: 'rgba(255,255,255,0.24)',
+  width: '16px',
+  height: '16px',
+  borderRadius: '100px',
+  background: themeVars.palette.cgrey200,
   flexShrink: 0,
 });
 
 export const navLabel = style({
   whiteSpace: 'nowrap',
   transition: 'opacity 0.2s ease',
-
   '@media': {
     [collapsedRange]: {
       position: 'absolute',
@@ -169,7 +173,12 @@ export const navLabel = style({
   },
 });
 
-export const navFooter = style({
+export const navLabelWeight = styleVariants({
+  active: [typography.captionB],
+  inactive: [typography.captionR],
+});
+
+const navFooterBase = style({
   display: 'flex',
   flexDirection: 'column',
   gap: themeVars.spacing.sm,
@@ -177,54 +186,18 @@ export const navFooter = style({
   width: '100%',
 });
 
-export const profileCard = style({
+export const navFooter = styleVariants({
+  show: [navFooterBase],
+  hide: [navFooterBase, { display: 'none' }],
+});
+
+export const footerVersion = style({
+  marginTop: themeVars.spacing.md,
   display: 'flex',
   alignItems: 'center',
-  gap: themeVars.spacing.sm,
-  padding: `${themeVars.spacing.sm} ${themeVars.spacing.base}`,
-  borderRadius: themeVars.radius.md,
-  background: 'rgba(255,255,255,0.06)',
-
-  '@media': {
-    [collapsedRange]: {
-      flexDirection: 'column',
-      padding: themeVars.spacing.sm,
-    },
-  },
-});
-
-export const profileAvatar = style({
-  width: '40px',
-  height: '40px',
-  borderRadius: '50%',
-  background: themeVars.palette.blue400,
-  flexShrink: 0,
-});
-
-export const profileMeta = style({
-  display: 'flex',
-  flexDirection: 'column',
   gap: '2px',
-  color: themeVars.palette.white,
-
-  '@media': {
-    [collapsedRange]: {
-      display: 'none',
-    },
-  },
 });
 
-export const profileName = style([
-  typography.bodySB,
-  {
-    lineHeight: 1.2,
-  },
-]);
+export const footerBrand = style([typography.captionR, { color: themeVars.palette.blue600 }]);
 
-export const profileRole = style([
-  typography.bodyM,
-  {
-    lineHeight: 1.2,
-    color: 'rgba(255,255,255,0.72)',
-  },
-]);
+export const footerVerText = style([typography.captionR, { color: themeVars.palette.cgrey600 }]);

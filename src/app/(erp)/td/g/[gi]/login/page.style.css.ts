@@ -30,15 +30,9 @@ export const header = style({
   gap: themeVars.spacing.xs,
 });
 
-export const title = style([
-  typography.titleSmallB,
-  { color: themeVars.palette.black },
-]);
+export const title = style([typography.titleSmallB, { color: themeVars.palette.black }]);
 
-export const subtitle = style([
-  typography.bodyR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const subtitle = style([typography.bodyR, { color: themeVars.palette.cgrey500 }]);
 
 export const form = style({
   display: 'flex',
