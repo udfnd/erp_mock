@@ -102,7 +102,7 @@ export function ListViewTable<T>({
                 className={styles.emptyCell}
                 colSpan={columns.length + (onSelectionChange ? 1 : 0)}
               >
-                표시할 조직이 없습니다.
+                표시할 항목이 없습니다.
               </td>
             </tr>
           ) : (
