@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { LOGIN_ROUTE } from '@/constants/routes';
 import { useAuth } from '@/state/auth';
 
 type UseAuthGuardOptions = {
@@ -11,7 +12,7 @@ type UseAuthGuardOptions = {
 };
 
 export const useAuthGuard = (options?: UseAuthGuardOptions) => {
-  const { redirectTo = '/td/g', disabled = false } = options ?? {};
+  const { redirectTo = LOGIN_ROUTE, disabled = false } = options ?? {};
   const auth = useAuth();
   const router = useRouter();
 
