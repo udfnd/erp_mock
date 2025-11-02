@@ -90,6 +90,52 @@ export const statusItem = style({
 
 export const statusInput = style({ flex: 1 });
 
+// 기존 export 들 유지
+
+export const statusValue = style([
+  typography.bodyR,
+  { color: themeVars.palette.black, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+]);
+
+export const statusField = style({
+  // 텍스트필드 형태의 컨테이너
+  display: 'flex',
+  alignItems: 'center',
+  gap: themeVars.spacing.sm,
+  padding: `${themeVars.spacing.xs} ${themeVars.spacing.sm}`,
+  border: `1px solid ${themeVars.palette.cgrey200}`,
+  borderRadius: themeVars.radius.md,
+  background: themeVars.palette.white,
+  transition: 'border-color 120ms ease',
+  selectors: {
+    '&:hover': { borderColor: themeVars.palette.cgrey300 },
+    '&:focus-within': { borderColor: themeVars.palette.blue600 },
+  },
+});
+
+export const statusInputField = style([
+  typography.bodyR,
+  {
+    flex: 1,
+    border: 'none',
+    outline: 'none',
+    background: 'transparent',
+    color: themeVars.palette.black,
+    selectors: {
+      '&::placeholder': { color: themeVars.palette.cgrey400 },
+    },
+    minWidth: 0, // 긴 텍스트 줄바꿈/축소 대응
+  },
+]);
+
+export const statusActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: themeVars.spacing.xs,
+  marginLeft: themeVars.spacing.sm,
+});
+
+
 export const addButtonWrapper = style({
   display: 'flex',
   justifyContent: 'flex-start',

@@ -630,50 +630,59 @@ export default function GigwanSettingServicePage() {
           {employmentState.categories.map((category) => (
             <div key={category.nanoId} className={styles.categorySection}>
               <span className={styles.categoryLabel}>{category.name}</span>
+
               <div className={styles.statusList}>
                 {category.statuses.map((status) => {
                   const isEditing = Boolean(employmentEditing[status.localId]);
                   return (
-                    <div key={status.localId} className={styles.statusItem}>
+                    <div key={status.localId} className={styles.statusField} role="group">
                       {isEditing ? (
-                        <LabeledInput
-                          placeholder="상태 이름"
+                        <input
+                          className={styles.statusInputField}
                           value={status.name}
-                          onValueChange={(value) =>
-                            handleEmploymentStatusChange(category.nanoId, status.localId, value)
+                          onChange={(e) =>
+                            handleEmploymentStatusChange(
+                              category.nanoId,
+                              status.localId,
+                              e.target.value,
+                            )
                           }
-                          containerClassName={styles.statusInput}
+                          placeholder="상태 이름"
                           maxLength={20}
                           autoFocus
                         />
                       ) : (
-                        <span className={styles.statusText}>
+                        <span className={styles.statusValue}>
                           {status.name?.trim() || '새 상태'}
                         </span>
                       )}
-                      <IconButton
-                        styleType="normal"
-                        size="small"
-                        onClick={() => toggleEditEmploymentStatus(status.localId)}
-                        aria-label={`${status.name || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
-                        title={isEditing ? '편집 종료' : '수정'}
-                      >
-                        <Edit width={16} height={16} />
-                      </IconButton>
-                      <IconButton
-                        styleType="normal"
-                        size="small"
-                        onClick={() =>
-                          handleRemoveEmploymentStatus(category.nanoId, status.localId)
-                        }
-                        aria-label={`${status.name || '상태'} 삭제`}
-                        title="삭제"
-                      >
-                        <Delete width={16} height={16} />
-                      </IconButton>
+
+                      <div className={styles.statusActions}>
+                        <IconButton
+                          styleType="normal"
+                          size="small"
+                          onClick={() => toggleEditEmploymentStatus(status.localId)}
+                          aria-label={`${status.name || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
+                          title={isEditing ? '편집 종료' : '수정'}
+                        >
+                          <Edit width={16} height={16} />
+                        </IconButton>
+                        <IconButton
+                          styleType="normal"
+                          size="small"
+                          onClick={() =>
+                            handleRemoveEmploymentStatus(category.nanoId, status.localId)
+                          }
+                          aria-label={`${status.name || '상태'} 삭제`}
+                          title="삭제"
+                        >
+                          <Delete width={16} height={16} />
+                        </IconButton>
+                      </div>
                     </div>
                   );
                 })}
+
                 <Button
                   size="medium"
                   styleType="outlined"

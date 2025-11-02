@@ -20,7 +20,7 @@ const navContainerBase = style({
   boxSizing: 'border-box',
   '@media': {
     [collapsedRange]: {
-      width: '88px',
+      width: '40px',
       padding: '8px',
       alignItems: 'center',
     },
