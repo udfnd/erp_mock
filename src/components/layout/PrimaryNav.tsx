@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { SidebarOpen, SidebarClose } from '@/components/icons';
+import { useAuth } from '@/state/auth';
 
 import * as styles from './PrimaryNav.style.css';
 
@@ -23,10 +24,17 @@ export default function PrimaryNav() {
   const params = useParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
+  const { clearAuthState } = useAuth();
 
   const loginHref = `/td/g`;
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
+    try {
+      clearAuthState();
+    } catch (error) {
+      console.error('Failed to clear auth state', error);
+    }
+
     try {
       const re = /auth|token|persist|zustand|session/i;
       const explicitKeys = [
@@ -69,7 +77,7 @@ export default function PrimaryNav() {
     } catch {
       window.location.href = loginHref;
     }
-  };
+  }, [clearAuthState, loginHref, router]);
 
   const items: Item[] = [
     {
