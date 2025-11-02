@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import {
   useEmploymentCategoriesQuery,
@@ -26,6 +26,7 @@ type EmploymentStatusForm = {
   nanoId: string | null;
   name: string;
   localId: string;
+  isHwalseong: boolean;
 };
 
 type EmploymentCategoryForm = {
@@ -35,9 +36,10 @@ type EmploymentCategoryForm = {
 };
 
 type WorkTypeStatusForm = {
-  nanoId: string;
+  nanoId: string | null;
   name: string;
   localId: string;
+  isHwalseong: boolean;
   isNew?: boolean;
 };
 
@@ -92,6 +94,7 @@ type EmploymentState = {
   categories: EmploymentCategoryForm[];
   dirty: boolean;
   feedback: FeedbackState;
+  editing: Record<string, boolean>;
 };
 
 type EmploymentAction =
@@ -99,14 +102,16 @@ type EmploymentAction =
   | { type: 'change-status'; categoryId: string; statusLocalId: string; value: string }
   | { type: 'add-status'; categoryId: string; status: EmploymentStatusForm }
   | { type: 'remove-status'; categoryId: string; statusLocalId: string }
+  | { type: 'toggle-edit'; statusLocalId: string; value?: boolean }
   | { type: 'feedback'; payload: FeedbackState };
 
 const employmentReducer = (state: EmploymentState, action: EmploymentAction): EmploymentState => {
   switch (action.type) {
     case 'reset':
-      return { categories: action.payload, dirty: false, feedback: null };
+      return { categories: action.payload, dirty: false, feedback: null, editing: {} };
     case 'change-status':
       return {
+        ...state,
         categories: state.categories.map((category) =>
           category.nanoId === action.categoryId
             ? {
@@ -124,6 +129,7 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
       };
     case 'add-status':
       return {
+        ...state,
         categories: state.categories.map((category) =>
           category.nanoId === action.categoryId
             ? { ...category, statuses: [...category.statuses, action.status] }
@@ -131,9 +137,12 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
         ),
         dirty: true,
         feedback: null,
+        editing: { ...state.editing, [action.status.localId]: true },
       };
-    case 'remove-status':
+    case 'remove-status': {
+      const { [action.statusLocalId]: _removed, ...restEditing } = state.editing;
       return {
+        ...state,
         categories: state.categories.map((category) =>
           category.nanoId === action.categoryId
             ? {
@@ -146,6 +155,17 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
         ),
         dirty: true,
         feedback: null,
+        editing: restEditing,
+      };
+    }
+    case 'toggle-edit':
+      return {
+        ...state,
+        editing: {
+          ...state.editing,
+          [action.statusLocalId]:
+            action.value ?? !state.editing[action.statusLocalId],
+        },
       };
     case 'feedback':
       return { ...state, feedback: action.payload };
@@ -230,7 +250,7 @@ export default function GigwanSettingServicePage() {
       payload: {
         name: gigwan.name ?? '',
         intro: gigwan.intro ?? '',
-        juso: gigwan.juso ?? '',
+        juso: gigwan.juso?.juso ?? '',
       },
     });
   }, [gigwan]);
@@ -248,7 +268,10 @@ export default function GigwanSettingServicePage() {
     [basicState.form.intro, gigwan],
   );
   const jusoDirty = useMemo(
-    () => (gigwan ? basicState.form.juso !== (gigwan.juso ?? '') : basicState.form.juso !== ''),
+    () =>
+      gigwan
+        ? basicState.form.juso !== (gigwan.juso?.juso ?? '')
+        : basicState.form.juso !== '',
     [basicState.form.juso, gigwan],
   );
 
@@ -300,7 +323,7 @@ export default function GigwanSettingServicePage() {
   const handleSaveJuso = useCallback(async () => {
     if (!jusoDirty || !jusoValid) return;
     try {
-      await upsertJusoMutation.mutateAsync({ juso: basicState.form.juso.trim() });
+      await upsertJusoMutation.mutateAsync({ address: basicState.form.juso.trim() });
       dispatchBasic({
         type: 'feedback-juso',
         payload: { type: 'success', message: '주소가 저장되었습니다.' },
@@ -326,9 +349,8 @@ export default function GigwanSettingServicePage() {
     categories: [],
     dirty: false,
     feedback: null,
+    editing: {},
   });
-
-  const [employmentEditing, setEmploymentEditing] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!employmentCategoriesData) return;
@@ -341,10 +363,10 @@ export default function GigwanSettingServicePage() {
           nanoId: status.nanoId,
           name: status.name,
           localId: status.nanoId ?? createLocalId(),
+          isHwalseong: status.isHwalseong,
         })),
       })),
     });
-    setEmploymentEditing({});
   }, [employmentCategoriesData]);
 
   const handleEmploymentStatusChange = useCallback(
@@ -365,29 +387,28 @@ export default function GigwanSettingServicePage() {
       nanoId: null,
       name: '',
       localId: newLocalId,
+      isHwalseong: false,
     };
     dispatchEmployment({ type: 'add-status', categoryId: categoryNanoId, status: newStatus });
-    setEmploymentEditing((prev) => ({ ...prev, [newLocalId]: true }));
   }, []);
 
   const handleRemoveEmploymentStatus = useCallback(
-    (categoryNanoId: string, statusLocalId: string) => {
+    (categoryNanoId: string, statusLocalId: string, canRemove: boolean) => {
+      if (!canRemove) return;
       dispatchEmployment({ type: 'remove-status', categoryId: categoryNanoId, statusLocalId });
-      setEmploymentEditing((prev) => {
-        const next = { ...prev };
-        delete next[statusLocalId];
-        return next;
-      });
     },
     [],
   );
 
-  const toggleEditEmploymentStatus = useCallback((statusLocalId: string) => {
-    setEmploymentEditing((prev) => ({ ...prev, [statusLocalId]: !prev[statusLocalId] }));
+  const toggleEditEmploymentStatus = useCallback((statusLocalId: string, canEdit: boolean) => {
+    if (!canEdit) return;
+    dispatchEmployment({ type: 'toggle-edit', statusLocalId });
   }, []);
 
   const employmentHasEmptyStatus = employmentState.categories.some((category) =>
-    category.statuses.some((status) => status.name.trim().length === 0),
+    category.statuses.some(
+      (status) => !status.isHwalseong && status.name.trim().length === 0,
+    ),
   );
 
   const handleSaveEmploymentCategories = useCallback(() => {
@@ -399,6 +420,7 @@ export default function GigwanSettingServicePage() {
           sangtaes: category.statuses.map((status) => ({
             ...(status.nanoId ? { nanoId: status.nanoId } : {}),
             name: status.name.trim(),
+            isHwalseong: status.isHwalseong,
           })),
         })),
       },
@@ -408,14 +430,15 @@ export default function GigwanSettingServicePage() {
             type: 'reset',
             payload: data.categories.map((category) => ({
               nanoId: category.nanoId,
+              name: category.name,
               statuses: category.sangtaes.map((status) => ({
                 nanoId: status.nanoId,
                 name: status.name,
                 localId: status.nanoId ?? createLocalId(),
+                isHwalseong: status.isHwalseong,
               })),
             })),
           });
-          setEmploymentEditing({});
           dispatchEmployment({
             type: 'feedback',
             payload: { type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' },
@@ -461,6 +484,7 @@ export default function GigwanSettingServicePage() {
         nanoId: status.nanoId,
         name: status.name,
         localId: status.nanoId ?? createLocalId(),
+        isHwalseong: status.isHwalseong,
       })),
     });
   }, [workTypeStatusesData]);
@@ -471,25 +495,32 @@ export default function GigwanSettingServicePage() {
 
   const handleAddWorkTypeStatus = useCallback(() => {
     const localId = createLocalId();
-    dispatchWorkType({ type: 'add', status: { nanoId: '', name: '', localId, isNew: true } });
+    dispatchWorkType({
+      type: 'add',
+      status: { nanoId: null, name: '', localId, isHwalseong: false, isNew: true },
+    });
   }, []);
 
-  const handleRemoveWorkTypeStatus = useCallback((statusLocalId: string) => {
-    dispatchWorkType({ type: 'remove', statusLocalId });
-  }, []);
+  const handleRemoveWorkTypeStatus = useCallback(
+    (statusLocalId: string, canRemove: boolean) => {
+      if (!canRemove) return;
+      dispatchWorkType({ type: 'remove', statusLocalId });
+    },
+    [],
+  );
 
   const workTypeHasEmptyStatus = workTypeState.statuses.some(
-    (status) => status.name.trim().length === 0,
+    (status) => !status.isHwalseong && status.name.trim().length === 0,
   );
 
   const handleSaveWorkTypeStatuses = useCallback(() => {
     if (!workTypeState.dirty || workTypeHasEmptyStatus) return;
     upsertWorkTypeStatusesMutation.mutate(
       {
-        statuses: workTypeState.statuses.map((status) => ({
-          nanoId:
-            status.nanoId && !status.nanoId.startsWith('local-') ? status.nanoId : status.localId,
+        sangtaes: workTypeState.statuses.map((status) => ({
+          ...(status.nanoId ? { nanoId: status.nanoId } : {}),
           name: status.name.trim(),
+          isHwalseong: status.isHwalseong,
         })),
       },
       {
@@ -500,6 +531,7 @@ export default function GigwanSettingServicePage() {
               nanoId: status.nanoId,
               name: status.name,
               localId: status.nanoId ?? createLocalId(),
+              isHwalseong: status.isHwalseong,
             })),
           });
           dispatchWorkType({
@@ -632,8 +664,10 @@ export default function GigwanSettingServicePage() {
               <span className={styles.categoryLabel}>{category.name}</span>
 
               <div className={styles.statusList}>
-                {category.statuses.map((status) => {
-                  const isEditing = Boolean(employmentEditing[status.localId]);
+            {category.statuses.map((status) => {
+                  const canEdit = !status.isHwalseong;
+                  const isEditing =
+                    canEdit && Boolean(employmentState.editing[status.localId]);
                   return (
                     <div key={status.localId} className={styles.statusField} role="group">
                       {isEditing ? (
@@ -661,7 +695,8 @@ export default function GigwanSettingServicePage() {
                         <IconButton
                           styleType="normal"
                           size="small"
-                          onClick={() => toggleEditEmploymentStatus(status.localId)}
+                          disabled={!canEdit}
+                          onClick={() => toggleEditEmploymentStatus(status.localId, canEdit)}
                           aria-label={`${status.name || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
                           title={isEditing ? '편집 종료' : '수정'}
                         >
@@ -670,8 +705,13 @@ export default function GigwanSettingServicePage() {
                         <IconButton
                           styleType="normal"
                           size="small"
+                          disabled={status.isHwalseong}
                           onClick={() =>
-                            handleRemoveEmploymentStatus(category.nanoId, status.localId)
+                            handleRemoveEmploymentStatus(
+                              category.nanoId,
+                              status.localId,
+                              !status.isHwalseong,
+                            )
                           }
                           aria-label={`${status.name || '상태'} 삭제`}
                           title="삭제"
@@ -734,11 +774,13 @@ export default function GigwanSettingServicePage() {
                   onValueChange={(value) => handleWorkTypeStatusChange(status.localId, value)}
                   containerClassName={styles.statusInput}
                   maxLength={20}
+                  disabled={status.isHwalseong}
                 />
                 <IconButton
                   styleType="normal"
                   size="small"
-                  onClick={() => handleRemoveWorkTypeStatus(status.localId)}
+                  disabled={status.isHwalseong}
+                  onClick={() => handleRemoveWorkTypeStatus(status.localId, !status.isHwalseong)}
                   aria-label={`${status.name || '상태'} 삭제`}
                 >
                   <Delete width={16} height={16} />
