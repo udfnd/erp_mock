@@ -30,7 +30,7 @@ const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
 
 export const getHadaJaewonsangLinkRequestPermissions =
   async (): Promise<GetHadaJaewonsangLinkRequestPermissionsResponse> => {
-    const res = await apiClient.get('/T/dl/hada-jaewonsang-link-request-permissions');
+    const res = await apiClient.get('/T/dl/can-hada-link-request-sangtaes');
     return parseOrThrow(GetHadaJaewonsangLinkRequestPermissionsResponseSchema, res.data);
   };
 
@@ -42,7 +42,7 @@ export const useGetHadaJaewonsangLinkRequestPermissionsQuery = (options?: { enab
   });
 
 export const getOpenContentsPermissions = async (): Promise<GetOpenContentsPermissionsResponse> => {
-  const res = await apiClient.get('/T/dl/open-contents-permissions');
+  const res = await apiClient.get('/T/dl/can-access-open-file-sangtaes');
   return parseOrThrow(GetOpenContentsPermissionsResponseSchema, res.data);
 };
 

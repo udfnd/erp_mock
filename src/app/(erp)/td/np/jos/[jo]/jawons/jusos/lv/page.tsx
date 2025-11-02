@@ -70,10 +70,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
     if (!searchTerm.trim()) return jusos;
     const lowered = searchTerm.trim().toLowerCase();
     return jusos.filter((item) =>
-      [item.jusoName, item.jusoDetail, item.juso]
-        .join(' ')
-        .toLowerCase()
-        .includes(lowered),
+      [item.jusoName, item.jusoDetail, item.juso].join(' ').toLowerCase().includes(lowered),
     );
   }, [jusos, searchTerm]);
 
@@ -83,7 +80,10 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
 
   const paginatedRows = useMemo(
     () =>
-      filteredJusos.slice((safeCurrentPage - 1) * PAGE_SIZE, (safeCurrentPage - 1) * PAGE_SIZE + PAGE_SIZE),
+      filteredJusos.slice(
+        (safeCurrentPage - 1) * PAGE_SIZE,
+        (safeCurrentPage - 1) * PAGE_SIZE + PAGE_SIZE,
+      ),
     [filteredJusos, safeCurrentPage],
   );
 
@@ -174,7 +174,9 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
 
   const handleDelete = async () => {
     if (!selectedRowId) return;
-    const confirmed = window.confirm('선택한 주소를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.');
+    const confirmed = window.confirm(
+      '선택한 주소를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.',
+    );
     if (!confirmed) return;
     try {
       await deleteMutation.mutateAsync();
@@ -243,7 +245,12 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
             >
               취소
             </Button>
-            <Button type="submit" styleType="solid" variant="primary" disabled={createMutation.isPending}>
+            <Button
+              type="submit"
+              styleType="solid"
+              variant="primary"
+              disabled={createMutation.isPending}
+            >
               {createMutation.isPending ? '등록 중...' : '주소 등록'}
             </Button>
           </div>
@@ -252,7 +259,11 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
     }
 
     if (!selectedRowId || !jusoDetailData) {
-      return <div className={styles.sidePanel.empty}>좌측 목록에서 주소를 선택하거나 새 주소를 등록하세요.</div>;
+      return (
+        <div className={styles.sidePanel.empty}>
+          좌측 목록에서 주소를 선택하거나 새 주소를 등록하세요.
+        </div>
+      );
     }
 
     if (panelMode === 'edit') {
@@ -301,7 +312,12 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
             >
               취소
             </Button>
-            <Button type="submit" styleType="solid" variant="primary" disabled={updateMutation.isPending}>
+            <Button
+              type="submit"
+              styleType="solid"
+              variant="primary"
+              disabled={updateMutation.isPending}
+            >
               {updateMutation.isPending ? '저장 중...' : '변경 사항 저장'}
             </Button>
           </div>
@@ -329,7 +345,9 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
           <div className={styles.sidePanel.infoItem}>
             <span className={styles.sidePanel.infoLabel}>상세 주소</span>
             <span className={styles.sidePanel.infoValue}>
-              {jusoDetailData.jusoDetail || <span className={styles.sidePanel.muted}>등록된 상세 주소가 없습니다.</span>}
+              {jusoDetailData.jusoDetail || (
+                <span className={styles.sidePanel.muted}>등록된 상세 주소가 없습니다.</span>
+              )}
             </span>
           </div>
         </div>
@@ -347,7 +365,9 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
             </div>
             <div className={styles.sidePanel.infoItem}>
               <span className={styles.sidePanel.infoLabel}>등록일</span>
-              <span className={styles.sidePanel.infoValue}>{formatDateTime(jusoDetailData.createdAt)}</span>
+              <span className={styles.sidePanel.infoValue}>
+                {formatDateTime(jusoDetailData.createdAt)}
+              </span>
             </div>
             <div className={styles.sidePanel.infoItem}>
               <span className={styles.sidePanel.infoLabel}>수정자</span>
@@ -355,7 +375,9 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
             </div>
             <div className={styles.sidePanel.infoItem}>
               <span className={styles.sidePanel.infoLabel}>수정일</span>
-              <span className={styles.sidePanel.infoValue}>{formatDateTime(jusoDetailData.updatedAt)}</span>
+              <span className={styles.sidePanel.infoValue}>
+                {formatDateTime(jusoDetailData.updatedAt)}
+              </span>
             </div>
           </div>
         </div>
@@ -441,7 +463,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
                 : panelMode === 'edit'
                   ? '주소 설정 편집'
                   : selectedRowId
-                    ? jusoDetailData?.jusoName ?? '주소 상세'
+                    ? (jusoDetailData?.jusoName ?? '주소 상세')
                     : '주소 설정'}
             </span>
             <span className={styles.sidePanel.subtitle}>
@@ -453,7 +475,9 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
             </span>
           </div>
           <div className={styles.sidePanel.body}>
-            {isDetailLoading && panelMode !== 'create' ? '정보를 불러오는 중입니다...' : sidePanelContent}
+            {isDetailLoading && panelMode !== 'create'
+              ? '정보를 불러오는 중입니다...'
+              : sidePanelContent}
           </div>
         </>
       }

@@ -81,10 +81,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     if (!searchTerm.trim()) return oebuLinks;
     const lowered = searchTerm.trim().toLowerCase();
     return oebuLinks.filter((item) =>
-      [item.name, item.asName, item.linkUrl]
-        .join(' ')
-        .toLowerCase()
-        .includes(lowered),
+      [item.name, item.asName, item.linkUrl].join(' ').toLowerCase().includes(lowered),
     );
   }, [oebuLinks, searchTerm]);
 
@@ -119,9 +116,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
                   unoptimized
                 />
               ) : (
-                <span className={styles.linkIconPlaceholder}>
-                  {row.name?.[0]?.toUpperCase() ?? '?'}
-                </span>
+                <span className={styles.linkIconPlaceholder}>{row.name?.[0] ?? '?'}</span>
               )}
             </div>
             <div className={styles.linkInfo}>
@@ -296,7 +291,12 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
             >
               취소
             </Button>
-            <Button type="submit" styleType="solid" variant="primary" disabled={createMutation.isPending}>
+            <Button
+              type="submit"
+              styleType="solid"
+              variant="primary"
+              disabled={createMutation.isPending}
+            >
               {createMutation.isPending ? '등록 중...' : '외부 링크 등록'}
             </Button>
           </div>
@@ -365,7 +365,12 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
             >
               취소
             </Button>
-            <Button type="submit" styleType="solid" variant="primary" disabled={updateMutation.isPending}>
+            <Button
+              type="submit"
+              styleType="solid"
+              variant="primary"
+              disabled={updateMutation.isPending}
+            >
               {updateMutation.isPending ? '저장 중...' : '변경 사항 저장'}
             </Button>
           </div>
@@ -413,11 +418,13 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
                   />
                 ) : (
                   <span className={styles.sidePanel.linkPreviewFallback}>
-                    {oebuLinkDetailData.name?.[0]?.toUpperCase() ?? '?'}
+                    {oebuLinkDetailData.name?.[0] ?? '?'}
                   </span>
                 )}
               </div>
-              <span className={styles.sidePanel.infoValue}>{oebuLinkDetailData.linkIcon || '아이콘 정보 없음'}</span>
+              <span className={styles.sidePanel.infoValue}>
+                {oebuLinkDetailData.linkIcon || '아이콘 정보 없음'}
+              </span>
             </div>
           </div>
         </div>
@@ -435,7 +442,9 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
             </div>
             <div className={styles.sidePanel.infoItem}>
               <span className={styles.sidePanel.infoLabel}>등록일</span>
-              <span className={styles.sidePanel.infoValue}>{formatDateTime(oebuLinkDetailData.createdAt)}</span>
+              <span className={styles.sidePanel.infoValue}>
+                {formatDateTime(oebuLinkDetailData.createdAt)}
+              </span>
             </div>
             <div className={styles.sidePanel.infoItem}>
               <span className={styles.sidePanel.infoLabel}>수정자</span>
@@ -443,7 +452,9 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
             </div>
             <div className={styles.sidePanel.infoItem}>
               <span className={styles.sidePanel.infoLabel}>수정일</span>
-              <span className={styles.sidePanel.infoValue}>{formatDateTime(oebuLinkDetailData.updatedAt)}</span>
+              <span className={styles.sidePanel.infoValue}>
+                {formatDateTime(oebuLinkDetailData.updatedAt)}
+              </span>
             </div>
           </div>
         </div>
@@ -504,7 +515,9 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
               />
             </div>
           </div>
-          <span className={styles.tableSummary}>{`검색 결과 ${filteredLinks.length}건이 표시됩니다.`}</span>
+          <span
+            className={styles.tableSummary}
+          >{`검색 결과 ${filteredLinks.length}건이 표시됩니다.`}</span>
         </div>
       }
       list={
@@ -537,7 +550,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
                 : panelMode === 'edit'
                   ? '외부 링크 설정 편집'
                   : selectedRowId
-                    ? oebuLinkDetailData?.name ?? '외부 링크 상세'
+                    ? (oebuLinkDetailData?.name ?? '외부 링크 상세')
                     : '외부 링크 설정'}
             </span>
             <span className={styles.sidePanel.subtitle}>
@@ -549,7 +562,9 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
             </span>
           </div>
           <div className={styles.sidePanel.body}>
-            {isDetailLoading && panelMode !== 'create' ? '정보를 불러오는 중입니다...' : sidePanelContent}
+            {isDetailLoading && panelMode !== 'create'
+              ? '정보를 불러오는 중입니다...'
+              : sidePanelContent}
           </div>
         </>
       }
@@ -611,4 +626,3 @@ function formatDateTime(value: string): string {
 
   return `${year}.${month}.${day} ${hour}:${minute}`;
 }
-

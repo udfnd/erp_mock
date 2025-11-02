@@ -90,7 +90,7 @@ export const useJojikQuery = (nanoId: string, options?: { enabled?: boolean }) =
   useQuery<JojikDetailResponse, unknown>({
     queryKey: ['jojik', nanoId],
     queryFn: () => getJojik(nanoId),
-    enabled: options?.enabled ?? true,
+    enabled: !!nanoId && (options?.enabled ?? true),
   });
 
 export const updateJojik = async (
@@ -126,7 +126,7 @@ export const useJojikPermissionsQuery = (nanoId: string, options?: { enabled?: b
   useQuery<GetJojikPermissionsResponse, unknown>({
     queryKey: ['jojikPermissions', nanoId],
     queryFn: () => getJojikPermissions(nanoId),
-    enabled: options?.enabled ?? true,
+    enabled: !!nanoId && (options?.enabled ?? true),
   });
 
 export const getJojikSettingSidebar = async (
@@ -140,7 +140,7 @@ export const useJojikSettingSidebarQuery = (nanoId: string, options?: { enabled?
   useQuery<GetJojikSettingSidebarResponse, unknown>({
     queryKey: ['jojikSettingSidebar', nanoId],
     queryFn: () => getJojikSettingSidebar(nanoId),
-    enabled: options?.enabled ?? true,
+    enabled: !!nanoId && (options?.enabled ?? true),
   });
 
 export const upsertJojikAddress = async (

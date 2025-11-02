@@ -18,15 +18,9 @@ export const header = style({
   gap: themeVars.spacing.sm,
 });
 
-export const pageTitle = style([
-  typography.titleSmallB,
-  { color: themeVars.palette.black },
-]);
+export const pageTitle = style([typography.titleSmallB, { color: themeVars.palette.black }]);
 
-export const pageDescription = style([
-  typography.bodyR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const pageDescription = style([typography.bodyR, { color: themeVars.palette.cgrey500 }]);
 
 export const cardGrid = style({
   display: 'grid',
@@ -67,15 +61,9 @@ export const cardTitleGroup = style({
   gap: themeVars.spacing.xs,
 });
 
-export const cardTitle = style([
-  typography.bodyLargeB,
-  { color: themeVars.palette.black },
-]);
+export const cardTitle = style([typography.bodyLargeB, { color: themeVars.palette.black }]);
 
-export const cardSubtitle = style([
-  typography.bodySmallR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const cardSubtitle = style([typography.bodySmallR, { color: themeVars.palette.cgrey500 }]);
 
 export const cardBody = style({
   display: 'flex',
@@ -92,26 +80,14 @@ export const cardFooter = style({
   flexWrap: 'wrap',
 });
 
-export const statusText = style([
-  typography.captionR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const statusText = style([typography.captionR, { color: themeVars.palette.cgrey500 }]);
 
 export const feedback = styleVariants({
-  success: [
-    typography.captionB,
-    { color: themeVars.palette.blue600 },
-  ],
-  error: [
-    typography.captionB,
-    { color: themeVars.palette.red },
-  ],
+  success: [typography.captionB, { color: themeVars.palette.blue600 }],
+  error: [typography.captionB, { color: themeVars.palette.red }],
 });
 
-export const errorText = style([
-  typography.bodySmallR,
-  { color: themeVars.palette.red },
-]);
+export const errorText = style([typography.bodySmallR, { color: themeVars.palette.red }]);
 
 export const linkField = style({
   display: 'flex',
@@ -131,10 +107,7 @@ export const linkInput = style({
   minWidth: '220px',
 });
 
-export const copyStatus = style([
-  typography.captionR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const copyStatus = style([typography.captionR, { color: themeVars.palette.cgrey500 }]);
 
 export const inputRow = style({
   display: 'flex',
@@ -158,10 +131,7 @@ export const chipButton = style({
   background: 'transparent',
 });
 
-export const emptyText = style([
-  typography.bodySmallR,
-  { color: themeVars.palette.cgrey400 },
-]);
+export const emptyText = style([typography.bodySmallR, { color: themeVars.palette.cgrey400 }]);
 
 export const selectGroupGrid = style({
   display: 'grid',
@@ -175,15 +145,9 @@ export const selectGroup = style({
   gap: themeVars.spacing.xs,
 });
 
-export const fieldLabel = style([
-  typography.bodySmallSB,
-  { color: themeVars.palette.black },
-]);
+export const fieldLabel = style([typography.bodySmallSB, { color: themeVars.palette.black }]);
 
-export const fieldDescription = style([
-  typography.captionR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const fieldDescription = style([typography.captionR, { color: themeVars.palette.cgrey500 }]);
 
 export const select = style({
   width: '100%',
@@ -230,20 +194,14 @@ export const openFileItem = style({
   gap: themeVars.spacing.sm,
 });
 
-export const openFileName = style([
-  typography.bodySmallR,
-  { color: themeVars.palette.black },
-]);
+export const openFileName = style([typography.bodySmallR, { color: themeVars.palette.black }]);
 
 export const openFileDescription = style([
   typography.captionR,
   { color: themeVars.palette.cgrey500 },
 ]);
 
-export const sectionTitle = style([
-  typography.bodySB,
-  { color: themeVars.palette.black },
-]);
+export const sectionTitle = style([typography.bodySB, { color: themeVars.palette.black }]);
 
 export const sectionDescription = style([
   typography.captionR,

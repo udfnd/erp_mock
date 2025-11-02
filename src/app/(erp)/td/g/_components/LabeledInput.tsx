@@ -21,15 +21,14 @@ type HelperTextStatus = NonNullable<HelperTextOptions['status']>;
 
 type BaseInputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  'size' | 'onChange' | 'defaultValue'
+  'size' | 'onChange' | 'defaultValue' | 'value'
 >;
 
 export type LabeledInputProps = BaseInputProps & {
   label?: string;
   required?: boolean;
-  value?: string;
+  value: string;
   onValueChange?: (value: string) => void;
-  defaultValue?: string;
   helperText?: string;
   status?: InputWrapperStatus;
   containerClassName?: string;
@@ -42,7 +41,6 @@ const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
       required = false,
       value,
       onValueChange,
-      defaultValue,
       helperText,
       status = 'normal',
       disabled = false,
@@ -53,7 +51,6 @@ const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
     ref,
   ) => {
     const id = useId();
-
     const inputWrapperClasses = inputWrapperRecipe({ status, disabled });
     const helperTextClasses = helperTextRecipe({ status: status as HelperTextStatus });
 
@@ -71,8 +68,7 @@ const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
             ref={ref}
             className={inputRecipe()}
             value={value ?? ''}
-            defaultValue={defaultValue}
-            onChange={(event) => onValueChange?.(event.target.value)}
+            onChange={(e) => onValueChange?.(e.target.value)}
             disabled={disabled}
             {...props}
           />
@@ -84,5 +80,4 @@ const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
 );
 
 LabeledInput.displayName = 'LabeledInput';
-
 export default LabeledInput;

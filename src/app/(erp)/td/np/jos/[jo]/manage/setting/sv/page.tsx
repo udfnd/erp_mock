@@ -14,8 +14,8 @@ import {
   useUpdateJojikSchoolsMutation,
 } from '@/api/jojik';
 import LabeledInput from '@/app/(erp)/td/g/_components/LabeledInput';
-import { Checkbox } from '@/components/Checkbox';
 import { Copy, Delete, Plus } from '@/components/icons';
+import { Checkbox } from '@/design';
 import { Button, Chip, Textfield } from '@/design';
 
 import * as styles from './page.style.css';
@@ -219,10 +219,14 @@ export default function JoManageSettingPage({ params }: PageProps) {
   const jojikNanoId = params.jo;
   const queryClient = useQueryClient();
 
-  const { data: jojik, isLoading: isJojikLoading, isFetching: isJojikFetching, error: jojikError } =
-    useJojikQuery(jojikNanoId, {
-      enabled: Boolean(jojikNanoId),
-    });
+  const {
+    data: jojik,
+    isLoading: isJojikLoading,
+    isFetching: isJojikFetching,
+    error: jojikError,
+  } = useJojikQuery(jojikNanoId, {
+    enabled: Boolean(jojikNanoId),
+  });
   const updateJojikMutation = useUpdateJojikMutation(jojikNanoId);
   const updateJojikSchoolsMutation = useUpdateJojikSchoolsMutation(jojikNanoId);
 
@@ -285,13 +289,9 @@ export default function JoManageSettingPage({ params }: PageProps) {
 
   const isBasicDirty = useMemo(() => {
     if (!jojik) {
-      return (
-        basicState.form.name.trim().length > 0 || basicState.form.intro.trim().length > 0
-      );
+      return basicState.form.name.trim().length > 0 || basicState.form.intro.trim().length > 0;
     }
-    return (
-      basicState.form.name !== jojik.name || (jojik.intro ?? '') !== basicState.form.intro
-    );
+    return basicState.form.name !== jojik.name || (jojik.intro ?? '') !== basicState.form.intro;
   }, [basicState.form, jojik]);
 
   const isBasicValid = basicState.form.name.trim().length > 0;
@@ -498,8 +498,8 @@ export default function JoManageSettingPage({ params }: PageProps) {
     copyStatus === 'success'
       ? '링크를 복사했습니다.'
       : copyStatus === 'error'
-      ? '링크 복사에 실패했습니다. 다시 시도해주세요.'
-      : null;
+        ? '링크 복사에 실패했습니다. 다시 시도해주세요.'
+        : null;
 
   const basicIsSaving = updateJojikMutation.isPending && savingTarget === 'basic';
   const openIsSaving = updateJojikMutation.isPending && savingTarget === 'open';
@@ -566,7 +566,11 @@ export default function JoManageSettingPage({ params }: PageProps) {
                 </Button>
               </div>
               {copyMessage ? (
-                <span className={copyStatus === 'error' ? styles.feedback.error : styles.feedback.success}>
+                <span
+                  className={
+                    copyStatus === 'error' ? styles.feedback.error : styles.feedback.success
+                  }
+                >
                   {copyMessage}
                 </span>
               ) : null}
@@ -769,7 +773,7 @@ export default function JoManageSettingPage({ params }: PageProps) {
               </span>
             ) : (
               <span className={styles.statusText}>
-                {(isOpenFileSangtaesLoading || isHadaSangtaesLoading)
+                {isOpenFileSangtaesLoading || isHadaSangtaesLoading
                   ? '접근 권한 옵션을 불러오는 중입니다.'
                   : '공개 범위와 파일 선택을 조정한 후 저장을 눌러주세요.'}
               </span>

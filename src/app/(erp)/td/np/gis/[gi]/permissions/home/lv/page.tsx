@@ -15,8 +15,8 @@ import {
   ListViewTable,
   type ListViewColumn,
 } from '@/app/(erp)/_components/list-view';
-import { Checkbox } from '@/components/Checkbox';
 import { Search as SearchIcon } from '@/components/icons';
+import { Checkbox } from '@/design';
 import { Button } from '@/design/components/Button';
 import { Filter as FilterButton } from '@/design/components/Filter';
 
@@ -65,12 +65,12 @@ const SORT_OPTIONS: SortOption[] = [
   {
     id: 'type-asc',
     label: '타입 오름차순',
-    comparator: (a, b) => a.permissionType.localeCompare(b.permissionType, 'ko'),
+    comparator: (a, b) => a.type.name.localeCompare(b.type.name, 'ko'),
   },
   {
     id: 'type-desc',
     label: '타입 내림차순',
-    comparator: (a, b) => b.permissionType.localeCompare(a.permissionType, 'ko'),
+    comparator: (a, b) => b.type.name.localeCompare(a.type.name, 'ko'),
   },
 ];
 
@@ -154,16 +154,17 @@ export default function GiPermissionsPage({ params }: PageProps) {
     };
   }, [isSortOpen]);
 
-  const permissions = useMemo<PermissionListItem[]>(() => permissionsData?.permissions ?? [], [
-    permissionsData,
-  ]);
+  const permissions = useMemo<PermissionListItem[]>(
+    () => permissionsData?.permissions ?? [],
+    [permissionsData],
+  );
 
   const filteredPermissions = useMemo(() => {
     if (activeFilters.permissionTypes.length === 0) {
       return permissions;
     }
     const allowed = new Set(activeFilters.permissionTypes);
-    return permissions.filter((item) => allowed.has(item.permissionType));
+    return permissions.filter((item) => allowed.has(item.type.name));
   }, [permissions, activeFilters.permissionTypes]);
 
   const searchedPermissions = useMemo(() => {
@@ -299,7 +300,9 @@ export default function GiPermissionsPage({ params }: PageProps) {
 
   const sidePanelContent = (() => {
     if (selectedItems.length === 0) {
-      return <div className={styles.placeholder}>좌측 목록에서 권한을 선택하면 정보가 표시됩니다.</div>;
+      return (
+        <div className={styles.placeholder}>좌측 목록에서 권한을 선택하면 정보가 표시됩니다.</div>
+      );
     }
 
     if (selectedItems.length > 1) {
@@ -335,7 +338,9 @@ export default function GiPermissionsPage({ params }: PageProps) {
         <div className={styles.infoGroup}>
           <span className={styles.infoLabel}>연결된 조직</span>
           <span className={styles.infoValue}>
-            {primaryDetail.linkJojik ? `${primaryDetail.linkJojik.name} (${primaryDetail.linkJojik.nanoId})` : '연결된 조직 없음'}
+            {primaryDetail.linkJojik
+              ? `${primaryDetail.linkJojik.name} (${primaryDetail.linkJojik.nanoId})`
+              : '연결된 조직 없음'}
           </span>
         </div>
       </div>
@@ -383,7 +388,9 @@ export default function GiPermissionsPage({ params }: PageProps) {
                         type="button"
                         className={styles.filterGroupHeader}
                         onClick={() =>
-                          handleToggleFilterGroup(permissionTypeOptions.map((option) => option.value))
+                          handleToggleFilterGroup(
+                            permissionTypeOptions.map((option) => option.value),
+                          )
                         }
                       >
                         권한 타입
@@ -392,7 +399,9 @@ export default function GiPermissionsPage({ params }: PageProps) {
                         <label key={option.value} className={styles.filterOption}>
                           <span className={styles.filterOptionLabel}>{option.label}</span>
                           <Checkbox
-                            checked={pendingFiltersNormalized.permissionTypes.includes(option.value)}
+                            checked={pendingFiltersNormalized.permissionTypes.includes(
+                              option.value,
+                            )}
                             onChange={() => handleToggleFilterOption(option.value)}
                           />
                         </label>
@@ -481,7 +490,9 @@ export default function GiPermissionsPage({ params }: PageProps) {
             </span>
             <span className={styles.sidePanelSubtitle}>
               {selectedItems.length > 0 ? (
-                <span className={styles.selectedCount}>{`총 ${selectedItems.length}개 선택됨`}</span>
+                <span
+                  className={styles.selectedCount}
+                >{`총 ${selectedItems.length}개 선택됨`}</span>
               ) : (
                 '권한을 선택하면 상세 정보가 표시됩니다.'
               )}

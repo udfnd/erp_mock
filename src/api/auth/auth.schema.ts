@@ -29,6 +29,7 @@ export const MyProfileResponseSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
   employedAt: z.string(),
+  isHwalseong: z.boolean(),
   activeSangtae: SangtaeSchema,
   workTypeSangtae: SangtaeSchema.nullable(),
   employmentSangtae: SangtaeSchema.nullable(),

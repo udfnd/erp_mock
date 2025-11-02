@@ -6,7 +6,7 @@ export const container = style({
   display: 'flex',
   height: '100vh',
   width: '100vw',
-  background: themeVars.palette.cgrey25,
+  background: themeVars.palette.white,
   overflow: 'hidden',
 });
 
@@ -15,7 +15,7 @@ export const mainWrapper = style({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  background: themeVars.palette.cgrey25,
+  background: themeVars.palette.white,
 });
 
 export const header = style({
@@ -52,7 +52,7 @@ export const tertiaryNavWrapper = styleVariants({
 export const content = style({
   flex: 1,
   overflowY: 'auto',
-  padding: `${themeVars.spacing.xxl} ${themeVars.spacing.xxl}`,
+  padding: `${themeVars.spacing.base} ${themeVars.spacing.base}`,
   scrollBehavior: 'smooth',
 
   '@media': {

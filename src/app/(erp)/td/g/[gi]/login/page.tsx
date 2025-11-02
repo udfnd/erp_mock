@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useSignInMutation } from '@/api/auth';
-import { useGigwanQuery } from '@/api/gigwan';
+import { useGigwanNameQuery } from '@/api/gigwan';
 import { Progress } from '@/components/icons';
 import { Button } from '@/design';
 import { useAuth } from '@/state/auth';
@@ -15,8 +15,7 @@ import LabeledInput from '../../_components/LabeledInput';
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const codeParam = searchParams.get('code') ?? '';
-  const gigwanCode = codeParam.toUpperCase();
+  const gigwanCode = searchParams.get('code') ?? '';
 
   const { state, isReady, isAuthenticated, setAuthState } = useAuth();
 
@@ -24,7 +23,7 @@ export default function SignInPage() {
     data: gigwan,
     isError: isGigwanError,
     isLoading: isGigwanLoading,
-  } = useGigwanQuery(gigwanCode, { enabled: gigwanCode.length === 8 });
+  } = useGigwanNameQuery(gigwanCode, { enabled: gigwanCode.length === 8 });
 
   const { mutateAsync } = useSignInMutation();
 
@@ -100,10 +99,10 @@ export default function SignInPage() {
   );
 
   useEffect(() => {
-    if (!codeParam || codeParam.length !== 8) {
+    if (!gigwanCode || gigwanCode.length !== 8) {
       router.replace('/td/g');
     }
-  }, [codeParam, router]);
+  }, [gigwanCode, router]);
 
   useEffect(() => {
     if (isGigwanError) {
@@ -118,8 +117,8 @@ export default function SignInPage() {
   }, [isAuthenticated, isReady, router, state.gigwanNanoId]);
 
   const isRedirecting =
-    !codeParam ||
-    codeParam.length !== 8 ||
+    !gigwanCode ||
+    gigwanCode.length !== 8 ||
     isGigwanError ||
     (isReady && isAuthenticated && Boolean(state.gigwanNanoId));
 

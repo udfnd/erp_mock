@@ -18,8 +18,8 @@ import {
   ListViewTable,
   type ListViewColumn,
 } from '@/app/(erp)/_components/list-view';
-import { Checkbox } from '@/components/Checkbox';
 import { Search as SearchIcon } from '@/components/icons';
+import { Checkbox } from '@/design';
 import { Button } from '@/design/components/Button';
 import { Filter as FilterButton } from '@/design/components/Filter';
 
@@ -121,7 +121,9 @@ export default function GiSayongjasPage({ params }: PageProps) {
 
   const { data: jojikData } = useJojiksQuery();
   const { data: sayongjaSangtaeData } = useGetSayongjaSangtaesQuery();
-  const { data: employmentCategoriesData } = useEmploymentCategoriesQuery(gi, { enabled: Boolean(gi) });
+  const { data: employmentCategoriesData } = useEmploymentCategoriesQuery(gi, {
+    enabled: Boolean(gi),
+  });
   const { data: workTypeData } = useWorkTypeCustomSangtaesQuery(gi, { enabled: Boolean(gi) });
 
   const jojikOptions = useMemo<JojikOption[]>(() => {
@@ -129,9 +131,10 @@ export default function GiSayongjasPage({ params }: PageProps) {
     return items.map((item) => ({ value: item.nanoId, label: item.name }));
   }, [jojikData]);
 
-  const jojikLabelMap = useMemo(() => new Map(jojikOptions.map((option) => [option.value, option.label])), [
-    jojikOptions,
-  ]);
+  const jojikLabelMap = useMemo(
+    () => new Map(jojikOptions.map((option) => [option.value, option.label])),
+    [jojikOptions],
+  );
 
   const sayongjaSangtaeOptions = useMemo(
     () =>
@@ -289,7 +292,10 @@ export default function GiSayongjasPage({ params }: PageProps) {
     return sortedSayongjas.slice(start, start + PAGE_SIZE);
   }, [sortedSayongjas, safeCurrentPage]);
 
-  const availableIdSet = useMemo(() => new Set(sortedSayongjas.map((item) => item.nanoId)), [sortedSayongjas]);
+  const availableIdSet = useMemo(
+    () => new Set(sortedSayongjas.map((item) => item.nanoId)),
+    [sortedSayongjas],
+  );
 
   const displaySelectedIds = useMemo(
     () => selectedIds.filter((id) => availableIdSet.has(id)),
@@ -430,7 +436,9 @@ export default function GiSayongjasPage({ params }: PageProps) {
   const sidePanelContent = (() => {
     if (selectedItems.length === 0) {
       return (
-        <div className={styles.placeholder}>좌측 목록에서 사용자를 선택하면 상세 정보가 표시됩니다.</div>
+        <div className={styles.placeholder}>
+          좌측 목록에서 사용자를 선택하면 상세 정보가 표시됩니다.
+        </div>
       );
     }
 
@@ -583,8 +591,12 @@ export default function GiSayongjasPage({ params }: PageProps) {
                           <label key={option.value} className={styles.filterOption}>
                             <span className={styles.filterOptionLabel}>{option.label}</span>
                             <Checkbox
-                              checked={pendingFiltersNormalized.sayongjaSangtaes.includes(option.value)}
-                              onChange={() => handleToggleFilterOption('sayongjaSangtaes', option.value)}
+                              checked={pendingFiltersNormalized.sayongjaSangtaes.includes(
+                                option.value,
+                              )}
+                              onChange={() =>
+                                handleToggleFilterOption('sayongjaSangtaes', option.value)
+                              }
                             />
                           </label>
                         ))
@@ -633,7 +645,10 @@ export default function GiSayongjasPage({ params }: PageProps) {
                                   option.value,
                                 )}
                                 onChange={() =>
-                                  handleToggleFilterOption('employmentCategorySangtaes', option.value)
+                                  handleToggleFilterOption(
+                                    'employmentCategorySangtaes',
+                                    option.value,
+                                  )
                                 }
                               />
                             </label>
@@ -658,8 +673,12 @@ export default function GiSayongjasPage({ params }: PageProps) {
                             <label key={option.value} className={styles.filterOption}>
                               <span className={styles.filterOptionLabel}>{option.label}</span>
                               <Checkbox
-                                checked={pendingFiltersNormalized.workTypeSangtaes.includes(option.value)}
-                                onChange={() => handleToggleFilterOption('workTypeSangtaes', option.value)}
+                                checked={pendingFiltersNormalized.workTypeSangtaes.includes(
+                                  option.value,
+                                )}
+                                onChange={() =>
+                                  handleToggleFilterOption('workTypeSangtaes', option.value)
+                                }
                               />
                             </label>
                           ))}
@@ -756,7 +775,9 @@ export default function GiSayongjasPage({ params }: PageProps) {
             </span>
             <span className={styles.sidePanelSubtitle}>
               {selectedItems.length > 0 ? (
-                <span className={styles.selectedCount}>{`총 ${selectedItems.length}명 선택됨`}</span>
+                <span
+                  className={styles.selectedCount}
+                >{`총 ${selectedItems.length}명 선택됨`}</span>
               ) : (
                 '사용자를 선택하면 정보가 표시됩니다.'
               )}
@@ -784,7 +805,9 @@ function normalizeFilters(state: FilterState, available: AvailableFilterSets): F
     ),
     employmentCategorySangtaes: Array.from(
       new Set(
-        state.employmentCategorySangtaes.filter((value) => available.employmentCategorySangtaes.has(value)),
+        state.employmentCategorySangtaes.filter((value) =>
+          available.employmentCategorySangtaes.has(value),
+        ),
       ),
     ),
     workTypeSangtaes: Array.from(

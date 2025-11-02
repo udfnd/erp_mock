@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 import { SidebarOpen, SidebarClose } from '@/components/icons';
@@ -21,20 +21,68 @@ type Item = {
 export default function PrimaryNav() {
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
+
+  const loginHref = `/td/g`;
+
+  const handleLogout = () => {
+    try {
+      const re = /auth|token|persist|zustand|session/i;
+      const explicitKeys = [
+        'auth-store',
+        'persist:auth',
+        'accessToken',
+        'refreshToken',
+        'session',
+        'auth',
+      ];
+      try {
+        Object.keys(localStorage).forEach((k) => {
+          if (re.test(k) || explicitKeys.includes(k)) localStorage.removeItem(k);
+        });
+        Object.keys(sessionStorage).forEach((k) => {
+          if (re.test(k) || explicitKeys.includes(k)) sessionStorage.removeItem(k);
+        });
+      } catch {}
+      try {
+        const cookieNames = Array.from(
+          new Set(
+            document.cookie
+              .split(';')
+              .map((c) => c.split('=')[0].trim())
+              .filter(Boolean)
+              .concat(['auth', 'session', 'access_token', 'refresh_token', 'boot-id']),
+          ),
+        );
+        cookieNames.forEach((name) => {
+          document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+          document.cookie = `${name}=; Max-Age=0; path=/; domain=${location.hostname}; SameSite=Lax`;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+        });
+      } catch {}
+      try {
+        router.replace(loginHref);
+      } catch {
+        window.location.href = loginHref;
+      }
+    } catch {
+      window.location.href = loginHref;
+    }
+  };
 
   const items: Item[] = [
     {
       key: '기관명',
       label: '기관명',
       depth: 1,
-      href: `/td/np/gis/${params?.gi ?? 'gi'}/manage/home/dv`,
+      href: `/td/np/gis/${(params as any)?.gi ?? 'gi'}/manage/home/dv`,
     },
     {
       key: '조직명',
       label: '조직명',
       depth: 1,
-      href: `/td/np/jos/${params?.jo ?? 'jo'}/manage/home/dv`,
+      href: `/td/np/jos/${(params as any)?.jo ?? 'jo'}/manage/home/dv`,
     },
     {
       key: '수업명',
@@ -144,7 +192,14 @@ export default function PrimaryNav() {
             다다팀에 문의하기
           </span>
         </a>
-
+        <button
+          type="button"
+          onClick={handleLogout}
+          className={cx(styles.navLink.inactive, styles.navLinkDepth[1])}
+          aria-label="로그아웃"
+        >
+          <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>로그아웃</span>
+        </button>
         <div className={styles.footerVersion}>
           <span className={styles.footerBrand}>티키타</span>
           <span className={styles.footerVerText}>&nbsp;Ver 0.1.0</span>

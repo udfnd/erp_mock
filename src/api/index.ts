@@ -4,7 +4,7 @@ import { refreshAccessToken as apiRefreshAccessToken } from './auth/auth.api';
 
 import type { SignInResponse } from '@/api/auth';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://staging.api.v3.teachita.com/api';
 
 let accessToken: string | null = null;
 

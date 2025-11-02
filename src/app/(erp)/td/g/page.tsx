@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useState } from 'react';
 
-import { getGigwan } from '@/api/gigwan';
+import { getGigwanName } from '@/api/gigwan';
 import { Progress } from '@/components/icons';
 import { Button } from '@/design';
 
@@ -18,10 +18,7 @@ export default function EnterCodePage() {
 
   const handleChange = useCallback(
     (value: string) => {
-      const sanitized = value
-        .replace(/[^a-zA-Z0-9]/g, '')
-        .slice(0, 8)
-        .toUpperCase();
+      const sanitized = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8);
       setCode((prev) => {
         if (errorMessage && sanitized !== prev) {
           setErrorMessage('');
@@ -39,7 +36,7 @@ export default function EnterCodePage() {
 
       setIsLoading(true);
       try {
-        await getGigwan(code);
+        await getGigwanName(code);
         router.push(`/td/g/[gi]/login?code=${code}`);
       } catch (error) {
         console.error('기관 코드 확인 실패', error);

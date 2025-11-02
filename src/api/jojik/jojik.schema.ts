@@ -1,5 +1,24 @@
 import { z } from 'zod';
 
+export const IconSchema = z
+  .object({
+    name: z.string(),
+    nanoId: z.string(),
+  })
+  .passthrough();
+export type Icon = z.infer<typeof IconSchema>;
+
+export const HomepageUrlSchema = z
+  .object({
+    icon: IconSchema,
+    linkUrl: z.string().url(),
+    name: z.string(),
+    nanoId: z.string(),
+    titleName: z.string(),
+  })
+  .passthrough();
+export type HomepageUrl = z.infer<typeof HomepageUrlSchema>;
+
 export const JojikListItemSchema = z.object({
   name: z.string(),
   createdAt: z.string(),
@@ -39,7 +58,7 @@ export const JojikDetailResponseSchema = z.object({
   canAccessOpenFileSangtaeNanoId: z.string(),
   canHadaLinkRequestSangtae: z.string(),
   canHadaLinkRequestSangtaeNanoId: z.string(),
-  homepageUrl: z.string(),
+  homepageUrl: HomepageUrlSchema,
   openFiles: z.array(JojikOpenFileSchema),
 });
 export type JojikDetailResponse = z.infer<typeof JojikDetailResponseSchema>;
@@ -48,7 +67,7 @@ export const UpdateJojikRequestSchema = z.object({
   name: z.string().optional(),
   intro: z.string().optional(),
   juso: z.string().optional(),
-  openSangtaeNanoId: z.string().optional(),
+  openSangtae: z.boolean,
   canAccessOpenFileSangtaeNanoId: z.string().optional(),
   canHadaLinkRequestSangtaeNanoId: z.string().optional(),
   openFileNanoIds: z.array(z.string()),
@@ -64,7 +83,7 @@ export type DeleteJojikResponse = z.infer<typeof DeleteJojikResponseSchema>;
 export const JojikPermissionSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
-  systemType: z.string(),
+  sysPermissionType: z.string(),
 });
 export const GetJojikPermissionsResponseSchema = z.object({
   permissions: z.array(JojikPermissionSchema),
@@ -73,7 +92,7 @@ export type GetJojikPermissionsResponse = z.infer<typeof GetJojikPermissionsResp
 
 export const GetJojikSettingSidebarResponseSchema = z.object({
   name: z.string(),
-  homepageUrl: z.string(),
+  homepageUrl: HomepageUrlSchema,
   nanoId: z.string(),
 });
 export type GetJojikSettingSidebarResponse = z.infer<typeof GetJojikSettingSidebarResponseSchema>;
@@ -131,12 +150,16 @@ export const UpdateJojikOpenSettingResponseSchema = z.object({
 });
 export type UpdateJojikOpenSettingResponse = z.infer<typeof UpdateJojikOpenSettingResponseSchema>;
 
-export const UpsertJojikHomepageRequestSchema = z.object({
-  url: z.string(),
-});
+export const UpsertJojikHomepageRequestSchema = z
+  .object({
+    icon: IconSchema,
+    linkUrl: z.string().url(),
+    name: z.string(),
+    titleName: z.string(),
+    nanoId: z.string().optional(),
+  })
+  .passthrough();
 export type UpsertJojikHomepageRequest = z.infer<typeof UpsertJojikHomepageRequestSchema>;
-export const UpsertJojikHomepageResponseSchema = z.object({
-  nanoId: z.string(),
-  url: z.string(),
-});
+
+export const UpsertJojikHomepageResponseSchema = HomepageUrlSchema;
 export type UpsertJojikHomepageResponse = z.infer<typeof UpsertJojikHomepageResponseSchema>;

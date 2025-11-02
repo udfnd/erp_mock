@@ -3,8 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { useGigwanQuery } from '@/api/gigwan';
-import { Home as HomeIcon } from '@/components/icons';
+import { useGigwanNameQuery } from '@/api/gigwan';
 import { useAuth } from '@/state/auth';
 
 import * as styles from './page.style.css';
@@ -31,31 +30,17 @@ export default function GigwanHomePage() {
     }
   }, [gigwanNanoId, isAuthenticated, isReady, router, state.gigwanNanoId]);
 
-  const { data: gigwan } = useGigwanQuery(gigwanNanoId, {
+  const { data: gigwan } = useGigwanNameQuery(gigwanNanoId, {
     enabled: isAuthenticated && Boolean(gigwanNanoId),
   });
-
-  const heroTitle = gigwan
-    ? `${gigwan.name}에 오신 것을 환영합니다.`
-    : '기관 정보를 불러오는 중입니다.';
-  const heroDescription = gigwan
-    ? `기관 코드 ${gigwanNanoId}에 로그인한 관리자 화면입니다.`
-    : '잠시만 기다려 주세요.';
 
   return (
     <div className={styles.page}>
       <section className={styles.header}>
-        <h1 className={styles.title}>기관 홈</h1>
-        <p className={styles.subtitle}>환영합니다! 기관 운영을 위한 첫 페이지입니다.</p>
-      </section>
-      <section className={styles.hero}>
-        <div className={styles.heroIcon}>
-          <HomeIcon width={28} height={28} />
-        </div>
-        <div className={styles.heroContent}>
-          <h2 className={styles.heroTitle}>{heroTitle}</h2>
-          <p className={styles.heroDescription}>{heroDescription}</p>
-        </div>
+        <h1 className={styles.title}>다시 오신 것을 환영합니다</h1>
+        <p className={styles.subtitle}>
+          {gigwan ? gigwan.name : ''}의 새로운 소식을 확인해 보세요.
+        </p>
       </section>
     </div>
   );

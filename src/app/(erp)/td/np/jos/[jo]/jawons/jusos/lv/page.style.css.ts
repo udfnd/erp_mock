@@ -3,10 +3,7 @@ import { style } from '@vanilla-extract/css';
 import { themeVars } from '@/design/theme.css';
 import { typography } from '@/design/typo.css';
 
-export const headerCounter = style([
-  typography.bodySmallR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const headerCounter = style([typography.bodySmallR, { color: themeVars.palette.cgrey500 }]);
 
 export const tableToolbar = style({
   display: 'flex',
@@ -41,7 +38,7 @@ export const searchInput = style([
   typography.bodyR,
   {
     width: '100%',
-    padding: `${themeVars.spacing.sm} ${themeVars.spacing.base} ${themeVars.spacing.sm} ${themeVars.spacing.xl}`,
+    padding: `${themeVars.spacing.sm} ${themeVars.spacing.base} ${themeVars.spacing.sm} ${themeVars.spacing.xxl}`,
     borderRadius: themeVars.radius.md,
     border: `1px solid ${themeVars.palette.cgrey200}`,
     backgroundColor: themeVars.palette.white,
@@ -76,15 +73,9 @@ export const tableSummary = style([
   },
 ]);
 
-export const nameCell = style([
-  typography.bodyB,
-  { color: themeVars.palette.black },
-]);
+export const nameCell = style([typography.bodyB, { color: themeVars.palette.black }]);
 
-export const cellMuted = style([
-  typography.bodyR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const cellMuted = style([typography.bodyR, { color: themeVars.palette.cgrey500 }]);
 
 export const sidePanel = {
   header: style({
@@ -94,14 +85,8 @@ export const sidePanel = {
     flexDirection: 'column',
     gap: themeVars.spacing.xs,
   }),
-  title: style([
-    typography.bodyLargeB,
-    { color: themeVars.palette.black },
-  ]),
-  subtitle: style([
-    typography.captionR,
-    { color: themeVars.palette.cgrey500 },
-  ]),
+  title: style([typography.bodyLargeB, { color: themeVars.palette.black }]),
+  subtitle: style([typography.captionR, { color: themeVars.palette.cgrey500 }]),
   body: style({
     padding: themeVars.spacing.xxl,
     display: 'flex',
@@ -120,14 +105,8 @@ export const sidePanel = {
     flexDirection: 'column',
     gap: themeVars.spacing.xs,
   }),
-  sectionTitle: style([
-    typography.bodyB,
-    { color: themeVars.palette.black },
-  ]),
-  sectionDescription: style([
-    typography.captionR,
-    { color: themeVars.palette.cgrey500 },
-  ]),
+  sectionTitle: style([typography.bodyB, { color: themeVars.palette.black }]),
+  sectionDescription: style([typography.captionR, { color: themeVars.palette.cgrey500 }]),
   infoList: style({
     display: 'flex',
     flexDirection: 'column',
@@ -138,18 +117,9 @@ export const sidePanel = {
     flexDirection: 'column',
     gap: themeVars.spacing.xs,
   }),
-  infoLabel: style([
-    typography.captionB,
-    { color: themeVars.palette.cgrey500 },
-  ]),
-  infoValue: style([
-    typography.bodyR,
-    { color: themeVars.palette.black, wordBreak: 'break-word' },
-  ]),
-  muted: style([
-    typography.captionR,
-    { color: themeVars.palette.cgrey400 },
-  ]),
+  infoLabel: style([typography.captionB, { color: themeVars.palette.cgrey500 }]),
+  infoValue: style([typography.bodyR, { color: themeVars.palette.black, wordBreak: 'break-word' }]),
+  muted: style([typography.captionR, { color: themeVars.palette.cgrey400 }]),
   form: style({
     display: 'flex',
     flexDirection: 'column',
@@ -174,4 +144,3 @@ export const sidePanel = {
     },
   ]),
 };
-

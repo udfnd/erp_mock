@@ -12,15 +12,59 @@ export const GetPermissionSayongjasResponseSchema = z.object({
 });
 export type GetPermissionSayongjasResponse = z.infer<typeof GetPermissionSayongjasResponseSchema>;
 
-export const PermissionListItemSchema = z.object({
-  nanoId: z.string(),
-  name: z.string(),
-  permissionType: z.string(),
-  typeId: z.number(),
-});
-export const GetPermissionsResponseSchema = z.object({
-  permissions: z.array(PermissionListItemSchema),
-});
+export const GigwanSchema = z
+  .object({
+    name: z.string(),
+    nanoId: z.string(),
+  })
+  .passthrough();
+export type Gigwan = z.infer<typeof GigwanSchema>;
+
+export const JojikSchema = z
+  .object({
+    name: z.string(),
+    nanoId: z.string(),
+  })
+  .passthrough();
+export type Jojik = z.infer<typeof JojikSchema>;
+
+export const TypeSchema = z
+  .object({
+    name: z.string(),
+    nanoId: z.string(),
+  })
+  .passthrough();
+export type Type = z.infer<typeof TypeSchema>;
+
+export const PermissionSchema = z
+  .object({
+    gigwan: GigwanSchema,
+    jojik: JojikSchema.nullable(),
+    name: z.string(),
+    nanoId: z.string(),
+    type: TypeSchema,
+  })
+  .passthrough();
+export type Permission = z.infer<typeof PermissionSchema>;
+
+export const PaginationDataSchema = z
+  .object({
+    hasNextPage: z.boolean(),
+    pageItemCount: z.number(),
+    pageNumber: z.number(),
+    pageSize: z.number(),
+    totalItemCount: z.number(),
+    totalPageCount: z.number(),
+  })
+  .passthrough();
+export type PaginationData = z.infer<typeof PaginationDataSchema>;
+
+export const GetPermissionsResponseSchema = z
+  .object({
+    paginationData: PaginationDataSchema.optional(),
+    permissions: z.array(PermissionSchema),
+  })
+  .passthrough();
 export type GetPermissionsResponse = z.infer<typeof GetPermissionsResponseSchema>;
 
 export const GetPermissionDetailResponseSchema = z.object({

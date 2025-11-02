@@ -7,14 +7,14 @@ const SystemItemSchema = z.object({
 export type SystemItem = z.infer<typeof SystemItemSchema>;
 
 export const GetHadaJaewonsangLinkRequestPermissionsResponseSchema = z.object({
-  permissions: z.array(SystemItemSchema),
+  sangtaes: z.array(SystemItemSchema),
 });
 export type GetHadaJaewonsangLinkRequestPermissionsResponse = z.infer<
   typeof GetHadaJaewonsangLinkRequestPermissionsResponseSchema
 >;
 
 export const GetOpenContentsPermissionsResponseSchema = z.object({
-  permissions: z.array(SystemItemSchema),
+  sangtaes: z.array(SystemItemSchema),
 });
 export type GetOpenContentsPermissionsResponse = z.infer<
   typeof GetOpenContentsPermissionsResponseSchema

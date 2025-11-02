@@ -1,5 +1,18 @@
 import { z } from 'zod';
 
+
+export const PaginationDataSchema = z
+  .object({
+    hasNextPage: z.boolean(),
+    pageItemCount: z.number(),
+    pageNumber: z.number(),
+    pageSize: z.number(),
+    totalItemCount: z.number(),
+    totalPageCount: z.number(),
+  })
+  .passthrough();
+export type PaginationData = z.infer<typeof PaginationDataSchema>;
+
 export const JusoListItemSchema = z.object({
   createdBy: z.string(),
   jusoName: z.string(),
@@ -10,9 +23,12 @@ export const JusoListItemSchema = z.object({
 });
 export type JusoListItem = z.infer<typeof JusoListItemSchema>;
 
-export const GetJusosResponseSchema = z.object({
-  jusos: z.array(JusoListItemSchema),
-});
+export const GetJusosResponseSchema = z
+  .object({
+    paginationData: PaginationDataSchema.optional(),
+    jusos: z.array(JusoListItemSchema),
+  })
+  .passthrough();
 export type GetJusosResponse = z.infer<typeof GetJusosResponseSchema>;
 
 export const CreateJusoRequestSchema = z.object({

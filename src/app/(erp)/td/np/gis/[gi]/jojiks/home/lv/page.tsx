@@ -11,8 +11,8 @@ import {
   ListViewTable,
   type ListViewColumn,
 } from '@/app/(erp)/_components/list-view';
-import { Checkbox } from '@/components/Checkbox';
 import { Search as SearchIcon } from '@/components/icons';
+import { Checkbox } from '@/design';
 import { Button } from '@/design/components/Button';
 import { Filter as FilterButton } from '@/design/components/Filter';
 
@@ -198,7 +198,10 @@ export default function GiOrganizationsPage({ params }: PageProps) {
     return sortedJojiks.slice(start, start + PAGE_SIZE);
   }, [sortedJojiks, safeCurrentPage]);
 
-  const availableIdSet = useMemo(() => new Set(sortedJojiks.map((item) => item.nanoId)), [sortedJojiks]);
+  const availableIdSet = useMemo(
+    () => new Set(sortedJojiks.map((item) => item.nanoId)),
+    [sortedJojiks],
+  );
 
   const displaySelectedIds = useMemo(
     () => selectedIds.filter((id) => availableIdSet.has(id)),
@@ -289,7 +292,11 @@ export default function GiOrganizationsPage({ params }: PageProps) {
 
   const sidePanelContent = (() => {
     if (selectedItems.length === 0) {
-      return <div className={styles.placeholder}>좌측 목록에서 조직을 선택하면 상세 정보가 표시됩니다.</div>;
+      return (
+        <div className={styles.placeholder}>
+          좌측 목록에서 조직을 선택하면 상세 정보가 표시됩니다.
+        </div>
+      );
     }
 
     if (selectedItems.length > 1) {
@@ -488,7 +495,9 @@ export default function GiOrganizationsPage({ params }: PageProps) {
             </span>
             <span className={styles.sidePanelSubtitle}>
               {selectedItems.length > 0 ? (
-                <span className={styles.selectedCount}>{`총 ${selectedItems.length}개 선택됨`}</span>
+                <span
+                  className={styles.selectedCount}
+                >{`총 ${selectedItems.length}개 선택됨`}</span>
               ) : (
                 '조직을 선택하면 정보가 표시됩니다.'
               )}
@@ -510,7 +519,9 @@ export default function GiOrganizationsPage({ params }: PageProps) {
 
 function normalizeFilters(state: FilterState, availableYears: string[]): FilterState {
   const uniqueNameRange = Array.from(new Set(state.nameRange));
-  const uniqueYears = Array.from(new Set(state.year.filter((year) => availableYears.includes(year))));
+  const uniqueYears = Array.from(
+    new Set(state.year.filter((year) => availableYears.includes(year))),
+  );
   return {
     nameRange: uniqueNameRange,
     year: uniqueYears,

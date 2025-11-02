@@ -36,6 +36,8 @@ import {
   UpsertWorkTypeSangtaesRequestSchema,
   UpsertWorkTypeSangtaesResponse,
   UpsertWorkTypeSangtaesResponseSchema,
+  GigwanGetSchema,
+  GigwanGet,
 } from './gigwan.schema';
 
 const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
@@ -60,14 +62,26 @@ export const useGigwanSidebarQuery = (nanoId: string, options?: { enabled?: bool
     enabled: options?.enabled ?? true,
   });
 
-export const getGigwan = async (nanoId: string): Promise<GigwanBasicGet> => {
-  const res = await apiClient.get(`/T/dl/gigwans/${nanoId}`);
+export const getGigwanName = async (nanoId: string): Promise<GigwanBasicGet> => {
+  const res = await apiClient.get(`/T/feat/gigwans/${nanoId}`);
   return parseOrThrow(GigwanBasicGetSchema, res.data);
 };
 
-export const useGigwanQuery = (nanoId: string, options?: { enabled?: boolean }) =>
+export const useGigwanNameQuery = (nanoId: string, options?: { enabled?: boolean }) =>
   useQuery<GigwanBasicGet, unknown>({
-    queryKey: ['gigwan', nanoId],
+    queryKey: ['gigwanName', nanoId],
+    queryFn: () => getGigwanName(nanoId),
+    enabled: options?.enabled ?? true,
+  });
+
+export const getGigwan = async (nanoId: string): Promise<GigwanGet> => {
+  const res = await apiClient.get(`/T/dl/gigwans/${nanoId}`);
+  return parseOrThrow(GigwanGetSchema, res.data);
+};
+
+export const useGigwanQuery = (nanoId: string, options?: { enabled?: boolean }) =>
+  useQuery<GigwanGet, unknown, GigwanGet, readonly ['gigwan', string]>({
+    queryKey: ['gigwan', nanoId] as const,
     queryFn: () => getGigwan(nanoId),
     enabled: options?.enabled ?? true,
   });
@@ -147,7 +161,7 @@ export const upsertEmploymentCategories = async (
   data: UpsertEmploymentCategoriesRequest,
 ): Promise<UpsertEmploymentCategoriesResponse> => {
   const body = UpsertEmploymentCategoriesRequestSchema.parse(data);
-  const res = await apiClient.post(`/T/dl/gigwans/${nanoId}/sayongja-employment-category`, body);
+  const res = await apiClient.post(`/T/dl/gigwans/${nanoId}/employment-category-sangtae`, body);
   return parseOrThrow(UpsertEmploymentCategoriesResponseSchema, res.data);
 };
 

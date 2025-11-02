@@ -1,5 +1,17 @@
 import { z } from 'zod';
 
+export const PaginationDataSchema = z
+  .object({
+    hasNextPage: z.boolean(),
+    pageItemCount: z.number(),
+    pageNumber: z.number(),
+    pageSize: z.number(),
+    totalItemCount: z.number(),
+    totalPageCount: z.number(),
+  })
+  .passthrough();
+export type PaginationData = z.infer<typeof PaginationDataSchema>;
+
 export const OebuLinkListItemSchema = z.object({
   linkIcon: z.string(),
   nanoId: z.string(),
@@ -11,9 +23,12 @@ export const OebuLinkListItemSchema = z.object({
 });
 export type OebuLinkListItem = z.infer<typeof OebuLinkListItemSchema>;
 
-export const GetOebuLinksResponseSchema = z.object({
-  oebuLinks: z.array(OebuLinkListItemSchema),
-});
+export const GetOebuLinksResponseSchema = z
+  .object({
+    paginationData: PaginationDataSchema.optional(),
+    oebuLinks: z.array(OebuLinkListItemSchema),
+  })
+  .passthrough();
 export type GetOebuLinksResponse = z.infer<typeof GetOebuLinksResponseSchema>;
 
 export const OebuLinkDetailSchema = OebuLinkListItemSchema.extend({

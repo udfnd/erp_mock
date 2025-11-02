@@ -34,11 +34,24 @@ export type GigwanSidebarResponse = z.infer<typeof GigwanSidebarResponseSchema>;
 
 export const GigwanBasicGetSchema = z.object({
   name: z.string(),
-  address: z.string(),
-  intro: z.string(),
   nanoId: z.string(),
 });
 export type GigwanBasicGet = z.infer<typeof GigwanBasicGetSchema>;
+
+export const GigwanGetSchema = z.object({
+  name: z.string(),
+  nanoId: z.string(),
+  intro: z.string(),
+  juso: z.union([
+    z.object({
+      nanoId: z.string(),
+      name: z.string(),
+      fullJuso: z.string(),
+    }),
+    z.null(),
+  ]),
+});
+export type GigwanGet = z.infer<typeof GigwanGetSchema>;
 
 export const UpdateGigwanRequestSchema = z.object({
   name: z.string().optional(),
@@ -118,12 +131,13 @@ export const UpsertEmploymentCategoriesRequestSchema = z.object({
   categories: z.array(
     z.object({
       nanoId: z.string(),
-      name: z.string(),
       sangtaes: z.array(
-        z.object({
-          nanoId: z.union([z.string(), z.null()]),
-          name: z.string(),
-        }),
+        z
+          .object({
+            nanoId: z.string().optional(),
+            name: z.string(),
+          })
+          .strict(),
       ),
     }),
   ),

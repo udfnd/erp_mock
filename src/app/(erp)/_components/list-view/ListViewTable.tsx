@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Checkbox } from '@/components/Checkbox';
+import { Checkbox } from '@/design';
 
 import * as styles from './listViewTable.css';
 
@@ -34,13 +34,10 @@ export function ListViewTable<T>({
   const disabledSet = new Set(disabledRowIds);
   const selectedSet = new Set(selectedRowIds);
 
-  const allSelectableRowIds = rows
-    .map((row) => getRowId(row))
-    .filter((id) => !disabledSet.has(id));
+  const allSelectableRowIds = rows.map((row) => getRowId(row)).filter((id) => !disabledSet.has(id));
 
   const isAllSelected =
-    allSelectableRowIds.length > 0 &&
-    allSelectableRowIds.every((id) => selectedSet.has(id));
+    allSelectableRowIds.length > 0 && allSelectableRowIds.every((id) => selectedSet.has(id));
 
   const isIndeterminate =
     selectedSet.size > 0 && !isAllSelected && selectedSet.size < allSelectableRowIds.length;

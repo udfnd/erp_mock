@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import React, { ReactNode, useState, useId } from 'react';
+import React, { ReactNode, useId } from 'react';
 
 import {
   container,
@@ -30,9 +30,8 @@ export type TextfieldProps = Omit<
 > & {
   label?: string;
   required?: boolean;
-  value?: string;
+  value: string;
   onValueChange?: (value: string) => void;
-  defaultValue?: string;
   maxLength?: number;
   actionButton?: ReactNode;
   onActionButtonClick?: () => void;
@@ -48,9 +47,8 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
     {
       label,
       required = false,
-      value: controlledValue,
+      value,
       onValueChange,
-      defaultValue = '',
       maxLength,
       actionButton,
       onActionButtonClick,
@@ -64,20 +62,11 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
     },
     ref,
   ) => {
-    const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
-    const isControlled = controlledValue !== undefined;
-    const value = isControlled ? controlledValue : uncontrolledValue;
     const id = useId();
-
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newValue = e.target.value;
-      if (!isControlled) setUncontrolledValue(newValue);
-      onValueChange?.(newValue);
-    };
-
     const inputWrapperClasses = inputWrapperRecipe({ status, disabled });
     const textareaClasses = textareaRecipe({ resize });
     const helperTextClasses = helperTextRecipe({ status: status as HelperTextStatus });
+    const safeValue = value ?? '';
 
     return (
       <div className={clsx(container, className)}>
@@ -92,8 +81,8 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
             ref={ref}
             id={id}
             className={textareaClasses}
-            value={value}
-            onChange={handleChange}
+            value={safeValue}
+            onChange={(e) => onValueChange?.(e.target.value)}
             placeholder={placeholder}
             maxLength={maxLength}
             disabled={disabled}
@@ -101,7 +90,9 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
           />
           {(maxLength || actionButton) && (
             <div className={footer}>
-              <span className={counter}>{maxLength ? `${value.length}/${maxLength}` : null}</span>
+              <span className={counter}>
+                {maxLength ? `${safeValue.length}/${maxLength}` : null}
+              </span>
               {actionButton && (
                 <button
                   type="button"
@@ -122,3 +113,4 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
 );
 
 Textfield.displayName = 'Textfield';
+export default Textfield;

@@ -29,7 +29,7 @@ export const searchInput = style([
   typography.bodyR,
   {
     width: '100%',
-    padding: `${themeVars.spacing.sm} ${themeVars.spacing.base} ${themeVars.spacing.sm} ${themeVars.spacing.lg}`,
+    padding: `${themeVars.spacing.sm} ${themeVars.spacing.base} ${themeVars.spacing.sm} ${themeVars.spacing.xxl}`,
     borderRadius: themeVars.radius.md,
     border: `1px solid ${themeVars.palette.cgrey200}`,
     backgroundColor: themeVars.palette.white,
@@ -88,10 +88,7 @@ export const filterOption = style({
   gap: themeVars.spacing.sm,
 });
 
-export const filterOptionLabel = style([
-  typography.bodyR,
-  { color: themeVars.palette.black },
-]);
+export const filterOptionLabel = style([typography.bodyR, { color: themeVars.palette.black }]);
 
 export const filterFooter = style({
   display: 'flex',
@@ -101,10 +98,7 @@ export const filterFooter = style({
   borderTop: `1px solid ${themeVars.palette.cgrey100}`,
 });
 
-export const filterSummary = style([
-  typography.captionR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const filterSummary = style([typography.captionR, { color: themeVars.palette.cgrey500 }]);
 
 export const sortPopover = style({
   position: 'absolute',
@@ -156,10 +150,7 @@ export const sidePanelHeader = style({
   gap: themeVars.spacing.xs,
 });
 
-export const sidePanelTitle = style([
-  typography.bodyLargeB,
-  { color: themeVars.palette.black },
-]);
+export const sidePanelTitle = style([typography.bodyLargeB, { color: themeVars.palette.black }]);
 
 export const sidePanelSubtitle = style([
   typography.captionR,
@@ -181,15 +172,9 @@ export const infoGroup = style({
   gap: themeVars.spacing.xs,
 });
 
-export const infoLabel = style([
-  typography.captionB,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const infoLabel = style([typography.captionB, { color: themeVars.palette.cgrey500 }]);
 
-export const infoValue = style([
-  typography.bodyR,
-  { color: themeVars.palette.black },
-]);
+export const infoValue = style([typography.bodyR, { color: themeVars.palette.black }]);
 
 export const placeholder = style([
   typography.bodyR,
@@ -199,10 +184,7 @@ export const placeholder = style([
   },
 ]);
 
-export const selectedCount = style([
-  typography.captionB,
-  { color: themeVars.palette.blue600 },
-]);
+export const selectedCount = style([typography.captionB, { color: themeVars.palette.blue600 }]);
 
 export const panelFooter = style({
   padding: themeVars.spacing.xxl,

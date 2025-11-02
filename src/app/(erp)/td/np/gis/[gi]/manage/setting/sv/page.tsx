@@ -1,27 +1,24 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
 import {
   useEmploymentCategoriesQuery,
   useGigwanQuery,
-  useUpdateGigwanMutation,
+  useUpdateGigwanNameMutation,
+  useUpdateGigwanIntroMutation,
+  useUpsertGigwanAddressMutation,
   useUpsertEmploymentCategoriesMutation,
   useUpsertWorkTypeCustomSangtaesMutation,
   useWorkTypeCustomSangtaesQuery,
 } from '@/api/gigwan';
 import LabeledInput from '@/app/(erp)/td/g/_components/LabeledInput';
-import { Delete, Plus } from '@/components/icons';
-import { Button, Chip, IconButton, Textfield } from '@/design';
+import { Delete, Plus, Edit } from '@/components/icons';
+import { Button, IconButton, Textfield } from '@/design';
 
 import * as styles from './page.style.css';
-
-type PageProps = {
-  params: {
-    gi: string;
-  };
-};
 
 type FeedbackState = { type: 'success' | 'error'; message: string } | null;
 
@@ -47,30 +44,45 @@ type WorkTypeStatusForm = {
 type BasicFormState = {
   name: string;
   intro: string;
+  juso: string;
 };
 
 type BasicState = {
   form: BasicFormState;
-  feedback: FeedbackState;
+  nameFeedback: FeedbackState;
+  introFeedback: FeedbackState;
+  jusoFeedback: FeedbackState;
 };
 
 type BasicAction =
   | { type: 'update'; field: keyof BasicFormState; value: string }
   | { type: 'reset'; payload: BasicFormState }
-  | { type: 'feedback'; payload: FeedbackState };
+  | { type: 'feedback-name'; payload: FeedbackState }
+  | { type: 'feedback-intro'; payload: FeedbackState }
+  | { type: 'feedback-juso'; payload: FeedbackState };
 
 const basicReducer = (state: BasicState, action: BasicAction): BasicState => {
   switch (action.type) {
-    case 'update':
-      if (state.form[action.field] === action.value) return state;
-      return {
-        form: { ...state.form, [action.field]: action.value },
-        feedback: null,
-      };
+    case 'update': {
+      const next = { ...state.form, [action.field]: action.value };
+      if (action.field === 'name') return { ...state, form: next, nameFeedback: null };
+      if (action.field === 'intro') return { ...state, form: next, introFeedback: null };
+      if (action.field === 'juso') return { ...state, form: next, jusoFeedback: null };
+      return { ...state, form: next };
+    }
     case 'reset':
-      return { form: action.payload, feedback: null };
-    case 'feedback':
-      return { ...state, feedback: action.payload };
+      return {
+        form: action.payload,
+        nameFeedback: null,
+        introFeedback: null,
+        jusoFeedback: null,
+      };
+    case 'feedback-name':
+      return { ...state, nameFeedback: action.payload };
+    case 'feedback-intro':
+      return { ...state, introFeedback: action.payload };
+    case 'feedback-juso':
+      return { ...state, jusoFeedback: action.payload };
     default:
       return state;
   }
@@ -100,7 +112,9 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
             ? {
                 ...category,
                 statuses: category.statuses.map((status) =>
-                  status.localId === action.statusLocalId ? { ...status, name: action.value } : status,
+                  status.localId === action.statusLocalId
+                    ? { ...status, name: action.value }
+                    : status,
                 ),
               }
             : category,
@@ -124,7 +138,9 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
           category.nanoId === action.categoryId
             ? {
                 ...category,
-                statuses: category.statuses.filter((status) => status.localId !== action.statusLocalId),
+                statuses: category.statuses.filter(
+                  (status) => status.localId !== action.statusLocalId,
+                ),
               }
             : category,
         ),
@@ -184,83 +200,126 @@ const createLocalId = () => {
   return `local-${Date.now()}-${localIdCounter}`;
 };
 
-export default function GigwanSettingServicePage({ params }: PageProps) {
-  const gigwanNanoId = params.gi;
+export default function GigwanSettingServicePage() {
+  const { gi } = useParams<{ gi: string }>();
+  const gigwanNanoId = Array.isArray(gi) ? gi[0] : gi;
+
   const queryClient = useQueryClient();
 
   const {
     data: gigwan,
     isLoading: isGigwanLoading,
     isFetching: isGigwanFetching,
-  } = useGigwanQuery(gigwanNanoId, {
-    enabled: Boolean(gigwanNanoId),
-  });
-  const updateGigwanMutation = useUpdateGigwanMutation(gigwanNanoId);
+  } = useGigwanQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
+
+  const updateNameMutation = useUpdateGigwanNameMutation(gigwanNanoId);
+  const updateIntroMutation = useUpdateGigwanIntroMutation(gigwanNanoId);
+  const upsertJusoMutation = useUpsertGigwanAddressMutation(gigwanNanoId);
 
   const [basicState, dispatchBasic] = useReducer(basicReducer, {
-    form: { name: '', intro: '' },
-    feedback: null,
+    form: { name: '', intro: '', juso: '' },
+    nameFeedback: null,
+    introFeedback: null,
+    jusoFeedback: null,
   });
 
   useEffect(() => {
     if (!gigwan) return;
-    dispatchBasic({ type: 'reset', payload: { name: gigwan.name, intro: gigwan.intro ?? '' } });
+    dispatchBasic({
+      type: 'reset',
+      payload: {
+        name: gigwan.name ?? '',
+        intro: gigwan.intro ?? '',
+        juso: gigwan.juso ?? '',
+      },
+    });
   }, [gigwan]);
 
-  const handleBasicChange = useCallback((field: 'name' | 'intro', value: string) => {
+  const handleBasicChange = useCallback((field: 'name' | 'intro' | 'juso', value: string) => {
     dispatchBasic({ type: 'update', field, value });
   }, []);
 
-  const isBasicDirty = useMemo(() => {
-    if (!gigwan)
-      return basicState.form.name.trim().length > 0 || basicState.form.intro.trim().length > 0;
-    return (
-      basicState.form.name !== gigwan.name || (gigwan.intro ?? '') !== basicState.form.intro
-    );
-  }, [basicState.form, gigwan]);
+  const nameDirty = useMemo(
+    () => (gigwan ? basicState.form.name !== (gigwan.name ?? '') : basicState.form.name !== ''),
+    [basicState.form.name, gigwan],
+  );
+  const introDirty = useMemo(
+    () => (gigwan ? basicState.form.intro !== (gigwan.intro ?? '') : basicState.form.intro !== ''),
+    [basicState.form.intro, gigwan],
+  );
+  const jusoDirty = useMemo(
+    () => (gigwan ? basicState.form.juso !== (gigwan.juso ?? '') : basicState.form.juso !== ''),
+    [basicState.form.juso, gigwan],
+  );
 
-  const isBasicValid = basicState.form.name.trim().length > 0;
+  const nameValid = basicState.form.name.trim().length > 0;
+  const introValid = basicState.form.intro.trim().length > 0;
+  const jusoValid = basicState.form.juso.trim().length > 0;
 
-  const handleSaveBasic = useCallback(() => {
-    if (!isBasicDirty || !isBasicValid) return;
-    updateGigwanMutation.mutate(
-      {
-        name: basicState.form.name.trim(),
-        intro: basicState.form.intro.trim(),
-      },
-      {
-        onSuccess: () => {
-          dispatchBasic({
-            type: 'feedback',
-            payload: { type: 'success', message: '기관 기본 설정이 저장되었습니다.' },
-          });
-          queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] });
-        },
-        onError: () => {
-          dispatchBasic({
-            type: 'feedback',
-            payload: { type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' },
-          });
-        },
-      },
-    );
+  const handleSaveName = useCallback(async () => {
+    if (!nameDirty || !nameValid) return;
+    try {
+      await updateNameMutation.mutateAsync({ name: basicState.form.name.trim() });
+      dispatchBasic({
+        type: 'feedback-name',
+        payload: { type: 'success', message: '이름이 저장되었습니다.' },
+      });
+      await queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] });
+    } catch {
+      dispatchBasic({
+        type: 'feedback-name',
+        payload: { type: 'error', message: '이름 저장에 실패했습니다. 다시 시도해주세요.' },
+      });
+    }
+  }, [gigwanNanoId, nameDirty, nameValid, basicState.form.name, queryClient, updateNameMutation]);
+
+  const handleSaveIntro = useCallback(async () => {
+    if (!introDirty || !introValid) return;
+    try {
+      await updateIntroMutation.mutateAsync({ intro: basicState.form.intro.trim() });
+      dispatchBasic({
+        type: 'feedback-intro',
+        payload: { type: 'success', message: '소개가 저장되었습니다.' },
+      });
+      await queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] });
+    } catch {
+      dispatchBasic({
+        type: 'feedback-intro',
+        payload: { type: 'error', message: '소개 저장에 실패했습니다. 다시 시도해주세요.' },
+      });
+    }
   }, [
-    basicState.form,
     gigwanNanoId,
-    isBasicDirty,
-    isBasicValid,
+    introDirty,
+    introValid,
+    basicState.form.intro,
     queryClient,
-    updateGigwanMutation,
+    updateIntroMutation,
   ]);
+
+  const handleSaveJuso = useCallback(async () => {
+    if (!jusoDirty || !jusoValid) return;
+    try {
+      await upsertJusoMutation.mutateAsync({ juso: basicState.form.juso.trim() });
+      dispatchBasic({
+        type: 'feedback-juso',
+        payload: { type: 'success', message: '주소가 저장되었습니다.' },
+      });
+      await queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] });
+    } catch {
+      dispatchBasic({
+        type: 'feedback-juso',
+        payload: { type: 'error', message: '주소 저장에 실패했습니다. 다시 시도해주세요.' },
+      });
+    }
+  }, [gigwanNanoId, jusoDirty, jusoValid, basicState.form.juso, queryClient, upsertJusoMutation]);
 
   const {
     data: employmentCategoriesData,
     isLoading: isEmploymentLoading,
     isFetching: isEmploymentFetching,
     error: employmentError,
-  } = useEmploymentCategoriesQuery(gigwanNanoId, {
-    enabled: Boolean(gigwanNanoId),
-  });
+  } = useEmploymentCategoriesQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
   const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
 
   const [employmentState, dispatchEmployment] = useReducer(employmentReducer, {
@@ -268,6 +327,8 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
     dirty: false,
     feedback: null,
   });
+
+  const [employmentEditing, setEmploymentEditing] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!employmentCategoriesData) return;
@@ -283,6 +344,7 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
         })),
       })),
     });
+    setEmploymentEditing({});
   }, [employmentCategoriesData]);
 
   const handleEmploymentStatusChange = useCallback(
@@ -298,24 +360,30 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
   );
 
   const handleAddEmploymentStatus = useCallback((categoryNanoId: string) => {
+    const newLocalId = createLocalId();
     const newStatus: EmploymentStatusForm = {
       nanoId: null,
       name: '',
-      localId: createLocalId(),
+      localId: newLocalId,
     };
-    dispatchEmployment({
-      type: 'add-status',
-      categoryId: categoryNanoId,
-      status: newStatus,
-    });
+    dispatchEmployment({ type: 'add-status', categoryId: categoryNanoId, status: newStatus });
+    setEmploymentEditing((prev) => ({ ...prev, [newLocalId]: true }));
   }, []);
 
-  const handleRemoveEmploymentStatus = useCallback((categoryNanoId: string, statusLocalId: string) => {
-    dispatchEmployment({
-      type: 'remove-status',
-      categoryId: categoryNanoId,
-      statusLocalId,
-    });
+  const handleRemoveEmploymentStatus = useCallback(
+    (categoryNanoId: string, statusLocalId: string) => {
+      dispatchEmployment({ type: 'remove-status', categoryId: categoryNanoId, statusLocalId });
+      setEmploymentEditing((prev) => {
+        const next = { ...prev };
+        delete next[statusLocalId];
+        return next;
+      });
+    },
+    [],
+  );
+
+  const toggleEditEmploymentStatus = useCallback((statusLocalId: string) => {
+    setEmploymentEditing((prev) => ({ ...prev, [statusLocalId]: !prev[statusLocalId] }));
   }, []);
 
   const employmentHasEmptyStatus = employmentState.categories.some((category) =>
@@ -328,9 +396,8 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
       {
         categories: employmentState.categories.map((category) => ({
           nanoId: category.nanoId,
-          name: category.name,
           sangtaes: category.statuses.map((status) => ({
-            nanoId: status.nanoId ?? null,
+            ...(status.nanoId ? { nanoId: status.nanoId } : {}),
             name: status.name.trim(),
           })),
         })),
@@ -341,7 +408,6 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
             type: 'reset',
             payload: data.categories.map((category) => ({
               nanoId: category.nanoId,
-              name: category.name,
               statuses: category.sangtaes.map((status) => ({
                 nanoId: status.nanoId,
                 name: status.name,
@@ -349,24 +415,17 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
               })),
             })),
           });
+          setEmploymentEditing({});
           dispatchEmployment({
             type: 'feedback',
-            payload: {
-              type: 'success',
-              message: '재직 카테고리 상태가 저장되었습니다.',
-            },
+            payload: { type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' },
           });
-          queryClient.invalidateQueries({
-            queryKey: ['employmentCategories', gigwanNanoId],
-          });
+          queryClient.invalidateQueries({ queryKey: ['employmentCategories', gigwanNanoId] });
         },
         onError: () => {
           dispatchEmployment({
             type: 'feedback',
-            payload: {
-              type: 'error',
-              message: '재직 카테고리 상태 저장에 실패했습니다. 다시 시도해주세요.',
-            },
+            payload: { type: 'error', message: '재직 카테고리 상태 저장에 실패했습니다.' },
           });
         },
       },
@@ -385,9 +444,7 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
     isLoading: isWorkTypeLoading,
     isFetching: isWorkTypeFetching,
     error: workTypeError,
-  } = useWorkTypeCustomSangtaesQuery(gigwanNanoId, {
-    enabled: Boolean(gigwanNanoId),
-  });
+  } = useWorkTypeCustomSangtaesQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
 
   const [workTypeState, dispatchWorkType] = useReducer(workTypeReducer, {
@@ -414,15 +471,7 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
 
   const handleAddWorkTypeStatus = useCallback(() => {
     const localId = createLocalId();
-    dispatchWorkType({
-      type: 'add',
-      status: {
-        nanoId: '',
-        name: '',
-        localId,
-        isNew: true,
-      },
-    });
+    dispatchWorkType({ type: 'add', status: { nanoId: '', name: '', localId, isNew: true } });
   }, []);
 
   const handleRemoveWorkTypeStatus = useCallback((statusLocalId: string) => {
@@ -438,7 +487,8 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
     upsertWorkTypeStatusesMutation.mutate(
       {
         statuses: workTypeState.statuses.map((status) => ({
-          nanoId: status.nanoId && !status.nanoId.startsWith('local-') ? status.nanoId : status.localId,
+          nanoId:
+            status.nanoId && !status.nanoId.startsWith('local-') ? status.nanoId : status.localId,
           name: status.name.trim(),
         })),
       },
@@ -454,22 +504,14 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
           });
           dispatchWorkType({
             type: 'feedback',
-            payload: {
-              type: 'success',
-              message: '근무 형태 커스텀 상태가 저장되었습니다.',
-            },
+            payload: { type: 'success', message: '근무 형태 커스텀 상태가 저장되었습니다.' },
           });
-          queryClient.invalidateQueries({
-            queryKey: ['workTypeCustomSangtaes', gigwanNanoId],
-          });
+          queryClient.invalidateQueries({ queryKey: ['workTypeCustomSangtaes', gigwanNanoId] });
         },
         onError: () => {
           dispatchWorkType({
             type: 'feedback',
-            payload: {
-              type: 'error',
-              message: '근무 형태 상태 저장에 실패했습니다. 다시 시도해주세요.',
-            },
+            payload: { type: 'error', message: '근무 형태 상태 저장에 실패했습니다.' },
           });
         },
       },
@@ -483,239 +525,245 @@ export default function GigwanSettingServicePage({ params }: PageProps) {
     workTypeState.statuses,
   ]);
 
-  const basicIsSaving = updateGigwanMutation.isPending;
   const employmentIsSaving = upsertEmploymentCategoriesMutation.isPending;
   const workTypeIsSaving = upsertWorkTypeStatusesMutation.isPending;
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.pageTitle}>기관 설정</h1>
-        <p className={styles.pageDescription}>
-          기관 기본 정보와 재직 상태, 근무 형태 커스텀 상태를 관리합니다.
-        </p>
-      </header>
-      <div className={styles.cardGrid}>
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardTitleGroup}>
-              <h2 className={styles.cardTitle}>기관 기본 설정</h2>
-              <p className={styles.cardSubtitle}>
-                기관 이름과 설명을 수정하고 주소 정보를 확인할 수 있습니다.
-              </p>
-            </div>
-            <Chip size="sm" variant="outlined" disabled>
-              기관 코드 {gigwanNanoId}
-            </Chip>
+      <section className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitleGroup}>
+            <h2 className={styles.cardTitle}>기관 기본 설정</h2>
           </div>
-          <div className={styles.cardBody}>
-            <LabeledInput
-              label="기관 이름"
-              placeholder="기관 이름을 입력하세요"
-              value={basicState.form.name}
-              onValueChange={(value) => handleBasicChange('name', value)}
-              required
-              maxLength={50}
-              helperText="50자 이내로 입력해주세요"
-            />
-            <Textfield
-              label="기관 소개"
-              placeholder="기관의 특징이나 안내 문구를 입력하세요"
-              value={basicState.form.intro}
-              onValueChange={(value) => handleBasicChange('intro', value)}
-              rows={4}
-              maxLength={300}
-              helperText="최대 300자까지 입력할 수 있습니다"
-            />
-            <LabeledInput
-              label="기관 주소"
-              placeholder="주소 정보를 불러오는 중입니다"
-              value={gigwan?.address ?? ''}
-              disabled
-              helperText="주소 변경은 별도 메뉴에서 진행됩니다"
-            />
-          </div>
-          <footer className={styles.cardFooter}>
-            {basicState.feedback ? (
-              <span className={styles.feedback[basicState.feedback.type]}>
-                {basicState.feedback.message}
-              </span>
-            ) : (
-              <span className={styles.statusText}>
-                {isGigwanLoading || isGigwanFetching ? '기관 정보를 불러오는 중입니다.' : '변경 후 저장을 눌러주세요.'}
+        </div>
+
+        <div className={styles.cardBody}>
+          <LabeledInput
+            label="기관 이름"
+            placeholder="기관 이름을 입력하세요"
+            value={basicState.form.name}
+            onValueChange={(value) => handleBasicChange('name', value)}
+            required
+            maxLength={50}
+            helperText="50자 이내"
+          />
+          <div className={styles.cardFooter}>
+            {basicState.nameFeedback && (
+              <span className={styles.feedback[basicState.nameFeedback.type]}>
+                {basicState.nameFeedback.message}
               </span>
             )}
             <Button
               size="small"
               styleType="solid"
               variant="primary"
-              disabled={!isBasicDirty || !isBasicValid || basicIsSaving}
-              onClick={handleSaveBasic}
+              disabled={!nameDirty || !nameValid || updateNameMutation.isPending}
+              onClick={handleSaveName}
             >
-              {basicIsSaving ? '저장 중...' : '저장'}
+              {updateNameMutation.isPending ? '저장 중...' : '저장'}
             </Button>
-          </footer>
-        </section>
-
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardTitleGroup}>
-              <h2 className={styles.cardTitle}>사용자 재직 카테고리 상태</h2>
-              <p className={styles.cardSubtitle}>
-                조직에서 사용하는 재직 상태 라벨을 카테고리별로 관리합니다.
-              </p>
-            </div>
           </div>
-          <div className={styles.cardBody}>
-            {employmentError ? (
-              <p className={styles.errorText}>재직 카테고리 정보를 불러오지 못했습니다.</p>
-            ) : null}
-            {employmentState.categories.map((category) => (
-              <div key={category.nanoId} className={styles.categorySection}>
-                <div className={styles.categoryHeader}>
-                  <span className={styles.categoryLabel}>{category.name}</span>
-                  <Button
-                    size="small"
-                    styleType="text"
-                    variant="secondary"
-                    iconLeft={<Plus width={16} height={16} />}
-                    onClick={() => handleAddEmploymentStatus(category.nanoId)}
-                  >
-                    상태 추가
-                  </Button>
-                </div>
-                <div className={styles.statusList}>
-                  {category.statuses.map((status) => (
+
+          <Textfield
+            label="기관 소개"
+            placeholder="기관의 특징이나 안내 문구를 입력하세요"
+            value={basicState.form.intro}
+            onValueChange={(value) => handleBasicChange('intro', value)}
+            rows={4}
+            maxLength={300}
+            helperText="최대 300자"
+          />
+          <div className={styles.cardFooter}>
+            {basicState.introFeedback && (
+              <span className={styles.feedback[basicState.introFeedback.type]}>
+                {basicState.introFeedback.message}
+              </span>
+            )}
+            <Button
+              size="small"
+              styleType="solid"
+              variant="primary"
+              disabled={!introDirty || !introValid || updateIntroMutation.isPending}
+              onClick={handleSaveIntro}
+            >
+              {updateIntroMutation.isPending ? '저장 중...' : '저장'}
+            </Button>
+          </div>
+
+          <LabeledInput
+            label="기관 주소"
+            placeholder="기관 주소를 입력하세요"
+            value={basicState.form.juso}
+            onValueChange={(value) => handleBasicChange('juso', value)}
+            maxLength={200}
+            helperText="저장 시 반영"
+          />
+          <div className={styles.cardFooter}>
+            {basicState.jusoFeedback && (
+              <span className={styles.feedback[basicState.jusoFeedback.type]}>
+                {basicState.jusoFeedback.message}
+              </span>
+            )}
+            <Button
+              size="small"
+              styleType="solid"
+              variant="primary"
+              disabled={!jusoDirty || !jusoValid || upsertJusoMutation.isPending}
+              onClick={handleSaveJuso}
+            >
+              {upsertJusoMutation.isPending ? '저장 중...' : '저장'}
+            </Button>
+          </div>
+        </div>
+      </section>
+      <section className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitleGroup}>
+            <h2 className={styles.cardTitle}>사용자 재직 카테고리 상태</h2>
+            <p className={styles.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
+          </div>
+        </div>
+        <div className={styles.cardBody}>
+          {employmentError ? (
+            <p className={styles.errorText}>재직 카테고리 정보를 불러오지 못했습니다.</p>
+          ) : null}
+          {employmentState.categories.map((category) => (
+            <div key={category.nanoId} className={styles.categorySection}>
+              <span className={styles.categoryLabel}>{category.name}</span>
+              <div className={styles.statusList}>
+                {category.statuses.map((status) => {
+                  const isEditing = Boolean(employmentEditing[status.localId]);
+                  return (
                     <div key={status.localId} className={styles.statusItem}>
-                      <LabeledInput
-                        placeholder="상태 이름"
-                        value={status.name}
-                        onValueChange={(value) =>
-                          handleEmploymentStatusChange(category.nanoId, status.localId, value)
-                        }
-                        containerClassName={styles.statusInput}
-                        maxLength={20}
-                      />
+                      {isEditing ? (
+                        <LabeledInput
+                          placeholder="상태 이름"
+                          value={status.name}
+                          onValueChange={(value) =>
+                            handleEmploymentStatusChange(category.nanoId, status.localId, value)
+                          }
+                          containerClassName={styles.statusInput}
+                          maxLength={20}
+                          autoFocus
+                        />
+                      ) : (
+                        <span className={styles.statusText}>
+                          {status.name?.trim() || '새 상태'}
+                        </span>
+                      )}
                       <IconButton
                         styleType="normal"
                         size="small"
-                        onClick={() => handleRemoveEmploymentStatus(category.nanoId, status.localId)}
-                        disabled={category.statuses.length <= 1}
+                        onClick={() => toggleEditEmploymentStatus(status.localId)}
+                        aria-label={`${status.name || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
+                        title={isEditing ? '편집 종료' : '수정'}
+                      >
+                        <Edit width={16} height={16} />
+                      </IconButton>
+                      <IconButton
+                        styleType="normal"
+                        size="small"
+                        onClick={() =>
+                          handleRemoveEmploymentStatus(category.nanoId, status.localId)
+                        }
                         aria-label={`${status.name || '상태'} 삭제`}
+                        title="삭제"
                       >
                         <Delete width={16} height={16} />
                       </IconButton>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+                <Button
+                  size="medium"
+                  styleType="outlined"
+                  variant="secondary"
+                  iconRight={<Plus width={16} height={16} />}
+                  onClick={() => handleAddEmploymentStatus(category.nanoId)}
+                >
+                  추가
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <footer className={styles.cardFooter}>
+          <Button
+            size="small"
+            styleType="solid"
+            variant="primary"
+            disabled={
+              !employmentState.dirty ||
+              employmentHasEmptyStatus ||
+              employmentIsSaving ||
+              employmentState.categories.length === 0
+            }
+            onClick={handleSaveEmploymentCategories}
+          >
+            {employmentIsSaving ? '저장 중...' : '저장'}
+          </Button>
+        </footer>
+      </section>
+      <section className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardTitleGroup}>
+            <h2 className={styles.cardTitle}>근무 형태 커스텀 상태</h2>
+            <p className={styles.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
+          </div>
+        </div>
+        <div className={styles.cardBody}>
+          {workTypeError ? (
+            <p className={styles.errorText}>근무 형태 상태를 불러오지 못했습니다.</p>
+          ) : null}
+          <div className={styles.statusList}>
+            <span className={styles.categoryLabel}>재직상태</span>
+            {workTypeState.statuses.map((status) => (
+              <div key={status.localId} className={styles.statusItem}>
+                <LabeledInput
+                  placeholder="근무 형태 상태 이름"
+                  value={status.name}
+                  onValueChange={(value) => handleWorkTypeStatusChange(status.localId, value)}
+                  containerClassName={styles.statusInput}
+                  maxLength={20}
+                />
+                <IconButton
+                  styleType="normal"
+                  size="small"
+                  onClick={() => handleRemoveWorkTypeStatus(status.localId)}
+                  aria-label={`${status.name || '상태'} 삭제`}
+                >
+                  <Delete width={16} height={16} />
+                </IconButton>
               </div>
             ))}
           </div>
-          <footer className={styles.cardFooter}>
-            {employmentState.feedback ? (
-              <span className={styles.feedback[employmentState.feedback.type]}>
-                {employmentState.feedback.message}
-              </span>
-            ) : (
-              <span className={styles.statusText}>
-                {isEmploymentLoading || isEmploymentFetching
-                  ? '재직 카테고리를 불러오는 중입니다.'
-                  : '카테고리별 상태명을 수정할 수 있습니다.'}
-              </span>
-            )}
-            <Button
-              size="small"
-              styleType="solid"
-              variant="primary"
-              disabled={
-                !employmentState.dirty ||
-                employmentHasEmptyStatus ||
-                employmentIsSaving ||
-                employmentState.categories.length === 0
-              }
-              onClick={handleSaveEmploymentCategories}
-            >
-              {employmentIsSaving ? '저장 중...' : '저장'}
-            </Button>
-          </footer>
-        </section>
-
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardTitleGroup}>
-              <h2 className={styles.cardTitle}>근무 형태 커스텀 상태</h2>
-              <p className={styles.cardSubtitle}>
-                근무 형태에 맞는 사용자 정의 상태를 구성합니다.
-              </p>
-            </div>
-          </div>
-          <div className={styles.cardBody}>
-            {workTypeError ? (
-              <p className={styles.errorText}>근무 형태 상태를 불러오지 못했습니다.</p>
-            ) : null}
-            <div className={styles.statusList}>
-              {workTypeState.statuses.map((status) => (
-                <div key={status.localId} className={styles.statusItem}>
-                  <LabeledInput
-                    placeholder="근무 형태 상태 이름"
-                    value={status.name}
-                    onValueChange={(value) => handleWorkTypeStatusChange(status.localId, value)}
-                    containerClassName={styles.statusInput}
-                    maxLength={20}
-                  />
-                  <IconButton
-                    styleType="normal"
-                    size="small"
-                    onClick={() => handleRemoveWorkTypeStatus(status.localId)}
-                    disabled={workTypeState.statuses.length <= 1}
-                    aria-label={`${status.name || '상태'} 삭제`}
-                  >
-                    <Delete width={16} height={16} />
-                  </IconButton>
-                </div>
-              ))}
-            </div>
-            <div className={styles.addButtonWrapper}>
-              <Button
-                size="small"
-                styleType="text"
-                variant="secondary"
-                iconLeft={<Plus width={16} height={16} />}
-                onClick={handleAddWorkTypeStatus}
-              >
-                상태 추가
-              </Button>
-            </div>
-          </div>
-          <footer className={styles.cardFooter}>
-            {workTypeState.feedback ? (
-              <span className={styles.feedback[workTypeState.feedback.type]}>
-                {workTypeState.feedback.message}
-              </span>
-            ) : (
-              <span className={styles.statusText}>
-                {isWorkTypeLoading || isWorkTypeFetching
-                  ? '근무 형태 상태를 불러오는 중입니다.'
-                  : '근무 형태 상태명을 자유롭게 구성할 수 있습니다.'}
-              </span>
-            )}
-            <Button
-              size="small"
-              styleType="solid"
-              variant="primary"
-              disabled={
-                !workTypeState.dirty ||
-                workTypeHasEmptyStatus ||
-                workTypeIsSaving ||
-                workTypeState.statuses.length === 0
-              }
-              onClick={handleSaveWorkTypeStatuses}
-            >
-              {workTypeIsSaving ? '저장 중...' : '저장'}
-            </Button>
-          </footer>
-        </section>
-      </div>
+          <Button
+            size="medium"
+            styleType="outlined"
+            variant="secondary"
+            iconRight={<Plus width={16} height={16} />}
+            onClick={handleAddWorkTypeStatus}
+          >
+            추가
+          </Button>
+        </div>
+        <footer className={styles.cardFooter}>
+          <Button
+            size="small"
+            styleType="solid"
+            variant="primary"
+            disabled={
+              !workTypeState.dirty ||
+              workTypeHasEmptyStatus ||
+              workTypeIsSaving ||
+              workTypeState.statuses.length === 0
+            }
+            onClick={handleSaveWorkTypeStatuses}
+          >
+            {workTypeIsSaving ? '저장 중...' : '저장'}
+          </Button>
+        </footer>
+      </section>
     </div>
   );
 }

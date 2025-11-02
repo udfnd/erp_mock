@@ -32,15 +32,9 @@ export const headerText = style({
   gap: themeVars.spacing.xs,
 });
 
-export const title = style([
-  typography.titleSmallB,
-  { color: themeVars.palette.black },
-]);
+export const title = style([typography.titleSmallB, { color: themeVars.palette.black }]);
 
-export const description = style([
-  typography.bodyR,
-  { color: themeVars.palette.cgrey500 },
-]);
+export const description = style([typography.bodyR, { color: themeVars.palette.cgrey500 }]);
 
 export const headerMeta = style({
   display: 'flex',

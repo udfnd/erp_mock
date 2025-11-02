@@ -41,7 +41,12 @@ export const ListViewPagination = memo(function ListViewPagination({
   const buttons: PageButton[] = [];
 
   buttons.push({ type: 'first', label: '맨 앞으로', page: 1, disabled: currentGroupStart === 1 });
-  buttons.push({ type: 'prev', label: '이전 페이지', page: Math.max(1, currentPage - 1), disabled: currentPage === 1 });
+  buttons.push({
+    type: 'prev',
+    label: '이전 페이지',
+    page: Math.max(1, currentPage - 1),
+    disabled: currentPage === 1,
+  });
 
   if (currentGroupStart > 1) {
     const previousGroupPage = Math.max(1, currentGroupStart - MAX_VISIBLE);
@@ -92,7 +97,14 @@ type PaginationButtonProps = PageButton & {
   onPageChange: (page: number) => void;
 };
 
-const PaginationButton = ({ type, page, label, disabled, active, onPageChange }: PaginationButtonProps) => {
+const PaginationButton = ({
+  type,
+  page,
+  label,
+  disabled,
+  active,
+  onPageChange,
+}: PaginationButtonProps) => {
   const handleClick = () => {
     if (disabled || !page) return;
     onPageChange(page);
