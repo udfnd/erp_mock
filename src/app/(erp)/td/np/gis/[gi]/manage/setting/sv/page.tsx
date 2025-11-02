@@ -26,6 +26,7 @@ type EmploymentStatusForm = {
   nanoId: string | null;
   name: string;
   localId: string;
+  isHwalseong: boolean;
 };
 
 type EmploymentCategoryForm = {
@@ -38,6 +39,7 @@ type WorkTypeStatusForm = {
   nanoId: string;
   name: string;
   localId: string;
+  isHwalseong: boolean;
   isNew?: boolean;
 };
 
@@ -230,7 +232,7 @@ export default function GigwanSettingServicePage() {
       payload: {
         name: gigwan.name ?? '',
         intro: gigwan.intro ?? '',
-        juso: gigwan.juso ?? '',
+        juso: gigwan.juso?.juso ?? '',
       },
     });
   }, [gigwan]);
@@ -248,7 +250,10 @@ export default function GigwanSettingServicePage() {
     [basicState.form.intro, gigwan],
   );
   const jusoDirty = useMemo(
-    () => (gigwan ? basicState.form.juso !== (gigwan.juso ?? '') : basicState.form.juso !== ''),
+    () =>
+      gigwan
+        ? basicState.form.juso !== (gigwan.juso?.juso ?? '')
+        : basicState.form.juso !== '',
     [basicState.form.juso, gigwan],
   );
 
@@ -300,7 +305,7 @@ export default function GigwanSettingServicePage() {
   const handleSaveJuso = useCallback(async () => {
     if (!jusoDirty || !jusoValid) return;
     try {
-      await upsertJusoMutation.mutateAsync({ juso: basicState.form.juso.trim() });
+      await upsertJusoMutation.mutateAsync({ address: basicState.form.juso.trim() });
       dispatchBasic({
         type: 'feedback-juso',
         payload: { type: 'success', message: '주소가 저장되었습니다.' },
@@ -341,6 +346,7 @@ export default function GigwanSettingServicePage() {
           nanoId: status.nanoId,
           name: status.name,
           localId: status.nanoId ?? createLocalId(),
+          isHwalseong: status.isHwalseong,
         })),
       })),
     });
@@ -367,6 +373,7 @@ export default function GigwanSettingServicePage() {
       nanoId: null,
       name: '',
       localId: newLocalId,
+      isHwalseong: true,
     };
     dispatchEmployment({ type: 'add-status', categoryId: categoryNanoId, status: newStatus });
     setEmploymentEditing((prev) => ({ ...prev, [newLocalId]: true }));
@@ -401,6 +408,7 @@ export default function GigwanSettingServicePage() {
           sangtaes: category.statuses.map((status) => ({
             ...(status.nanoId ? { nanoId: status.nanoId } : {}),
             name: status.name.trim(),
+            isHwalseong: status.isHwalseong,
           })),
         })),
       },
@@ -410,10 +418,12 @@ export default function GigwanSettingServicePage() {
             type: 'reset',
             payload: data.categories.map((category) => ({
               nanoId: category.nanoId,
+              name: category.name,
               statuses: category.sangtaes.map((status) => ({
                 nanoId: status.nanoId,
                 name: status.name,
                 localId: status.nanoId ?? createLocalId(),
+                isHwalseong: status.isHwalseong,
               })),
             })),
           });
@@ -463,6 +473,7 @@ export default function GigwanSettingServicePage() {
         nanoId: status.nanoId,
         name: status.name,
         localId: status.nanoId ?? createLocalId(),
+        isHwalseong: status.isHwalseong,
       })),
     });
   }, [workTypeStatusesData]);
@@ -473,7 +484,10 @@ export default function GigwanSettingServicePage() {
 
   const handleAddWorkTypeStatus = useCallback(() => {
     const localId = createLocalId();
-    dispatchWorkType({ type: 'add', status: { nanoId: '', name: '', localId, isNew: true } });
+    dispatchWorkType({
+      type: 'add',
+      status: { nanoId: '', name: '', localId, isHwalseong: true, isNew: true },
+    });
   }, []);
 
   const handleRemoveWorkTypeStatus = useCallback((statusLocalId: string) => {
@@ -488,10 +502,11 @@ export default function GigwanSettingServicePage() {
     if (!workTypeState.dirty || workTypeHasEmptyStatus) return;
     upsertWorkTypeStatusesMutation.mutate(
       {
-        statuses: workTypeState.statuses.map((status) => ({
+        sangtaes: workTypeState.statuses.map((status) => ({
           nanoId:
             status.nanoId && !status.nanoId.startsWith('local-') ? status.nanoId : status.localId,
           name: status.name.trim(),
+          isHwalseong: status.isHwalseong,
         })),
       },
       {
@@ -502,6 +517,7 @@ export default function GigwanSettingServicePage() {
               nanoId: status.nanoId,
               name: status.name,
               localId: status.nanoId ?? createLocalId(),
+              isHwalseong: status.isHwalseong,
             })),
           });
           dispatchWorkType({
