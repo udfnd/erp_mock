@@ -1,23 +1,25 @@
 import { z } from 'zod';
 
-export const IconSchema = z
-  .object({
-    name: z.string(),
-    nanoId: z.string(),
-  })
-  .passthrough();
+export const IconSchema = z.object({
+  name: z.string(),
+  nanoId: z.string(),
+});
 export type Icon = z.infer<typeof IconSchema>;
 
-export const HomepageUrlSchema = z
-  .object({
-    icon: IconSchema,
-    linkUrl: z.string().url(),
-    name: z.string(),
-    nanoId: z.string(),
-    titleName: z.string(),
-  })
-  .passthrough();
-export type HomepageUrl = z.infer<typeof HomepageUrlSchema>;
+export const HomepageLinkSchema = z.object({
+  nanoId: z.string(),
+  name: z.string(),
+  linkUrl: z.string(),
+  titleName: z.string(),
+  icon: IconSchema,
+});
+export type HomepageLink = z.infer<typeof HomepageLinkSchema>;
+
+export const JojikOpenFileSchema = z.object({
+  nanoId: z.string(),
+  name: z.string(),
+});
+export type JojikOpenFile = z.infer<typeof JojikOpenFileSchema>;
 
 export const JojikListItemSchema = z.object({
   name: z.string(),
@@ -26,9 +28,20 @@ export const JojikListItemSchema = z.object({
 });
 export type JojikListItem = z.infer<typeof JojikListItemSchema>;
 
-export const GetJojiksResponseSchema = z.object({
-  jojiks: z.array(JojikListItemSchema),
+export const GetJojiksRequestSchema = z.object({
+  gigwanNanoId: z.string(),
+  jojikNameSearch: z.string().optional(),
+  sortByOption: z.string().optional(),
+  pageSize: z.number().optional(),
+  pageNumber: z.number().optional(),
 });
+export type GetJojiksRequest = z.infer<typeof GetJojiksRequestSchema>;
+
+export const GetJojiksResponseSchema = z
+  .object({
+    jojiks: z.array(JojikListItemSchema),
+  })
+  .passthrough();
 export type GetJojiksResponse = z.infer<typeof GetJojiksResponseSchema>;
 
 export const CreateJojikRequestSchema = z.object({
@@ -42,35 +55,37 @@ export const CreateJojikResponseSchema = z.object({
 });
 export type CreateJojikResponse = z.infer<typeof CreateJojikResponseSchema>;
 
-export const JojikOpenFileSchema = z.object({
-  nanoId: z.string(),
-  name: z.string(),
-});
-
 export const JojikDetailResponseSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
-  intro: z.string(),
+  intro: z.string().nullable(),
   jaewonsaengLinkRequestUrl: z.string(),
-  openSangtae: z.string(),
-  openSangtaeNanoId: z.string(),
+  openSangtae: z.boolean(),
   canAccessOpenFileSangtae: z.string(),
-  canAccessOpenFileSangtaeNanoId: z.string(),
   canHadaLinkRequestSangtae: z.string(),
-  canHadaLinkRequestSangtaeNanoId: z.string(),
-  homepageUrl: HomepageUrlSchema,
+  hompageUrl: HomepageLinkSchema.nullable(),
   openFiles: z.array(JojikOpenFileSchema),
+  juso: z
+    .object({
+      nanoId: z.string(),
+      name: z.string(),
+      juso: z.string(),
+      jusoDetail: z.string(),
+    })
+    .nullable(),
 });
 export type JojikDetailResponse = z.infer<typeof JojikDetailResponseSchema>;
 
 export const UpdateJojikRequestSchema = z.object({
   name: z.string().optional(),
   intro: z.string().optional(),
-  juso: z.string().optional(),
-  openSangtae: z.boolean,
+  jusoNanoId: z.string().nullable().optional(),
+  openSangtae: z.boolean().optional(),
   canAccessOpenFileSangtaeNanoId: z.string().optional(),
   canHadaLinkRequestSangtaeNanoId: z.string().optional(),
-  openFileNanoIds: z.array(z.string()),
+  hompageUrlNanoId: z.string().nullable().optional(),
+  logoImageNanoId: z.string().nullable().optional(),
+  openFileNanoIds: z.array(z.string()).optional(),
 });
 export type UpdateJojikRequest = z.infer<typeof UpdateJojikRequestSchema>;
 
@@ -85,6 +100,8 @@ export const JojikPermissionSchema = z.object({
   nanoId: z.string(),
   sysPermissionType: z.string(),
 });
+export type JojikPermission = z.infer<typeof JojikPermissionSchema>;
+
 export const GetJojikPermissionsResponseSchema = z.object({
   permissions: z.array(JojikPermissionSchema),
 });
@@ -92,15 +109,18 @@ export type GetJojikPermissionsResponse = z.infer<typeof GetJojikPermissionsResp
 
 export const GetJojikSettingSidebarResponseSchema = z.object({
   name: z.string(),
-  homepageUrl: HomepageUrlSchema,
+  homepageUrl: z.string(),
   nanoId: z.string(),
 });
-export type GetJojikSettingSidebarResponse = z.infer<typeof GetJojikSettingSidebarResponseSchema>;
+export type GetJojikSettingSidebarResponse = z.infer<
+  typeof GetJojikSettingSidebarResponseSchema
+>;
 
 export const UpsertJojikAddressRequestSchema = z.object({
   address: z.string(),
 });
 export type UpsertJojikAddressRequest = z.infer<typeof UpsertJojikAddressRequestSchema>;
+
 export const UpsertJojikAddressResponseSchema = z.object({
   address: z.string(),
   nanoId: z.string(),
@@ -111,6 +131,7 @@ export const UpdateJojikNameRequestSchema = z.object({
   name: z.string(),
 });
 export type UpdateJojikNameRequest = z.infer<typeof UpdateJojikNameRequestSchema>;
+
 export const UpdateJojikNameResponseSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
@@ -121,6 +142,7 @@ export const UpdateJojikIntroRequestSchema = z.object({
   intro: z.string(),
 });
 export type UpdateJojikIntroRequest = z.infer<typeof UpdateJojikIntroRequestSchema>;
+
 export const UpdateJojikIntroResponseSchema = z.object({
   intro: z.string(),
   nanoId: z.string(),
@@ -131,6 +153,7 @@ export const UpdateJojikSchoolsRequestSchema = z.object({
   schools: z.array(z.string()),
 });
 export type UpdateJojikSchoolsRequest = z.infer<typeof UpdateJojikSchoolsRequestSchema>;
+
 export const UpdateJojikSchoolsResponseSchema = z.object({
   schools: z.array(z.object({ name: z.string(), nanoId: z.string() })),
 });
@@ -142,24 +165,24 @@ export const UpdateJojikOpenSettingRequestSchema = z.object({
   canAccessHadaLinkRequestNanoId: z.string(),
 });
 export type UpdateJojikOpenSettingRequest = z.infer<typeof UpdateJojikOpenSettingRequestSchema>;
+
 export const UpdateJojikOpenSettingResponseSchema = z.object({
   canAccessBasicInfo: z.string(),
   canAccessOpenFile: z.object({ nanoId: z.string(), name: z.string() }),
   canAccessHadaLinkRequest: z.object({ nanoId: z.string(), name: z.string() }),
   nanoId: z.string(),
 });
-export type UpdateJojikOpenSettingResponse = z.infer<typeof UpdateJojikOpenSettingResponseSchema>;
+export type UpdateJojikOpenSettingResponse = z.infer<
+  typeof UpdateJojikOpenSettingResponseSchema
+>;
 
-export const UpsertJojikHomepageRequestSchema = z
-  .object({
-    icon: IconSchema,
-    linkUrl: z.string().url(),
-    name: z.string(),
-    titleName: z.string(),
-    nanoId: z.string().optional(),
-  })
-  .passthrough();
+export const UpsertJojikHomepageRequestSchema = z.object({
+  url: z.string(),
+});
 export type UpsertJojikHomepageRequest = z.infer<typeof UpsertJojikHomepageRequestSchema>;
 
-export const UpsertJojikHomepageResponseSchema = HomepageUrlSchema;
+export const UpsertJojikHomepageResponseSchema = z.object({
+  nanoId: z.string(),
+  url: z.string(),
+});
 export type UpsertJojikHomepageResponse = z.infer<typeof UpsertJojikHomepageResponseSchema>;

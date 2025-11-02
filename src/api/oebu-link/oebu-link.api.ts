@@ -12,6 +12,8 @@ import {
   DeleteOebuLinkResponseSchema,
   GetOebuLinkDetailResponse,
   GetOebuLinkDetailResponseSchema,
+  GetOebuLinksRequest,
+  GetOebuLinksRequestSchema,
   GetOebuLinksResponse,
   GetOebuLinksResponseSchema,
   UpdateOebuLinkRequest,
@@ -30,15 +32,21 @@ const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
   return r.data;
 };
 
-export const getOebuLinks = async (): Promise<GetOebuLinksResponse> => {
-  const res = await apiClient.get('/T/dl/oebu-links');
+export const getOebuLinks = async (
+  params: GetOebuLinksRequest,
+): Promise<GetOebuLinksResponse> => {
+  const validated = GetOebuLinksRequestSchema.parse(params);
+  const res = await apiClient.get('/T/dl/oebu-links', { params: validated });
   return parseOrThrow(GetOebuLinksResponseSchema, res.data);
 };
 
-export const useGetOebuLinksQuery = (options?: { enabled?: boolean }) =>
+export const useGetOebuLinksQuery = (
+  params: GetOebuLinksRequest,
+  options?: { enabled?: boolean },
+) =>
   useQuery<GetOebuLinksResponse, unknown>({
-    queryKey: ['oebuLinks'],
-    queryFn: getOebuLinks,
+    queryKey: ['oebuLinks', params],
+    queryFn: () => getOebuLinks(params),
     enabled: options?.enabled ?? true,
   });
 

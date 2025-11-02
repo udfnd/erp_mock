@@ -4,6 +4,8 @@ import { z } from 'zod';
 import apiClient from '@/api';
 
 import {
+  GetJojiksRequestSchema,
+  type GetJojiksRequest,
   GetJojiksResponseSchema,
   type GetJojiksResponse,
   CreateJojikRequestSchema,
@@ -58,15 +60,19 @@ const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
   return r.data;
 };
 
-export const getJojiks = async (): Promise<GetJojiksResponse> => {
-  const res = await apiClient.get('/T/dl/jojiks');
+export const getJojiks = async (params: GetJojiksRequest): Promise<GetJojiksResponse> => {
+  const validated = GetJojiksRequestSchema.parse(params);
+  const res = await apiClient.get('/T/dl/jojiks', { params: validated });
   return parseOrThrow(GetJojiksResponseSchema, res.data);
 };
 
-export const useJojiksQuery = (options?: { enabled?: boolean }) =>
+export const useJojiksQuery = (
+  params: GetJojiksRequest,
+  options?: { enabled?: boolean },
+) =>
   useQuery<GetJojiksResponse, unknown>({
-    queryKey: ['jojiks'],
-    queryFn: getJojiks,
+    queryKey: ['jojiks', params],
+    queryFn: () => getJojiks(params),
     enabled: options?.enabled ?? true,
   });
 

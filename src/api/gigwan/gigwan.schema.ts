@@ -41,15 +41,15 @@ export type GigwanBasicGet = z.infer<typeof GigwanBasicGetSchema>;
 export const GigwanGetSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
-  intro: z.string(),
-  juso: z.union([
-    z.object({
+  intro: z.string().nullable(),
+  juso: z
+    .object({
       nanoId: z.string(),
       name: z.string(),
-      fullJuso: z.string(),
-    }),
-    z.null(),
-  ]),
+      juso: z.string(),
+      jusoDetail: z.string(),
+    })
+    .nullable(),
 });
 export type GigwanGet = z.infer<typeof GigwanGetSchema>;
 
@@ -64,15 +64,15 @@ export type UpdateGigwanRequest = z.infer<typeof UpdateGigwanRequestSchema>;
 export const UpdateGigwanResponseSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
-  intro: z.union([z.string(), z.null()]),
-  juso: z.union([
-    z.object({
+  intro: z.string().nullable(),
+  juso: z
+    .object({
       nanoId: z.string(),
       name: z.string(),
-      fullJuso: z.string(),
-    }),
-    z.null(),
-  ]),
+      juso: z.string(),
+      jusoDetail: z.string(),
+    })
+    .nullable(),
 });
 export type UpdateGigwanResponse = z.infer<typeof UpdateGigwanResponseSchema>;
 
@@ -112,6 +112,7 @@ export type UpdateGigwanNameResponse = z.infer<typeof UpdateGigwanNameResponseSc
 export const EmploymentSangtaeSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
+  isHwalseong: z.boolean(),
 });
 export type EmploymentSangtae = z.infer<typeof EmploymentSangtaeSchema>;
 
@@ -136,6 +137,7 @@ export const UpsertEmploymentCategoriesRequestSchema = z.object({
           .object({
             nanoId: z.string().optional(),
             name: z.string(),
+            isHwalseong: z.boolean(),
           })
           .strict(),
       ),
@@ -155,6 +157,7 @@ export const UpsertEmploymentCategoriesResponseSchema = z.object({
         z.object({
           nanoId: z.string(),
           name: z.string(),
+          isHwalseong: z.boolean(),
         }),
       ),
     }),
@@ -167,6 +170,7 @@ export type UpsertEmploymentCategoriesResponse = z.infer<
 export const WorkTypeSangtaeSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
+  isHwalseong: z.boolean(),
 });
 export type WorkTypeSangtae = z.infer<typeof WorkTypeSangtaeSchema>;
 
@@ -176,10 +180,11 @@ export const GetWorkTypeSangtaesResponseSchema = z.object({
 export type GetWorkTypeSangtaesResponse = z.infer<typeof GetWorkTypeSangtaesResponseSchema>;
 
 export const UpsertWorkTypeSangtaesRequestSchema = z.object({
-  statuses: z.array(
+  sangtaes: z.array(
     z.object({
-      nanoId: z.string(),
+      nanoId: z.string().optional(),
       name: z.string(),
+      isHwalseong: z.boolean(),
     }),
   ),
 });
