@@ -12,17 +12,18 @@ export const SignInResponseSchema = z.object({
 
 export const RefreshTokenResponseSchema = z.object({
   accessToken: z.string(),
-  refreshToken: z.string(),
 });
 
 const SangtaeSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
+  isHwalseong: z.boolean(),
 });
 
 const PermissionSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
+  role: z.string(),
 });
 
 export const MyProfileResponseSchema = z.object({
@@ -30,7 +31,6 @@ export const MyProfileResponseSchema = z.object({
   nanoId: z.string(),
   employedAt: z.string(),
   isHwalseong: z.boolean(),
-  activeSangtae: SangtaeSchema,
   workTypeSangtae: SangtaeSchema.nullable(),
   employmentSangtae: SangtaeSchema.nullable(),
   loginId: z.string(),

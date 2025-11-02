@@ -36,6 +36,6 @@ export const GetOpenSangtaesResponseSchema = z.object({
 export type GetOpenSangtaesResponse = z.infer<typeof GetOpenSangtaesResponseSchema>;
 
 export const GetLinkIconsResponseSchema = z.object({
-  'link-icons': z.array(SystemItemSchema),
+  linkIcons: z.array(SystemItemSchema),
 });
 export type GetLinkIconsResponse = z.infer<typeof GetLinkIconsResponseSchema>;

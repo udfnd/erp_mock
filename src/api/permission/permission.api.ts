@@ -10,6 +10,8 @@ import {
   BatchlinkPermissionSayongjaResponseSchema,
   GetPermissionDetailResponse,
   GetPermissionDetailResponseSchema,
+  GetPermissionsRequest,
+  GetPermissionsRequestSchema,
   GetPermissionsResponse,
   GetPermissionsResponseSchema,
   GetPermissionSayongjasResponse,
@@ -44,15 +46,21 @@ export const useGetPermissionSayongjasQuery = (nanoId: string, options?: { enabl
     enabled: !!nanoId && (options?.enabled ?? true),
   });
 
-export const getPermissions = async (): Promise<GetPermissionsResponse> => {
-  const res = await apiClient.get('/T/dl/permissions');
+export const getPermissions = async (
+  params: GetPermissionsRequest,
+): Promise<GetPermissionsResponse> => {
+  const validated = GetPermissionsRequestSchema.parse(params);
+  const res = await apiClient.get('/T/dl/permissions', { params: validated });
   return parseOrThrow(GetPermissionsResponseSchema, res.data);
 };
 
-export const useGetPermissionsQuery = (options?: { enabled?: boolean }) =>
+export const useGetPermissionsQuery = (
+  params: GetPermissionsRequest,
+  options?: { enabled?: boolean },
+) =>
   useQuery<GetPermissionsResponse, unknown>({
-    queryKey: ['permissions'],
-    queryFn: getPermissions,
+    queryKey: ['permissions', params],
+    queryFn: () => getPermissions(params),
     enabled: options?.enabled ?? true,
   });
 
@@ -87,7 +95,10 @@ export const batchlinkPermissionSayongja = async (
   data: BatchlinkPermissionSayongjaRequest,
 ): Promise<BatchlinkPermissionSayongjaResponse> => {
   const body = BatchlinkPermissionSayongjaRequestSchema.parse(data);
-  const res = await apiClient.post(`/T/dl/permissions/${nanoId}/batchlink-sayongja`, body);
+  const res = await apiClient.post(
+    `/T/dl/permissions/${nanoId}/batchlink-sayongjas`,
+    body,
+  );
   return parseOrThrow(BatchlinkPermissionSayongjaResponseSchema, res.data);
 };
 

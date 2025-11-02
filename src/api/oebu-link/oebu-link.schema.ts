@@ -1,5 +1,15 @@
 import { z } from 'zod';
 
+export const GetOebuLinksRequestSchema = z.object({
+  gigwanNanoId: z.string(),
+  nameSearch: z.string().optional(),
+  pageNumber: z.number().optional(),
+  pageSize: z.number().optional(),
+  sortByOption: z.string().optional(),
+  iconFilters: z.string().optional(),
+});
+export type GetOebuLinksRequest = z.infer<typeof GetOebuLinksRequestSchema>;
+
 export const PaginationDataSchema = z
   .object({
     hasNextPage: z.boolean(),
@@ -13,12 +23,12 @@ export const PaginationDataSchema = z
 export type PaginationData = z.infer<typeof PaginationDataSchema>;
 
 export const OebuLinkListItemSchema = z.object({
-  linkIcon: z.string(),
+  linkIcon: z.string().nullable(),
   nanoId: z.string(),
   linkUrl: z.string(),
   createdAt: z.string(),
   createdBy: z.string(),
-  asName: z.string(),
+  titleName: z.string(),
   name: z.string(),
 });
 export type OebuLinkListItem = z.infer<typeof OebuLinkListItemSchema>;
@@ -40,9 +50,10 @@ export type OebuLinkDetail = z.infer<typeof OebuLinkDetailSchema>;
 export const CreateOebuLinkRequestSchema = z.object({
   gigwanNanoId: z.string(),
   name: z.string(),
-  asName: z.string(),
+  titleName: z.string(),
   linkUrl: z.string(),
-  linkIconNanoId: z.string(),
+  linkIconNanoId: z.string().nullable(),
+  jojikNanoId: z.string().optional(),
 });
 export type CreateOebuLinkRequest = z.infer<typeof CreateOebuLinkRequestSchema>;
 
@@ -54,9 +65,9 @@ export type GetOebuLinkDetailResponse = z.infer<typeof GetOebuLinkDetailResponse
 
 export const UpdateOebuLinkRequestSchema = z.object({
   name: z.string(),
-  asName: z.string(),
+  titleName: z.string(),
   linkUrl: z.string(),
-  linkIconNanoId: z.string(),
+  linkIconNanoId: z.string().nullable(),
 });
 export type UpdateOebuLinkRequest = z.infer<typeof UpdateOebuLinkRequestSchema>;
 

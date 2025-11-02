@@ -3,19 +3,21 @@ import { z } from 'zod';
 const SangtaeSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
+  isHwalseong: z.boolean(),
 });
 
 const PermissionSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
+  role: z.string(),
 });
 
 export const GetSayongjasRequestSchema = z.object({
   gigwanNanoId: z.string(),
   sayongjaNameSearch: z.string().optional(),
   jojikFilters: z.array(z.string()).optional(),
+  isHwalseongFilter: z.boolean().optional(),
   workTypeCustomSangtaeFilters: z.array(z.string()).optional(),
-  sayongjaSangtaeFilters: z.array(z.string()).optional(),
   employmentCategorySangtaeFilters: z.array(z.string()).optional(),
   pageSize: z.number().optional(),
   pageNumber: z.number().optional(),
@@ -27,10 +29,26 @@ export const SayongjaListItemSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
   employedAt: z.string(),
+  isHwalseong: z.boolean(),
 });
-export const GetSayongjasResponseSchema = z.object({
-  sayongjas: z.array(SayongjaListItemSchema),
-});
+export const PaginationDataSchema = z
+  .object({
+    hasNextPage: z.boolean(),
+    pageItemCount: z.number(),
+    pageNumber: z.number(),
+    pageSize: z.number(),
+    totalItemCount: z.number(),
+    totalPageCount: z.number(),
+  })
+  .passthrough();
+export type PaginationData = z.infer<typeof PaginationDataSchema>;
+
+export const GetSayongjasResponseSchema = z
+  .object({
+    paginationData: PaginationDataSchema.optional(),
+    sayongjas: z.array(SayongjaListItemSchema),
+  })
+  .passthrough();
 export type GetSayongjasResponse = z.infer<typeof GetSayongjasResponseSchema>;
 
 export const SayongjaDetailSchema = z.object({
@@ -38,7 +56,6 @@ export const SayongjaDetailSchema = z.object({
   nanoId: z.string(),
   employedAt: z.string(),
   isHwalseong: z.boolean(),
-  activeSangtae: SangtaeSchema,
   workTypeSangtae: SangtaeSchema.nullable(),
   employmentSangtae: SangtaeSchema.nullable(),
   loginId: z.string(),
@@ -53,7 +70,6 @@ export const CreateSayongjaRequestSchema = z.object({
   isHwalseong: z.boolean(),
   employmentSangtaeNanoId: z.string().nullable(),
   workTypeSangtaeNanoId: z.string().nullable(),
-  activeSangtaeNanoId: z.string(),
   loginId: z.string(),
   password: z.string(),
 });
@@ -70,9 +86,9 @@ export const UpdateSayongjaRequestSchema = z.object({
   employedAt: z.string().optional(),
   employmentSangtaeNanoId: z.string().nullable().optional(),
   workTypeSangtaeNanoId: z.string().nullable().optional(),
-  activeSangtaeNanoId: z.string().optional(),
   loginId: z.string().optional(),
   password: z.string().optional(),
+  isHwalseong: z.boolean().optional(),
 });
 export type UpdateSayongjaRequest = z.infer<typeof UpdateSayongjaRequestSchema>;
 
@@ -100,3 +116,13 @@ export const GetSayongjaPermissionsResponseSchema = z.object({
   permissions: z.array(PermissionSchema),
 });
 export type GetSayongjaPermissionsResponse = z.infer<typeof GetSayongjaPermissionsResponseSchema>;
+
+export const GetMyJojiksResponseSchema = z.object({
+  jojiks: z.array(
+    z.object({
+      name: z.string(),
+      nanoId: z.string(),
+    }),
+  ),
+});
+export type GetMyJojiksResponse = z.infer<typeof GetMyJojiksResponseSchema>;

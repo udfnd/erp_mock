@@ -26,6 +26,8 @@ import {
   BatchlinkSayongjaPermissionsResponseSchema,
   GetSayongjaPermissionsResponse,
   GetSayongjaPermissionsResponseSchema,
+  GetMyJojiksResponse,
+  GetMyJojiksResponseSchema,
 } from './sayongja.schema';
 
 const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
@@ -129,4 +131,16 @@ export const useGetSayongjaPermissionsQuery = (nanoId: string, options?: { enabl
     queryKey: ['sayongjaPermissions', nanoId],
     queryFn: () => getSayongjaPermissions(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
+  });
+
+export const getMyJojiks = async (): Promise<GetMyJojiksResponse> => {
+  const res = await apiClient.get('/T/feat/sayongjas/my-jojiks');
+  return parseOrThrow(GetMyJojiksResponseSchema, res.data);
+};
+
+export const useGetMyJojiksQuery = (options?: { enabled?: boolean }) =>
+  useQuery<GetMyJojiksResponse, unknown>({
+    queryKey: ['myJojiks'],
+    queryFn: getMyJojiks,
+    enabled: options?.enabled ?? true,
   });

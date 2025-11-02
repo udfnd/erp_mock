@@ -1,5 +1,13 @@
 import { z } from 'zod';
 
+export const GetJusosRequestSchema = z.object({
+  gigwanNanoId: z.string(),
+  jusoNameSearch: z.string().optional(),
+  sortByOption: z.string().optional(),
+  pageSize: z.number().optional(),
+  pageNumber: z.number().optional(),
+});
+export type GetJusosRequest = z.infer<typeof GetJusosRequestSchema>;
 
 export const PaginationDataSchema = z
   .object({
@@ -20,6 +28,8 @@ export const JusoListItemSchema = z.object({
   juso: z.string(),
   createdAt: z.string(),
   nanoId: z.string(),
+  updatedAt: z.string(),
+  updatedBy: z.string(),
 });
 export type JusoListItem = z.infer<typeof JusoListItemSchema>;
 
@@ -35,6 +45,8 @@ export const CreateJusoRequestSchema = z.object({
   jusoName: z.string(),
   jusoDetail: z.string(),
   juso: z.string(),
+  gigwanNanoId: z.string(),
+  jojikNanoId: z.string().optional(),
 });
 export type CreateJusoRequest = z.infer<typeof CreateJusoRequestSchema>;
 
@@ -52,9 +64,9 @@ export const GetJusoDetailResponseSchema = z.object({
   juso: z.string(),
   nanoId: z.string(),
   createdAt: z.string(),
-  createdBy: z.string(),
+  createdBy: z.string().nullable(),
   updatedAt: z.string(),
-  updatedBy: z.string(),
+  updatedBy: z.string().nullable(),
 });
 export type GetJusoDetailResponse = z.infer<typeof GetJusoDetailResponseSchema>;
 

@@ -12,6 +12,8 @@ import {
   DeleteJusoResponseSchema,
   GetJusoDetailResponse,
   GetJusoDetailResponseSchema,
+  GetJusosRequest,
+  GetJusosRequestSchema,
   GetJusosResponse,
   GetJusosResponseSchema,
   UpdateJusoRequest,
@@ -30,15 +32,19 @@ const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
   return r.data;
 };
 
-export const getJusos = async (): Promise<GetJusosResponse> => {
-  const res = await apiClient.get('/T/dl/jusos');
+export const getJusos = async (params: GetJusosRequest): Promise<GetJusosResponse> => {
+  const validated = GetJusosRequestSchema.parse(params);
+  const res = await apiClient.get('/T/dl/jusos', { params: validated });
   return parseOrThrow(GetJusosResponseSchema, res.data);
 };
 
-export const useGetJusosQuery = (options?: { enabled?: boolean }) =>
+export const useGetJusosQuery = (
+  params: GetJusosRequest,
+  options?: { enabled?: boolean },
+) =>
   useQuery<GetJusosResponse, unknown>({
-    queryKey: ['jusos'],
-    queryFn: getJusos,
+    queryKey: ['jusos', params],
+    queryFn: () => getJusos(params),
     enabled: options?.enabled ?? true,
   });
 
