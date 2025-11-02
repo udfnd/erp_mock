@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/api/gigwan';
 import { useJojiksQuery, type JojikListItem } from '@/api/jojik';
@@ -11,7 +12,6 @@ import {
   useGetSayongjaDetailQuery,
   useGetSayongjasQuery,
 } from '@/api/sayongja';
-import { useGetSayongjaSangtaesQuery } from '@/api/system';
 import {
   ListViewLayout,
   ListViewPagination,
@@ -26,12 +26,6 @@ import { Filter as FilterButton } from '@/design/components/Filter';
 import * as styles from './page.style.css';
 
 const PAGE_SIZE = 20;
-
-type PageProps = {
-  params: {
-    gi: string;
-  };
-};
 
 type SortOption = {
   id: string;
@@ -100,7 +94,8 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 export default function GiSayongjasPage({ params }: PageProps) {
-  const { gi } = params;
+  const routeParams = useParams<{ gi: string }>();
+  const gi = Array.isArray(routeParams.gi) ? routeParams.gi[0] : routeParams.gi;
 
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
