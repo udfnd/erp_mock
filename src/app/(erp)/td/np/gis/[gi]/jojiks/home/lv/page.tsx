@@ -52,12 +52,6 @@ type JojikListItemView = {
   createdAt: string;
 };
 
-type PageProps = {
-  params: {
-    gi: string;
-  };
-};
-
 const SORT_OPTIONS: SortOption[] = [
   {
     id: 'name-asc',
@@ -81,14 +75,14 @@ const SORT_OPTIONS: SortOption[] = [
   },
 ];
 
-export default function GiOrganizationsPage({ params }: PageProps) {
-  const { gi } = useParams<{ gi: string }>();
+export default function GiOrganizationsPage() {
+  // ✅ useParams만 사용 (배열 가능성 대비)
+  const { gi: rawGi } = useParams<{ gi: string | string[] }>();
+  const gi = Array.isArray(rawGi) ? rawGi[0] : rawGi;
+
   const queryClient = useQueryClient();
 
-  const listQueryParams = useMemo(
-    () => ({ gigwanNanoId: gi ?? params.gi }),
-    [gi, params.gi],
-  );
+  const listQueryParams = useMemo(() => ({ gigwanNanoId: gi }), [gi]);
 
   const { data, isLoading } = useJojiksQuery(listQueryParams, {
     enabled: Boolean(listQueryParams.gigwanNanoId),
@@ -126,12 +120,8 @@ export default function GiOrganizationsPage({ params }: PageProps) {
       setFilterOpen(false);
       setPendingFilters(normalizeFilters(filters, yearOptions));
     };
-    if (isFilterOpen) {
-      document.addEventListener('mousedown', removeOutsideClick);
-    }
-    return () => {
-      document.removeEventListener('mousedown', removeOutsideClick);
-    };
+    if (isFilterOpen) document.addEventListener('mousedown', removeOutsideClick);
+    return () => document.removeEventListener('mousedown', removeOutsideClick);
   }, [isFilterOpen, filters, yearOptions]);
 
   useEffect(() => {
@@ -141,12 +131,8 @@ export default function GiOrganizationsPage({ params }: PageProps) {
       if (sortRef.current.contains(event.target as Node)) return;
       setSortOpen(false);
     };
-    if (isSortOpen) {
-      document.addEventListener('mousedown', removeOutsideClick);
-    }
-    return () => {
-      document.removeEventListener('mousedown', removeOutsideClick);
-    };
+    if (isSortOpen) document.addEventListener('mousedown', removeOutsideClick);
+    return () => document.removeEventListener('mousedown', removeOutsideClick);
   }, [isSortOpen]);
 
   const activeFilters = useMemo(
@@ -166,16 +152,8 @@ export default function GiOrganizationsPage({ params }: PageProps) {
     const yearSummary = activeFilters.year.map((year) => `${year}년`).join(', ');
 
     if (!nameRangeSummary && !yearSummary) return '필터가 적용되지 않았습니다.';
-
-    if (nameRangeSummary && yearSummary) {
-      return `${nameRangeSummary} | ${yearSummary}`;
-    }
-
-    if (nameRangeSummary) {
-      return nameRangeSummary;
-    }
-
-    return yearSummary;
+    if (nameRangeSummary && yearSummary) return `${nameRangeSummary} | ${yearSummary}`;
+    return nameRangeSummary || yearSummary;
   }, [activeFilters]);
 
   const filteredJojiks = useMemo(() => {
@@ -243,10 +221,10 @@ export default function GiOrganizationsPage({ params }: PageProps) {
   const singleSelected = selectedItems.length === 1 ? selectedItems[0] : null;
   const selectedNanoId = singleSelected?.nanoId ?? '';
 
-  const {
-    data: selectedJojik,
-    isFetching: isSelectedJojikFetching,
-  } = useJojikQuery(selectedNanoId, { enabled: Boolean(selectedNanoId) });
+  const { data: selectedJojik, isFetching: isSelectedJojikFetching } = useJojikQuery(
+    selectedNanoId,
+    { enabled: Boolean(selectedNanoId) },
+  );
 
   const updateJojikMutation = useUpdateJojikMutation(selectedNanoId);
   const deleteJojikMutation = useDeleteJojikMutation(selectedNanoId);
@@ -359,7 +337,9 @@ export default function GiOrganizationsPage({ params }: PageProps) {
 
   const handleDeleteJojik = useCallback(() => {
     if (!selectedNanoId) return;
-    const confirmed = window.confirm('선택한 조직을 삭제하시겠습니까? 삭제 후에는 되돌릴 수 없습니다.');
+    const confirmed = window.confirm(
+      '선택한 조직을 삭제하시겠습니까? 삭제 후에는 되돌릴 수 없습니다.',
+    );
     if (!confirmed) return;
     deleteJojikMutation.mutate(undefined, {
       onSuccess: () => {
@@ -565,7 +545,9 @@ export default function GiOrganizationsPage({ params }: PageProps) {
               styleType="solid"
               variant="secondary"
               onClick={handleSaveOpenSangtae}
-              disabled={updateJojikMutation.isPending || openSangtaeValue === selectedJojik.openSangtae}
+              disabled={
+                updateJojikMutation.isPending || openSangtaeValue === selectedJojik.openSangtae
+              }
             >
               저장
             </Button>
@@ -633,9 +615,7 @@ export default function GiOrganizationsPage({ params }: PageProps) {
   })();
 
   const panelFooter = (() => {
-    if (selectedItems.length === 0) {
-      return null;
-    }
+    if (selectedItems.length === 0) return null;
     if (selectedItems.length > 1) {
       return (
         <div className={clsx(styles.panelFooter, styles.panelFooterSingle)}>
@@ -831,15 +811,15 @@ export default function GiOrganizationsPage({ params }: PageProps) {
                   : '새 조직 생성'}
             </span>
             <span className={styles.sidePanelSubtitle}>
-              {selectedItems.length === 0
-                ? '조직을 선택하거나 새 조직을 생성하세요.'
-                : selectedItems.length > 1
-                  ? (
-                    <span className={styles.selectedCount}>{`총 ${selectedItems.length}개 선택됨`}</span>
-                  )
-                  : (
-                    <span className={styles.selectedCount}>조직 정보를 수정할 수 있습니다.</span>
-                  )}
+              {selectedItems.length === 0 ? (
+                '조직을 선택하거나 새 조직을 생성하세요.'
+              ) : selectedItems.length > 1 ? (
+                <span
+                  className={styles.selectedCount}
+                >{`총 ${selectedItems.length}개 선택됨`}</span>
+              ) : (
+                <span className={styles.selectedCount}>조직 정보를 수정할 수 있습니다.</span>
+              )}
             </span>
           </div>
           {sidePanelContent}

@@ -2,6 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
+import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/api/gigwan';
@@ -34,13 +35,9 @@ import { Toggle } from '@/design/components/Toggle';
 
 import * as styles from './page.style.css';
 
-const PAGE_SIZE = 20;
+import type { RefObject } from 'react';
 
-type PageProps = {
-  params: {
-    gi: string;
-  };
-};
+const PAGE_SIZE = 20;
 
 type SortOptionId = 'nameAsc' | 'nameDesc' | 'employedAtAsc' | 'employedAtDesc';
 type SortOption = {
@@ -126,14 +123,15 @@ const INITIAL_CREATE_FORM: CreateFormState = {
   isHwalseong: true,
 };
 
-export default function GiSayongjasPage({ params }: PageProps) {
-  const { gi } = params;
+export default function GiSayongjasPage() {
+  const { gi: rawGi } = useParams<{ gi: string | string[] }>();
+  const gi = Array.isArray(rawGi) ? rawGi[0] : rawGi;
 
   const queryClient = useQueryClient();
 
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
-  const permissionModalRef = useRef<HTMLDivElement | null>(null);
+  const permissionModalRef = useRef<HTMLDivElement>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTER_STATE);
@@ -321,10 +319,14 @@ export default function GiSayongjasPage({ params }: PageProps) {
     enabled: Boolean(gi),
   });
 
-  const sayongjas = useMemo<SayongjaListItem[]>(() => sayongjaListData?.sayongjas ?? [], [sayongjaListData]);
+  const sayongjas = useMemo<SayongjaListItem[]>(
+    () => sayongjaListData?.sayongjas ?? [],
+    [sayongjaListData],
+  );
   const paginationData = sayongjaListData?.paginationData;
   const totalItems = paginationData?.totalItemCount ?? sayongjas.length;
-  const totalPages = paginationData?.totalPageCount ?? Math.max(1, Math.ceil(Math.max(totalItems, 1) / PAGE_SIZE));
+  const totalPages =
+    paginationData?.totalPageCount ?? Math.max(1, Math.ceil(Math.max(totalItems, 1) / PAGE_SIZE));
   const currentPageFromServer = paginationData?.pageNumber ?? currentPage;
 
   const currentRowIdSet = useMemo(() => new Set(sayongjas.map((item) => item.nanoId)), [sayongjas]);
@@ -347,20 +349,23 @@ export default function GiSayongjasPage({ params }: PageProps) {
 
   const primarySelectedId = selectedIds.length === 1 ? selectedIds[0] : undefined;
 
-  const { data: primaryDetail, isLoading: isDetailLoading } = useGetSayongjaDetailQuery(primarySelectedId ?? '', {
-    enabled: Boolean(primarySelectedId),
-  });
-
-  const { data: assignedPermissionsData, isFetching: isPermissionsFetching } = useGetSayongjaPermissionsQuery(
+  const { data: primaryDetail, isLoading: isDetailLoading } = useGetSayongjaDetailQuery(
     primarySelectedId ?? '',
     {
       enabled: Boolean(primarySelectedId),
     },
   );
 
+  const { data: assignedPermissionsData, isFetching: isPermissionsFetching } =
+    useGetSayongjaPermissionsQuery(primarySelectedId ?? '', {
+      enabled: Boolean(primarySelectedId),
+    });
+
   const updateSayongjaMutation = useUpdateSayongjaMutation(primarySelectedId ?? '');
   const deleteSayongjaMutation = useDeleteSayongjaMutation(primarySelectedId ?? '');
-  const batchlinkPermissionsMutation = useBatchlinkSayongjaPermissionsMutation(primarySelectedId ?? '');
+  const batchlinkPermissionsMutation = useBatchlinkSayongjaPermissionsMutation(
+    primarySelectedId ?? '',
+  );
   const createSayongjaMutation = useCreateSayongjaMutation();
 
   const assignedPermissions = useMemo(
@@ -386,7 +391,10 @@ export default function GiSayongjasPage({ params }: PageProps) {
   });
 
   const availablePermissions = useMemo(
-    () => (permissionListData?.permissions ?? []).filter((permission) => !assignedPermissionIds.has(permission.nanoId)),
+    () =>
+      (permissionListData?.permissions ?? []).filter(
+        (permission) => !assignedPermissionIds.has(permission.nanoId),
+      ),
     [permissionListData, assignedPermissionIds],
   );
 
@@ -423,7 +431,9 @@ export default function GiSayongjasPage({ params }: PageProps) {
   const appliedFiltersSummary = useMemo(() => {
     const parts: string[] = [];
     if (activeFilters.jojiks.length > 0) {
-      const labels = activeFilters.jojiks.map((value) => jojikLabelMap.get(value) ?? value).join(', ');
+      const labels = activeFilters.jojiks
+        .map((value) => jojikLabelMap.get(value) ?? value)
+        .join(', ');
       parts.push(labels);
     }
     if (activeFilters.employmentCategories.length > 0) {
@@ -445,12 +455,7 @@ export default function GiSayongjasPage({ params }: PageProps) {
       return '필터가 적용되지 않았습니다.';
     }
     return parts.join(' | ');
-  }, [
-    activeFilters,
-    employmentCategoryLabelMap,
-    jojikLabelMap,
-    workTypeLabelMap,
-  ]);
+  }, [activeFilters, employmentCategoryLabelMap, jojikLabelMap, workTypeLabelMap]);
 
   const filterAppliedCount =
     activeFilters.jojiks.length +
@@ -461,9 +466,10 @@ export default function GiSayongjasPage({ params }: PageProps) {
   const sortButtonLabel = sortOption.label;
   const filterButtonLabel = filterAppliedCount > 0 ? '필터 적용됨' : '필터';
 
-  const primarySelectedName = primaryDetail?.name
-    ?? sayongjas.find((item) => item.nanoId === primarySelectedId)?.name
-    ?? (primarySelectedId ? `사용자 ${primarySelectedId}` : undefined);
+  const primarySelectedName =
+    primaryDetail?.name ??
+    sayongjas.find((item) => item.nanoId === primarySelectedId)?.name ??
+    (primarySelectedId ? `사용자 ${primarySelectedId}` : undefined);
 
   const handleToggleFilterOption = (group: keyof FilterState, value: string) => {
     if (group === 'isHwalseong') return;
@@ -802,11 +808,11 @@ export default function GiSayongjasPage({ params }: PageProps) {
     );
   };
 
-const sidePanelContent = (() => {
-  if (selectedIds.length === 0) {
-    return renderCreateForm();
-  }
-  if (selectedIds.length > 1) {
+  const sidePanelContent = (() => {
+    if (selectedIds.length === 0) {
+      return renderCreateForm();
+    }
+    if (selectedIds.length > 1) {
       return renderMultiSelection();
     }
     return renderDetailView();
@@ -904,7 +910,9 @@ const sidePanelContent = (() => {
                             <label key={option.value} className={styles.filterOption}>
                               <span className={styles.filterOptionLabel}>{option.label}</span>
                               <Checkbox
-                                checked={pendingFiltersNormalized.employmentCategories.includes(option.value)}
+                                checked={pendingFiltersNormalized.employmentCategories.includes(
+                                  option.value,
+                                )}
                                 onChange={() =>
                                   handleToggleFilterOption('employmentCategories', option.value)
                                 }
@@ -1046,8 +1054,8 @@ const sidePanelContent = (() => {
               {selectedIds.length === 0
                 ? '새 사용자 등록'
                 : selectedIds.length > 1
-                ? `${selectedIds.length}명 선택됨`
-                : primarySelectedName ?? '선택된 사용자 없음'}
+                  ? `${selectedIds.length}명 선택됨`
+                  : (primarySelectedName ?? '선택된 사용자 없음')}
             </span>
             <span className={styles.sidePanelSubtitle}>
               {selectedIds.length > 0 ? (
@@ -1086,7 +1094,7 @@ type SelectedSayongjaPanelProps = {
   isPermissionsFetching: boolean;
   onPermissionModalToggle: () => void;
   isPermissionModalOpen: boolean;
-  permissionModalRef: RefObject<HTMLDivElement>;
+  permissionModalRef: RefObject<HTMLDivElement | null>;
   availablePermissions: PermissionListItem[];
   permissionSelection: string[];
   onPermissionSelection: (permissionId: string) => void;
@@ -1143,7 +1151,10 @@ function SelectedSayongjaPanel({
         setLocalError(null);
       })
       .catch((error) => {
-        const message = error instanceof Error ? error.message : '사용자 정보를 저장하는 중 문제가 발생했습니다. 다시 시도해주세요.';
+        const message =
+          error instanceof Error
+            ? error.message
+            : '사용자 정보를 저장하는 중 문제가 발생했습니다. 다시 시도해주세요.';
         setLocalError(message);
       });
   };
@@ -1285,7 +1296,9 @@ function SelectedSayongjaPanel({
                       const checked = permissionSelection.includes(permission.nanoId);
                       return (
                         <li key={permission.nanoId} className={styles.permissionModalOption}>
-                          <span className={styles.permissionModalOptionLabel}>{permission.name}</span>
+                          <span className={styles.permissionModalOptionLabel}>
+                            {permission.name}
+                          </span>
                           <Checkbox
                             checked={checked}
                             onChange={() => onPermissionSelection(permission.nanoId)}
@@ -1318,12 +1331,7 @@ function SelectedSayongjaPanel({
       <div className={styles.sidePanelSection}>
         <h3 className={styles.sectionTitle}>위험 작업</h3>
         <p className={styles.sectionSubtitle}>사용자를 삭제하면 복구할 수 없습니다.</p>
-        <Button
-          styleType="outlined"
-          variant="assistive"
-          onClick={onDelete}
-          disabled={isDeleting}
-        >
+        <Button styleType="outlined" variant="assistive" onClick={onDelete} disabled={isDeleting}>
           {isDeleting ? '삭제 중...' : '사용자 삭제'}
         </Button>
       </div>
@@ -1337,9 +1345,13 @@ function normalizeFilters(state: FilterState, available: AvailableFilterSets): F
   return {
     jojiks: Array.from(new Set(state.jojiks.filter((value) => available.jojiks.has(value)))),
     employmentCategories: Array.from(
-      new Set(state.employmentCategories.filter((value) => available.employmentCategories.has(value))),
+      new Set(
+        state.employmentCategories.filter((value) => available.employmentCategories.has(value)),
+      ),
     ),
-    workTypes: Array.from(new Set(state.workTypes.filter((value) => available.workTypes.has(value)))),
+    workTypes: Array.from(
+      new Set(state.workTypes.filter((value) => available.workTypes.has(value))),
+    ),
     isHwalseong: validHwalseong,
   };
 }

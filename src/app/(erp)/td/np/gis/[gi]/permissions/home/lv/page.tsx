@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from 'react';
+import { useParams } from 'next/navigation';
 
 import {
   useBatchlinkPermissionSayongjaMutation,
@@ -78,8 +79,9 @@ function normalizeFilters(state: FilterState, available: AvailableFilterSets): F
   };
 }
 
-export default function GiPermissionsPage({ params }: PageProps) {
-  const { gi } = params;
+export default function GiPermissionsPage() {
+  const { gi: rawGi } = useParams<{ gi: string | string[] }>();
+  const gi = Array.isArray(rawGi) ? rawGi[0] : rawGi;
 
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);

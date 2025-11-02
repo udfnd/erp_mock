@@ -176,7 +176,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         key: `gigwan-${hierarchy.gigwan.nanoId}`,
         label: hierarchy.gigwan.name,
         depth: 1,
-        href: `/td/np/gis/${hierarchy.gigwan.nanoId}`,
+        href: `/td/np/gis/${hierarchy.gigwan.nanoId}/manage/home/dv`,
       });
     }
 
