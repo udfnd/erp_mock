@@ -112,13 +112,13 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
         categories: state.categories.map((category) =>
           category.nanoId === action.categoryId
             ? {
-                ...category,
-                statuses: category.statuses.map((status) =>
-                  status.localId === action.statusLocalId
-                    ? { ...status, name: action.value }
-                    : status,
-                ),
-              }
+              ...category,
+              statuses: category.statuses.map((status) =>
+                status.localId === action.statusLocalId
+                  ? { ...status, name: action.value }
+                  : status,
+              ),
+            }
             : category,
         ),
         dirty: true,
@@ -139,11 +139,11 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
         categories: state.categories.map((category) =>
           category.nanoId === action.categoryId
             ? {
-                ...category,
-                statuses: category.statuses.filter(
-                  (status) => status.localId !== action.statusLocalId,
-                ),
-              }
+              ...category,
+              statuses: category.statuses.filter(
+                (status) => status.localId !== action.statusLocalId,
+              ),
+            }
             : category,
         ),
         dirty: true,
@@ -196,11 +196,28 @@ const workTypeReducer = (state: WorkTypeState, action: WorkTypeAction): WorkType
   }
 };
 
+// ===== Helpers =====
 let localIdCounter = 0;
 const createLocalId = () => {
   localIdCounter += 1;
   return `local-${Date.now()}-${localIdCounter}`;
 };
+
+// 영문/숫자 8자리 난수 nanoId 생성
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+function generateNanoId8(): string {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  let out = '';
+  for (let i = 0; i < bytes.length; i++) {
+    out += ALPHABET[bytes[i] % ALPHABET.length];
+  }
+  return out;
+}
+
+// null/로컬 키 대비 안정 ID (payload 전송 시 사용)
+const stableId = (s: { nanoId: string | null; localId: string }) =>
+  s.nanoId && !s.nanoId.startsWith('local-') ? s.nanoId : s.localId;
 
 export default function GigwanSettingServicePage() {
   const { gi } = useParams<{ gi: string }>();
@@ -251,9 +268,7 @@ export default function GigwanSettingServicePage() {
   );
   const jusoDirty = useMemo(
     () =>
-      gigwan
-        ? basicState.form.juso !== (gigwan.juso?.juso ?? '')
-        : basicState.form.juso !== '',
+      gigwan ? basicState.form.juso !== (gigwan.juso?.juso ?? '') : basicState.form.juso !== '',
     [basicState.form.juso, gigwan],
   );
 
@@ -368,15 +383,16 @@ export default function GigwanSettingServicePage() {
   );
 
   const handleAddEmploymentStatus = useCallback((categoryNanoId: string) => {
-    const newLocalId = createLocalId();
+    // 새 항목 즉시 8자 nanoId 부여
+    const id = generateNanoId8();
     const newStatus: EmploymentStatusForm = {
-      nanoId: null,
+      nanoId: id,
       name: '',
-      localId: newLocalId,
+      localId: id, // 이후 reset 시에도 서버 nanoId를 localId로 씀(일관성)
       isHwalseong: true,
     };
     dispatchEmployment({ type: 'add-status', categoryId: categoryNanoId, status: newStatus });
-    setEmploymentEditing((prev) => ({ ...prev, [newLocalId]: true }));
+    setEmploymentEditing((prev) => ({ ...prev, [id]: true }));
   }, []);
 
   const handleRemoveEmploymentStatus = useCallback(
@@ -401,17 +417,26 @@ export default function GigwanSettingServicePage() {
 
   const handleSaveEmploymentCategories = useCallback(() => {
     if (!employmentState.dirty || employmentHasEmptyStatus) return;
+
+    // stableId로 dedupe + 항상 nanoId 전송
+    const categoriesPayload = employmentState.categories.map((category) => {
+      const seen = new Set<string>();
+      const sangtaes = [];
+      for (const status of category.statuses) {
+        const id = stableId(status);
+        if (seen.has(id)) continue; // 중복 방지
+        seen.add(id);
+        sangtaes.push({
+          nanoId: id,
+          name: status.name.trim(),
+          isHwalseong: status.isHwalseong,
+        });
+      }
+      return { nanoId: category.nanoId, sangtaes };
+    });
+
     upsertEmploymentCategoriesMutation.mutate(
-      {
-        categories: employmentState.categories.map((category) => ({
-          nanoId: category.nanoId,
-          sangtaes: category.statuses.map((status) => ({
-            ...(status.nanoId ? { nanoId: status.nanoId } : {}),
-            name: status.name.trim(),
-            isHwalseong: status.isHwalseong,
-          })),
-        })),
-      },
+      { categories: categoriesPayload },
       {
         onSuccess: (data) => {
           dispatchEmployment({
@@ -422,7 +447,7 @@ export default function GigwanSettingServicePage() {
               statuses: category.sangtaes.map((status) => ({
                 nanoId: status.nanoId,
                 name: status.name,
-                localId: status.nanoId ?? createLocalId(),
+                localId: status.nanoId, // 서버 nanoId로 동기화
                 isHwalseong: status.isHwalseong,
               })),
             })),
@@ -483,10 +508,11 @@ export default function GigwanSettingServicePage() {
   }, []);
 
   const handleAddWorkTypeStatus = useCallback(() => {
-    const localId = createLocalId();
+    // 새 커스텀 sangtae도 8자 nanoId 부여
+    const id = generateNanoId8();
     dispatchWorkType({
       type: 'add',
-      status: { nanoId: '', name: '', localId, isHwalseong: true, isNew: true },
+      status: { nanoId: id, name: '', localId: id, isHwalseong: true, isNew: true },
     });
   }, []);
 
@@ -494,21 +520,30 @@ export default function GigwanSettingServicePage() {
     dispatchWorkType({ type: 'remove', statusLocalId });
   }, []);
 
-  const workTypeHasEmptyStatus = workTypeState.statuses.some(
-    (status) => status.name.trim().length === 0,
+  const workTypeHasEmptyStatus = useMemo(
+    () => workTypeState.statuses.some((status) => status.name.trim().length === 0),
+    [workTypeState.statuses],
   );
 
   const handleSaveWorkTypeStatuses = useCallback(() => {
     if (!workTypeState.dirty || workTypeHasEmptyStatus) return;
+
+    // stableId로 dedupe + 항상 nanoId 전송
+    const seen = new Set<string>();
+    const sangtaes = [];
+    for (const status of workTypeState.statuses) {
+      const id = stableId(status);
+      if (seen.has(id)) continue;
+      seen.add(id);
+      sangtaes.push({
+        nanoId: id,
+        name: status.name.trim(),
+        isHwalseong: status.isHwalseong,
+      });
+    }
+
     upsertWorkTypeStatusesMutation.mutate(
-      {
-        sangtaes: workTypeState.statuses.map((status) => ({
-          nanoId:
-            status.nanoId && !status.nanoId.startsWith('local-') ? status.nanoId : status.localId,
-          name: status.name.trim(),
-          isHwalseong: status.isHwalseong,
-        })),
-      },
+      { sangtaes },
       {
         onSuccess: (data) => {
           dispatchWorkType({
@@ -516,7 +551,7 @@ export default function GigwanSettingServicePage() {
             payload: data.sangtaes.map((status) => ({
               nanoId: status.nanoId,
               name: status.name,
-              localId: status.nanoId ?? createLocalId(),
+              localId: status.nanoId, // 서버 nanoId로 동기화
               isHwalseong: status.isHwalseong,
             })),
           });

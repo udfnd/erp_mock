@@ -63,7 +63,7 @@ export const JojikDetailResponseSchema = z.object({
   openSangtae: z.boolean(),
   canAccessOpenFileSangtae: z.string(),
   canHadaLinkRequestSangtae: z.string(),
-  hompageUrl: HomepageLinkSchema.nullable(),
+  homepageUrl: HomepageLinkSchema.nullable(),
   openFiles: z.array(JojikOpenFileSchema),
   juso: z
     .object({
@@ -83,7 +83,7 @@ export const UpdateJojikRequestSchema = z.object({
   openSangtae: z.boolean().optional(),
   canAccessOpenFileSangtaeNanoId: z.string().optional(),
   canHadaLinkRequestSangtaeNanoId: z.string().optional(),
-  hompageUrlNanoId: z.string().nullable().optional(),
+  homepageUrlNanoId: z.string().nullable().optional(),
   logoImageNanoId: z.string().nullable().optional(),
   openFileNanoIds: z.array(z.string()).optional(),
 });

@@ -2009,7 +2009,7 @@
                       "type": "string",
                       "description": "하다 연동 신청 가능인"
                     },
-                    "hompageUrl": {
+                    "homepageUrl": {
                       "type": [
                         "object",
                         "null"
@@ -2133,7 +2133,7 @@
                   "canAccessOpenFileSangtaeNanoId": "96",
                   "canHadaLinkRequestSangtae": "https://-.biz/",
                   "canHadaLinkRequestSangtaeNanoId": "https://-.biz/",
-                  "hompageUrl": "https://-.org/",
+                  "homepageUrl": "https://-.org/",
                   "openFiles": [
                     {
                       "nanoId": "8fftsAoMXZdp1d4ZXnhr5",
@@ -2246,7 +2246,7 @@
                     "type": "string",
                     "description": "하다링크 요청 상태 nanoId"
                   },
-                  "hompageUrlNanoId": {
+                  "homepageUrlNanoId": {
                     "type": [
                       "string",
                       "null"
@@ -2312,7 +2312,7 @@
                       "type": "string",
                       "description": "하다 연동 신청 가능인"
                     },
-                    "hompageUrl": {
+                    "homepageUrl": {
                       "type": [
                         "object",
                         "null"
@@ -6005,7 +6005,7 @@
             "type": "string",
             "description": "하다 연동 신청 가능인"
           },
-          "hompageUrl": {
+          "homepageUrl": {
             "type": [
               "object",
               "null"

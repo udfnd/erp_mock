@@ -595,16 +595,16 @@ export default function GiOrganizationsPage({ params }: PageProps) {
               {selectedJojik.jaewonsaengLinkRequestUrl}
             </a>
           </div>
-          {selectedJojik.hompageUrl ? (
+          {selectedJojik.homepageUrl ? (
             <div className={styles.infoGroup}>
               <span className={styles.infoLabel}>홈페이지</span>
               <a
-                href={selectedJojik.hompageUrl.linkUrl}
+                href={selectedJojik.homepageUrl.linkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.infoLink}
               >
-                {selectedJojik.hompageUrl.name}
+                {selectedJojik.homepageUrl.name}
               </a>
             </div>
           ) : null}
