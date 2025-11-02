@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/api/gigwan';
 import { SidebarOpen, SidebarClose } from '@/components/icons';
+import { LOGIN_ROUTE } from '@/constants/routes';
 import { useAuth } from '@/state/auth';
 
 import * as styles from './PrimaryNav.style.css';
@@ -56,7 +57,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const gigwanDisplayName = gigwanNameData?.name ?? authState.gigwanName ?? '기관';
 
-  const loginHref = `/td/g`;
+  const loginHref = LOGIN_ROUTE;
 
   const handleLogout = useCallback(() => {
     try {
