@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { useGigwanNameQuery } from '@/api/gigwan';
+import { LOGIN_ROUTE, createGigwanHomeRoute } from '@/constants/routes';
 import { useAuth } from '@/state/auth';
 
 import * as styles from './page.style.css';
@@ -22,11 +23,11 @@ export default function GigwanHomePage() {
   useEffect(() => {
     if (!isReady) return;
     if (!isAuthenticated) {
-      router.replace('/td/g');
+      router.replace(LOGIN_ROUTE);
       return;
     }
     if (state.gigwanNanoId && state.gigwanNanoId !== gigwanNanoId) {
-      router.replace(`/td/np/gis/${state.gigwanNanoId}/manage/home/dv`);
+      router.replace(createGigwanHomeRoute(state.gigwanNanoId));
     }
   }, [gigwanNanoId, isAuthenticated, isReady, router, state.gigwanNanoId]);
 

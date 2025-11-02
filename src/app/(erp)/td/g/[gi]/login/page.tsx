@@ -6,6 +6,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSignInMutation } from '@/api/auth';
 import { useGigwanNameQuery } from '@/api/gigwan';
 import { Progress } from '@/components/icons';
+import { LOGIN_ROUTE, createGigwanHomeRoute } from '@/constants/routes';
 import { Button } from '@/design';
 import { useAuth } from '@/state/auth';
 
@@ -77,7 +78,7 @@ export default function SignInPage() {
           gigwanName: institutionName,
           loginId: id.trim(),
         });
-        router.replace(`/td/np/gis/${gigwanCode}/manage/home/dv`);
+        router.replace(createGigwanHomeRoute(gigwanCode));
       } catch (error) {
         console.error('로그인 실패', error);
         setLoginError('아이디/패스워드가 맞지 않습니다.');
@@ -100,19 +101,19 @@ export default function SignInPage() {
 
   useEffect(() => {
     if (!gigwanCode || gigwanCode.length !== 8) {
-      router.replace('/td/g');
+      router.replace(LOGIN_ROUTE);
     }
   }, [gigwanCode, router]);
 
   useEffect(() => {
     if (isGigwanError) {
-      router.replace('/td/g');
+      router.replace(LOGIN_ROUTE);
     }
   }, [isGigwanError, router]);
 
   useEffect(() => {
     if (isReady && isAuthenticated && state.gigwanNanoId) {
-      router.replace(`/td/np/gis/${state.gigwanNanoId}/manage/home/dv`);
+      router.replace(createGigwanHomeRoute(state.gigwanNanoId));
     }
   }, [isAuthenticated, isReady, router, state.gigwanNanoId]);
 
