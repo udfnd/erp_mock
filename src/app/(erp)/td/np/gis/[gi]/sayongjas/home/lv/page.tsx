@@ -1,8 +1,8 @@
 'use client';
 
 import clsx from 'clsx';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/api/gigwan';
 import { useJojiksQuery, type JojikListItem } from '@/api/jojik';

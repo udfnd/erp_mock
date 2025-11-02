@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, styleVariants } from '@vanilla-extract/css';
 
 import { themeVars } from '@/design/theme.css';
 import { typography } from '@/design/typo.css';
@@ -170,6 +170,36 @@ export const sidePanelBody = style({
   gap: themeVars.spacing.xl,
 });
 
+export const sidePanelSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.base,
+  paddingBottom: themeVars.spacing.xl,
+  borderBottom: `1px solid ${themeVars.palette.cgrey100}`,
+  selectors: {
+    '&:last-child': {
+      borderBottom: 'none',
+      paddingBottom: 0,
+    },
+  },
+});
+
+export const sectionTitle = style([typography.bodyB, { color: themeVars.palette.black }]);
+
+export const sectionDescription = style([
+  typography.captionR,
+  {
+    color: themeVars.palette.cgrey500,
+    lineHeight: 1.5,
+  },
+]);
+
+export const sectionActions = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: themeVars.spacing.sm,
+});
+
 export const infoGroup = style({
   display: 'flex',
   flexDirection: 'column',
@@ -179,6 +209,182 @@ export const infoGroup = style({
 export const infoLabel = style([typography.captionB, { color: themeVars.palette.cgrey500 }]);
 
 export const infoValue = style([typography.bodyR, { color: themeVars.palette.black }]);
+
+export const connectionPlaceholder = style([
+  typography.captionR,
+  {
+    color: themeVars.palette.cgrey500,
+    backgroundColor: themeVars.palette.cgrey50,
+    padding: `${themeVars.spacing.base} ${themeVars.spacing.lg}`,
+    borderRadius: themeVars.radius.md,
+  },
+]);
+
+export const organizationInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.xs,
+});
+
+export const organizationName = style([typography.bodyR, { color: themeVars.palette.black }]);
+
+export const organizationMeta = style([typography.captionR, { color: themeVars.palette.cgrey500 }]);
+
+export const connectionHeader = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.base,
+});
+
+export const connectionTitleGroup = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.xs,
+  flex: 1,
+});
+
+export const userAddContainer = style({
+  position: 'relative',
+});
+
+export const userPicker = style({
+  position: 'absolute',
+  top: `calc(100% + ${themeVars.spacing.sm})`,
+  right: 0,
+  width: 360,
+  backgroundColor: themeVars.palette.white,
+  borderRadius: themeVars.radius.lg,
+  border: `1px solid ${themeVars.palette.cgrey200}`,
+  boxShadow: themeVars.shadow.lg,
+  zIndex: 20,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.base,
+  padding: themeVars.spacing.xl,
+});
+
+export const userPickerSearch = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: themeVars.spacing.sm,
+});
+
+export const userPickerSearchIcon = style({
+  color: themeVars.palette.cgrey400,
+});
+
+export const userPickerInput = style([
+  typography.bodyR,
+  {
+    flex: 1,
+    padding: `${themeVars.spacing.xs} ${themeVars.spacing.sm}`,
+    borderRadius: themeVars.radius.sm,
+    border: `1px solid ${themeVars.palette.cgrey200}`,
+    backgroundColor: themeVars.palette.white,
+    selectors: {
+      '&:focus-visible': {
+        outline: 'none',
+        borderColor: themeVars.palette.blue300,
+        boxShadow: `0 0 0 2px ${themeVars.palette.blue50}`,
+      },
+    },
+  },
+]);
+
+export const userPickerList = style({
+  maxHeight: 240,
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.sm,
+});
+
+export const userPickerNotice = style([
+  typography.captionR,
+  { color: themeVars.palette.cgrey500 },
+]);
+
+export const userPickerItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.sm,
+});
+
+export const userPickerItemInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.xs,
+});
+
+export const userPickerItemMeta = style([
+  typography.captionR,
+  { color: themeVars.palette.cgrey500 },
+]);
+
+export const userPickerFooter = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: themeVars.spacing.sm,
+});
+
+export const helperText = style([
+  typography.captionR,
+  { color: themeVars.palette.cgrey400 },
+]);
+
+export const errorText = style({ color: themeVars.palette.red500 });
+
+export const userPickerActions = style({
+  display: 'flex',
+  gap: themeVars.spacing.sm,
+});
+
+export const userList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.sm,
+});
+
+export const userListItem = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: `${themeVars.spacing.sm} ${themeVars.spacing.lg}`,
+  borderRadius: themeVars.radius.md,
+  border: `1px solid ${themeVars.palette.cgrey100}`,
+  backgroundColor: themeVars.palette.white,
+});
+
+export const userName = style([typography.bodyR, { color: themeVars.palette.black }]);
+
+export const userMeta = style([
+  typography.captionR,
+  { color: themeVars.palette.cgrey500, display: 'block', marginTop: themeVars.spacing.xs },
+]);
+
+export const userStatusBadge = styleVariants({
+  active: [
+    typography.captionB,
+    {
+      color: themeVars.palette.green600,
+      backgroundColor: themeVars.palette.green50,
+      padding: `${themeVars.spacing.xs} ${themeVars.spacing.sm}`,
+      borderRadius: themeVars.radius.lg,
+    },
+  ],
+  inactive: [
+    typography.captionB,
+    {
+      color: themeVars.palette.cgrey500,
+      backgroundColor: themeVars.palette.cgrey100,
+      padding: `${themeVars.spacing.xs} ${themeVars.spacing.sm}`,
+      borderRadius: themeVars.radius.lg,
+    },
+  ],
+});
 
 export const panelFooter = style({
   padding: themeVars.spacing.xxl,
