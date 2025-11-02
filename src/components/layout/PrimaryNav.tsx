@@ -2,12 +2,15 @@
 
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/api/gigwan';
 import { SidebarOpen, SidebarClose } from '@/components/icons';
 import { useAuth } from '@/state/auth';
 
 import * as styles from './PrimaryNav.style.css';
+
+import type { PrimaryNavHierarchy } from './navigation.types';
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ');
 
@@ -19,13 +22,39 @@ type Item = {
   children?: Item[];
 };
 
-export default function PrimaryNav() {
+type Props = {
+  onHierarchyChange?: (hierarchy: PrimaryNavHierarchy) => void;
+};
+
+const getParamValue = (
+  params: ReturnType<typeof useParams>,
+  key: string,
+): string | null => {
+  const value = (params as Record<string, string | string[] | undefined>)[key];
+  if (!value) return null;
+  return typeof value === 'string' ? value : value[0] ?? null;
+};
+
+export default function PrimaryNav({ onHierarchyChange }: Props) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [isCollapsedByBreakpoint, setIsCollapsedByBreakpoint] = useState(false);
-  const { clearAuthState } = useAuth();
+  const { state: authState, clearAuthState } = useAuth();
+
+  const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
+  const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
+
+  const { data: gigwanNameData } = useGigwanNameQuery(gigwanNanoId ?? '', {
+    enabled: Boolean(gigwanNanoId),
+  });
+
+  const { data: sidebarData } = useGigwanSidebarQuery(gigwanNanoId ?? '', {
+    enabled: Boolean(gigwanNanoId),
+  });
+
+  const gigwanDisplayName = gigwanNameData?.name ?? authState.gigwanName ?? '기관';
 
   const loginHref = `/td/g`;
 
@@ -115,35 +144,94 @@ export default function PrimaryNav() {
     setIsOpen((v) => !v);
   }, [isCollapsedByBreakpoint]);
 
-  const items: Item[] = [
-    {
-      key: '기관명',
-      label: '기관명',
-      depth: 1,
-      href: `/td/np/gis/${(params as any)?.gi ?? 'gi'}/manage/home/dv`,
-    },
-    {
-      key: '조직명',
-      label: '조직명',
-      depth: 1,
-      href: `/td/np/jos/${(params as any)?.jo ?? 'jo'}/manage/home/dv`,
-    },
-    {
-      key: '수업명',
-      label: '수업명',
-      depth: 1,
-      href: null,
-      children: [
-        {
-          key: '수업-d2',
-          label: '수업',
-          depth: 2,
-          href: null,
-          children: [{ key: '수업-d3', label: '수업', depth: 3, href: null }],
-        },
-      ],
-    },
-  ];
+  const hierarchy = useMemo<PrimaryNavHierarchy>(() => {
+    return {
+      gigwan: gigwanNanoId
+        ? {
+            nanoId: gigwanNanoId,
+            name: gigwanDisplayName,
+          }
+        : null,
+      jojiks: (sidebarData?.jojiks ?? []).map((jojik) => ({
+        nanoId: jojik.nanoId,
+        name: jojik.name,
+        sueops: (jojik.sueops ?? []).map((sueop) => ({
+          nanoId: sueop.nanoId,
+          name: sueop.name,
+        })),
+      })),
+    };
+  }, [gigwanDisplayName, gigwanNanoId, sidebarData?.jojiks]);
+
+  useEffect(() => {
+    if (!onHierarchyChange) return;
+    onHierarchyChange(hierarchy);
+  }, [hierarchy, onHierarchyChange]);
+
+  const items = useMemo<Item[]>(() => {
+    const list: Item[] = [];
+
+    if (hierarchy.gigwan) {
+      list.push({
+        key: `gigwan-${hierarchy.gigwan.nanoId}`,
+        label: hierarchy.gigwan.name,
+        depth: 1,
+        href: `/td/np/gis/${hierarchy.gigwan.nanoId}`,
+      });
+    }
+
+    const rawJojiks = sidebarData?.jojiks;
+
+    if (rawJojiks && rawJojiks.length > 0) {
+      rawJojiks.forEach((jojik) => {
+        const sueopItems = (jojik.sueops ?? []).map<Item>((sueop) => {
+          const konItems = (sueop.kons ?? []).map<Item>((kon) => ({
+            key: `kon-${kon.nanoId}`,
+            label: kon.name,
+            depth: 3,
+            href: null,
+          }));
+
+          return {
+            key: `sueop-${sueop.nanoId}`,
+            label: sueop.name,
+            depth: 2,
+            href: null,
+            children: konItems.length > 0 ? konItems : undefined,
+          };
+        });
+
+        list.push({
+          key: `jojik-${jojik.nanoId}`,
+          label: jojik.name,
+          depth: 1,
+          href: `/td/np/jos/${jojik.nanoId}`,
+          children: sueopItems.length > 0 ? sueopItems : undefined,
+        });
+      });
+
+      return list;
+    }
+
+    hierarchy.jojiks.forEach((jojik) => {
+      const sueopItems = jojik.sueops.map<Item>((sueop) => ({
+        key: `sueop-${sueop.nanoId}`,
+        label: sueop.name,
+        depth: 2,
+        href: null,
+      }));
+
+      list.push({
+        key: `jojik-${jojik.nanoId}`,
+        label: jojik.name,
+        depth: 1,
+        href: `/td/np/jos/${jojik.nanoId}`,
+        children: sueopItems.length > 0 ? sueopItems : undefined,
+      });
+    });
+
+    return list;
+  }, [hierarchy, sidebarData?.jojiks]);
 
   const renderItems = (list: Item[]) =>
     list.map((item) => {
