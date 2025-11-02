@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { SidebarOpen, SidebarClose } from '@/components/icons';
 import { useAuth } from '@/state/auth';
@@ -24,6 +24,7 @@ export default function PrimaryNav() {
   const params = useParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
+  const [isCollapsedByBreakpoint, setIsCollapsedByBreakpoint] = useState(false);
   const { clearAuthState } = useAuth();
 
   const loginHref = `/td/g`;
@@ -78,6 +79,41 @@ export default function PrimaryNav() {
       window.location.href = loginHref;
     }
   }, [clearAuthState, loginHref, router]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 960px) and (max-width: 1279px)');
+    const updateState = (matches: boolean) => {
+      setIsCollapsedByBreakpoint(matches);
+      if (matches) {
+        setIsOpen(false);
+      }
+    };
+
+    updateState(mediaQuery.matches);
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      updateState(event.matches);
+    };
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => {
+      mediaQuery.removeListener(handleChange);
+    };
+  }, []);
+
+  const effectiveIsOpen = isCollapsedByBreakpoint ? false : isOpen;
+
+  const handleToggle = useCallback(() => {
+    if (isCollapsedByBreakpoint) return;
+    setIsOpen((v) => !v);
+  }, [isCollapsedByBreakpoint]);
 
   const items: Item[] = [
     {
@@ -146,20 +182,21 @@ export default function PrimaryNav() {
 
   return (
     <aside
-      className={isOpen ? styles.navContainerOpen : styles.navContainerClosed}
+      className={effectiveIsOpen ? styles.navContainerOpen : styles.navContainerClosed}
       aria-label="기본 내비게이션"
-      data-open={isOpen ? 'true' : 'false'}
+      data-open={effectiveIsOpen ? 'true' : 'false'}
     >
       <div className={styles.toggleBar}>
         <button
           type="button"
           className={styles.toggleButton}
-          onClick={() => setIsOpen((v) => !v)}
-          aria-expanded={isOpen}
+          onClick={handleToggle}
+          aria-expanded={effectiveIsOpen}
           aria-controls="primary-nav-list"
-          aria-label={isOpen ? '메뉴 접기' : '메뉴 열기'}
+          aria-label={effectiveIsOpen ? '메뉴 접기' : '메뉴 열기'}
+          disabled={isCollapsedByBreakpoint}
         >
-          {isOpen ? (
+          {effectiveIsOpen ? (
             <SidebarClose className={styles.icon} />
           ) : (
             <SidebarOpen className={styles.icon} />
@@ -167,11 +204,11 @@ export default function PrimaryNav() {
         </button>
       </div>
 
-      <ul id="primary-nav-list" className={styles.navList[isOpen ? 'show' : 'hide']}>
+      <ul id="primary-nav-list" className={styles.navList[effectiveIsOpen ? 'show' : 'hide']}>
         {renderItems(items)}
       </ul>
 
-      <div className={styles.navFooter[isOpen ? 'show' : 'hide']}>
+      <div className={styles.navFooter[effectiveIsOpen ? 'show' : 'hide']}>
         <a
           href="https://example.com/purchase-strike"
           target="_blank"
