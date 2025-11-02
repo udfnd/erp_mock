@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
 import {
   useEmploymentCategoriesQuery,
@@ -344,7 +344,9 @@ export default function GigwanSettingServicePage() {
         })),
       })),
     });
-    setEmploymentEditing({});
+    startTransition(() => {
+      setEmploymentEditing({});
+    });
   }, [employmentCategoriesData]);
 
   const handleEmploymentStatusChange = useCallback(

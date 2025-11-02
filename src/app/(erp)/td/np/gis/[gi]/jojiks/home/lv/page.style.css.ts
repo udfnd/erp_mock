@@ -166,6 +166,72 @@ export const sidePanelBody = style({
   gap: themeVars.spacing.xl,
 });
 
+export const sidePanelSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.base,
+  paddingBottom: themeVars.spacing.xl,
+  borderBottom: `1px solid ${themeVars.palette.cgrey100}`,
+  selectors: {
+    '&:last-child': {
+      borderBottom: 'none',
+      paddingBottom: 0,
+    },
+  },
+});
+
+export const sectionTitle = style([typography.bodyB, { color: themeVars.palette.black }]);
+
+export const sectionDescription = style([
+  typography.captionR,
+  {
+    color: themeVars.palette.cgrey500,
+    lineHeight: 1.5,
+  },
+]);
+
+export const sectionActions = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: themeVars.spacing.sm,
+});
+
+export const toggleRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.base,
+});
+
+export const toggleLabel = style([typography.bodyR, { color: themeVars.palette.black }]);
+
+export const errorText = style([typography.captionR, { color: themeVars.palette.red }]);
+
+export const fullWidthInput = style({ width: '100%' });
+
+export const infoLink = style([
+  typography.bodyR,
+  {
+    color: themeVars.palette.blue,
+    textDecoration: 'none',
+    wordBreak: 'break-all',
+    selectors: {
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    },
+  },
+]);
+
+export const infoList = style({
+  margin: 0,
+  paddingLeft: themeVars.spacing.base,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.xs,
+  color: themeVars.palette.black,
+});
+
 export const infoGroup = style({
   display: 'flex',
   flexDirection: 'column',
@@ -190,5 +256,25 @@ export const panelFooter = style({
   padding: themeVars.spacing.xxl,
   borderTop: `1px solid ${themeVars.palette.cgrey100}`,
   display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: themeVars.spacing.sm,
+  flexWrap: 'wrap',
+});
+
+export const panelFooterSingle = style({
   justifyContent: 'flex-end',
+});
+
+export const deleteButton = style({
+  color: themeVars.palette.red,
+  borderColor: themeVars.palette.red,
+  selectors: {
+    '&:hover': {
+      backgroundColor: themeVars.palette.red10,
+    },
+    '&:active': {
+      backgroundColor: themeVars.palette.red10,
+    },
+  },
 });

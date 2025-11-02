@@ -1,19 +1,26 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useJojiksQuery } from '@/api/jojik';
+import {
+  useCreateJojikMutation,
+  useDeleteJojikMutation,
+  useJojikQuery,
+  useJojiksQuery,
+  useUpdateJojikMutation,
+} from '@/api/jojik';
 import {
   ListViewLayout,
   ListViewPagination,
   ListViewTable,
   type ListViewColumn,
 } from '@/app/(erp)/_components/list-view';
+import LabeledInput from '@/app/(erp)/td/g/_components/LabeledInput';
 import { Search as SearchIcon } from '@/components/icons';
-import { Checkbox } from '@/design';
-import { Button } from '@/design/components/Button';
+import { Button, Checkbox, Textfield } from '@/design';
 import { Filter as FilterButton } from '@/design/components/Filter';
 
 import * as styles from './page.style.css';
@@ -76,8 +83,16 @@ const SORT_OPTIONS: SortOption[] = [
 
 export default function GiOrganizationsPage({ params }: PageProps) {
   const { gi } = useParams<{ gi: string }>();
+  const queryClient = useQueryClient();
 
-  const { data, isLoading } = useJojiksQuery();
+  const listQueryParams = useMemo(
+    () => ({ gigwanNanoId: gi ?? params.gi }),
+    [gi, params.gi],
+  );
+
+  const { data, isLoading } = useJojiksQuery(listQueryParams, {
+    enabled: Boolean(listQueryParams.gigwanNanoId),
+  });
   const jojiks = useMemo<JojikListItemView[]>(() => data?.jojiks ?? [], [data]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -225,6 +240,135 @@ export default function GiOrganizationsPage({ params }: PageProps) {
   );
 
   const primarySelected = selectedItems[0];
+  const singleSelected = selectedItems.length === 1 ? selectedItems[0] : null;
+  const selectedNanoId = singleSelected?.nanoId ?? '';
+
+  const {
+    data: selectedJojik,
+    isFetching: isSelectedJojikFetching,
+  } = useJojikQuery(selectedNanoId, { enabled: Boolean(selectedNanoId) });
+
+  const updateJojikMutation = useUpdateJojikMutation(selectedNanoId);
+  const deleteJojikMutation = useDeleteJojikMutation(selectedNanoId);
+  const createJojikMutation = useCreateJojikMutation();
+
+  const [nameValue, setNameValue] = useState('');
+  const [introValue, setIntroValue] = useState('');
+  const [openSangtaeValue, setOpenSangtaeValue] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [introError, setIntroError] = useState<string | null>(null);
+  const [openError, setOpenError] = useState<string | null>(null);
+  const [createName, setCreateName] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedJojik) {
+      startTransition(() => {
+        setNameValue('');
+        setIntroValue('');
+        setOpenSangtaeValue(false);
+        setNameError(null);
+        setIntroError(null);
+        setOpenError(null);
+      });
+      return;
+    }
+    startTransition(() => {
+      setNameValue(selectedJojik.name ?? '');
+      setIntroValue(selectedJojik.intro ?? '');
+      setOpenSangtaeValue(Boolean(selectedJojik.openSangtae));
+      setNameError(null);
+      setIntroError(null);
+      setOpenError(null);
+    });
+  }, [selectedJojik]);
+
+  const handleCreateJojik = useCallback(() => {
+    if (!listQueryParams.gigwanNanoId) return;
+    const trimmed = createName.trim();
+    if (!trimmed) {
+      setCreateError('조직명을 입력해주세요.');
+      return;
+    }
+    setCreateError(null);
+    createJojikMutation.mutate(
+      { name: trimmed, gigwanNanoId: listQueryParams.gigwanNanoId },
+      {
+        onSuccess: () => {
+          setCreateName('');
+          queryClient.invalidateQueries({ queryKey: ['jojiks'] });
+        },
+        onError: () => {
+          setCreateError('조직 생성에 실패했습니다. 다시 시도해주세요.');
+        },
+      },
+    );
+  }, [createJojikMutation, createName, listQueryParams.gigwanNanoId, queryClient]);
+
+  const handleSaveName = useCallback(() => {
+    if (!selectedNanoId) return;
+    const trimmed = nameValue.trim();
+    if (!trimmed) {
+      setNameError('조직 이름을 입력해주세요.');
+      return;
+    }
+    setNameError(null);
+    updateJojikMutation.mutate(
+      { name: trimmed },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['jojik', selectedNanoId] });
+          queryClient.invalidateQueries({ queryKey: ['jojiks'] });
+        },
+        onError: () => {
+          setNameError('조직 이름 저장에 실패했습니다.');
+        },
+      },
+    );
+  }, [nameValue, selectedNanoId, updateJojikMutation, queryClient]);
+
+  const handleSaveIntro = useCallback(() => {
+    if (!selectedNanoId) return;
+    updateJojikMutation.mutate(
+      { intro: introValue },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['jojik', selectedNanoId] });
+        },
+        onError: () => {
+          setIntroError('조직 소개 저장에 실패했습니다.');
+        },
+      },
+    );
+  }, [introValue, selectedNanoId, updateJojikMutation, queryClient]);
+
+  const handleSaveOpenSangtae = useCallback(() => {
+    if (!selectedNanoId) return;
+    updateJojikMutation.mutate(
+      { openSangtae: openSangtaeValue },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['jojik', selectedNanoId] });
+        },
+        onError: () => {
+          setOpenError('공개 설정 저장에 실패했습니다.');
+        },
+      },
+    );
+  }, [openSangtaeValue, selectedNanoId, updateJojikMutation, queryClient]);
+
+  const handleDeleteJojik = useCallback(() => {
+    if (!selectedNanoId) return;
+    const confirmed = window.confirm('선택한 조직을 삭제하시겠습니까? 삭제 후에는 되돌릴 수 없습니다.');
+    if (!confirmed) return;
+    deleteJojikMutation.mutate(undefined, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['jojiks'] });
+        queryClient.invalidateQueries({ queryKey: ['jojik', selectedNanoId] });
+        setSelectedIds((prev) => prev.filter((id) => id !== selectedNanoId));
+      },
+    });
+  }, [deleteJojikMutation, queryClient, selectedNanoId]);
 
   const tableColumns: Array<ListViewColumn<JojikListItemView>> = useMemo(
     () => [
@@ -293,8 +437,35 @@ export default function GiOrganizationsPage({ params }: PageProps) {
   const sidePanelContent = (() => {
     if (selectedItems.length === 0) {
       return (
-        <div className={styles.placeholder}>
-          좌측 목록에서 조직을 선택하면 상세 정보가 표시됩니다.
+        <div className={styles.sidePanelBody}>
+          <div className={styles.sidePanelSection}>
+            <h3 className={styles.sectionTitle}>새 조직 생성</h3>
+            <p className={styles.sectionDescription}>
+              조직명을 입력하고 저장하면 새로운 조직을 등록할 수 있습니다.
+            </p>
+            <LabeledInput
+              label="조직 이름"
+              value={createName}
+              onValueChange={(value) => {
+                setCreateName(value);
+                setCreateError(null);
+              }}
+              placeholder="예: 행복한 교실"
+              status={createError ? 'negative' : 'normal'}
+              helperText={createError ?? undefined}
+              containerClassName={styles.fullWidthInput}
+            />
+            <div className={styles.sectionActions}>
+              <Button
+                styleType="solid"
+                variant="primary"
+                onClick={handleCreateJojik}
+                disabled={createJojikMutation.isPending || createName.trim().length === 0}
+              >
+                조직 생성
+              </Button>
+            </div>
+          </div>
         </div>
       );
     }
@@ -302,26 +473,192 @@ export default function GiOrganizationsPage({ params }: PageProps) {
     if (selectedItems.length > 1) {
       return (
         <div className={styles.placeholder}>
-          {selectedItems[0]?.name} 외 {selectedItems.length - 1}개 조직 설정은 준비중입니다.
+          선택된 {selectedItems.length}개 조직의 일괄 설정 기능은 준비중입니다.
         </div>
       );
     }
 
-    const item = selectedItems[0];
+    if (isSelectedJojikFetching) {
+      return <div className={styles.placeholder}>조직 정보를 불러오는 중입니다.</div>;
+    }
+
+    if (!selectedJojik) {
+      return (
+        <div className={styles.placeholder}>
+          조직 상세 정보를 불러오지 못했습니다. 다시 시도해주세요.
+        </div>
+      );
+    }
+
     return (
       <div className={styles.sidePanelBody}>
-        <div className={styles.infoGroup}>
-          <span className={styles.infoLabel}>조직 이름</span>
-          <span className={styles.infoValue}>{item.name}</span>
+        <div className={styles.sidePanelSection}>
+          <h3 className={styles.sectionTitle}>기본 정보</h3>
+          <p className={styles.sectionDescription}>
+            조직의 이름과 소개를 수정하고 저장할 수 있습니다.
+          </p>
+          <LabeledInput
+            label="조직 이름"
+            value={nameValue}
+            onValueChange={(value) => {
+              setNameValue(value);
+              setNameError(null);
+            }}
+            status={nameError ? 'negative' : 'normal'}
+            helperText={nameError ?? undefined}
+            containerClassName={styles.fullWidthInput}
+          />
+          <div className={styles.sectionActions}>
+            <Button
+              styleType="solid"
+              variant="secondary"
+              onClick={handleSaveName}
+              disabled={
+                updateJojikMutation.isPending ||
+                nameValue.trim().length === 0 ||
+                nameValue.trim() === selectedJojik.name.trim()
+              }
+            >
+              저장
+            </Button>
+          </div>
+          <Textfield
+            label="조직 소개"
+            value={introValue}
+            onValueChange={(value) => {
+              setIntroValue(value);
+              setIntroError(null);
+            }}
+            placeholder="조직 소개를 입력하세요"
+            resize="limit"
+            className={styles.fullWidthInput}
+            status={introError ? 'negative' : 'normal'}
+            helperText={introError ?? undefined}
+          />
+          <div className={styles.sectionActions}>
+            <Button
+              styleType="solid"
+              variant="secondary"
+              onClick={handleSaveIntro}
+              disabled={updateJojikMutation.isPending || introValue === (selectedJojik.intro ?? '')}
+            >
+              저장
+            </Button>
+          </div>
         </div>
-        <div className={styles.infoGroup}>
-          <span className={styles.infoLabel}>조직 코드</span>
-          <span className={styles.infoValue}>{item.nanoId}</span>
+
+        <div className={styles.sidePanelSection}>
+          <h3 className={styles.sectionTitle}>공개 설정</h3>
+          <div className={styles.toggleRow}>
+            <span className={styles.toggleLabel}>조직 정보 공개</span>
+            <Checkbox
+              checked={openSangtaeValue}
+              onChange={(event) => {
+                setOpenSangtaeValue(event.target.checked);
+                setOpenError(null);
+              }}
+            />
+          </div>
+          {openError ? <span className={styles.errorText}>{openError}</span> : null}
+          <div className={styles.sectionActions}>
+            <Button
+              styleType="solid"
+              variant="secondary"
+              onClick={handleSaveOpenSangtae}
+              disabled={updateJojikMutation.isPending || openSangtaeValue === selectedJojik.openSangtae}
+            >
+              저장
+            </Button>
+          </div>
         </div>
-        <div className={styles.infoGroup}>
-          <span className={styles.infoLabel}>생성일</span>
-          <span className={styles.infoValue}>{formatDate(item.createdAt)}</span>
+
+        <div className={styles.sidePanelSection}>
+          <h3 className={styles.sectionTitle}>추가 정보</h3>
+          <div className={styles.infoGroup}>
+            <span className={styles.infoLabel}>조직 코드</span>
+            <span className={styles.infoValue}>{selectedJojik.nanoId}</span>
+          </div>
+          {singleSelected ? (
+            <div className={styles.infoGroup}>
+              <span className={styles.infoLabel}>생성일</span>
+              <span className={styles.infoValue}>{formatDate(singleSelected.createdAt)}</span>
+            </div>
+          ) : null}
+          <div className={styles.infoGroup}>
+            <span className={styles.infoLabel}>재원생 신청 URL</span>
+            <a
+              href={selectedJojik.jaewonsaengLinkRequestUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.infoLink}
+            >
+              {selectedJojik.jaewonsaengLinkRequestUrl}
+            </a>
+          </div>
+          {selectedJojik.hompageUrl ? (
+            <div className={styles.infoGroup}>
+              <span className={styles.infoLabel}>홈페이지</span>
+              <a
+                href={selectedJojik.hompageUrl.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.infoLink}
+              >
+                {selectedJojik.hompageUrl.name}
+              </a>
+            </div>
+          ) : null}
+          {selectedJojik.openFiles.length > 0 ? (
+            <div className={styles.infoGroup}>
+              <span className={styles.infoLabel}>공개 자료</span>
+              <ul className={styles.infoList}>
+                {selectedJojik.openFiles.map((file) => (
+                  <li key={file.nanoId}>{file.name}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {selectedJojik.juso ? (
+            <div className={styles.infoGroup}>
+              <span className={styles.infoLabel}>주소</span>
+              <span className={styles.infoValue}>
+                {selectedJojik.juso.juso}
+                {selectedJojik.juso.jusoDetail ? ` ${selectedJojik.juso.jusoDetail}` : ''}
+              </span>
+            </div>
+          ) : null}
         </div>
+      </div>
+    );
+  })();
+
+  const panelFooter = (() => {
+    if (selectedItems.length === 0) {
+      return null;
+    }
+    if (selectedItems.length > 1) {
+      return (
+        <div className={clsx(styles.panelFooter, styles.panelFooterSingle)}>
+          <Button styleType="text" variant="secondary" onClick={() => setSelectedIds([])}>
+            선택 해제
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <div className={styles.panelFooter}>
+        <Button
+          styleType="outlined"
+          variant="secondary"
+          className={styles.deleteButton}
+          onClick={handleDeleteJojik}
+          disabled={deleteJojikMutation.isPending}
+        >
+          조직 삭제
+        </Button>
+        <Button styleType="text" variant="secondary" onClick={() => setSelectedIds([])}>
+          선택 해제
+        </Button>
       </div>
     );
   })();
@@ -330,7 +667,7 @@ export default function GiOrganizationsPage({ params }: PageProps) {
     <ListViewLayout
       title="조직 목록"
       description="기관에 속한 조직을 조회하고 관리할 수 있는 리스트 뷰입니다."
-      meta={<span>{`기관 코드: ${gi}`}</span>}
+      meta={<span>{`기관 코드: ${listQueryParams.gigwanNanoId ?? '-'}`}</span>}
       headerActions={<span>{`총 ${totalItems}개`}</span>}
       filterBar={
         <div className={styles.tableToolbar}>
@@ -487,30 +824,26 @@ export default function GiOrganizationsPage({ params }: PageProps) {
         <>
           <div className={styles.sidePanelHeader}>
             <span className={styles.sidePanelTitle}>
-              {primarySelected
-                ? selectedItems.length > 1
-                  ? `${primarySelected.name} 외 ${selectedItems.length - 1}개`
-                  : primarySelected.name
-                : '선택된 조직 없음'}
+              {singleSelected
+                ? singleSelected.name
+                : selectedItems.length > 1
+                  ? `${primarySelected?.name ?? ''} 외 ${selectedItems.length - 1}개`
+                  : '새 조직 생성'}
             </span>
             <span className={styles.sidePanelSubtitle}>
-              {selectedItems.length > 0 ? (
-                <span
-                  className={styles.selectedCount}
-                >{`총 ${selectedItems.length}개 선택됨`}</span>
-              ) : (
-                '조직을 선택하면 정보가 표시됩니다.'
-              )}
+              {selectedItems.length === 0
+                ? '조직을 선택하거나 새 조직을 생성하세요.'
+                : selectedItems.length > 1
+                  ? (
+                    <span className={styles.selectedCount}>{`총 ${selectedItems.length}개 선택됨`}</span>
+                  )
+                  : (
+                    <span className={styles.selectedCount}>조직 정보를 수정할 수 있습니다.</span>
+                  )}
             </span>
           </div>
           {sidePanelContent}
-          {selectedItems.length > 0 ? (
-            <div className={styles.panelFooter}>
-              <Button styleType="text" variant="secondary" onClick={() => setSelectedIds([])}>
-                선택 해제
-              </Button>
-            </div>
-          ) : null}
+          {panelFooter}
         </>
       }
     />
