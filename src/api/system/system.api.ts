@@ -14,8 +14,6 @@ import {
   GetOpenSangtaesResponseSchema,
   GetPermissionTypesResponse,
   GetPermissionTypesResponseSchema,
-  GetSayongjaSangtaesResponse,
-  GetSayongjaSangtaesResponseSchema,
 } from './system.schema';
 
 const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
@@ -50,18 +48,6 @@ export const useGetOpenContentsPermissionsQuery = (options?: { enabled?: boolean
   useQuery<GetOpenContentsPermissionsResponse, unknown>({
     queryKey: ['openContentsPermissions'],
     queryFn: getOpenContentsPermissions,
-    enabled: options?.enabled ?? true,
-  });
-
-export const getSayongjaSangtaes = async (): Promise<GetSayongjaSangtaesResponse> => {
-  const res = await apiClient.get('/T/dl/sayongja-sangtaes');
-  return parseOrThrow(GetSayongjaSangtaesResponseSchema, res.data);
-};
-
-export const useGetSayongjaSangtaesQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetSayongjaSangtaesResponse, unknown>({
-    queryKey: ['sayongjaSangtaes'],
-    queryFn: getSayongjaSangtaes,
     enabled: options?.enabled ?? true,
   });
 

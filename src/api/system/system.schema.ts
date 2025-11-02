@@ -20,11 +20,6 @@ export type GetOpenContentsPermissionsResponse = z.infer<
   typeof GetOpenContentsPermissionsResponseSchema
 >;
 
-export const GetSayongjaSangtaesResponseSchema = z.object({
-  sangtaes: z.array(SystemItemSchema),
-});
-export type GetSayongjaSangtaesResponse = z.infer<typeof GetSayongjaSangtaesResponseSchema>;
-
 export const GetPermissionTypesResponseSchema = z.object({
   permissionTypes: z.array(SystemItemSchema),
 });
