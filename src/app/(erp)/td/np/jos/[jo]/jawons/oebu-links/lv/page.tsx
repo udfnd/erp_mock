@@ -1,11 +1,13 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   type CreateOebuLinkRequest,
+  type GetOebuLinksRequest,
   type OebuLinkListItem,
   type UpdateOebuLinkRequest,
   useCreateOebuLinkMutation,
@@ -14,6 +16,7 @@ import {
   useGetOebuLinksQuery,
   useUpdateOebuLinkMutation,
 } from '@/api/oebu-link';
+import { useGetLinkIconsQuery } from '@/api/system';
 import {
   ListViewLayout,
   ListViewPagination,
@@ -22,7 +25,8 @@ import {
 } from '@/app/(erp)/_components/list-view';
 import LabeledInput from '@/app/(erp)/td/g/_components/LabeledInput';
 import { Search as SearchIcon } from '@/components/icons';
-import { Button, Textfield } from '@/design';
+import { Button, Checkbox, Textfield } from '@/design';
+import { Filter as FilterButton } from '@/design/components/Filter';
 
 import * as styles from './page.style.css';
 
@@ -36,31 +40,156 @@ type PageProps = {
 
 type PanelMode = 'idle' | 'detail' | 'edit' | 'create';
 
+type FilterState = {
+  iconNanoIds: string[];
+};
+
+type SortOption = {
+  id: 'nameAsc' | 'nameDesc' | 'createdAtAsc' | 'createdAtDesc';
+  label: string;
+};
+
+type IconOption = {
+  value: string;
+  label: string;
+};
+
+type AvailableFilterSets = {
+  iconNanoIds: Set<string>;
+};
+
 type OebuLinkFormState = Pick<
   CreateOebuLinkRequest,
-  'name' | 'asName' | 'linkUrl' | 'linkIconNanoId'
+  'name' | 'titleName' | 'linkUrl' | 'linkIconNanoId'
 >;
 
 type OebuLinkRequestPayload = Omit<CreateOebuLinkRequest, 'gigwanNanoId'>;
 
 const initialFormState: OebuLinkFormState = {
   name: '',
-  asName: '',
+  titleName: '',
   linkUrl: '',
   linkIconNanoId: '',
 };
 
+const SORT_OPTIONS: SortOption[] = [
+  { id: 'nameAsc', label: '이름 오름차순' },
+  { id: 'nameDesc', label: '이름 내림차순' },
+  { id: 'createdAtDesc', label: '최근 등록순' },
+  { id: 'createdAtAsc', label: '오래된 등록순' },
+];
+
+function normalizeFilters(state: FilterState, available: AvailableFilterSets): FilterState {
+  return {
+    iconNanoIds: Array.from(
+      new Set(state.iconNanoIds.filter((value) => available.iconNanoIds.has(value))),
+    ),
+  };
+}
+
 export default function JoResourceExternalLinksPage({ params }: PageProps) {
   const queryClient = useQueryClient();
   const gigwanNanoId = params.jo;
+
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  const sortRef = useRef<HTMLDivElement | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [panelMode, setPanelMode] = useState<PanelMode>('idle');
   const [formState, setFormState] = useState<OebuLinkFormState>(initialFormState);
+  const [filters, setFilters] = useState<FilterState>({ iconNanoIds: [] });
+  const [pendingFilters, setPendingFilters] = useState<FilterState>({ iconNanoIds: [] });
+  const [isFilterOpen, setFilterOpen] = useState(false);
+  const [isSortOpen, setSortOpen] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>(SORT_OPTIONS[0]);
 
-  const { data: oebuLinkListData, isLoading: isListLoading } = useGetOebuLinksQuery();
+  const { data: linkIconsData } = useGetLinkIconsQuery();
+
+  const iconOptions = useMemo<IconOption[]>(
+    () =>
+      (linkIconsData?.linkIcons ?? []).map((icon) => ({
+        value: icon.nanoId,
+        label: icon.name,
+      })),
+    [linkIconsData],
+  );
+
+  const iconLabelMap = useMemo(() => new Map(iconOptions.map((option) => [option.value, option.label])), [
+    iconOptions,
+  ]);
+
+  const availableFilterSets = useMemo<AvailableFilterSets>(
+    () => ({
+      iconNanoIds: new Set(iconOptions.map((option) => option.value)),
+    }),
+    [iconOptions],
+  );
+
+  const activeFilters = useMemo(
+    () => normalizeFilters(filters, availableFilterSets),
+    [filters, availableFilterSets],
+  );
+
+  const pendingFiltersNormalized = useMemo(
+    () => normalizeFilters(pendingFilters, availableFilterSets),
+    [pendingFilters, availableFilterSets],
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isFilterOpen) return;
+      if (!filterRef.current) return;
+      if (filterRef.current.contains(event.target as Node)) return;
+      setFilterOpen(false);
+      setPendingFilters(normalizeFilters(filters, availableFilterSets));
+    };
+
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterOpen, filters, availableFilterSets]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isSortOpen) return;
+      if (!sortRef.current) return;
+      if (sortRef.current.contains(event.target as Node)) return;
+      setSortOpen(false);
+    };
+
+    if (isSortOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSortOpen]);
+
+  const listQueryParams = useMemo<GetOebuLinksRequest>(
+    () => ({
+      gigwanNanoId,
+      nameSearch: searchTerm.trim() ? searchTerm.trim() : undefined,
+      iconFilters:
+        activeFilters.iconNanoIds.length > 0 ? activeFilters.iconNanoIds.join(',') : undefined,
+      pageSize: PAGE_SIZE,
+      pageNumber: currentPage,
+      sortByOption: sortOption.id,
+    }),
+    [gigwanNanoId, searchTerm, activeFilters.iconNanoIds, currentPage, sortOption.id],
+  );
+
+  const {
+    data: oebuLinkListData,
+    isLoading: isListLoading,
+    isFetching: isListFetching,
+  } = useGetOebuLinksQuery(listQueryParams, { enabled: Boolean(gigwanNanoId) });
   const { data: oebuLinkDetailData, isFetching: isDetailLoading } = useGetOebuLinkDetailQuery(
     selectedRowId ?? '',
     {
@@ -77,26 +206,12 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     [oebuLinkListData],
   );
 
-  const filteredLinks = useMemo(() => {
-    if (!searchTerm.trim()) return oebuLinks;
-    const lowered = searchTerm.trim().toLowerCase();
-    return oebuLinks.filter((item) =>
-      [item.name, item.asName, item.linkUrl].join(' ').toLowerCase().includes(lowered),
-    );
-  }, [oebuLinks, searchTerm]);
-
-  const totalItems = filteredLinks.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-
-  const paginatedRows = useMemo(
-    () =>
-      filteredLinks.slice(
-        (safeCurrentPage - 1) * PAGE_SIZE,
-        (safeCurrentPage - 1) * PAGE_SIZE + PAGE_SIZE,
-      ),
-    [filteredLinks, safeCurrentPage],
-  );
+  const paginationData = oebuLinkListData?.paginationData;
+  const totalItems = paginationData?.totalItemCount ?? oebuLinks.length;
+  const pageSize = paginationData?.pageSize ?? PAGE_SIZE;
+  const totalPages = paginationData?.totalPageCount ?? Math.max(1, Math.ceil(totalItems / pageSize));
+  const pageItemCount = paginationData?.pageItemCount ?? oebuLinks.length;
+  const currentPageForDisplay = paginationData?.pageNumber ?? Math.min(currentPage, totalPages);
 
   const columns = useMemo<ListViewColumn<OebuLinkListItem>[]>(
     () => [
@@ -121,7 +236,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
             </div>
             <div className={styles.linkInfo}>
               <span className={styles.linkName}>{row.name}</span>
-              <span className={styles.linkAlias}>{row.asName}</span>
+              <span className={styles.linkAlias}>{row.titleName}</span>
             </div>
           </div>
         ),
@@ -149,7 +264,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     [],
   );
 
-  const handleSelectionChange = (ids: string[]) => {
+  const handleSelectionChange = useCallback((ids: string[]) => {
     const lastId = ids.at(-1) ?? null;
     setSelectedRowId(lastId);
     if (lastId) {
@@ -157,7 +272,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     } else {
       setPanelMode('idle');
     }
-  };
+  }, []);
 
   const handleOpenCreate = () => {
     setPanelMode('create');
@@ -169,7 +284,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     if (!oebuLinkDetailData) return;
     setFormState({
       name: oebuLinkDetailData.name,
-      asName: oebuLinkDetailData.asName,
+      titleName: oebuLinkDetailData.titleName,
       linkUrl: oebuLinkDetailData.linkUrl,
       linkIconNanoId: oebuLinkDetailData.linkIcon,
     });
@@ -183,6 +298,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     try {
       const result = await createMutation.mutateAsync(payload);
       await queryClient.invalidateQueries({ queryKey: ['oebuLinks'] });
+      setCurrentPage(1);
       setSelectedRowId(result.nanoId);
       setPanelMode('detail');
     } catch (error) {
@@ -227,6 +343,51 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     }
   };
 
+  const handleToggleFilterOption = (value: string) => {
+    setPendingFilters((prev) => {
+      const base = normalizeFilters(prev, availableFilterSets);
+      const current = new Set(base.iconNanoIds);
+      if (current.has(value)) {
+        current.delete(value);
+      } else {
+        current.add(value);
+      }
+      return { iconNanoIds: Array.from(current) };
+    });
+  };
+
+  const handleApplyFilters = () => {
+    const normalized = normalizeFilters(pendingFilters, availableFilterSets);
+    setFilters(normalized);
+    setPendingFilters(normalized);
+    setFilterOpen(false);
+    setCurrentPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setPendingFilters({ iconNanoIds: [] });
+  };
+
+  const filterButtonLabel =
+    activeFilters.iconNanoIds.length > 0
+      ? `아이콘 필터 (${activeFilters.iconNanoIds.length})`
+      : '아이콘 필터';
+  const sortButtonLabel = sortOption.label;
+
+  const appliedFiltersSummary = useMemo(() => {
+    if (activeFilters.iconNanoIds.length === 0) {
+      return '아이콘 필터가 적용되지 않았습니다.';
+    }
+    const labels = activeFilters.iconNanoIds
+      .map((value) => iconLabelMap.get(value) ?? value)
+      .join(', ');
+    return `선택된 아이콘: ${labels}`;
+  }, [activeFilters.iconNanoIds, iconLabelMap]);
+
+  const listPlaceholderMessage = isListFetching
+    ? '외부 링크 목록을 불러오는 중입니다.'
+    : '조건에 맞는 외부 링크가 없습니다.';
+
   const sidePanelContent = (() => {
     if (panelMode === 'create') {
       return (
@@ -250,8 +411,8 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
                 label="표시 이름"
                 placeholder="예: 자료실"
                 required
-                value={formState.asName}
-                onValueChange={(value) => setFormState((prev) => ({ ...prev, asName: value }))}
+                value={formState.titleName}
+                onValueChange={(value) => setFormState((prev) => ({ ...prev, titleName: value }))}
               />
               <LabeledInput
                 label="링크 주소"
@@ -332,8 +493,8 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
               <LabeledInput
                 label="표시 이름"
                 required
-                value={formState.asName}
-                onValueChange={(value) => setFormState((prev) => ({ ...prev, asName: value }))}
+                value={formState.titleName}
+                onValueChange={(value) => setFormState((prev) => ({ ...prev, titleName: value }))}
               />
               <LabeledInput
                 label="링크 주소"
@@ -393,7 +554,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
           </div>
           <div className={styles.sidePanel.infoItem}>
             <span className={styles.sidePanel.infoLabel}>표시 이름</span>
-            <span className={styles.sidePanel.infoValue}>{oebuLinkDetailData.asName}</span>
+            <span className={styles.sidePanel.infoValue}>{oebuLinkDetailData.titleName}</span>
           </div>
           <div className={styles.sidePanel.infoItem}>
             <span className={styles.sidePanel.infoLabel}>링크 주소</span>
@@ -492,7 +653,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
       meta={<span>{`조직 코드: ${gigwanNanoId}`}</span>}
       headerActions={
         <>
-          <span className={styles.headerCounter}>{`전체 외부 링크 (${totalItems}개)`}</span>
+          <span className={styles.headerCounter}>{`전체 외부 링크 (${totalItems.toLocaleString()}개)`}</span>
           <Button styleType="solid" variant="primary" onClick={handleOpenCreate}>
             외부 링크 추가
           </Button>
@@ -514,19 +675,99 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
                 }}
               />
             </div>
+            <div className={styles.filterButtons}>
+              <div ref={filterRef} style={{ position: 'relative' }}>
+                <FilterButton
+                  styleType="solid"
+                  active={isFilterOpen || activeFilters.iconNanoIds.length > 0}
+                  onClick={() => {
+                    setFilterOpen((prev) => !prev);
+                    setPendingFilters(normalizeFilters(filters, availableFilterSets));
+                  }}
+                >
+                  {filterButtonLabel}
+                </FilterButton>
+                {isFilterOpen ? (
+                  <div className={styles.filterPopover}>
+                    <div className={styles.filterGroup}>
+                      <span className={styles.filterGroupHeader}>아이콘 선택</span>
+                      {iconOptions.length === 0 ? (
+                        <span className={styles.filterEmpty}>표시할 아이콘이 없습니다.</span>
+                      ) : (
+                        iconOptions.map((option) => (
+                          <label key={option.value} className={styles.filterOption}>
+                            <span className={styles.filterOptionLabel}>{option.label}</span>
+                            <Checkbox
+                              checked={pendingFiltersNormalized.iconNanoIds.includes(option.value)}
+                              onChange={() => handleToggleFilterOption(option.value)}
+                            />
+                          </label>
+                        ))
+                      )}
+                    </div>
+                    <div className={styles.filterFooter}>
+                      <Button
+                        styleType="text"
+                        variant="secondary"
+                        onClick={handleResetFilters}
+                        disabled={pendingFiltersNormalized.iconNanoIds.length === 0}
+                      >
+                        초기화
+                      </Button>
+                      <Button styleType="solid" variant="primary" onClick={handleApplyFilters}>
+                        적용하기
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              <div ref={sortRef} style={{ position: 'relative' }}>
+                <FilterButton
+                  styleType="outlined"
+                  active={isSortOpen}
+                  onClick={() => setSortOpen((prev) => !prev)}
+                >
+                  {sortButtonLabel}
+                </FilterButton>
+                {isSortOpen ? (
+                  <div className={styles.sortPopover}>
+                    {SORT_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={clsx(
+                          styles.sortOptionButton,
+                          option.id === sortOption.id && styles.sortOptionActive,
+                        )}
+                        onClick={() => {
+                          setSortOption(option);
+                          setSortOpen(false);
+                          setCurrentPage(1);
+                        }}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </div>
-          <span
-            className={styles.tableSummary}
-          >{`검색 결과 ${filteredLinks.length}건이 표시됩니다.`}</span>
+          <div className={styles.tableMeta}>
+            <span className={styles.filterSummary}>{appliedFiltersSummary}</span>
+            <span className={styles.tableSummary}>{`조건에 맞는 외부 링크 ${totalItems.toLocaleString()}건 · 현재 페이지 ${pageItemCount.toLocaleString()}건`}</span>
+          </div>
         </div>
       }
       list={
         isListLoading ? (
           <div className={styles.listPlaceholder}>외부 링크 목록을 불러오는 중입니다.</div>
+        ) : oebuLinks.length === 0 ? (
+          <div className={styles.listPlaceholder}>{listPlaceholderMessage}</div>
         ) : (
           <ListViewTable
             columns={columns}
-            rows={paginatedRows}
+            rows={oebuLinks}
             getRowId={(row) => row.nanoId}
             selectedRowIds={selectedRowId ? [selectedRowId] : []}
             onSelectionChange={handleSelectionChange}
@@ -535,9 +776,9 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
       }
       pagination={
         <ListViewPagination
-          currentPage={safeCurrentPage}
+          currentPage={currentPageForDisplay}
           totalItems={totalItems}
-          pageSize={PAGE_SIZE}
+          pageSize={pageSize}
           onPageChange={setCurrentPage}
         />
       }
@@ -594,18 +835,18 @@ function buildUpdatePayload(state: OebuLinkFormState): UpdateOebuLinkRequest | n
 
 function sanitizeFormState(state: OebuLinkFormState): OebuLinkRequestPayload | null {
   const name = state.name.trim();
-  const asName = state.asName.trim();
+  const titleName = state.titleName.trim();
   const linkUrl = state.linkUrl.trim();
   const linkIconNanoId = state.linkIconNanoId.trim();
 
-  if (!name || !asName || !linkUrl || !linkIconNanoId) {
+  if (!name || !titleName || !linkUrl || !linkIconNanoId) {
     window.alert('링크 이름, 표시 이름, 링크 주소, 아이콘 ID는 모두 필수 입력 항목입니다.');
     return null;
   }
 
   return {
     name,
-    asName,
+    titleName,
     linkUrl,
     linkIconNanoId,
   };

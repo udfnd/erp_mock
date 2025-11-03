@@ -19,6 +19,12 @@ export const controls = style({
   flexWrap: 'wrap',
 });
 
+export const filterButtons = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: themeVars.spacing.sm,
+});
+
 export const searchWrapper = style({
   position: 'relative',
   flex: '1 1 320px',
@@ -56,13 +62,108 @@ export const searchInput = style([
   },
 ]);
 
+export const filterPopover = style({
+  position: 'absolute',
+  top: 'calc(100% + 8px)',
+  right: 0,
+  width: 320,
+  backgroundColor: themeVars.palette.white,
+  borderRadius: themeVars.radius.lg,
+  border: `1px solid ${themeVars.palette.cgrey200}`,
+  boxShadow: themeVars.shadow.lg,
+  zIndex: 20,
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+export const filterGroup = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: themeVars.spacing.xs,
+  padding: `${themeVars.spacing.base} ${themeVars.spacing.xxl}`,
+});
+
+export const filterGroupHeader = style([
+  typography.captionB,
+  { color: themeVars.palette.cgrey500 },
+]);
+
+export const filterOption = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.sm,
+});
+
+export const filterOptionLabel = style([typography.bodyR, { color: themeVars.palette.black }]);
+
+export const filterEmpty = style([
+  typography.captionR,
+  {
+    color: themeVars.palette.cgrey400,
+    padding: `${themeVars.spacing.sm} 0`,
+  },
+]);
+
+export const filterFooter = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.base,
+  padding: `${themeVars.spacing.base} ${themeVars.spacing.xxl}`,
+  borderTop: `1px solid ${themeVars.palette.cgrey100}`,
+});
+
+export const tableMeta = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.sm,
+  flexWrap: 'wrap',
+});
+
+export const filterSummary = style([typography.captionR, { color: themeVars.palette.cgrey500 }]);
+
 export const tableSummary = style([
   typography.captionR,
   {
     color: themeVars.palette.cgrey500,
-    textAlign: 'right',
   },
 ]);
+
+export const sortPopover = style({
+  position: 'absolute',
+  top: 'calc(100% + 8px)',
+  right: 0,
+  width: 220,
+  backgroundColor: themeVars.palette.white,
+  borderRadius: themeVars.radius.lg,
+  border: `1px solid ${themeVars.palette.cgrey200}`,
+  boxShadow: themeVars.shadow.lg,
+  zIndex: 20,
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+export const sortOptionButton = style([
+  typography.bodyR,
+  {
+    padding: `${themeVars.spacing.sm} ${themeVars.spacing.xxl}`,
+    backgroundColor: 'transparent',
+    border: 'none',
+    textAlign: 'left',
+    cursor: 'pointer',
+    selectors: {
+      '&:hover': {
+        backgroundColor: themeVars.palette.blue50,
+      },
+    },
+  },
+]);
+
+export const sortOptionActive = style({
+  backgroundColor: themeVars.palette.blue100,
+  color: themeVars.palette.blue600,
+});
 
 export const listPlaceholder = style([
   typography.bodyR,
