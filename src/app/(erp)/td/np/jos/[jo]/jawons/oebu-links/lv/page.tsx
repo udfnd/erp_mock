@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -63,7 +64,7 @@ type OebuLinkFormState = Pick<
   'name' | 'titleName' | 'linkUrl' | 'linkIconNanoId'
 >;
 
-type OebuLinkRequestPayload = Omit<CreateOebuLinkRequest, 'gigwanNanoId'>;
+type OebuLinkRequestPayload = Omit<CreateOebuLinkRequest, 'jojikNanoId'>;
 
 const initialFormState: OebuLinkFormState = {
   name: '',
@@ -87,9 +88,9 @@ function normalizeFilters(state: FilterState, available: AvailableFilterSets): F
   };
 }
 
-export default function JoResourceExternalLinksPage({ params }: PageProps) {
+export default function JoResourceExternalLinksPage() {
   const queryClient = useQueryClient();
-  const gigwanNanoId = params.jo;
+  const { jo: jojikNanoId } = useParams<{ jo: string }>();
 
   const filterRef = useRef<HTMLDivElement | null>(null);
   const sortRef = useRef<HTMLDivElement | null>(null);
@@ -116,9 +117,10 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     [linkIconsData],
   );
 
-  const iconLabelMap = useMemo(() => new Map(iconOptions.map((option) => [option.value, option.label])), [
-    iconOptions,
-  ]);
+  const iconLabelMap = useMemo(
+    () => new Map(iconOptions.map((option) => [option.value, option.label])),
+    [iconOptions],
+  );
 
   const availableFilterSets = useMemo<AvailableFilterSets>(
     () => ({
@@ -174,7 +176,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
 
   const listQueryParams = useMemo<GetOebuLinksRequest>(
     () => ({
-      gigwanNanoId,
+      jojikNanoId,
       nameSearch: searchTerm.trim() ? searchTerm.trim() : undefined,
       iconFilters:
         activeFilters.iconNanoIds.length > 0 ? activeFilters.iconNanoIds.join(',') : undefined,
@@ -182,14 +184,14 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
       pageNumber: currentPage,
       sortByOption: sortOption.id,
     }),
-    [gigwanNanoId, searchTerm, activeFilters.iconNanoIds, currentPage, sortOption.id],
+    [jojikNanoId, searchTerm, activeFilters.iconNanoIds, currentPage, sortOption.id],
   );
 
   const {
     data: oebuLinkListData,
     isLoading: isListLoading,
     isFetching: isListFetching,
-  } = useGetOebuLinksQuery(listQueryParams, { enabled: Boolean(gigwanNanoId) });
+  } = useGetOebuLinksQuery(listQueryParams, { enabled: Boolean(jojikNanoId) });
   const { data: oebuLinkDetailData, isFetching: isDetailLoading } = useGetOebuLinkDetailQuery(
     selectedRowId ?? '',
     {
@@ -209,7 +211,8 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
   const paginationData = oebuLinkListData?.paginationData;
   const totalItems = paginationData?.totalItemCount ?? oebuLinks.length;
   const pageSize = paginationData?.pageSize ?? PAGE_SIZE;
-  const totalPages = paginationData?.totalPageCount ?? Math.max(1, Math.ceil(totalItems / pageSize));
+  const totalPages =
+    paginationData?.totalPageCount ?? Math.max(1, Math.ceil(totalItems / pageSize));
   const pageItemCount = paginationData?.pageItemCount ?? oebuLinks.length;
   const currentPageForDisplay = paginationData?.pageNumber ?? Math.min(currentPage, totalPages);
 
@@ -293,7 +296,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
 
   const handleSubmitCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const payload = buildCreatePayload(formState, gigwanNanoId);
+    const payload = buildCreatePayload(formState, jojikNanoId);
     if (!payload) return;
     try {
       const result = await createMutation.mutateAsync(payload);
@@ -426,7 +429,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
                 label="아이콘 ID"
                 placeholder="아이콘 식별자를 입력하세요"
                 rows={2}
-                resize="none"
+                resize={'limit'}
                 value={formState.linkIconNanoId}
                 onValueChange={(value) =>
                   setFormState((prev) => ({
@@ -506,7 +509,7 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
               <Textfield
                 label="아이콘 ID"
                 rows={2}
-                resize="none"
+                resize={'limit'}
                 value={formState.linkIconNanoId}
                 onValueChange={(value) =>
                   setFormState((prev) => ({
@@ -650,10 +653,12 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
     <ListViewLayout
       title="외부 링크 관리"
       description="조직에서 자주 사용하는 외부 시스템과 자료 링크를 관리합니다."
-      meta={<span>{`조직 코드: ${gigwanNanoId}`}</span>}
+      meta={<span>{`조직 코드: ${jojikNanoId}`}</span>}
       headerActions={
         <>
-          <span className={styles.headerCounter}>{`전체 외부 링크 (${totalItems.toLocaleString()}개)`}</span>
+          <span
+            className={styles.headerCounter}
+          >{`전체 외부 링크 (${totalItems.toLocaleString()}개)`}</span>
           <Button styleType="solid" variant="primary" onClick={handleOpenCreate}>
             외부 링크 추가
           </Button>
@@ -755,7 +760,9 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
           </div>
           <div className={styles.tableMeta}>
             <span className={styles.filterSummary}>{appliedFiltersSummary}</span>
-            <span className={styles.tableSummary}>{`조건에 맞는 외부 링크 ${totalItems.toLocaleString()}건 · 현재 페이지 ${pageItemCount.toLocaleString()}건`}</span>
+            <span
+              className={styles.tableSummary}
+            >{`조건에 맞는 외부 링크 ${totalItems.toLocaleString()}건 · 현재 페이지 ${pageItemCount.toLocaleString()}건`}</span>
           </div>
         </div>
       }
@@ -815,13 +822,13 @@ export default function JoResourceExternalLinksPage({ params }: PageProps) {
 
 function buildCreatePayload(
   state: OebuLinkFormState,
-  gigwanNanoId: string,
+  jojikNanoId: string,
 ): CreateOebuLinkRequest | null {
   const base = sanitizeFormState(state);
   if (!base) return null;
 
   return {
-    gigwanNanoId,
+    jojikNanoId,
     ...base,
   };
 }

@@ -126,17 +126,3 @@ export const GetMyJojiksResponseSchema = z.object({
   ),
 });
 export type GetMyJojiksResponse = z.infer<typeof GetMyJojiksResponseSchema>;
-
-export const GetMyProfileResponseSchema = SayongjaDetailSchema.extend({
-  permissions: z.array(PermissionSchema),
-});
-export type GetMyProfileResponse = z.infer<typeof GetMyProfileResponseSchema>;
-
-export const UpdateMyPasswordRequestSchema = z.object({
-  currentPassword: z.string(),
-  newPassword: z.string(),
-});
-export type UpdateMyPasswordRequest = z.infer<typeof UpdateMyPasswordRequestSchema>;
-
-export const UpdateMyPasswordResponseSchema = z.object({});
-export type UpdateMyPasswordResponse = z.infer<typeof UpdateMyPasswordResponseSchema>;

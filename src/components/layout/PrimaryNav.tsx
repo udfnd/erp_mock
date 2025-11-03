@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useGetMyProfileQuery } from '@/api/auth';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/api/gigwan';
-import { useMyProfileQuery } from '@/api/sayongja';
 import { SidebarOpen, SidebarClose } from '@/components/icons';
 import MyProfileMenu from '@/components/profile/MyProfileMenu';
 import UserSettingsModal, { type UserSettingsTab } from '@/components/profile/UserSettingsModal';
@@ -31,13 +31,10 @@ type Props = {
   onHierarchyChange?: (hierarchy: PrimaryNavHierarchy) => void;
 };
 
-const getParamValue = (
-  params: ReturnType<typeof useParams>,
-  key: string,
-): string | null => {
+const getParamValue = (params: ReturnType<typeof useParams>, key: string): string | null => {
   const value = (params as Record<string, string | string[] | undefined>)[key];
   if (!value) return null;
-  return typeof value === 'string' ? value : value[0] ?? null;
+  return typeof value === 'string' ? value : (value[0] ?? null);
 };
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
@@ -67,7 +64,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     enabled: Boolean(gigwanNanoId),
   });
 
-  const { data: myProfileData } = useMyProfileQuery({
+  const { data: myProfileData } = useGetMyProfileQuery({
     enabled: Boolean(authState.accessToken),
   });
 
@@ -238,7 +235,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           key: `jojik-${jojik.nanoId}`,
           label: jojik.name,
           depth: 1,
-          href: `/td/np/jos/${jojik.nanoId}`,
+          href: `/td/np/jos/${jojik.nanoId}/manage/home/dv`,
           children: sueopItems.length > 0 ? sueopItems : undefined,
         });
       });

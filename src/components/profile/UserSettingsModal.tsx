@@ -2,11 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { useUpdateMyPasswordMutation } from '@/api/auth';
 import { useGigwanQuery } from '@/api/gigwan';
-import {
-  useGetSayongjaDetailQuery,
-  useUpdateMyPasswordMutation,
-} from '@/api/sayongja';
+import { useGetSayongjaDetailQuery } from '@/api/sayongja';
 import { Close } from '@/components/icons';
 import { Button } from '@/design';
 
@@ -193,9 +191,7 @@ export default function UserSettingsModal({
                 <h3 className={styles.contentTitle} style={{ fontSize: '18px' }}>
                   사용자 정보
                 </h3>
-                <p className={styles.description}>
-                  로그인 정보와 조직 정보를 확인할 수 있습니다.
-                </p>
+                <p className={styles.description}>로그인 정보와 조직 정보를 확인할 수 있습니다.</p>
                 <dl className={styles.infoGrid}>
                   {profileItems.map((item) => (
                     <React.Fragment key={item.label}>
@@ -225,9 +221,7 @@ export default function UserSettingsModal({
 
           {activeTab === 'photo' && (
             <div className={styles.section}>
-              <p className={styles.placeholder}>
-                프로필 사진 변경 기능은 곧 제공될 예정입니다.
-              </p>
+              <p className={styles.placeholder}>프로필 사진 변경 기능은 곧 제공될 예정입니다.</p>
             </div>
           )}
 
@@ -300,4 +294,3 @@ export default function UserSettingsModal({
     </div>
   );
 }
-

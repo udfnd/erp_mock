@@ -42,21 +42,12 @@ export const GigwanGetSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
   intro: z.string().nullable(),
-  juso: z
-    .object({
-      nanoId: z.string(),
-      name: z.string(),
-      juso: z.string(),
-      jusoDetail: z.string(),
-    })
-    .nullable(),
 });
 export type GigwanGet = z.infer<typeof GigwanGetSchema>;
 
 export const UpdateGigwanRequestSchema = z.object({
   name: z.string().optional(),
   intro: z.string().optional(),
-  jusoNanoId: z.union([z.string(), z.null()]).optional(),
   logoImageNanoId: z.string().optional(),
 });
 export type UpdateGigwanRequest = z.infer<typeof UpdateGigwanRequestSchema>;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const GetOebuLinksRequestSchema = z.object({
-  gigwanNanoId: z.string(),
+  jojikNanoId: z.string(),
   nameSearch: z.string().optional(),
   pageNumber: z.number().optional(),
   pageSize: z.number().optional(),
@@ -48,12 +48,11 @@ export const OebuLinkDetailSchema = OebuLinkListItemSchema.extend({
 export type OebuLinkDetail = z.infer<typeof OebuLinkDetailSchema>;
 
 export const CreateOebuLinkRequestSchema = z.object({
-  gigwanNanoId: z.string(),
+  jojikNanoId: z.string(),
   name: z.string(),
   titleName: z.string(),
   linkUrl: z.string(),
   linkIconNanoId: z.string().nullable(),
-  jojikNanoId: z.string().optional(),
 });
 export type CreateOebuLinkRequest = z.infer<typeof CreateOebuLinkRequestSchema>;
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
 import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 
 import {
@@ -54,9 +55,9 @@ const initialFormState: JusoFormState = {
   jusoDetail: '',
 };
 
-export default function JoResourceAddressesPage({ params }: PageProps) {
+export default function JoResourceAddressesPage() {
   const queryClient = useQueryClient();
-  const gigwanNanoId = params.jo;
+  const { jo: jojikNanoId } = useParams<{ jo: string }>();
   const openDaumPostcode = useDaumPostcode();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,7 +71,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
 
   const listQueryParams = useMemo<GetJusosRequest>(() => {
     const baseParams: GetJusosRequest = {
-      gigwanNanoId,
+      jojikNanoId,
       pageNumber: safeCurrentPage,
       pageSize: PAGE_SIZE,
       sortByOption: sortOption,
@@ -80,14 +81,14 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
       baseParams.jusoNameSearch = trimmedSearch;
     }
     return baseParams;
-  }, [gigwanNanoId, safeCurrentPage, sortOption, searchTerm]);
+  }, [jojikNanoId, safeCurrentPage, sortOption, searchTerm]);
 
   const {
     data: jusoListData,
     isLoading: isListLoading,
     isFetching: isListFetching,
   } = useGetJusosQuery(listQueryParams, {
-    enabled: Boolean(gigwanNanoId),
+    enabled: Boolean(jojikNanoId),
   });
 
   const { data: jusoDetailData, isFetching: isDetailLoading } = useGetJusoDetailQuery(
@@ -198,11 +199,11 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
 
   const handleSubmitCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!gigwanNanoId) {
+    if (!jojikNanoId) {
       window.alert('기관 정보가 없어 주소를 등록할 수 없습니다.');
       return;
     }
-    const payload = buildCreatePayload(formState, gigwanNanoId);
+    const payload = buildCreatePayload(formState, jojikNanoId);
     if (!payload) return;
     try {
       const result = await createMutation.mutateAsync(payload);
@@ -474,7 +475,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
     <ListViewLayout
       title="주소 관리"
       description="조직이 관리하는 시설과 캠퍼스 주소를 조회하고 설정합니다."
-      meta={<span>{`조직 코드: ${gigwanNanoId || '-'}`}</span>}
+      meta={<span>{`조직 코드: ${jojikNanoId || '-'}`}</span>}
       headerActions={
         <>
           <span className={styles.headerCounter}>{`전체 주소 (${totalItems}개)`}</span>
@@ -544,7 +545,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
                 : isEditMode
                   ? '주소 설정 편집'
                   : selectedRowId
-                    ? jusoDetailData?.jusoName ?? '주소 상세'
+                    ? (jusoDetailData?.jusoName ?? '주소 상세')
                     : '주소 설정'}
             </span>
             <span className={styles.sidePanel.subtitle}>
@@ -556,9 +557,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
             </span>
           </div>
           <div className={styles.sidePanel.body}>
-            {isDetailLoading && !isCreateMode
-              ? '정보를 불러오는 중입니다...'
-              : sidePanelContent}
+            {isDetailLoading && !isCreateMode ? '정보를 불러오는 중입니다...' : sidePanelContent}
           </div>
         </>
       }
@@ -566,10 +565,7 @@ export default function JoResourceAddressesPage({ params }: PageProps) {
   );
 }
 
-function buildCreatePayload(
-  state: JusoFormState,
-  gigwanNanoId: string,
-): CreateJusoRequest | null {
+function buildCreatePayload(state: JusoFormState, jojikNanoId: string): CreateJusoRequest | null {
   const jusoName = state.jusoName.trim();
   const juso = state.juso.trim();
   const jusoDetail = state.jusoDetail.trim();
@@ -583,7 +579,7 @@ function buildCreatePayload(
     jusoName,
     juso,
     jusoDetail,
-    gigwanNanoId,
+    jojikNanoId,
   };
 }
 

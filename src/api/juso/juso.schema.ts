@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const GetJusosRequestSchema = z.object({
-  gigwanNanoId: z.string(),
+  jojikNanoId: z.string(),
   jusoNameSearch: z.string().optional(),
   sortByOption: z.string().optional(),
   pageSize: z.number().optional(),
@@ -45,8 +45,7 @@ export const CreateJusoRequestSchema = z.object({
   jusoName: z.string(),
   jusoDetail: z.string(),
   juso: z.string(),
-  gigwanNanoId: z.string(),
-  jojikNanoId: z.string().optional(),
+  jojikNanoId: z.string(),
 });
 export type CreateJusoRequest = z.infer<typeof CreateJusoRequestSchema>;
 
