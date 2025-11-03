@@ -1,13 +1,17 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/api/gigwan';
+import { useMyProfileQuery } from '@/api/sayongja';
 import { SidebarOpen, SidebarClose } from '@/components/icons';
+import MyProfileMenu from '@/components/profile/MyProfileMenu';
+import UserSettingsModal, { type UserSettingsTab } from '@/components/profile/UserSettingsModal';
 import { LOGIN_ROUTE } from '@/constants/routes';
-import { useAuth } from '@/state/auth';
+import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/state/auth';
 
 import * as styles from './PrimaryNav.style.css';
 
@@ -36,13 +40,21 @@ const getParamValue = (
   return typeof value === 'string' ? value : value[0] ?? null;
 };
 
+const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
+
 export default function PrimaryNav({ onHierarchyChange }: Props) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [isCollapsedByBreakpoint, setIsCollapsedByBreakpoint] = useState(false);
-  const { state: authState, clearAuthState } = useAuth();
+  const { state: authState, clearAuthState, setAuthState } = useAuth();
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<UserSettingsTab>('profile');
+  const { history, refresh: refreshHistory } = useAuthHistory();
+  const storedProfileKeyRef = useRef<string | null>(null);
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
@@ -53,6 +65,10 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const { data: sidebarData } = useGigwanSidebarQuery(gigwanNanoId ?? '', {
     enabled: Boolean(gigwanNanoId),
+  });
+
+  const { data: myProfileData } = useMyProfileQuery({
+    enabled: Boolean(authState.accessToken),
   });
 
   const gigwanDisplayName = gigwanNameData?.name ?? authState.gigwanName ?? '기관';
@@ -145,6 +161,22 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     setIsOpen((v) => !v);
   }, [isCollapsedByBreakpoint]);
 
+  useEffect(() => {
+    if (!myProfileData || !authState.accessToken) return;
+    const historyKey = `${myProfileData.nanoId}-${authState.accessToken}`;
+    if (storedProfileKeyRef.current === historyKey) return;
+
+    upsertAuthHistoryEntry({
+      authState: { ...authState },
+      sayongjaNanoId: myProfileData.nanoId,
+      sayongjaName: myProfileData.name,
+      gigwanName: gigwanDisplayName,
+      lastUsedAt: Date.now(),
+    });
+    storedProfileKeyRef.current = historyKey;
+    refreshHistory();
+  }, [authState, gigwanDisplayName, myProfileData, refreshHistory]);
+
   const hierarchy = useMemo<PrimaryNavHierarchy>(() => {
     return {
       gigwan: gigwanNanoId
@@ -233,6 +265,54 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
     return list;
   }, [hierarchy, sidebarData?.jojiks]);
+
+  const filteredHistory = useMemo(
+    () =>
+      history
+        .filter((entry) => entry.sayongjaNanoId !== myProfileData?.nanoId)
+        .sort((a, b) => b.lastUsedAt - a.lastUsedAt),
+    [history, myProfileData?.nanoId],
+  );
+
+  const handleProfileButtonClick = useCallback(() => {
+    setIsProfileMenuOpen((prev) => !prev);
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    setSettingsTab('profile');
+    setIsSettingsModalOpen(true);
+    setIsProfileMenuOpen(false);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setIsSettingsModalOpen(false);
+  }, []);
+
+  const handleSelectHistory = useCallback(
+    (entry: (typeof history)[number]) => {
+      setAuthState(entry.authState);
+      upsertAuthHistoryEntry(entry);
+      refreshHistory();
+      setIsProfileMenuOpen(false);
+      try {
+        router.refresh();
+      } catch (error) {
+        console.error('Failed to refresh after user switch', error);
+      }
+    },
+    [refreshHistory, router, setAuthState],
+  );
+
+  const handleAddUser = useCallback(() => {
+    if (!gigwanNanoId) {
+      window.alert('기관 정보가 없어 사용자를 추가할 수 없습니다.');
+      return;
+    }
+    router.push(`/td/np/gis/${gigwanNanoId}/sayongjas/home/lv`);
+    setIsProfileMenuOpen(false);
+  }, [gigwanNanoId, router]);
+
+  const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
 
   const renderItems = (list: Item[]) =>
     list.map((item) => {
@@ -334,11 +414,52 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         >
           <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>로그아웃</span>
         </button>
-        <div className={styles.footerVersion}>
-          <span className={styles.footerBrand}>티키타</span>
-          <span className={styles.footerVerText}>&nbsp;Ver 0.1.0</span>
+        <div className={styles.footerProfileSection}>
+          <div className={styles.footerVersionGroup}>
+            <span className={styles.footerBrand}>티키타</span>
+            <span className={styles.footerVerText}>&nbsp;Ver 0.1.0</span>
+          </div>
+          <button
+            type="button"
+            className={styles.profileTriggerButton}
+            onClick={handleProfileButtonClick}
+            ref={profileButtonRef}
+            aria-haspopup="dialog"
+            aria-expanded={isProfileMenuOpen}
+            aria-label="내 프로필 열기"
+          >
+            <Image
+              src={profileImageUrl}
+              alt="내 프로필"
+              width={40}
+              height={40}
+              className={styles.profileTriggerImage}
+              unoptimized
+            />
+          </button>
+          {isProfileMenuOpen && myProfileData && (
+            <MyProfileMenu
+              gigwanName={gigwanDisplayName}
+              userName={myProfileData.name}
+              onClose={() => setIsProfileMenuOpen(false)}
+              onOpenSettings={handleOpenSettings}
+              history={filteredHistory}
+              onSelectHistory={handleSelectHistory}
+              onAddUser={handleAddUser}
+              anchorRef={profileButtonRef}
+              profileImageUrl={profileImageUrl}
+            />
+          )}
         </div>
       </div>
+      <UserSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={handleCloseSettings}
+        activeTab={settingsTab}
+        onTabChange={setSettingsTab}
+        sayongjaNanoId={myProfileData?.nanoId}
+        gigwanNanoId={gigwanNanoId}
+      />
     </aside>
   );
 }
