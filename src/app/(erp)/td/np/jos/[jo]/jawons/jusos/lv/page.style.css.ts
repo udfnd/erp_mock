@@ -19,6 +19,39 @@ export const controls = style({
   flexWrap: 'wrap',
 });
 
+export const sortWrapper = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: themeVars.spacing.xs,
+});
+
+export const sortLabel = style([typography.captionB, { color: themeVars.palette.cgrey500 }]);
+
+export const sortSelect = style([
+  typography.bodyR,
+  {
+    minWidth: 160,
+    padding: `${themeVars.spacing.sm} ${themeVars.spacing.lg}`,
+    borderRadius: themeVars.radius.md,
+    border: `1px solid ${themeVars.palette.cgrey200}`,
+    backgroundColor: themeVars.palette.white,
+    appearance: 'none',
+    backgroundImage:
+      'linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%)',
+    backgroundPosition: 'calc(100% - 16px) calc(50% - 3px), calc(100% - 11px) calc(50% - 3px)',
+    backgroundSize: '5px 5px, 5px 5px',
+    backgroundRepeat: 'no-repeat',
+    color: themeVars.palette.cgrey600,
+    selectors: {
+      '&:focus-visible': {
+        outline: 'none',
+        borderColor: themeVars.palette.blue300,
+        boxShadow: `0 0 0 3px ${themeVars.palette.blue50}`,
+      },
+    },
+  },
+]);
+
 export const searchWrapper = style({
   position: 'relative',
   flex: '1 1 320px',
