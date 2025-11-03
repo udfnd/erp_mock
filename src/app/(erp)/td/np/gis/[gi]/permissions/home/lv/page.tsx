@@ -2,8 +2,8 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from 'react';
 import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from 'react';
 
 import {
   useBatchlinkPermissionSayongjaMutation,

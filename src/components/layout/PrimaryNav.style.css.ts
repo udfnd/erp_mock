@@ -201,3 +201,42 @@ export const footerVersion = style({
 export const footerBrand = style([typography.captionR, { color: themeVars.palette.blue600 }]);
 
 export const footerVerText = style([typography.captionR, { color: themeVars.palette.cgrey600 }]);
+
+export const footerProfileSection = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: themeVars.spacing.sm,
+  position: 'relative',
+});
+
+export const footerVersionGroup = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '2px',
+});
+
+export const profileTriggerButton = style({
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  border: `1px solid ${themeVars.palette.cgrey200}`,
+  padding: 0,
+  overflow: 'hidden',
+  backgroundColor: themeVars.palette.white,
+  cursor: 'pointer',
+  flexShrink: 0,
+  selectors: {
+    '&:focus-visible': {
+      outline: `2px solid ${themeVars.palette.blue400}`,
+      outlineOffset: '2px',
+    },
+  },
+});
+
+export const profileTriggerImage = style({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  display: 'block',
+});

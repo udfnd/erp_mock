@@ -28,6 +28,12 @@ import {
   GetSayongjaPermissionsResponseSchema,
   GetMyJojiksResponse,
   GetMyJojiksResponseSchema,
+  GetMyProfileResponse,
+  GetMyProfileResponseSchema,
+  UpdateMyPasswordRequest,
+  UpdateMyPasswordRequestSchema,
+  UpdateMyPasswordResponse,
+  UpdateMyPasswordResponseSchema,
 } from './sayongja.schema';
 
 const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
@@ -143,4 +149,29 @@ export const useGetMyJojiksQuery = (options?: { enabled?: boolean }) =>
     queryKey: ['myJojiks'],
     queryFn: getMyJojiks,
     enabled: options?.enabled ?? true,
+  });
+
+export const getMyProfile = async (): Promise<GetMyProfileResponse> => {
+  const res = await apiClient.get('/T/feat/sayongjas/my-profile');
+  return parseOrThrow(GetMyProfileResponseSchema, res.data);
+};
+
+export const useMyProfileQuery = (options?: { enabled?: boolean }) =>
+  useQuery<GetMyProfileResponse, unknown>({
+    queryKey: ['myProfile'],
+    queryFn: getMyProfile,
+    enabled: options?.enabled ?? true,
+  });
+
+export const updateMyPassword = async (
+  data: UpdateMyPasswordRequest,
+): Promise<UpdateMyPasswordResponse> => {
+  const body = UpdateMyPasswordRequestSchema.parse(data);
+  const res = await apiClient.put('/T/feat/sayongjas/my-password', body);
+  return parseOrThrow(UpdateMyPasswordResponseSchema, res.data);
+};
+
+export const useUpdateMyPasswordMutation = () =>
+  useMutation<UpdateMyPasswordResponse, unknown, UpdateMyPasswordRequest>({
+    mutationFn: updateMyPassword,
   });
