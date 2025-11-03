@@ -17,7 +17,7 @@ type Props = {
   history: AuthHistoryEntry[];
   onSelectHistory: (entry: AuthHistoryEntry) => void;
   onAddUser: () => void;
-  anchorRef: React.RefObject<HTMLElement>;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
   profileImageUrl?: string;
 };
 
@@ -75,7 +75,7 @@ export default function MyProfileMenu({
           />
         </div>
         <Button
-          styleType="outline"
+          styleType="outlined"
           variant="primary"
           size="medium"
           onClick={onOpenSettings}

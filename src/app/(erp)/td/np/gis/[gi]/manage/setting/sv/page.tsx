@@ -642,31 +642,6 @@ export default function GigwanSettingServicePage() {
               {updateIntroMutation.isPending ? '저장 중...' : '저장'}
             </Button>
           </div>
-
-          <LabeledInput
-            label="기관 주소"
-            placeholder="기관 주소를 입력하세요"
-            value={basicState.form.juso}
-            onValueChange={(value) => handleBasicChange('juso', value)}
-            maxLength={200}
-            helperText="저장 시 반영"
-          />
-          <div className={styles.cardFooter}>
-            {basicState.jusoFeedback && (
-              <span className={styles.feedback[basicState.jusoFeedback.type]}>
-                {basicState.jusoFeedback.message}
-              </span>
-            )}
-            <Button
-              size="small"
-              styleType="solid"
-              variant="primary"
-              disabled={!jusoDirty || !jusoValid || upsertJusoMutation.isPending}
-              onClick={handleSaveJuso}
-            >
-              {upsertJusoMutation.isPending ? '저장 중...' : '저장'}
-            </Button>
-          </div>
         </div>
       </section>
       <section className={styles.card}>

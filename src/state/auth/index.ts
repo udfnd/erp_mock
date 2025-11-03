@@ -6,3 +6,4 @@ export {
   upsertAuthHistoryEntry,
   removeAuthHistoryEntry,
 } from './auth-history';
+export type { AuthHistoryEntry } from './auth-history';

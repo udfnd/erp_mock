@@ -5,9 +5,8 @@ import { typography } from '@/design/typo.css';
 
 export const container = style({
   position: 'absolute',
-  top: '50%',
   left: 'calc(100% + 12px)',
-  transform: 'translateY(-50%)',
+  bottom: 0,
   width: '320px',
   backgroundColor: themeVars.palette.white,
   borderRadius: themeVars.radius.lg,

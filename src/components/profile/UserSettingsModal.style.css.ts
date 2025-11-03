@@ -84,7 +84,7 @@ export const contentHeader = style({
   marginBottom: themeVars.spacing.lg,
 });
 
-export const contentTitle = style([typography.heading4, { color: themeVars.palette.black }]);
+export const contentTitle = style([typography.titleSmallB, { color: themeVars.palette.black }]);
 
 export const section = style({
   display: 'flex',
