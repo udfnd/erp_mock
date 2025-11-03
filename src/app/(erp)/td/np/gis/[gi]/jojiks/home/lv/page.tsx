@@ -76,7 +76,6 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 export default function GiOrganizationsPage() {
-  // ✅ useParams만 사용 (배열 가능성 대비)
   const { gi: rawGi } = useParams<{ gi: string | string[] }>();
   const gi = Array.isArray(rawGi) ? rawGi[0] : rawGi;
 
