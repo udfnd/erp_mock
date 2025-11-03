@@ -1,18 +1,12 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+import { getAccessToken, setAccessToken } from '@/lib/access-token';
+
 import { refreshAccessToken as apiRefreshAccessToken } from './auth/auth.api';
 
 import type { SignInResponse } from '@/api/auth';
 
 const API_BASE_URL = 'http://staging.api.v3.teachita.com/api';
-
-let accessToken: string | null = null;
-
-export const setAccessToken = (token: string | null) => {
-  accessToken = token;
-};
-
-export const getAccessToken = (): string | null => accessToken;
 
 const stripQueryAndSlash = (url?: string) => {
   if (!url) return '';
@@ -114,7 +108,6 @@ apiClient.interceptors.response.use(
 
 export const clearAuthHeader = () => {
   delete (apiClient.defaults.headers.common as any)['Authorization'];
-  setAccessToken(null);
 };
 
 export default apiClient;

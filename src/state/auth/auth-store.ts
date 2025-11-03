@@ -1,6 +1,7 @@
 'use client';
 
-import { clearAuthHeader, setAccessToken } from '@/api';
+import { clearAuthHeader } from '@/api';
+import { setAccessToken, subscribeAccessToken } from '@/lib/access-token';
 
 type AuthData = {
   accessToken: string | null;
@@ -51,9 +52,8 @@ const persistState = (state: AuthState) => {
 };
 
 const syncAccessToken = (token: string | null) => {
-  if (token) {
-    setAccessToken(token);
-  } else {
+  setAccessToken(token, 'store');
+  if (!token) {
     clearAuthHeader();
   }
 };
@@ -79,6 +79,19 @@ export const initializeAuthStore = () => {
   if (typeof window === 'undefined') {
     return;
   }
+
+  subscribeAccessToken((token, source) => {
+    if (source === 'store') return;
+
+    updateSnapshot((prev) => {
+      const nextState: AuthState = { ...prev.state, accessToken: token };
+      return {
+        state: nextState,
+        isReady: prev.isReady,
+        isAuthenticated: Boolean(token),
+      };
+    });
+  });
 
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
