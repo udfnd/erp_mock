@@ -72,6 +72,7 @@ export default function SignInPage() {
         });
         setAuthState({
           accessToken: response.accessToken,
+          sayongjaNanoId: response.nanoId,
           gigwanNanoId: gigwanCode,
           gigwanName: institutionName,
           loginId: id.trim(),

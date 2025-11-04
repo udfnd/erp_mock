@@ -8,6 +8,7 @@ export const SignInRequestSchema = z.object({
 
 export const SignInResponseSchema = z.object({
   accessToken: z.string(),
+  nanoId: z.string(),
 });
 
 export const RefreshTokenResponseSchema = z.object({

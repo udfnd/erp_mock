@@ -30,7 +30,7 @@ const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
 
 export const signIn = async (data: SignInRequest): Promise<SignInResponse> => {
   const validated = SignInRequestSchema.parse(data);
-  const res = await apiClient.post('/T/dl/sayongjas/sign-in', validated);
+  const res = await apiClient.post('T/dl/sayongjas/sign-in', validated);
   return parseOrThrow(SignInResponseSchema, res.data);
 };
 
@@ -38,8 +38,8 @@ export const useSignInMutation = () => {
   return useMutation<SignInResponse, unknown, SignInRequest>({ mutationFn: signIn });
 };
 
-export const refreshAccessToken = async (): Promise<RefreshTokenResponse> => {
-  const res = await apiClient.post('/T/dl/sayongjas/refresh-access', {});
+export const refreshAccessToken = async (nanoId: string): Promise<RefreshTokenResponse> => {
+  const res = await apiClient.post(`T/dl/sayongjas/${encodeURIComponent(nanoId)}/refresh-access`, {});
   return parseOrThrow(RefreshTokenResponseSchema, res.data);
 };
 
