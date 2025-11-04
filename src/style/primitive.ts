@@ -3,6 +3,9 @@ export const spacing = {
   sm: '8px',
   md: '12px',
   base: '16px',
+  lg: '20px',
+  xl: '24px',
+  xxl: '32px',
 } as const;
 
 export const radius = {

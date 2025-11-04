@@ -4,10 +4,10 @@ import { useParams, usePathname } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import * as styles from './ErpLayout.style.css';
-import { getDynamicHref, primaryNavItems, secondaryNavItems } from './nav.data';
 import PrimaryNav from './PrimaryNav';
 import SecondaryNav from './SecondaryNav';
 import TertiaryNav from './TertiaryNav';
+import { getDynamicHref, primaryNavItems, secondaryNavItems } from './nav.data';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
 
@@ -138,10 +138,7 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
         <header className={styles.header}>
           {currentSecondaryNavItems.length > 0 ? (
             <div className={styles.secondaryNavWrapper[secondaryVisibility]}>
-              <SecondaryNav
-                navItems={currentSecondaryNavItems}
-                hierarchy={primaryNavHierarchy}
-              />
+              <SecondaryNav navItems={currentSecondaryNavItems} hierarchy={primaryNavHierarchy} />
             </div>
           ) : null}
           {currentTertiaryNavItems.length > 0 ? (

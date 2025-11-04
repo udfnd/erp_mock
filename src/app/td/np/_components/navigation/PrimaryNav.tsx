@@ -5,14 +5,13 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useGetMyProfileQuery } from '@/api/auth';
-import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/api/gigwan';
-import { SidebarOpen, SidebarClose } from '@/components/icons';
-import MyProfileMenu from '@/components/profile/MyProfileMenu';
-import UserSettingsModal, { type UserSettingsTab } from '@/components/profile/UserSettingsModal';
-import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/state/auth';
+import { SidebarClose, SidebarOpen } from '@/common/icons';
+import { useGetMyProfileQuery } from '@/domain/auth/api';
+import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
+import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
 
 import * as styles from './PrimaryNav.style.css';
+import MyProfileMenu from './MyProfileMenu';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
 
@@ -47,8 +46,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const { state: authState, setAuthState } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<UserSettingsTab>('profile');
   const { history, refresh: refreshHistory } = useAuthHistory();
   const storedProfileKeyRef = useRef<string | null>(null);
 
@@ -201,7 +198,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         key: `jojik-${jojik.nanoId}`,
         label: jojik.name,
         depth: 1,
-        href: `/td/np/jos/${jojik.nanoId}`,
+        href: `/td/np/jos/${jojik.nanoId}/manage/home/dv`,
         children: sueopItems.length > 0 ? sueopItems : undefined,
       });
     });
@@ -219,16 +216,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const handleProfileButtonClick = useCallback(() => {
     setIsProfileMenuOpen((prev) => !prev);
-  }, []);
-
-  const handleOpenSettings = useCallback(() => {
-    setSettingsTab('profile');
-    setIsSettingsModalOpen(true);
-    setIsProfileMenuOpen(false);
-  }, []);
-
-  const handleCloseSettings = useCallback(() => {
-    setIsSettingsModalOpen(false);
   }, []);
 
   const handleSelectHistory = useCallback(
@@ -280,9 +267,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           ) : (
             <span className={linkCls} aria-disabled="true">
               <span className={styles.navIcon} aria-hidden />
-              <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>
-                {item.label}
-              </span>
+              <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>{item.label}</span>
             </span>
           )}
           {item.children && item.children.length > 0 && (
@@ -378,7 +363,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
               gigwanName={gigwanDisplayName}
               userName={myProfileData.name}
               onClose={() => setIsProfileMenuOpen(false)}
-              onOpenSettings={handleOpenSettings}
               history={filteredHistory}
               onSelectHistory={handleSelectHistory}
               onAddUser={handleAddUser}
@@ -388,14 +372,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           )}
         </div>
       </div>
-      <UserSettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={handleCloseSettings}
-        activeTab={settingsTab}
-        onTabChange={setSettingsTab}
-        sayongjaNanoId={myProfileData?.nanoId}
-        gigwanNanoId={gigwanNanoId}
-      />
     </aside>
   );
 }
