@@ -81,11 +81,10 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
   ],
   '/td/np/jos': [
     {
-      name: '{조직명} 관리', // IA Depth 3
+      name: '{조직명} 관리',
       href: '/td/np/jos/[jo]/manage/home/dv',
       basePath: '/td/np/jos/[jo]/manage',
       items: [
-        // IA Depth 4
         { name: '홈', href: '/td/np/jos/[jo]/manage/home/dv' },
         { name: '조직 설정', href: '/td/np/jos/[jo]/manage/setting/sv' },
       ],

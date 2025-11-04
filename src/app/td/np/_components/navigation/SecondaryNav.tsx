@@ -3,7 +3,7 @@
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 
-import { Chip } from '@/design';
+import { Chip } from '@/common/components';
 
 import { NavItem, getDynamicHref } from './nav.data';
 import * as styles from './SecondaryNav.style.css';
@@ -71,9 +71,7 @@ export default function SecondaryNav({ navItems, hierarchy }: Props) {
       <ul className={styles.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
-          const resolvedBasePath = item.basePath
-            ? getDynamicHref(item.basePath, params)
-            : undefined;
+          const resolvedBasePath = item.basePath ? getDynamicHref(item.basePath, params) : undefined;
           const isActive = resolvedBasePath
             ? pathname.startsWith(resolvedBasePath)
             : href
