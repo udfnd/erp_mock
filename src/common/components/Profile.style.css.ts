@@ -1,86 +1,72 @@
-import { recipe } from '@vanilla-extract/recipes';
+import { css, cx } from '@emotion/css';
 
-import { themeVars } from '@/design/theme.css';
-import { typography } from '@/design/typo.css';
+import { color, spacing, typography } from '@/style';
 
-export const containerRecipe = recipe({
-  base: {
-    display: 'inline-flex',
-    alignItems: 'center',
-  },
-  variants: {
-    size: {
-      large: {
-        gap: themeVars.spacing.sm,
-      },
-      medium: {
-        gap: themeVars.spacing.sm,
-      },
-      small: {
-        gap: themeVars.spacing.xs,
-      },
-    },
-  },
-  defaultVariants: {
-    size: 'medium',
-  },
+const containerBase = css({
+  display: 'inline-flex',
+  alignItems: 'center',
 });
 
-export const photoRecipe = recipe({
-  base: {
-    display: 'block',
-    borderRadius: '50%',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    backgroundColor: themeVars.palette.cgrey100,
-    flexShrink: 0,
-    objectFit: 'cover',
-  },
-  variants: {
-    size: {
-      large: {
-        width: 48,
-        height: 48,
-      },
-      medium: {
-        width: 32,
-        height: 32,
-      },
-      small: {
-        width: 16,
-        height: 16,
-      },
-    },
-    variant: {
-      default: {
-        borderColor: themeVars.palette.cgrey100,
-      },
-      active: {
-        borderColor: themeVars.palette.blue,
-      },
-    },
-  },
-  defaultVariants: {
-    size: 'medium',
-    variant: 'default',
-  },
+const containerSizeStyles = {
+  large: css({ gap: spacing.sm }),
+  medium: css({ gap: spacing.sm }),
+  small: css({ gap: spacing.xs }),
+} as const;
+
+export type ContainerRecipeOptions = {
+  size?: keyof typeof containerSizeStyles;
+};
+
+export const containerRecipe = ({ size = 'medium' }: ContainerRecipeOptions = {}) =>
+  cx(containerBase, containerSizeStyles[size]);
+
+const photoBase = css({
+  display: 'block',
+  borderRadius: '50%',
+  borderWidth: '1px',
+  borderStyle: 'solid',
+  backgroundColor: color.cgrey100,
+  flexShrink: 0,
+  objectFit: 'cover',
 });
 
-export const nameRecipe = recipe({
-  base: {
-    color: themeVars.palette.cgrey700,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-  variants: {
-    size: {
-      large: [typography.bodyB],
-      medium: [typography.bodyM],
-      small: [typography.captionR],
-    },
-  },
-  defaultVariants: {
-    size: 'medium',
-  },
+const photoSizeStyles = {
+  large: css({ width: 48, height: 48 }),
+  medium: css({ width: 32, height: 32 }),
+  small: css({ width: 16, height: 16 }),
+} as const;
+
+const photoVariantStyles = {
+  default: css({ borderColor: color.cgrey100 }),
+  active: css({ borderColor: color.blue }),
+} as const;
+
+export type PhotoRecipeOptions = {
+  size?: keyof typeof photoSizeStyles;
+  variant?: keyof typeof photoVariantStyles;
+};
+
+export const photoRecipe = ({
+  size = 'medium',
+  variant = 'default',
+}: PhotoRecipeOptions = {}) => cx(photoBase, photoSizeStyles[size], photoVariantStyles[variant]);
+
+const nameBase = css({
+  color: color.cgrey700,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 });
+
+const nameSizeStyles = {
+  large: css({ ...typography.bodyB }),
+  medium: css({ ...typography.bodyM }),
+  small: css({ ...typography.captionR }),
+} as const;
+
+export type NameRecipeOptions = {
+  size?: keyof typeof nameSizeStyles;
+};
+
+export const nameRecipe = ({ size = 'medium' }: NameRecipeOptions = {}) =>
+  cx(nameBase, nameSizeStyles[size]);

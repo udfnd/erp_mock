@@ -3,18 +3,18 @@
 import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
 
-import { buttonBaseStyles, buttonRecipe, iconWrapper } from './Button.style.css';
-
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-type ButtonRecipeVariants = RecipeVariants<typeof buttonRecipe>;
+import {
+  buttonBaseStyles,
+  buttonRecipe,
+  iconWrapper,
+  type ButtonRecipeOptions,
+} from './Button.style.css';
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  ButtonRecipeVariants & {
+  ButtonRecipeOptions & {
     iconLeft?: ReactNode;
     iconRight?: ReactNode;
     children?: ReactNode;
-    // as?: React.ElementType;
   };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

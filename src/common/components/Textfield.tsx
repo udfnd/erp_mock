@@ -4,25 +4,22 @@ import { clsx } from 'clsx';
 import React, { ReactNode, useId } from 'react';
 
 import {
-  container,
-  labelWrapper,
-  label as labelStyle,
-  requiredAsterisk,
-  inputWrapperRecipe,
-  textareaRecipe,
-  footer,
-  counter,
   actionButtonStyle,
+  container,
+  counter,
+  footer,
   helperTextRecipe,
+  inputWrapperRecipe,
+  label as labelStyle,
+  labelWrapper,
+  requiredAsterisk,
+  textareaRecipe,
+  type InputWrapperRecipeOptions,
+  type TextareaRecipeOptions,
 } from './Textfield.style.css';
 
-type InputWrapperOptions = Exclude<Parameters<typeof inputWrapperRecipe>[0], undefined>;
-type TextareaOptions = Exclude<Parameters<typeof textareaRecipe>[0], undefined>;
-type HelperTextOptions = Exclude<Parameters<typeof helperTextRecipe>[0], undefined>;
-
-type InputWrapperStatus = NonNullable<InputWrapperOptions['status']>;
-type TextareaResize = NonNullable<TextareaOptions['resize']>;
-type HelperTextStatus = NonNullable<HelperTextOptions['status']>;
+type InputWrapperStatus = NonNullable<InputWrapperRecipeOptions['status']>;
+type TextareaResize = NonNullable<TextareaRecipeOptions['resize']>;
 
 export type TextfieldProps = Omit<
   React.TextareaHTMLAttributes<HTMLTextAreaElement>,
@@ -65,7 +62,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
     const id = useId();
     const inputWrapperClasses = inputWrapperRecipe({ status, disabled });
     const textareaClasses = textareaRecipe({ resize });
-    const helperTextClasses = helperTextRecipe({ status: status as HelperTextStatus });
+    const helperTextClasses = helperText ? helperTextRecipe({ status }) : undefined;
     const safeValue = value ?? '';
 
     return (
@@ -106,7 +103,9 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
             </div>
           )}
         </div>
-        {helperText && <span className={helperTextClasses}>{helperText}</span>}
+        {helperText && helperTextClasses && (
+          <span className={helperTextClasses}>{helperText}</span>
+        )}
       </div>
     );
   },
