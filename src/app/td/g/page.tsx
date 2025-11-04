@@ -5,7 +5,7 @@ import { FormEvent, useCallback, useState } from 'react';
 
 import { getGigwanName } from '@/domain/gigwan/api';
 import { Progress } from '@/common/icons';
-import { Button } from '@/common/components';
+import { Button, LabeledInput } from '@/common/components';
 
 import * as styles from './style';
 

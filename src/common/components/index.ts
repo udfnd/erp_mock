@@ -6,3 +6,4 @@ export * from './Textfield';
 export * from './Toggle';
 export * from './Chip';
 export * from './Checkbox';
+export * from './LabeledInput';
