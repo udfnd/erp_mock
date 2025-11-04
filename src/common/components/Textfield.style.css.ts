@@ -1,167 +1,177 @@
-import { style } from '@vanilla-extract/css';
-import { recipe } from '@vanilla-extract/recipes';
+import { css, cx } from '@emotion/css';
 
-import { themeVars } from '@/design/theme.css';
-import { typography } from '@/design/typo.css';
+import { color, radius, spacing, typography } from '@/style';
 
-export const container = style({
+export const container = css({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
-  gap: themeVars.spacing.sm,
+  gap: spacing.sm,
   width: '343px',
 });
 
-export const labelWrapper = style({
+export const labelWrapper = css({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'flex-start',
-  gap: themeVars.spacing.xs,
+  gap: spacing.xs,
   width: '100%',
 });
 
-export const label = style([typography.bodySmallM, { color: themeVars.palette.cgrey700 }]);
-
-export const requiredAsterisk = style([typography.bodySmallM, { color: themeVars.palette.red }]);
-
-export const inputWrapperRecipe = recipe({
-  base: {
-    boxSizing: 'border-box',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: `${themeVars.spacing.md} ${themeVars.spacing.base}`,
-    width: '100%',
-    background: themeVars.palette.white,
-    borderRadius: themeVars.radius.md,
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    transition: 'border-color 0.2s, box-shadow 0.2s, background-color 0.2s',
-  },
-  variants: {
-    status: {
-      normal: {
-        borderColor: themeVars.palette.cgrey200,
-        ':focus-within': {
-          borderColor: themeVars.palette.blue,
-          boxShadow: `0 0 0 1px ${themeVars.palette.blue}`,
-        },
-      },
-      negative: {
-        borderColor: themeVars.palette.red,
-        ':focus-within': {
-          borderColor: themeVars.palette.red,
-          boxShadow: `0 0 0 1px ${themeVars.palette.red}`,
-        },
-      },
-    },
-    disabled: {
-      true: {
-        background: themeVars.palette.cgrey100,
-        borderColor: themeVars.palette.cgrey100,
-      },
-      false: {},
-    },
-  },
-  defaultVariants: {
-    status: 'normal',
-    disabled: false,
-  },
+export const label = css({
+  ...typography.bodySmallM,
+  color: color.cgrey700,
 });
 
-export const textareaRecipe = recipe({
-  base: [
-    typography.bodyR,
-    {
-      width: '100%',
-      border: 'none',
-      outline: 'none',
-      padding: 0,
-      background: 'transparent',
-      resize: 'none',
-      color: themeVars.palette.black,
-      selectors: {
-        '&::placeholder': { color: themeVars.palette.cgrey300 },
-        '&:disabled': { color: themeVars.palette.cgrey400 },
-        '&:disabled::placeholder': { color: themeVars.palette.cgrey300 },
-      },
-    },
-  ],
-  variants: {
-    resize: {
-      normal: { height: 'auto', minHeight: 24 },
-      limit: {
-        height: 134,
-        overflowY: 'auto',
-        scrollbarWidth: 'thin',
-        scrollbarColor: `${themeVars.palette.cgrey200} ${themeVars.palette.white}`,
-        selectors: {
-          '&::-webkit-scrollbar': { width: 4 },
-          '&::-webkit-scrollbar-track': { background: themeVars.palette.white },
-          '&::-webkit-scrollbar-thumb': {
-            background: themeVars.palette.cgrey200,
-            borderRadius: 2,
-          },
-        },
-      },
-    },
-  },
-  defaultVariants: { resize: 'normal' },
+export const requiredAsterisk = css({
+  ...typography.bodySmallM,
+  color: color.red,
 });
 
-export const inputRecipe = recipe({
-  base: [
-    typography.bodyR,
-    {
-      width: '100%',
-      border: 'none',
-      outline: 'none',
-      padding: 0,
-      background: 'transparent',
-      color: themeVars.palette.black,
-      selectors: {
-        '&::placeholder': { color: themeVars.palette.cgrey300 },
-        '&:disabled': { color: themeVars.palette.cgrey400 },
-        '&:disabled::placeholder': { color: themeVars.palette.cgrey300 },
-      },
-    },
-  ],
+const inputWrapperBase = css({
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: 10,
+  padding: `${spacing.md} ${spacing.base}`,
+  width: '100%',
+  background: color.white,
+  borderRadius: radius.md,
+  borderWidth: '1px',
+  borderStyle: 'solid',
+  transition: 'border-color 0.2s, box-shadow 0.2s, background-color 0.2s',
 });
 
-export const footer = style({
+const inputWrapperStatusStyles = {
+  normal: css({
+    borderColor: color.cgrey200,
+    '&:focus-within': {
+      borderColor: color.blue,
+      boxShadow: `0 0 0 1px ${color.blue}`,
+    },
+  }),
+  negative: css({
+    borderColor: color.red,
+    '&:focus-within': {
+      borderColor: color.red,
+      boxShadow: `0 0 0 1px ${color.red}`,
+    },
+  }),
+} as const;
+
+const inputWrapperDisabledStyles = {
+  enabled: css({}),
+  disabled: css({
+    background: color.cgrey100,
+    borderColor: color.cgrey100,
+  }),
+} as const;
+
+export type InputWrapperRecipeOptions = {
+  status?: keyof typeof inputWrapperStatusStyles;
+  disabled?: boolean;
+};
+
+export const inputWrapperRecipe = ({
+  status = 'normal',
+  disabled = false,
+}: InputWrapperRecipeOptions = {}) =>
+  cx(
+    inputWrapperBase,
+    inputWrapperStatusStyles[status],
+    disabled ? inputWrapperDisabledStyles.disabled : inputWrapperDisabledStyles.enabled,
+  );
+
+const textareaBase = css({
+  ...typography.bodyR,
+  width: '100%',
+  border: 'none',
+  outline: 'none',
+  padding: 0,
+  background: 'transparent',
+  resize: 'none',
+  color: color.black,
+  '&::placeholder': { color: color.cgrey300 },
+  '&:disabled': { color: color.cgrey400 },
+  '&:disabled::placeholder': { color: color.cgrey300 },
+});
+
+const textareaResizeStyles = {
+  normal: css({ height: 'auto', minHeight: 24 }),
+  limit: css({
+    height: 134,
+    overflowY: 'auto',
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${color.cgrey200} ${color.white}`,
+    '&::-webkit-scrollbar': { width: 4 },
+    '&::-webkit-scrollbar-track': { background: color.white },
+    '&::-webkit-scrollbar-thumb': {
+      background: color.cgrey200,
+      borderRadius: 2,
+    },
+  }),
+} as const;
+
+export type TextareaRecipeOptions = {
+  resize?: keyof typeof textareaResizeStyles;
+};
+
+export const textareaRecipe = ({ resize = 'normal' }: TextareaRecipeOptions = {}) =>
+  cx(textareaBase, textareaResizeStyles[resize]);
+
+export const inputRecipe = css({
+  ...typography.bodyR,
+  width: '100%',
+  border: 'none',
+  outline: 'none',
+  padding: 0,
+  background: 'transparent',
+  color: color.black,
+  '&::placeholder': { color: color.cgrey300 },
+  '&:disabled': { color: color.cgrey400 },
+  '&:disabled::placeholder': { color: color.cgrey300 },
+});
+
+export const footer = css({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: 0,
-  gap: themeVars.spacing.sm,
+  gap: spacing.sm,
   width: '100%',
 });
 
-export const counter = style([
-  typography.captionR,
-  { color: themeVars.palette.cgrey300, flexGrow: 1 },
-]);
-
-export const actionButtonStyle = style([
-  typography.captionB,
-  {
-    color: themeVars.palette.cgrey300,
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '3px 0px',
-  },
-]);
-
-export const helperTextRecipe = recipe({
-  base: [typography.captionR, { alignSelf: 'stretch' }],
-  variants: {
-    status: {
-      normal: { color: themeVars.palette.cgrey400 },
-      negative: { color: themeVars.palette.red },
-    },
-  },
-  defaultVariants: { status: 'normal' },
+export const counter = css({
+  ...typography.captionR,
+  color: color.cgrey300,
+  flexGrow: 1,
 });
+
+export const actionButtonStyle = css({
+  ...typography.captionB,
+  color: color.cgrey300,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: '3px 0px',
+});
+
+const helperTextBase = css({
+  ...typography.captionR,
+  alignSelf: 'stretch',
+});
+
+const helperTextStatusStyles = {
+  normal: css({ color: color.cgrey400 }),
+  negative: css({ color: color.red }),
+} as const;
+
+export type HelperTextRecipeOptions = {
+  status?: keyof typeof helperTextStatusStyles;
+};
+
+export const helperTextRecipe = ({
+  status = 'normal',
+}: HelperTextRecipeOptions = {}) => cx(helperTextBase, helperTextStatusStyles[status]);

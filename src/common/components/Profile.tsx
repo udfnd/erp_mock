@@ -1,17 +1,11 @@
 import { clsx } from 'clsx';
 import React from 'react';
 
-import { containerRecipe, photoRecipe, nameRecipe } from './Profile.style.css';
-
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-type ContainerVariants = RecipeVariants<typeof containerRecipe>;
-type PhotoVariants = RecipeVariants<typeof photoRecipe>;
-type NameVariants = RecipeVariants<typeof nameRecipe>;
+import { containerRecipe, nameRecipe, photoRecipe, type PhotoRecipeOptions } from './Profile.style.css';
 
 export type ProfileProps = React.HTMLAttributes<HTMLDivElement> & {
-  size?: PhotoVariants['size'];
-  variant?: PhotoVariants['variant'];
+  size?: PhotoRecipeOptions['size'];
+  variant?: PhotoRecipeOptions['variant'];
   name?: string;
   imageUrl?: string;
   className?: string;

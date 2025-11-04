@@ -3,14 +3,15 @@
 import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
 
-import { chipBaseStyles, chipRecipe, chipIconWrapper } from './Chip.style.css';
-
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-type ChipVariants = RecipeVariants<typeof chipRecipe>;
+import {
+  chipBaseStyles,
+  chipIconWrapper,
+  chipRecipe,
+  type ChipRecipeOptions,
+} from './Chip.style.css';
 
 export type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  ChipVariants & {
+  ChipRecipeOptions & {
     iconLeft?: ReactNode;
     iconRight?: ReactNode;
     children?: ReactNode;

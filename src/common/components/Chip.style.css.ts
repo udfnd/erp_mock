@@ -1,10 +1,8 @@
-import { style } from '@vanilla-extract/css';
-import { recipe } from '@vanilla-extract/recipes';
+import { css, cx } from '@emotion/css';
 
-import { themeVars } from '@/design/theme.css';
-import { typography } from '@/design/typo.css';
+import { color, typography } from '@/style';
 
-export const chipBaseStyles = style({
+export const chipBaseStyles = css({
   boxSizing: 'border-box',
   display: 'inline-flex',
   flexDirection: 'row',
@@ -17,103 +15,114 @@ export const chipBaseStyles = style({
   transition: 'all 0.2s ease',
   whiteSpace: 'nowrap',
   border: '1px solid transparent',
-  selectors: {
-    '&:disabled': { cursor: 'not-allowed' },
+  '&:disabled': {
+    cursor: 'not-allowed',
   },
 });
 
 const solidGradient =
   'linear-gradient(0deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), linear-gradient(0deg, rgba(0, 0, 0, 0.53), rgba(0, 0, 0, 0.53)), #0A3FFF';
 
-export const chipRecipe = recipe({
-  base: {},
-  variants: {
-    size: {
-      lg: [typography.bodyB, { height: '36px', padding: '6px 12px', borderRadius: '10px' }],
-      md: [
-        typography.bodySmallSB,
-        { height: '32px', padding: '6px 10px 5px', borderRadius: '8px' },
-      ],
-      sm: [typography.captionB, { height: '24px', padding: '3px 8px', borderRadius: '6px' }],
-    },
-    variant: {
-      solid: {},
-      outlined: { background: 'transparent' },
-    },
-    active: {
-      true: {},
-      false: {},
-    },
-    disabled: {
-      true: {},
-      false: {},
-    },
-  },
-  compoundVariants: [
-    {
-      variants: { variant: 'solid', active: false, disabled: false },
-      style: {
-        background: solidGradient,
-        color: themeVars.palette.white,
-        ':hover': { background: themeVars.palette.blue600 },
-        ':active': { background: themeVars.palette.blue600 },
-      },
-    },
-    {
-      variants: { variant: 'solid', active: true, disabled: false },
-      style: {
-        background: themeVars.palette.black,
-        color: themeVars.palette.white,
-        ':hover': { background: themeVars.palette.black },
-        ':active': { background: themeVars.palette.black },
-      },
-    },
-    {
-      variants: { variant: 'outlined', active: false, disabled: false },
-      style: {
-        background: 'transparent',
-        color: themeVars.palette.cgrey500,
-        borderColor: themeVars.palette.cgrey200,
-        ':hover': { background: themeVars.palette.cgrey50 },
-        ':active': { background: themeVars.palette.cgrey100 },
-      },
-    },
-    {
-      variants: { variant: 'outlined', active: true, disabled: false },
-      style: {
-        background: 'transparent',
-        color: themeVars.palette.blue,
-        borderColor: themeVars.palette.blue,
-        ':hover': { background: 'transparent' },
-        ':active': { background: 'transparent' },
-      },
-    },
-    {
-      variants: { variant: 'solid', disabled: true },
-      style: {
-        background: themeVars.palette.cgrey100,
-        color: themeVars.palette.cgrey300,
-        borderColor: 'transparent',
-      },
-    },
-    {
-      variants: { variant: 'outlined', disabled: true },
-      style: {
-        background: 'transparent',
-        color: themeVars.palette.cgrey300,
-        borderColor: themeVars.palette.cgrey100,
-      },
-    },
-  ],
-  defaultVariants: {
-    size: 'md',
-    variant: 'solid',
-    active: false,
-    disabled: false,
-  },
-});
+const sizeStyles = {
+  lg: css({
+    ...typography.bodyB,
+    height: '36px',
+    padding: '6px 12px',
+    borderRadius: '10px',
+  }),
+  md: css({
+    ...typography.bodySmallSB,
+    height: '32px',
+    padding: '6px 10px 5px',
+    borderRadius: '8px',
+  }),
+  sm: css({
+    ...typography.captionB,
+    height: '24px',
+    padding: '3px 8px',
+    borderRadius: '6px',
+  }),
+} as const;
 
-export const chipIconWrapper = style({
+const variantStyles = {
+  solid: css({}),
+  outlined: css({
+    background: 'transparent',
+  }),
+} as const;
+
+const solidStateStyles = {
+  inactive: css({
+    background: solidGradient,
+    color: color.white,
+    '&:not(:disabled):hover': { background: color.blue600 },
+    '&:not(:disabled):active': { background: color.blue600 },
+  }),
+  active: css({
+    background: color.black,
+    color: color.white,
+    '&:not(:disabled):hover': { background: color.black },
+    '&:not(:disabled):active': { background: color.black },
+  }),
+} as const;
+
+const outlinedStateStyles = {
+  inactive: css({
+    background: 'transparent',
+    color: color.cgrey500,
+    borderColor: color.cgrey200,
+    '&:not(:disabled):hover': { background: color.cgrey50 },
+    '&:not(:disabled):active': { background: color.cgrey100 },
+  }),
+  active: css({
+    background: 'transparent',
+    color: color.blue,
+    borderColor: color.blue,
+    '&:not(:disabled):hover': { background: 'transparent' },
+    '&:not(:disabled):active': { background: 'transparent' },
+  }),
+} as const;
+
+const disabledStyles = {
+  solid: css({
+    background: color.cgrey100,
+    color: color.cgrey300,
+    borderColor: 'transparent',
+  }),
+  outlined: css({
+    background: 'transparent',
+    color: color.cgrey300,
+    borderColor: color.cgrey100,
+  }),
+} as const;
+
+export type ChipRecipeOptions = {
+  size?: keyof typeof sizeStyles;
+  variant?: keyof typeof variantStyles;
+  active?: boolean;
+  disabled?: boolean;
+};
+
+export const chipRecipe = ({
+  size = 'md',
+  variant = 'solid',
+  active = false,
+  disabled = false,
+}: ChipRecipeOptions = {}) => {
+  const stateKey = active ? 'active' : 'inactive';
+  const stateStyles =
+    variant === 'solid' ? solidStateStyles[stateKey] : outlinedStateStyles[stateKey];
+
+  const classes = [
+    sizeStyles[size],
+    variantStyles[variant],
+    disabled ? disabledStyles[variant] : stateStyles,
+  ];
+
+  return cx(...classes);
+};
+
+export const chipIconWrapper = css({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',

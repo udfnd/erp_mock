@@ -1,31 +1,25 @@
-// src/design/components/Toggle.tsx
 'use client';
 
 import { clsx } from 'clsx';
 import React, { useState } from 'react';
 
-import { handleRecipe, toggleRecipe } from './Toggle.style.css';
-
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-type ToggleRecipeVariants = RecipeVariants<typeof toggleRecipe>;
-type HandleRecipeVariants = RecipeVariants<typeof handleRecipe>;
+import { handleRecipe, toggleRecipe, type ToggleRecipeOptions } from './Toggle.style.css';
 
 export type ToggleProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> &
-  ToggleRecipeVariants & {
+  ToggleRecipeOptions & {
     onChange?: (isActive: boolean) => void;
-    initialActive?: boolean; // For uncontrolled state
+    initialActive?: boolean;
   };
 
 export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
   (
     {
       size = 'md',
-      active: controlledActive, // Rename prop for clarity
+      active: controlledActive,
       disabled = false,
       className,
       onChange,
-      initialActive = false, // Default initial state for uncontrolled
+      initialActive = false,
       ...props
     },
     ref,

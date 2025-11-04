@@ -3,14 +3,14 @@
 import { clsx } from 'clsx';
 import React from 'react';
 
-import { buttonBaseStyles, iconButtonRecipe } from './IconButton.style.css';
-
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-type IconButtonRecipeVariants = RecipeVariants<typeof iconButtonRecipe>;
+import {
+  buttonBaseStyles,
+  iconButtonRecipe,
+  type IconButtonRecipeOptions,
+} from './IconButton.style.css';
 
 export type IconButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  IconButtonRecipeVariants & {
+  IconButtonRecipeOptions & {
     children: React.ReactNode;
   };
 

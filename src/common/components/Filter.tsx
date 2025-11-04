@@ -5,14 +5,15 @@ import React, { ReactNode } from 'react';
 
 import { StateDown, StateUp } from '@/components/icons';
 
-import { filterBaseStyles, filterRecipe, iconWrapper } from './Filter.style.css';
-
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-
-type FilterRecipeVariants = RecipeVariants<typeof filterRecipe>;
+import {
+  filterBaseStyles,
+  filterRecipe,
+  iconWrapper,
+  type FilterRecipeOptions,
+} from './Filter.style.css';
 
 export type FilterProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
-  FilterRecipeVariants & {
+  FilterRecipeOptions & {
     iconLeft?: ReactNode;
     children?: ReactNode;
   };

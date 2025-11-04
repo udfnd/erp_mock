@@ -1,9 +1,8 @@
-import { style } from '@vanilla-extract/css';
-import { recipe } from '@vanilla-extract/recipes';
+import { css, cx } from '@emotion/css';
 
-import { themeVars } from '@/design/theme.css';
+import { color } from '@/style';
 
-export const buttonBaseStyles = style({
+export const buttonBaseStyles = css({
   display: 'inline-flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -13,177 +12,104 @@ export const buttonBaseStyles = style({
   transition: 'all 0.2s ease',
   textDecoration: 'none',
   flexShrink: 0,
-  ':disabled': {
+  color: color.cgrey700,
+  '&:disabled': {
     cursor: 'not-allowed',
   },
-  color: themeVars.palette.cgrey700,
 });
 
-export const iconButtonRecipe = recipe({
-  base: {},
-  variants: {
-    styleType: {
-      normal: {
-        background: 'transparent',
-      },
-      solid: {
-        borderRadius: '1000px',
-        background: themeVars.palette.blue,
-        color: themeVars.palette.white,
-      },
-      outlined: {
-        borderRadius: '1000px',
-        background: themeVars.palette.white,
-        borderColor: themeVars.palette.cgrey200,
-        color: themeVars.palette.cgrey700,
-      },
-      background: {
-        background: themeVars.palette.cgrey50,
-        borderRadius: '4px',
-      },
-    },
-    size: {
-      default: {},
-      medium: {},
-      small: {},
-      micro: {},
-    },
-    disabled: {
-      true: {},
-      false: {},
-    },
-  },
-  compoundVariants: [
-    {
-      variants: { styleType: 'normal', size: 'default' },
-      style: { width: 24, height: 24, color: themeVars.palette.cgrey500 },
-    },
-    {
-      variants: { styleType: 'normal', size: 'small' },
-      style: { width: 20, height: 20, color: themeVars.palette.cgrey500 },
-    },
-    {
-      variants: { styleType: 'normal', disabled: false },
-      style: {
-        ':hover': { background: themeVars.palette.cgrey50 },
-      },
-    },
-    {
-      variants: { styleType: 'normal', disabled: false },
-      style: {
-        ':active': { background: themeVars.palette.cgrey100 },
-      },
-    },
-    {
-      variants: { styleType: 'background', size: 'default' },
-      style: { width: 24, height: 24, color: themeVars.palette.cgrey500 },
-    },
-    {
-      variants: { styleType: 'background', size: 'small' },
-      style: { width: 20, height: 20, color: themeVars.palette.cgrey500 },
-    },
-    {
-      variants: { styleType: 'background', disabled: false },
-      style: {
-        ':hover': { background: themeVars.palette.cgrey100 },
-      },
-    },
-    {
-      variants: { styleType: 'background', disabled: false },
-      style: {
-        ':active': { background: themeVars.palette.cgrey200 },
-      },
-    },
-    {
-      variants: { styleType: 'solid', size: 'default' },
-      style: { width: 40, height: 40, padding: 8 },
-    },
-    {
-      variants: { styleType: 'solid', size: 'medium' },
-      style: { width: 32, height: 32, padding: 4 },
-    },
-    {
-      variants: { styleType: 'solid', size: 'small' },
-      style: { width: 24, height: 24, padding: 4 },
-    },
-    {
-      variants: { styleType: 'solid', size: 'micro' },
-      style: { width: 16, height: 16, padding: 2 },
-    },
-    {
-      variants: { styleType: 'solid', disabled: false },
-      style: {
-        ':hover': { background: themeVars.palette.blue600 },
-      },
-    },
-    {
-      variants: { styleType: 'solid', disabled: false },
-      style: {
-        ':active': {
-          background: themeVars.palette.blue,
-          boxShadow: 'inset 0 0 100px 100px rgba(0, 0, 0, 0.2)',
-        },
-      },
-    },
-    {
-      variants: { styleType: 'outlined', size: 'default' },
-      style: { width: 40, height: 40, padding: 8 },
-    },
-    {
-      variants: { styleType: 'outlined', size: 'medium' },
-      style: { width: 32, height: 32, padding: 4 },
-    },
-    {
-      variants: { styleType: 'outlined', size: 'small' },
-      style: { width: 24, height: 24, padding: 4 },
-    },
-    {
-      variants: { styleType: 'outlined', size: 'micro' },
-      style: { width: 16, height: 16, padding: 2 },
-    },
-    {
-      variants: { styleType: 'outlined', disabled: false },
-      style: {
-        ':hover': { background: themeVars.palette.cgrey50 },
-      },
-    },
-    {
-      variants: { styleType: 'outlined', disabled: false },
-      style: {
-        ':active': { background: themeVars.palette.cgrey100 },
-      },
-    },
-    {
-      variants: { styleType: 'normal', disabled: true },
-      style: { color: themeVars.palette.cgrey300, background: 'transparent' },
-    },
-    {
-      variants: { styleType: 'background', disabled: true },
-      style: {
-        color: themeVars.palette.cgrey300,
-        background: themeVars.palette.cgrey50,
-      },
-    },
-    {
-      variants: { styleType: 'solid', disabled: true },
-      style: {
-        background: themeVars.palette.cgrey100,
-        color: themeVars.palette.cgrey300,
-      },
-    },
-    {
-      variants: { styleType: 'outlined', disabled: true },
-      style: {
-        background: themeVars.palette.white,
-        color: themeVars.palette.cgrey300,
-        borderColor: themeVars.palette.cgrey100,
-      },
-    },
-  ],
+const styleTypeStyles = {
+  normal: css({
+    background: 'transparent',
+  }),
+  solid: css({
+    borderRadius: '1000px',
+    background: color.blue,
+    color: color.white,
+  }),
+  outlined: css({
+    borderRadius: '1000px',
+    background: color.white,
+    borderColor: color.cgrey200,
+    color: color.cgrey700,
+  }),
+  background: css({
+    background: color.cgrey50,
+    borderRadius: '4px',
+  }),
+} as const;
 
-  defaultVariants: {
-    styleType: 'normal',
-    size: 'default',
-    disabled: false,
+export type IconButtonStyleType = keyof typeof styleTypeStyles;
+export type IconButtonSize = 'default' | 'medium' | 'small' | 'micro';
+
+const sizeStylesByType: Record<IconButtonStyleType, Partial<Record<IconButtonSize, string>>> = {
+  normal: {
+    default: css({ width: 24, height: 24, color: color.cgrey500 }),
+    small: css({ width: 20, height: 20, color: color.cgrey500 }),
   },
-});
+  background: {
+    default: css({ width: 24, height: 24, color: color.cgrey500 }),
+    small: css({ width: 20, height: 20, color: color.cgrey500 }),
+  },
+  solid: {
+    default: css({ width: 40, height: 40, padding: 8 }),
+    medium: css({ width: 32, height: 32, padding: 4 }),
+    small: css({ width: 24, height: 24, padding: 4 }),
+    micro: css({ width: 16, height: 16, padding: 2 }),
+  },
+  outlined: {
+    default: css({ width: 40, height: 40, padding: 8 }),
+    medium: css({ width: 32, height: 32, padding: 4 }),
+    small: css({ width: 24, height: 24, padding: 4 }),
+    micro: css({ width: 16, height: 16, padding: 2 }),
+  },
+};
+
+const interactiveStyles: Record<IconButtonStyleType, string> = {
+  normal: css({
+    '&:not(:disabled):hover': { background: color.cgrey50 },
+    '&:not(:disabled):active': { background: color.cgrey100 },
+  }),
+  background: css({
+    '&:not(:disabled):hover': { background: color.cgrey100 },
+    '&:not(:disabled):active': { background: color.cgrey200 },
+  }),
+  solid: css({
+    '&:not(:disabled):hover': { background: color.blue600 },
+    '&:not(:disabled):active': {
+      background: color.blue,
+      boxShadow: 'inset 0 0 100px 100px rgba(0, 0, 0, 0.2)',
+    },
+  }),
+  outlined: css({
+    '&:not(:disabled):hover': { background: color.cgrey50 },
+    '&:not(:disabled):active': { background: color.cgrey100 },
+  }),
+};
+
+const disabledStyles: Record<IconButtonStyleType, string> = {
+  normal: css({ color: color.cgrey300, background: 'transparent' }),
+  background: css({ color: color.cgrey300, background: color.cgrey50 }),
+  solid: css({ background: color.cgrey100, color: color.cgrey300 }),
+  outlined: css({ background: color.white, color: color.cgrey300, borderColor: color.cgrey100 }),
+};
+
+export type IconButtonRecipeOptions = {
+  styleType?: IconButtonStyleType;
+  size?: IconButtonSize;
+  disabled?: boolean;
+};
+
+export const iconButtonRecipe = ({
+  styleType = 'normal',
+  size = 'default',
+  disabled = false,
+}: IconButtonRecipeOptions = {}) => {
+  const classes = [
+    styleTypeStyles[styleType],
+    sizeStylesByType[styleType][size],
+    disabled ? disabledStyles[styleType] : interactiveStyles[styleType],
+  ];
+
+  return cx(...classes.filter(Boolean));
+};
