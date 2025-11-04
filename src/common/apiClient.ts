@@ -8,22 +8,32 @@ import axios, {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://staging.api.v3.teachita.com/api';
-const SIGN_IN_PATH = '/api/T/dl/sayongjas/sign-in';
-const REFRESH_BASE_PATH = '/api/T/dl/sayongjas/refresh-access';
+const SIGN_IN_PATTERN = /^\/?(?:api\/)?T\/dl\/sayongjas\/sign-in$/;
+const REFRESH_PATTERN = /^\/?(?:api\/)?T\/dl\/sayongjas\/([^/]+)\/refresh-access$/;
+const REFRESH_ENDPOINT_BASE = 'T/dl/sayongjas';
+const REFRESH_ENDPOINT_SUFFIX = 'refresh-access';
 
 const stripQueryAndSlash = (url?: string) => {
   if (!url) return '';
   const q = url.indexOf('?');
   const base = q >= 0 ? url.slice(0, q) : url;
-  return base.endsWith('/') ? base.slice(0, -1) : base;
+  let pathname = base;
+  try {
+    pathname = new URL(base, 'http://stub').pathname;
+  } catch {}
+  return pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 };
-const isSignIn = (url?: string) => {
+const isSignIn = (url?: string) => SIGN_IN_PATTERN.test(stripQueryAndSlash(url));
+const extractRefreshUserIdFromUrl = (url?: string): string | null => {
   const u = stripQueryAndSlash(url);
-  return u.endsWith('/sign-in') || u.endsWith(SIGN_IN_PATH);
+  const match = REFRESH_PATTERN.exec(u);
+  return match ? match[1] : null;
 };
 const isRefresh = (url?: string) => {
   const u = stripQueryAndSlash(url);
-  return u === REFRESH_BASE_PATH || u.startsWith(`${REFRESH_BASE_PATH}/`);
+  if (!u) return false;
+  if (u === '/api/T/dl/sayongjas/refresh-access' || u === '/T/dl/sayongjas/refresh-access') return true;
+  return REFRESH_PATTERN.test(u);
 };
 
 type NodeBuffer = { from(i: string, e: string): { toString(e: string): string } };
@@ -121,10 +131,17 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-const hasAccessToken = (x: unknown): x is { accessToken: string } =>
+type AccessTokenPayload = { accessToken: string; nanoId?: string };
+
+const hasAccessToken = (x: unknown): x is AccessTokenPayload =>
   typeof x === 'object' &&
   x !== null &&
   typeof (x as { accessToken?: unknown }).accessToken === 'string';
+
+const getNanoId = (x: unknown): string | undefined => {
+  const candidate = (x as { nanoId?: unknown })?.nanoId;
+  return typeof candidate === 'string' ? candidate : undefined;
+};
 
 apiClient.interceptors.response.use(
   (response) => {
@@ -133,15 +150,19 @@ apiClient.interceptors.response.use(
 
     if (hasAccessToken(data)) {
       if (isSignIn(url)) {
-        let userId: string | undefined;
-        try {
-          const raw = response.config?.data as unknown;
-          const parsed = typeof raw === 'string' ? (JSON.parse(raw) as unknown) : raw;
-          const cand =
-            (parsed as Record<string, unknown> | undefined)?.['id'] ??
-            (parsed as Record<string, unknown> | undefined)?.['userId'];
-          if (typeof cand === 'string' && cand.length > 0) userId = cand;
-        } catch {}
+        const responseNanoId = getNanoId(data);
+        let userId = responseNanoId;
+        if (!userId) {
+          try {
+            const raw = response.config?.data as unknown;
+            const parsed = typeof raw === 'string' ? (JSON.parse(raw) as unknown) : raw;
+            const cand =
+              (parsed as Record<string, unknown> | undefined)?.['nanoId'] ??
+              (parsed as Record<string, unknown> | undefined)?.['id'] ??
+              (parsed as Record<string, unknown> | undefined)?.['userId'];
+            if (typeof cand === 'string' && cand.length > 0) userId = cand;
+          } catch {}
+        }
         if (userId) {
           cacheAccessTokenFor(userId, data.accessToken);
           setActiveUserId(userId);
@@ -150,13 +171,9 @@ apiClient.interceptors.response.use(
         }
       }
       if (isRefresh(url)) {
-        let refreshUserId = activeUserId || undefined;
-        try {
-          const u = stripQueryAndSlash(url);
-          const idx = u.lastIndexOf('/');
-          const last = idx >= 0 ? u.slice(idx + 1) : undefined;
-          if (last && last !== 'refresh-access') refreshUserId = last;
-        } catch {}
+        const responseNanoId = getNanoId(data);
+        const refreshUserId =
+          responseNanoId ?? extractRefreshUserIdFromUrl(url) ?? activeUserId ?? undefined;
         if (refreshUserId) {
           cacheAccessTokenFor(refreshUserId, data.accessToken);
           setActiveUserId(refreshUserId);
@@ -209,7 +226,8 @@ const drainQueue = (uid: string, err: AxiosError | null, token: string | null) =
 };
 
 async function refreshAccessTokenFor(userId: string): Promise<string> {
-  const { data } = await refreshClient.post(`${REFRESH_BASE_PATH}/${encodeURIComponent(userId)}`);
+  const endpoint = `${REFRESH_ENDPOINT_BASE}/${encodeURIComponent(userId)}/${REFRESH_ENDPOINT_SUFFIX}`;
+  const { data } = await refreshClient.post(endpoint);
   if (!hasAccessToken(data)) throw new Error('No accessToken from refresh');
   const newAT = data.accessToken;
   cacheAccessTokenFor(userId, newAT);
