@@ -128,6 +128,7 @@ export const historyEmpty = css({
 
 export const actions = css({
   display: 'flex',
-  justifyContent: 'flex-end',
+  justifyContent: 'space-between',
+  alignItems: 'center',
   gap: spacing.sm,
 });

@@ -17,6 +17,7 @@ type MyProfileMenuProps = {
   onClose: () => void;
   onSelectHistory: (entry: AuthHistoryEntry) => void;
   onAddUser: () => void;
+  onLogout: () => void;
 };
 
 export default function MyProfileMenu({
@@ -28,6 +29,7 @@ export default function MyProfileMenu({
   onClose,
   onSelectHistory,
   onAddUser,
+  onLogout,
 }: MyProfileMenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -87,10 +89,10 @@ export default function MyProfileMenu({
         </button>
       </div>
       <div className={styles.historySection}>
-        <span className={styles.historyTitle}>최근 전환한 계정</span>
+        <span className={styles.historyTitle}>같은 기관의 다른 사용자</span>
         <div className={styles.historyList}>
           {recentHistory.length === 0 ? (
-            <span className={styles.historyEmpty}>최근 전환한 계정이 없습니다.</span>
+            <span className={styles.historyEmpty}>같은 기관의 다른 사용자가 없습니다.</span>
           ) : (
             recentHistory.map((entry) => (
               <button
@@ -109,6 +111,9 @@ export default function MyProfileMenu({
         </div>
       </div>
       <div className={styles.actions}>
+        <Button styleType="text" variant="secondary" size="small" onClick={onLogout}>
+          로그아웃
+        </Button>
         <Button styleType="outlined" variant="secondary" size="small" onClick={onAddUser}>
           사용자 관리로 이동
         </Button>
