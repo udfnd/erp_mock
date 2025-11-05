@@ -141,16 +141,32 @@ const getNanoId = (x: unknown): string | undefined => {
   return typeof candidate === 'string' ? candidate : undefined;
 };
 
-const finalizeUnauthorizedForUser = (uid: string) => {
+const triggerUnauthorized = () => {
+  if (!onUnauthorized) return;
   try {
+    onUnauthorized();
+  } catch {}
+};
+
+const clearUserSession = (uid: string | null) => {
+  if (uid) {
     cacheAccessTokenFor(uid, null);
-    if (activeUserId === uid) setAccessToken(null);
-  } finally {
-    if (onUnauthorized) {
-      try {
-        onUnauthorized();
-      } catch {}
+    if (activeUserId === uid) {
+      setActiveUserId(null);
+      setAccessToken(null);
     }
+  } else {
+    atByUser.clear();
+    setActiveUserId(null);
+    setAccessToken(null);
+  }
+};
+
+const finalizeUnauthorized = (uid?: string | null) => {
+  try {
+    clearUserSession(uid ?? getActiveUserId());
+  } finally {
+    triggerUnauthorized();
   }
 };
 
@@ -210,8 +226,7 @@ apiClient.interceptors.response.use(
     const isSecond401AfterRetry =
       Boolean(original) && status === 401 && original?._retry && !isSignIn(url) && !isRefresh(url);
     if (isSecond401AfterRetry) {
-      const uid2 = getActiveUserId();
-      if (uid2) finalizeUnauthorizedForUser(uid2);
+      finalizeUnauthorized(getActiveUserId());
       return Promise.reject(error);
     }
 
@@ -221,7 +236,10 @@ apiClient.interceptors.response.use(
     if (!eligible401) return Promise.reject(error);
 
     const uid = getActiveUserId();
-    if (!uid) return Promise.reject(error);
+    if (!uid) {
+      finalizeUnauthorized(null);
+      return Promise.reject(error);
+    }
 
     return handle401ForUser(uid, original as InternalAxiosRequestConfig & { _retry?: boolean });
   },
@@ -285,7 +303,7 @@ async function handle401ForUser(
   } catch (e) {
     // 리프레시 실패 → 토큰 정리 + onUnauthorized 호출
     drainQueue(userId, e as AxiosError, null);
-    finalizeUnauthorizedForUser(userId);
+    finalizeUnauthorized(userId);
     return Promise.reject(e);
   } finally {
     isRefreshingByUser.set(userId, false);

@@ -1,24 +1,83 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Global, css } from '@emotion/react';
+import { QueryClient, QueryClientProvider, HydrationBoundary } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { configureUnauthorizedHandler } from '@/global';
+import { initializeAuthStore } from '@/global/auth';
 
 type AppProvidersProps = {
   children: ReactNode;
 };
 
 export function Providers({ children }: AppProvidersProps) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: (failureCount, error) => {
+              const axiosError = error as AxiosError | undefined;
+              const status = axiosError?.response?.status;
+              if (status === 401) return false;
+              return failureCount < 2;
+            },
+            refetchOnWindowFocus: false,
+          },
+          mutations: {
+            retry: (failureCount, error) => {
+              const axiosError = error as AxiosError | undefined;
+              const status = axiosError?.response?.status;
+              if (status === 401) return false;
+              return failureCount < 1;
+            },
+          },
+        },
+      }),
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthInitializer />
+      <Global styles={globalStyles} />
       {/* 전역 401 처리기 등록 */}
       <UnauthorizedRedirector queryClient={queryClient} />
-      {children}
+      <HydrationBoundary>{children}</HydrationBoundary>
     </QueryClientProvider>
   );
+}
+
+const globalStyles = css({
+  '*, *::before, *::after': {
+    boxSizing: 'border-box',
+  },
+  body: {
+    margin: 0,
+    minHeight: '100vh',
+    backgroundColor: '#F3F5FA',
+    color: '#2E3446',
+    fontFamily: 'inherit',
+  },
+  a: {
+    color: 'inherit',
+    textDecoration: 'none',
+  },
+  'button, input, textarea, select': {
+    font: 'inherit',
+  },
+  ':root': {
+    colorScheme: 'light',
+  },
+});
+
+function AuthInitializer() {
+  useEffect(() => {
+    initializeAuthStore();
+  }, []);
+
+  return null;
 }
 
 function UnauthorizedRedirector({ queryClient }: { queryClient: QueryClient }) {
