@@ -9,6 +9,7 @@ import { SidebarClose, SidebarOpen } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
+import { getAccessTokenFor, switchUser } from '@/global/apiClient';
 
 import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
@@ -46,7 +47,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const { state: authState, setAuthState, clearAuthState } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { history, refresh: refreshHistory } = useAuthHistory();
+  const { history, refresh: refreshHistory, remove: removeHistoryEntry } = useAuthHistory();
   const storedProfileKeyRef = useRef<string | null>(null);
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
@@ -221,18 +222,69 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   }, []);
 
   const handleSelectHistory = useCallback(
-    (entry: (typeof history)[number]) => {
-      setAuthState(entry.authState);
-      upsertAuthHistoryEntry(entry);
+    async (entry: (typeof history)[number]) => {
+      let loginRequired = false;
+
+      try {
+        await switchUser(entry.sayongjaNanoId, (userIdNeedingLogin) => {
+          loginRequired = true;
+          removeHistoryEntry(userIdNeedingLogin);
+          if (typeof window !== 'undefined') {
+            window.alert('저장된 로그인 정보가 만료되어 다시 로그인해야 합니다.');
+          }
+          const targetGigwan =
+            entry.authState.gigwanNanoId ?? authState.gigwanNanoId ?? gigwanNanoId;
+          if (targetGigwan) {
+            router.replace(`/td/g/${targetGigwan}/login`);
+          } else {
+            router.replace('/td/g');
+          }
+        });
+      } catch (error) {
+        loginRequired = true;
+        console.error('Failed to switch user session', error);
+        if (typeof window !== 'undefined') {
+          window.alert('사용자 전환 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        }
+      }
+
+      if (loginRequired) {
+        refreshHistory();
+        setIsProfileMenuOpen(false);
+        return;
+      }
+
+      const updatedAccessToken =
+        getAccessTokenFor(entry.sayongjaNanoId) ?? entry.authState.accessToken ?? null;
+      const nextAuthState = { ...entry.authState, accessToken: updatedAccessToken };
+
+      setAuthState(nextAuthState);
+      upsertAuthHistoryEntry({ ...entry, authState: nextAuthState });
       refreshHistory();
       setIsProfileMenuOpen(false);
+
+      // router.refresh() does not fully reset client-side caches (e.g. React Query),
+      // so switching users kept showing the previous user's data. Force a hard
+      // reload to ensure all requests are made with the new credentials.
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+        return;
+      }
+
       try {
         router.refresh();
       } catch (error) {
         console.error('Failed to refresh after user switch', error);
       }
     },
-    [refreshHistory, router, setAuthState],
+    [
+      authState.gigwanNanoId,
+      gigwanNanoId,
+      refreshHistory,
+      removeHistoryEntry,
+      router,
+      setAuthState,
+    ],
   );
 
   const handleAddUser = useCallback(() => {
