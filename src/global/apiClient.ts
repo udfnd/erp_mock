@@ -75,11 +75,15 @@ const deleteAuthOn = (headers: AxiosRequestHeaders | undefined): AxiosHeaders =>
 };
 
 let activeUserId: string | null = null;
+let hasTriggeredUnauthorized = false;
 const atByUser = new Map<string, string>();
 
 export const getActiveUserId = () => activeUserId;
 export const setActiveUserId = (userId: string | null) => {
   activeUserId = userId;
+  if (userId) {
+    hasTriggeredUnauthorized = false;
+  }
 };
 
 let legacyAccessToken: string | null = null;
@@ -97,15 +101,8 @@ export const getAccessTokenFor = (userId: string): string | null => atByUser.get
 
 type OnUnauthorized = () => void;
 let onUnauthorized: OnUnauthorized | null = null;
-let hasPendingUnauthorized = false;
 export const configureUnauthorizedHandler = (handler: OnUnauthorized | null) => {
   onUnauthorized = handler;
-  if (handler && hasPendingUnauthorized) {
-    hasPendingUnauthorized = false;
-    try {
-      handler();
-    } catch {}
-  }
 };
 
 export const apiClient: AxiosInstance = axios.create({
@@ -149,10 +146,7 @@ const getNanoId = (x: unknown): string | undefined => {
 };
 
 const triggerUnauthorized = () => {
-  if (!onUnauthorized) {
-    hasPendingUnauthorized = true;
-    return;
-  }
+  if (!onUnauthorized) return;
   try {
     onUnauthorized();
   } catch {}
@@ -173,6 +167,8 @@ const clearUserSession = (uid: string | null) => {
 };
 
 const finalizeUnauthorized = (uid?: string | null) => {
+  if (hasTriggeredUnauthorized) return;
+  hasTriggeredUnauthorized = true;
   try {
     clearUserSession(uid ?? getActiveUserId());
   } finally {
@@ -243,6 +239,7 @@ apiClient.interceptors.response.use(
 
     const uid = getActiveUserId();
     if (!uid) {
+      finalizeUnauthorized(null);
       return Promise.reject(error);
     }
 
