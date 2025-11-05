@@ -43,7 +43,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [isCollapsedByBreakpoint, setIsCollapsedByBreakpoint] = useState(false);
-  const { state: authState, setAuthState } = useAuth();
+  const { state: authState, setAuthState, clearAuthState } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { history, refresh: refreshHistory } = useAuthHistory();
@@ -101,7 +101,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   };
 
   useEffect(() => {
-    if (!myProfileData || !authState.accessToken) return;
+    if (!myProfileData || !authState.accessToken || !authState.gigwanNanoId) return;
     const historyKey = `${myProfileData.nanoId}-${authState.accessToken}`;
     if (storedProfileKeyRef.current === historyKey) return;
 
@@ -205,13 +205,16 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     return list;
   }, [hierarchy, sidebarData?.jojiks]);
 
-  const filteredHistory = useMemo(
-    () =>
-      history
-        .filter((entry) => entry.sayongjaNanoId !== myProfileData?.nanoId)
-        .sort((a, b) => b.lastUsedAt - a.lastUsedAt),
-    [history, myProfileData?.nanoId],
-  );
+  const filteredHistory = useMemo(() => {
+    if (!authState.gigwanNanoId) return [] as typeof history;
+    return history
+      .filter(
+        (entry) =>
+          entry.sayongjaNanoId !== myProfileData?.nanoId &&
+          entry.authState.gigwanNanoId === authState.gigwanNanoId,
+      )
+      .sort((a, b) => b.lastUsedAt - a.lastUsedAt);
+  }, [authState.gigwanNanoId, history, myProfileData?.nanoId]);
 
   const handleProfileButtonClick = useCallback(() => {
     setIsProfileMenuOpen((prev) => !prev);
@@ -240,6 +243,17 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     router.push(`/td/np/gis/${gigwanNanoId}/sayongjas/home/lv`);
     setIsProfileMenuOpen(false);
   }, [gigwanNanoId, router]);
+
+  const handleLogout = useCallback(() => {
+    try {
+      clearAuthState();
+      storedProfileKeyRef.current = null;
+      setIsProfileMenuOpen(false);
+      router.replace('/td/g');
+    } catch (error) {
+      console.error('Failed to logout', error);
+    }
+  }, [clearAuthState, router]);
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
 
@@ -366,6 +380,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
               history={filteredHistory}
               onSelectHistory={handleSelectHistory}
               onAddUser={handleAddUser}
+              onLogout={handleLogout}
               anchorRef={profileButtonRef}
               profileImageUrl={profileImageUrl}
             />
