@@ -22,14 +22,18 @@ const navContainerBase = css({
   '@media (max-width: 959px)': {
     display: 'none',
   },
-  [`@media ${collapsedRange}`]: {
-    width: '40px',
-    padding: '8px',
-    alignItems: 'center',
-  },
 });
 
-export const navContainerOpen = navContainerBase;
+export const navContainerOpen = cx(
+  navContainerBase,
+  css({
+    [`@media ${collapsedRange}`]: {
+      width: '200px',
+      padding: '10px 12px 24px',
+      alignItems: 'initial',
+    },
+  }),
+);
 
 export const navContainerClosed = cx(
   navContainerBase,
@@ -38,6 +42,12 @@ export const navContainerClosed = cx(
     padding: '8px',
     alignItems: 'center',
     overflow: 'hidden',
+    [`@media ${collapsedRange}`]: {
+      width: '40px',
+      padding: '8px',
+      alignItems: 'center',
+      overflow: 'hidden',
+    },
   }),
 );
 
@@ -154,15 +164,16 @@ export const navLabel = css({
   whiteSpace: 'nowrap',
   transition: 'opacity 0.2s ease',
   [`@media ${collapsedRange}`]: {
-    position: 'absolute',
-    width: '1px',
-    height: '1px',
-    padding: 0,
-    margin: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    border: 0,
+    ['aside[data-open="false"] &']: {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      padding: 0,
+      margin: '-1px',
+      overflow: 'hidden',
+      clip: 'rect(0, 0, 0, 0)',
+      border: 0,
+    },
   },
 });
 

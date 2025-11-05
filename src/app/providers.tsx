@@ -1,12 +1,13 @@
 'use client';
 
-import { Global, css } from '@emotion/react';
-import { QueryClient, QueryClientProvider, HydrationBoundary } from '@tanstack/react-query';
+import { Global } from '@emotion/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { configureUnauthorizedHandler } from '@/global';
-import { initializeAuthStore } from '@/global/auth';
+import { globalStyles } from '@/global/style';
+import { clearAuthState, initializeAuthStore } from '@/global/auth';
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -42,35 +43,11 @@ export function Providers({ children }: AppProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <AuthInitializer />
       <Global styles={globalStyles} />
-      {/* 전역 401 처리기 등록 */}
       <UnauthorizedRedirector queryClient={queryClient} />
-      <HydrationBoundary>{children}</HydrationBoundary>
+      {children}
     </QueryClientProvider>
   );
 }
-
-const globalStyles = css({
-  '*, *::before, *::after': {
-    boxSizing: 'border-box',
-  },
-  body: {
-    margin: 0,
-    minHeight: '100vh',
-    backgroundColor: '#F3F5FA',
-    color: '#2E3446',
-    fontFamily: 'inherit',
-  },
-  a: {
-    color: 'inherit',
-    textDecoration: 'none',
-  },
-  'button, input, textarea, select': {
-    font: 'inherit',
-  },
-  ':root': {
-    colorScheme: 'light',
-  },
-});
 
 function AuthInitializer() {
   useEffect(() => {
@@ -86,10 +63,10 @@ function UnauthorizedRedirector({ queryClient }: { queryClient: QueryClient }) {
   useEffect(() => {
     configureUnauthorizedHandler(() => {
       try {
-        // 필요 시 전역 상태/스토어도 함께 초기화
-        queryClient.clear(); // 모든 React Query 캐시 제거
+        clearAuthState();
+        queryClient.clear();
       } finally {
-        router.replace('/td/g'); // 기관 코드 입력 페이지로 이동
+        router.replace('/td/g');
       }
     });
     return () => configureUnauthorizedHandler(null);

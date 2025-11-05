@@ -94,12 +94,11 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     };
   }, []);
 
-  const effectiveIsOpen = isCollapsedByBreakpoint ? false : isOpen;
+  const effectiveIsOpen = isOpen;
 
-  const handleToggle = useCallback(() => {
-    if (isCollapsedByBreakpoint) return;
+  const handleToggle = () => {
     setIsOpen((v) => !v);
-  }, [isCollapsedByBreakpoint]);
+  };
 
   useEffect(() => {
     if (!myProfileData || !authState.accessToken) return;
@@ -293,7 +292,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           aria-expanded={effectiveIsOpen}
           aria-controls="primary-nav-list"
           aria-label={effectiveIsOpen ? '메뉴 접기' : '메뉴 열기'}
-          disabled={isCollapsedByBreakpoint}
         >
           {effectiveIsOpen ? (
             <SidebarClose className={styles.icon} />

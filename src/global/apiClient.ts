@@ -75,14 +75,14 @@ const deleteAuthOn = (headers: AxiosRequestHeaders | undefined): AxiosHeaders =>
 };
 
 let activeUserId: string | null = null;
-const atByUser = new Map<string, string>(); // 유저별 accessToken 캐시
+const atByUser = new Map<string, string>();
 
 export const getActiveUserId = () => activeUserId;
 export const setActiveUserId = (userId: string | null) => {
   activeUserId = userId;
 };
 
-let legacyAccessToken: string | null = null; // activeUserId 미지정 대비
+let legacyAccessToken: string | null = null;
 export const setAccessToken = (token: string | null) => {
   legacyAccessToken = token;
 };
@@ -181,7 +181,6 @@ apiClient.interceptors.response.use(
         const responseNanoId = getNanoId(data);
         let userId = responseNanoId;
         if (!userId) {
-          // 요청 바디에서 id 추론
           try {
             const raw = response.config?.data as unknown;
             const parsed = typeof raw === 'string' ? (JSON.parse(raw) as unknown) : raw;
@@ -200,7 +199,6 @@ apiClient.interceptors.response.use(
         }
       }
 
-      // 리프레시 응답
       if (isRefresh(url)) {
         const responseNanoId = getNanoId(data);
         const refreshUserId =
@@ -222,7 +220,6 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
     const url = original?.url;
 
-    // 2차 401: 리프레시 후 재시도에도 또 401이면 즉시 종료
     const isSecond401AfterRetry =
       Boolean(original) && status === 401 && original?._retry && !isSignIn(url) && !isRefresh(url);
     if (isSecond401AfterRetry) {
@@ -230,14 +227,12 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 1차 401 자동 리프레시 진입 조건
     const eligible401 =
       Boolean(original) && status === 401 && !original?._retry && !isSignIn(url) && !isRefresh(url);
     if (!eligible401) return Promise.reject(error);
 
     const uid = getActiveUserId();
     if (!uid) {
-      finalizeUnauthorized(null);
       return Promise.reject(error);
     }
 
@@ -245,7 +240,6 @@ apiClient.interceptors.response.use(
   },
 );
 
-// ---------- 동시성 제어 & 리프레시 ----------
 const isRefreshingByUser = new Map<string, boolean>();
 const queueByUser = new Map<
   string,
@@ -283,7 +277,6 @@ async function handle401ForUser(
   original: InternalAxiosRequestConfig & { _retry?: boolean },
 ) {
   if (isRefreshingByUser.get(userId)) {
-    // 이미 리프레시 중이면 큐에 합류 → 완료 후 새 토큰으로 재시도
     return new Promise<string>((resolve, reject) => pushQueue(userId, { resolve, reject })).then(
       (token) => {
         original.headers = setAuthOn(original.headers, token);
@@ -301,7 +294,6 @@ async function handle401ForUser(
     drainQueue(userId, null, newAT);
     return apiClient(original);
   } catch (e) {
-    // 리프레시 실패 → 토큰 정리 + onUnauthorized 호출
     drainQueue(userId, e as AxiosError, null);
     finalizeUnauthorized(userId);
     return Promise.reject(e);
@@ -310,7 +302,6 @@ async function handle401ForUser(
   }
 }
 
-// ---------- 보조 유틸 ----------
 export async function switchUser(userId: string, onNeedLogin?: (id: string) => void) {
   const cached = getAccessTokenFor(userId);
   if (cached && !isTokenExpiring(cached)) {
