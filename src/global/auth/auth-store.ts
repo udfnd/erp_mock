@@ -1,7 +1,7 @@
 'use client';
 
-import { clearAuthHeader, cacheAccessTokenFor, setActiveUserId } from '@/global/apiClient';
-import { setAccessToken as publishAccessToken, subscribeAccessToken } from './access-token';
+import { cacheAccessTokenFor, clearAuthHeader, setActiveUserId } from '@/global/apiClient';
+import { setAccessToken as broadcastAccessToken, subscribeAccessToken } from './access-token';
 
 export type AuthState = {
   accessToken: string | null;
@@ -19,6 +19,7 @@ export type AuthSnapshot = {
 };
 
 const STORAGE_KEY = 'erp-auth-state';
+const isBrowser = typeof window !== 'undefined';
 
 const createDefaultState = (): AuthState => ({
   accessToken: null,
@@ -29,6 +30,8 @@ const createDefaultState = (): AuthState => ({
   loginId: null,
 });
 
+const listeners = new Set<() => void>();
+
 let snapshot: AuthSnapshot = {
   state: createDefaultState(),
   isReady: false,
@@ -36,85 +39,79 @@ let snapshot: AuthSnapshot = {
 };
 
 let hasInitialized = false;
-const listeners = new Set<() => void>();
 
-const notify = () => {
-  listeners.forEach((l) => l());
-};
+const notify = () => listeners.forEach((listener) => listener());
 
-const persistState = (state: AuthState) => {
-  if (typeof window === 'undefined') return;
-  if (state.accessToken && state.sayongjaNanoId) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } else {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-};
-
-const syncToApiClient = (state: AuthState) => {
-  // 멀티세션(계정별)로 apiClient에 반영
+const runSideEffects = (state: AuthState) => {
   if (state.accessToken && state.sayongjaNanoId) {
     cacheAccessTokenFor(state.sayongjaNanoId, state.accessToken);
     setActiveUserId(state.sayongjaNanoId);
+    if (isBrowser) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
   } else {
-    // 활성 사용자 제거
+    if (state.sayongjaNanoId) {
+      cacheAccessTokenFor(state.sayongjaNanoId, null);
+    }
     setActiveUserId(null);
     clearAuthHeader();
+    if (isBrowser) {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
   }
-  // UI 호환 채널로도 브로드캐스트
-  publishAccessToken(state.accessToken, 'store');
+
+  broadcastAccessToken(state.accessToken, 'store');
 };
 
-const applySnapshot = (next: AuthSnapshot) => {
+const applySnapshot = (next: AuthSnapshot, { sync = true }: { sync?: boolean } = {}) => {
   snapshot = next;
-  if (snapshot.isReady) {
-    persistState(snapshot.state);
-    syncToApiClient(snapshot.state);
-  }
+  if (sync && next.isReady) runSideEffects(next.state);
   notify();
 };
 
-const updateSnapshot = (updater: (prev: AuthSnapshot) => AuthSnapshot) => {
+const withMeta = (state: AuthState, isReady: boolean): AuthSnapshot => ({
+  state,
+  isReady,
+  isAuthenticated: Boolean(state.accessToken),
+});
+
+const updateSnapshot = (updater: (current: AuthSnapshot) => AuthSnapshot) => {
   applySnapshot(updater(snapshot));
+};
+
+const readPersistedState = (): AuthState | null => {
+  if (!isBrowser) return null;
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<AuthState>;
+    return { ...createDefaultState(), ...(parsed ?? {}) };
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
 };
 
 export const initializeAuthStore = () => {
   if (hasInitialized) return;
   hasInitialized = true;
 
-  // 외부(pub/sub)를 통해 토큰이 들어오는 경우(희소 케이스) 동기화
   subscribeAccessToken((token, source) => {
     if (source === 'store') return;
-    updateSnapshot((prev) => {
-      const nextState: AuthState = { ...prev.state, accessToken: token };
-      return {
-        state: nextState,
-        isReady: prev.isReady,
-        isAuthenticated: Boolean(token),
-      };
-    });
+    updateSnapshot((prev) => withMeta({ ...prev.state, accessToken: token }, prev.isReady));
   });
 
-  if (typeof window === 'undefined') return;
+  if (!isBrowser) return;
 
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as Partial<AuthState>) : undefined;
-    const restored: AuthState = { ...createDefaultState(), ...(parsed ?? {}) };
-
-    applySnapshot({
-      state: restored,
-      isReady: true,
-      isAuthenticated: Boolean(restored.accessToken),
-    });
-  } catch {
-    localStorage.removeItem(STORAGE_KEY);
-    applySnapshot({
-      state: createDefaultState(),
-      isReady: true,
-      isAuthenticated: false,
-    });
+  const restored = readPersistedState();
+  if (restored) {
+    applySnapshot(withMeta(restored, true));
+    return;
   }
+
+  applySnapshot(withMeta(createDefaultState(), true));
 };
 
 export const subscribeAuthStore = (listener: () => void) => {
@@ -126,28 +123,16 @@ export const getAuthSnapshot = () => snapshot;
 
 export const setAuthState = (next: AuthState) => {
   const merged: AuthState = { ...createDefaultState(), ...next };
-  updateSnapshot(() => ({
-    state: merged,
-    isReady: true,
-    isAuthenticated: Boolean(merged.accessToken),
-  }));
+  applySnapshot(withMeta(merged, true));
 };
 
 export const updateAuthState = (partial: Partial<AuthState>) => {
   updateSnapshot((prev) => {
     const nextState: AuthState = { ...prev.state, ...partial };
-    return {
-      state: nextState,
-      isReady: true,
-      isAuthenticated: Boolean(nextState.accessToken),
-    };
+    return withMeta(nextState, true);
   });
 };
 
 export const clearAuthState = () => {
-  updateSnapshot(() => ({
-    state: createDefaultState(),
-    isReady: true,
-    isAuthenticated: false,
-  }));
+  applySnapshot(withMeta(createDefaultState(), true));
 };
