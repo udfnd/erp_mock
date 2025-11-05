@@ -97,8 +97,15 @@ export const getAccessTokenFor = (userId: string): string | null => atByUser.get
 
 type OnUnauthorized = () => void;
 let onUnauthorized: OnUnauthorized | null = null;
+let hasPendingUnauthorized = false;
 export const configureUnauthorizedHandler = (handler: OnUnauthorized | null) => {
   onUnauthorized = handler;
+  if (handler && hasPendingUnauthorized) {
+    hasPendingUnauthorized = false;
+    try {
+      handler();
+    } catch {}
+  }
 };
 
 export const apiClient: AxiosInstance = axios.create({
@@ -142,7 +149,10 @@ const getNanoId = (x: unknown): string | undefined => {
 };
 
 const triggerUnauthorized = () => {
-  if (!onUnauthorized) return;
+  if (!onUnauthorized) {
+    hasPendingUnauthorized = true;
+    return;
+  }
   try {
     onUnauthorized();
   } catch {}

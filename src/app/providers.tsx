@@ -6,8 +6,9 @@ import { AxiosError } from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { configureUnauthorizedHandler } from '@/global';
-import { globalStyles } from '@/global/style';
 import { clearAuthState, initializeAuthStore } from '@/global/auth';
+import { globalStyles } from '@/global/style';
+import { EmotionCacheProvider } from '@/style/emotion-cache';
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -40,12 +41,14 @@ export function Providers({ children }: AppProvidersProps) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthInitializer />
-      <Global styles={globalStyles} />
-      <UnauthorizedRedirector queryClient={queryClient} />
-      {children}
-    </QueryClientProvider>
+    <EmotionCacheProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthInitializer />
+        <Global styles={globalStyles} />
+        <UnauthorizedRedirector queryClient={queryClient} />
+        {children}
+      </QueryClientProvider>
+    </EmotionCacheProvider>
   );
 }
 
