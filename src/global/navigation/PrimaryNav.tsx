@@ -9,6 +9,7 @@ import { SidebarClose, SidebarOpen } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
+import { getAccessTokenFor, switchUser } from '@/global/apiClient';
 
 import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
@@ -46,7 +47,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const { state: authState, setAuthState, clearAuthState } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { history, refresh: refreshHistory } = useAuthHistory();
+  const { history, refresh: refreshHistory, remove: removeHistoryEntry } = useAuthHistory();
   const storedProfileKeyRef = useRef<string | null>(null);
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
@@ -222,17 +223,54 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const handleSelectHistory = useCallback(
     (entry: (typeof history)[number]) => {
-      setAuthState(entry.authState);
-      upsertAuthHistoryEntry(entry);
-      refreshHistory();
-      setIsProfileMenuOpen(false);
-      try {
-        router.refresh();
-      } catch (error) {
-        console.error('Failed to refresh after user switch', error);
-      }
+      void (async () => {
+        let aborted = false;
+
+        try {
+          await switchUser(entry.sayongjaNanoId, () => {
+            aborted = true;
+            removeHistoryEntry(entry.sayongjaNanoId);
+            refreshHistory();
+            setIsProfileMenuOpen(false);
+            window.alert('저장된 사용자 세션이 만료되었습니다. 다시 로그인해 주세요.');
+            router.replace('/td/g');
+          });
+
+          if (aborted) return;
+
+          const refreshedAccessToken =
+            getAccessTokenFor(entry.sayongjaNanoId) ?? entry.authState.accessToken ?? null;
+
+          if (!refreshedAccessToken) {
+            throw new Error('Missing access token after user switch');
+          }
+
+          const nextAuthState = {
+            ...entry.authState,
+            accessToken: refreshedAccessToken,
+            sayongjaNanoId: entry.sayongjaNanoId,
+            sayongjaName: entry.sayongjaName ?? entry.authState.sayongjaName,
+            gigwanName: entry.gigwanName ?? entry.authState.gigwanName,
+          } as typeof entry.authState;
+
+          setAuthState(nextAuthState);
+          upsertAuthHistoryEntry({ ...entry, authState: nextAuthState });
+          refreshHistory();
+          setIsProfileMenuOpen(false);
+          try {
+            router.refresh();
+          } catch (error) {
+            console.error('Failed to refresh after user switch', error);
+          }
+        } catch (error) {
+          console.error('Failed to switch user', error);
+          removeHistoryEntry(entry.sayongjaNanoId);
+          refreshHistory();
+          setIsProfileMenuOpen(false);
+        }
+      })();
     },
-    [refreshHistory, router, setAuthState],
+    [refreshHistory, removeHistoryEntry, router, setAuthState],
   );
 
   const handleAddUser = useCallback(() => {
