@@ -15,6 +15,7 @@ import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
+import { useQueryClient } from '@tanstack/react-query';
 
 const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ');
 
@@ -49,6 +50,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { history, refresh: refreshHistory, remove: removeHistoryEntry } = useAuthHistory();
   const storedProfileKeyRef = useRef<string | null>(null);
+  const queryClient = useQueryClient();
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
@@ -254,6 +256,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           } as typeof entry.authState;
 
           setAuthState(nextAuthState);
+          await queryClient.invalidateQueries({ queryKey: ['myProfile'] });
           upsertAuthHistoryEntry({ ...entry, authState: nextAuthState });
           refreshHistory();
           setIsProfileMenuOpen(false);
@@ -270,7 +273,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         }
       })();
     },
-    [refreshHistory, removeHistoryEntry, router, setAuthState],
+    [queryClient, refreshHistory, removeHistoryEntry, router, setAuthState],
   );
 
   const handleAddUser = useCallback(() => {
