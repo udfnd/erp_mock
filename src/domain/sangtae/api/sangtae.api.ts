@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { apiClient } from '@/common';
+import { apiClient } from '@/global';
 
 import {
   NanoIdSchema,

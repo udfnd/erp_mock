@@ -6,7 +6,7 @@ import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/common/components';
 import type { AuthHistoryEntry } from '@/global/auth';
 
-import * as styles from './MyProfileMenu.style.css';
+import * as styles from './MyProfileMenu.style';
 
 type MyProfileMenuProps = {
   gigwanName: string | null;
@@ -77,7 +77,12 @@ export default function MyProfileMenu({
           <span className={styles.userName}>{userName}</span>
           <span className={styles.gigwanName}>{gigwanName ?? '기관 정보 없음'}</span>
         </div>
-        <button type="button" className={styles.closeButton} onClick={onClose} aria-label="메뉴 닫기">
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="메뉴 닫기"
+        >
           ×
         </button>
       </div>

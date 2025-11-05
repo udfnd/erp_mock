@@ -8,6 +8,7 @@ import axios, {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://staging.api.v3.teachita.com/api';
+
 const SIGN_IN_PATTERN = /^\/?(?:api\/)?T\/dl\/sayongjas\/sign-in$/;
 const REFRESH_PATTERN = /^\/?(?:api\/)?T\/dl\/sayongjas\/([^/]+)\/refresh-access$/;
 const REFRESH_ENDPOINT_BASE = 'T/dl/sayongjas';
@@ -32,7 +33,8 @@ const extractRefreshUserIdFromUrl = (url?: string): string | null => {
 const isRefresh = (url?: string) => {
   const u = stripQueryAndSlash(url);
   if (!u) return false;
-  if (u === '/api/T/dl/sayongjas/refresh-access' || u === '/T/dl/sayongjas/refresh-access') return true;
+  if (u === '/api/T/dl/sayongjas/refresh-access' || u === '/T/dl/sayongjas/refresh-access')
+    return true;
   return REFRESH_PATTERN.test(u);
 };
 
@@ -61,7 +63,6 @@ const isTokenExpiring = (token: string, skewSec = 60): boolean => {
 
 const ensureAxiosHeaders = (h?: AxiosRequestHeaders): AxiosHeaders =>
   h instanceof AxiosHeaders ? h : AxiosHeaders.from(h ?? {});
-
 const setAuthOn = (headers: AxiosRequestHeaders | undefined, token: string): AxiosHeaders => {
   const hx = ensureAxiosHeaders(headers);
   hx.set('Authorization', `Bearer ${token}`);
@@ -74,14 +75,14 @@ const deleteAuthOn = (headers: AxiosRequestHeaders | undefined): AxiosHeaders =>
 };
 
 let activeUserId: string | null = null;
-const atByUser = new Map<string, string>();
+const atByUser = new Map<string, string>(); // 유저별 accessToken 캐시
 
 export const getActiveUserId = () => activeUserId;
 export const setActiveUserId = (userId: string | null) => {
   activeUserId = userId;
 };
 
-let legacyAccessToken: string | null = null;
+let legacyAccessToken: string | null = null; // activeUserId 미지정 대비
 export const setAccessToken = (token: string | null) => {
   legacyAccessToken = token;
 };
@@ -105,7 +106,6 @@ export const apiClient: AxiosInstance = axios.create({
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
-
 export default apiClient;
 
 const refreshClient: AxiosInstance = axios.create({
@@ -132,15 +132,26 @@ apiClient.interceptors.request.use(
 );
 
 type AccessTokenPayload = { accessToken: string; nanoId?: string };
-
 const hasAccessToken = (x: unknown): x is AccessTokenPayload =>
   typeof x === 'object' &&
   x !== null &&
   typeof (x as { accessToken?: unknown }).accessToken === 'string';
-
 const getNanoId = (x: unknown): string | undefined => {
   const candidate = (x as { nanoId?: unknown })?.nanoId;
   return typeof candidate === 'string' ? candidate : undefined;
+};
+
+const finalizeUnauthorizedForUser = (uid: string) => {
+  try {
+    cacheAccessTokenFor(uid, null);
+    if (activeUserId === uid) setAccessToken(null);
+  } finally {
+    if (onUnauthorized) {
+      try {
+        onUnauthorized();
+      } catch {}
+    }
+  }
 };
 
 apiClient.interceptors.response.use(
@@ -149,10 +160,12 @@ apiClient.interceptors.response.use(
     const data = response.data as unknown;
 
     if (hasAccessToken(data)) {
+      // 로그인 응답
       if (isSignIn(url)) {
         const responseNanoId = getNanoId(data);
         let userId = responseNanoId;
         if (!userId) {
+          // 요청 바디에서 id 추론
           try {
             const raw = response.config?.data as unknown;
             const parsed = typeof raw === 'string' ? (JSON.parse(raw) as unknown) : raw;
@@ -170,6 +183,8 @@ apiClient.interceptors.response.use(
           setAccessToken(data.accessToken);
         }
       }
+
+      // 리프레시 응답
       if (isRefresh(url)) {
         const responseNanoId = getNanoId(data);
         const refreshUserId =
@@ -191,6 +206,16 @@ apiClient.interceptors.response.use(
     const status = error.response?.status;
     const url = original?.url;
 
+    // 2차 401: 리프레시 후 재시도에도 또 401이면 즉시 종료
+    const isSecond401AfterRetry =
+      Boolean(original) && status === 401 && original?._retry && !isSignIn(url) && !isRefresh(url);
+    if (isSecond401AfterRetry) {
+      const uid2 = getActiveUserId();
+      if (uid2) finalizeUnauthorizedForUser(uid2);
+      return Promise.reject(error);
+    }
+
+    // 1차 401 자동 리프레시 진입 조건
     const eligible401 =
       Boolean(original) && status === 401 && !original?._retry && !isSignIn(url) && !isRefresh(url);
     if (!eligible401) return Promise.reject(error);
@@ -202,6 +227,7 @@ apiClient.interceptors.response.use(
   },
 );
 
+// ---------- 동시성 제어 & 리프레시 ----------
 const isRefreshingByUser = new Map<string, boolean>();
 const queueByUser = new Map<
   string,
@@ -239,6 +265,7 @@ async function handle401ForUser(
   original: InternalAxiosRequestConfig & { _retry?: boolean },
 ) {
   if (isRefreshingByUser.get(userId)) {
+    // 이미 리프레시 중이면 큐에 합류 → 완료 후 새 토큰으로 재시도
     return new Promise<string>((resolve, reject) => pushQueue(userId, { resolve, reject })).then(
       (token) => {
         original.headers = setAuthOn(original.headers, token);
@@ -256,16 +283,16 @@ async function handle401ForUser(
     drainQueue(userId, null, newAT);
     return apiClient(original);
   } catch (e) {
+    // 리프레시 실패 → 토큰 정리 + onUnauthorized 호출
     drainQueue(userId, e as AxiosError, null);
-    cacheAccessTokenFor(userId, null);
-    if (activeUserId === userId) setAccessToken(null);
-    if (onUnauthorized) onUnauthorized();
+    finalizeUnauthorizedForUser(userId);
     return Promise.reject(e);
   } finally {
     isRefreshingByUser.set(userId, false);
   }
 }
 
+// ---------- 보조 유틸 ----------
 export async function switchUser(userId: string, onNeedLogin?: (id: string) => void) {
   const cached = getAccessTokenFor(userId);
   if (cached && !isTokenExpiring(cached)) {

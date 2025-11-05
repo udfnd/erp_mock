@@ -10,7 +10,7 @@ import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
 
-import * as styles from './PrimaryNav.style.css';
+import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
@@ -267,7 +267,9 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           ) : (
             <span className={linkCls} aria-disabled="true">
               <span className={styles.navIcon} aria-hidden />
-              <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>{item.label}</span>
+              <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>
+                {item.label}
+              </span>
             </span>
           )}
           {item.children && item.children.length > 0 && (

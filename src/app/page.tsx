@@ -37,7 +37,7 @@ export default function HomePage() {
 
   return (
     <div className={container}>
-      <p>접속 상태를 확인하는 중입니다...</p>
+      <p>페이지 이동 중입니다..</p>
     </div>
   );
 }

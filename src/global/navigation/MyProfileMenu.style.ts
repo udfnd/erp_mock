@@ -6,8 +6,8 @@ import { typography } from '@/style/typo';
 
 export const container = css({
   position: 'absolute',
-  bottom: '56px',
-  right: 0,
+  left: 'calc(100% + 12px)',
+  bottom: 0,
   width: '280px',
   display: 'flex',
   flexDirection: 'column',

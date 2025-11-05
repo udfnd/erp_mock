@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { apiClient } from '@/common';
+import { apiClient } from '@/global';
 
 import {
   MyProfileResponse,
@@ -39,7 +39,10 @@ export const useSignInMutation = () => {
 };
 
 export const refreshAccessToken = async (nanoId: string): Promise<RefreshTokenResponse> => {
-  const res = await apiClient.post(`T/dl/sayongjas/${encodeURIComponent(nanoId)}/refresh-access`, {});
+  const res = await apiClient.post(
+    `T/dl/sayongjas/${encodeURIComponent(nanoId)}/refresh-access`,
+    {},
+  );
   return parseOrThrow(RefreshTokenResponseSchema, res.data);
 };
 

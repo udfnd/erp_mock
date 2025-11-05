@@ -1,11 +1,11 @@
 import { ReactNode } from 'react';
 
-import ErpLayout from './_components/navigation/ErpLayout';
+import { ErpLayout } from '@/global/navigation';
 
-type TdNpLayoutProps = {
+type AuthenticatedLayoutProps = {
   children: ReactNode;
 };
 
-export default function TdNpLayout({ children }: TdNpLayoutProps) {
+export default function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   return <ErpLayout>{children}</ErpLayout>;
 }

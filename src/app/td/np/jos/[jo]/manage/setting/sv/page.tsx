@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { z } from 'zod';
 
-import { apiClient } from '@/common';
+import { apiClient } from '@/global';
 import {
   type JojikDetailResponse,
   type UpdateJojikRequest,
@@ -15,7 +15,7 @@ import {
   useUpdateJojikSchoolsMutation,
 } from '@/api/jojik';
 import LabeledInput from '@/app/(erp)/td/g/_components/LabeledInput';
-import { Copy, Delete, Plus } from '@/components/icons';
+import { Copy, Delete, Plus } from '@/common/icons';
 import { Checkbox } from '@/design';
 import { Button, Chip, Textfield } from '@/design';
 

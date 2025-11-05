@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
 
-import { StateDown, StateUp } from '@/components/icons';
+import { StateDown, StateUp } from '@/common/icons';
 
 import {
   filterBaseStyles,

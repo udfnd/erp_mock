@@ -6,7 +6,7 @@ import { useCallback, useMemo } from 'react';
 import { Chip } from '@/common/components';
 
 import { NavItem, getDynamicHref } from './nav.data';
-import * as styles from './SecondaryNav.style.css';
+import * as styles from './SecondaryNav.style';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
 
@@ -15,13 +15,10 @@ type Props = {
   hierarchy?: PrimaryNavHierarchy;
 };
 
-const getParamValue = (
-  params: ReturnType<typeof useParams>,
-  key: string,
-): string | null => {
+const getParamValue = (params: ReturnType<typeof useParams>, key: string): string | null => {
   const value = (params as Record<string, string | string[] | undefined>)[key];
   if (!value) return null;
-  return typeof value === 'string' ? value : value[0] ?? null;
+  return typeof value === 'string' ? value : (value[0] ?? null);
 };
 
 export default function SecondaryNav({ navItems, hierarchy }: Props) {
@@ -71,7 +68,9 @@ export default function SecondaryNav({ navItems, hierarchy }: Props) {
       <ul className={styles.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
-          const resolvedBasePath = item.basePath ? getDynamicHref(item.basePath, params) : undefined;
+          const resolvedBasePath = item.basePath
+            ? getDynamicHref(item.basePath, params)
+            : undefined;
           const isActive = resolvedBasePath
             ? pathname.startsWith(resolvedBasePath)
             : href

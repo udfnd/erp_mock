@@ -3,7 +3,7 @@
 import { useParams, usePathname } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import * as styles from './ErpLayout.style.css';
+import * as styles from './ErpLayout.style';
 import PrimaryNav from './PrimaryNav';
 import SecondaryNav from './SecondaryNav';
 import TertiaryNav from './TertiaryNav';

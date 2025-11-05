@@ -5,7 +5,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/common/components';
 
 import { NavItem, getDynamicHref } from './nav.data';
-import * as styles from './TertiaryNav.style.css';
+import * as styles from './TertiaryNav.style';
 
 type Props = {
   navItems: NavItem[];

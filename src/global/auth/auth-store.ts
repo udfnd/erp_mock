@@ -1,6 +1,6 @@
 'use client';
 
-import { clearAuthHeader, cacheAccessTokenFor, setActiveUserId } from '@/common/apiClient';
+import { clearAuthHeader, cacheAccessTokenFor, setActiveUserId } from '@/global/apiClient';
 import { setAccessToken as publishAccessToken, subscribeAccessToken } from './access-token';
 
 export type AuthState = {
