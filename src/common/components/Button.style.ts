@@ -24,7 +24,7 @@ const styleTypeStyles = {
 
 const sizeStyles = {
   large: css({ height: 48, paddingLeft: 24, paddingRight: 24, gap: 8 }),
-  medium: css({ height: 40, paddingLeft: 20, paddingRight: 20, gap: 8 }),
+  medium: css({ height: 43, paddingLeft: 20, paddingRight: 20, gap: 8 }),
   small: css({ height: 32, paddingLeft: 12, paddingRight: 12, gap: 4 }),
 } as const;
 
@@ -34,6 +34,8 @@ const iconOnlySizeStyles = {
   medium: css({ width: 40 }),
   small: css({ width: 32 }),
 } as const;
+
+const fullWidthStyle = css({ width: '100%' });
 
 const solidVariantStyles = {
   primary: css({
@@ -122,6 +124,7 @@ export type ButtonRecipeOptions = {
   size?: keyof typeof sizeStyles;
   iconOnly?: boolean;
   disabled?: boolean;
+  isFull?: boolean;
 };
 
 export const buttonRecipe = ({
@@ -130,13 +133,15 @@ export const buttonRecipe = ({
   size = 'medium',
   iconOnly = false,
   disabled = false,
+  isFull = false,
 }: ButtonRecipeOptions = {}): Interpolation<Theme>[] => {
   return [
     buttonBaseStyles,
     styleTypeStyles[styleType],
     sizeStyles[size],
-    iconOnly && iconOnlyBase,
-    iconOnly && iconOnlySizeStyles[size],
+    !isFull && iconOnly && iconOnlyBase,
+    !isFull && iconOnly && iconOnlySizeStyles[size],
+    isFull && fullWidthStyle,
     disabled ? disabledStyles[styleType] : variantStyles[styleType][variant],
   ].filter(Boolean) as Interpolation<Theme>[];
 };

@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useState } from 'react';
 
 import { getGigwanName } from '@/domain/gigwan/api';
-import { Progress } from '@/common/icons';
-import { Button, LabeledInput } from '@/common/components';
+import { ArrowLgRight, Progress } from '@/common/icons';
+import { Button, Textfield } from '@/common/components';
 
 import * as styles from './style';
+import { color } from '@/style';
 
 export default function EnterCodePage() {
   const router = useRouter();
@@ -48,30 +49,39 @@ export default function EnterCodePage() {
   );
 
   const isButtonDisabled = code.length !== 8 || isLoading;
+  const helperText = () => {
+    if (errorMessage) return errorMessage;
+    else if (isLoading) return '잠시만 기다려 주세요...';
+    else return '코드는 8자리 입니다.';
+  };
 
   return (
     <div css={styles.page}>
       <div css={styles.card}>
         <header css={styles.header}>
-          <h1 css={styles.title}>기관 코드 입력</h1>
-          <p css={styles.description}>기관에서 발급 받은 8자리 코드를 입력해주세요.</p>
+          <h1 css={styles.title}>기관 코드를 입력해 주세요.</h1>
+          <p css={styles.description}>소속된 기관의 코드를 입력하여 티키타를 이용해 보세요.</p>
         </header>
         <form css={styles.form} onSubmit={handleSubmit}>
-          <LabeledInput
-            autoFocus
-            label="기관 코드"
-            placeholder="코드 8자리를 입력하세요"
+          <Textfield
+            singleLine
+            placeholder="코드를 입력해 주세요."
             value={code}
             onValueChange={handleChange}
             maxLength={8}
             status={errorMessage ? 'negative' : 'normal'}
-            helperText={errorMessage}
+            helperText={helperText()}
             disabled={isLoading}
-            inputMode="text"
-            autoComplete="off"
           />
           <div css={styles.buttonWrapper}>
-            <Button type="submit" disabled={isButtonDisabled} styleType="solid" variant="primary">
+            <Button
+              isFull
+              type="submit"
+              disabled={isButtonDisabled}
+              styleType="solid"
+              variant="primary"
+              iconRight={<ArrowLgRight width={16} height={16} color={`${color.cgrey300}`} />}
+            >
               {isLoading ? <Progress css={styles.spinner} /> : '확인'}
             </Button>
           </div>

@@ -7,6 +7,7 @@ export type AuthHistoryEntry = {
   sayongjaNanoId: string;
   sayongjaName: string;
   gigwanName: string | null;
+  gigwanNanoId: string | null;
   lastUsedAt: number;
 };
 

@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import { apiClient } from '@/global';
 
+import { parseOrThrow } from '../../util';
 import {
   MyProfileResponse,
   MyProfileResponseSchema,
@@ -17,16 +17,6 @@ import {
   UpdatePasswordResponse,
   UpdatePasswordResponseSchema,
 } from './auth.schema';
-
-const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
-  const r = schema.safeParse(data);
-  if (!r.success) {
-    const e = new Error('ZodParseError');
-    (e as any).zod = r.error;
-    throw e;
-  }
-  return r.data;
-};
 
 export const signIn = async (data: SignInRequest): Promise<SignInResponse> => {
   const validated = SignInRequestSchema.parse(data);

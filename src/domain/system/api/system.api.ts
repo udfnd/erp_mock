@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import { apiClient } from '@/global';
 
+import { parseOrThrow } from '../../util';
 import {
   GetHadaJaewonsangLinkRequestPermissionsResponse,
   GetHadaJaewonsangLinkRequestPermissionsResponseSchema,
@@ -15,16 +15,6 @@ import {
   GetPermissionTypesResponse,
   GetPermissionTypesResponseSchema,
 } from './system.schema';
-
-const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
-  const r = schema.safeParse(data);
-  if (!r.success) {
-    const e = new Error('ZodParseError');
-    (e as any).zod = r.error;
-    throw e;
-  }
-  return r.data;
-};
 
 export const getHadaJaewonsangLinkRequestPermissions =
   async (): Promise<GetHadaJaewonsangLinkRequestPermissionsResponse> => {

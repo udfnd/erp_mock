@@ -31,7 +31,7 @@ export const configureUnauthorizedHandler = (fn: OnUnauthorized | null) => {
   onUnauthorized = fn;
 };
 
-export const finalizeUnauthorized = (uid?: string | null) => {
+export const finalizeUnauthorized = () => {
   if (unauthorizedFired) return;
   unauthorizedFired = true;
   clearAllTokens();

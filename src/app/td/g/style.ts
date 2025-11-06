@@ -1,4 +1,3 @@
-// app/td/g/enter-code/style.ts
 import { css, keyframes } from '@emotion/react';
 import { color, typography } from '@/style';
 
@@ -7,30 +6,29 @@ export const page = css({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: color.cgrey10,
-  padding: '32px',
+  background: color.cgrey50,
 });
 
 export const card = css({
-  width: '100%',
-  maxWidth: 400,
+  width: '480px',
   background: color.white,
-  borderRadius: '16px',
-  padding: '32px',
+  borderRadius: '12px',
+  border: `1px solid ${color.cgrey50}`,
+  padding: '32px 40px',
   display: 'flex',
   flexDirection: 'column',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-  gap: '32px',
+  alignItems: 'center',
 });
 
 export const header = css({
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
+  alignItems: 'center',
+  marginBottom: '40px',
 });
 
-export const title = css({ ...typography.titleSmallB, color: color.black });
-export const description = css({ ...typography.bodyR, color: color.cgrey500 });
+export const title = css({ ...typography.titleSmallB, color: color.black, paddingBottom: '4px' });
+export const description = css({ ...typography.bodyM, color: color.cgrey500 });
 
 export const form = css({
   display: 'flex',

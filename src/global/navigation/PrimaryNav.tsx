@@ -37,41 +37,6 @@ const getParamValue = (params: ReturnType<typeof useParams>, key: string): strin
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
 
-const isPrimaryNavHierarchyEqual = (a: PrimaryNavHierarchy, b: PrimaryNavHierarchy) => {
-  if (Boolean(a.gigwan) !== Boolean(b.gigwan)) return false;
-  if (a.gigwan && b.gigwan) {
-    if (a.gigwan.nanoId !== b.gigwan.nanoId || a.gigwan.name !== b.gigwan.name) {
-      return false;
-    }
-  }
-
-  if (a.jojiks.length !== b.jojiks.length) return false;
-
-  for (let i = 0; i < a.jojiks.length; i += 1) {
-    const aj = a.jojiks[i];
-    const bj = b.jojiks[i];
-
-    if (aj.nanoId !== bj.nanoId || aj.name !== bj.name) {
-      return false;
-    }
-
-    if (aj.sueops.length !== bj.sueops.length) {
-      return false;
-    }
-
-    for (let j = 0; j < aj.sueops.length; j += 1) {
-      const as = aj.sueops[j];
-      const bs = bj.sueops[j];
-
-      if (as.nanoId !== bs.nanoId || as.name !== bs.name) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-};
-
 export default function PrimaryNav({ onHierarchyChange }: Props) {
   const pathname = usePathname();
   const params = useParams();
@@ -136,19 +101,19 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   useEffect(() => {
     if (!myProfileData || !authState.accessToken || !authState.gigwanNanoId) return;
-    const historyKey = `${myProfileData.nanoId}-${authState.accessToken}`;
+    const historyKey = myProfileData.nanoId;
     if (storedProfileKeyRef.current === historyKey) return;
 
     upsertAuthHistoryEntry({
-      authState: { ...authState },
       sayongjaNanoId: myProfileData.nanoId,
       sayongjaName: myProfileData.name,
       gigwanName: gigwanDisplayName,
+      gigwanNanoId,
       lastUsedAt: Date.now(),
     });
     storedProfileKeyRef.current = historyKey;
     refreshHistory();
-  }, [authState, gigwanDisplayName, myProfileData, refreshHistory]);
+  }, [authState, gigwanDisplayName, gigwanNanoId, myProfileData, refreshHistory]);
 
   const hierarchy = useMemo<PrimaryNavHierarchy>(() => {
     return {
@@ -239,24 +204,23 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     return list;
   }, [hierarchy, sidebarData?.jojiks]);
 
-  const { history: authHistory } = useAuthHistory();
   const filteredHistory = useMemo(() => {
-    if (!authState.gigwanNanoId) return [] as typeof authHistory;
-    return authHistory
+    if (!authState.gigwanNanoId) return [] as typeof history;
+    return history
       .filter(
         (entry) =>
           entry.sayongjaNanoId !== myProfileData?.nanoId &&
-          entry.authState.gigwanNanoId === authState.gigwanNanoId,
+          entry.gigwanNanoId === authState.gigwanNanoId,
       )
       .sort((a, b) => b.lastUsedAt - a.lastUsedAt);
-  }, [authState.gigwanNanoId, authHistory, myProfileData?.nanoId]);
+  }, [authState.gigwanNanoId, history, myProfileData?.nanoId]);
 
   const handleProfileButtonClick = useCallback(() => {
     setIsProfileMenuOpen((prev) => !prev);
   }, []);
 
   const handleSelectHistory = useCallback(
-    (entry: (typeof authHistory)[number]) => {
+    (entry: (typeof history)[number]) => {
       void (async () => {
         let aborted = false;
 
@@ -272,30 +236,33 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
           if (aborted) return;
 
-          const refreshedAccessToken =
-            getAccessTokenFor(entry.sayongjaNanoId) ?? entry.authState.accessToken ?? null;
+          const token = getAccessTokenFor(entry.sayongjaNanoId);
+          if (!token) throw new Error('Missing access token after user switch');
 
-          if (!refreshedAccessToken) {
-            throw new Error('Missing access token after user switch');
-          }
-
-          const nextAuthState = {
-            ...entry.authState,
-            accessToken: refreshedAccessToken,
+          setAuthState({
+            accessToken: token,
             sayongjaNanoId: entry.sayongjaNanoId,
-            sayongjaName: entry.sayongjaName ?? entry.authState.sayongjaName,
-            gigwanName: entry.gigwanName ?? entry.authState.gigwanName,
-          } as typeof entry.authState;
+            gigwanNanoId: authState.gigwanNanoId,
+            gigwanName: entry.gigwanName ?? authState.gigwanName,
+            loginId: authState.loginId,
+          });
 
-          setAuthState(nextAuthState);
           await queryClient.invalidateQueries({ queryKey: ['myProfile'] });
-          upsertAuthHistoryEntry({ ...entry, authState: nextAuthState });
+
+          upsertAuthHistoryEntry({
+            sayongjaNanoId: entry.sayongjaNanoId,
+            sayongjaName: entry.sayongjaName,
+            gigwanName: entry.gigwanName ?? gigwanDisplayName,
+            gigwanNanoId,
+            lastUsedAt: Date.now(),
+          });
+
           refreshHistory();
           setIsProfileMenuOpen(false);
           try {
             router.refresh();
-          } catch (error) {
-            console.error('Failed to refresh after user switch', error);
+          } catch (e) {
+            console.error('Failed to refresh after user switch', e);
           }
         } catch (error) {
           console.error('Failed to switch user', error);
@@ -305,7 +272,18 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         }
       })();
     },
-    [authHistory, queryClient, refreshHistory, removeHistoryEntry, router, setAuthState],
+    [
+      authState.gigwanNanoId,
+      authState.gigwanName,
+      authState.loginId,
+      gigwanDisplayName,
+      gigwanNanoId,
+      queryClient,
+      refreshHistory,
+      removeHistoryEntry,
+      router,
+      setAuthState,
+    ],
   );
 
   const handleAddUser = useCallback(() => {

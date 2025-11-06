@@ -13,6 +13,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     iconLeft?: ReactNode;
     iconRight?: ReactNode;
     children?: ReactNode;
+    isFull?: boolean;
   };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -25,13 +26,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       iconRight,
       iconOnly = false,
       disabled = false,
+      isFull = false,
       children,
       className,
       ...props
     },
     ref,
   ) => {
-    const recipeStyles = buttonRecipe({ styleType, variant, size, iconOnly, disabled });
+    const recipeStyles = buttonRecipe({ styleType, variant, size, iconOnly, disabled, isFull });
 
     return (
       <button

@@ -3,7 +3,7 @@ export const color = {
   white: '#FFFFFF',
 
   cgrey10: '#FAFBFD',
-  cgrey50: '#FAFBFD',
+  cgrey50: '#F3F4FA',
   cgrey100: '#E6E8F1',
   cgrey200: '#D2D5DF',
   cgrey300: '#A9AEC1',
@@ -27,9 +27,6 @@ export const color = {
   red: '#FF5226',
   red10: '#FFE7E1',
 
-  // Warning Yellow
   yellow: '#FF9A17',
   yellow10: '#FFF7D3',
 } as const;
-
-export type Color = typeof color;

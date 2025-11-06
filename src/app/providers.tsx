@@ -1,20 +1,24 @@
 'use client';
 
-import { Global } from '@emotion/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { ReactNode, useEffect, useState } from 'react';
+import createCache from '@emotion/cache';
+import { CacheProvider, Global } from '@emotion/react';
+import { useServerInsertedHTML, useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
-import { ReactNode, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import { configureUnauthorizedHandler } from '@/global';
 import { clearAuthState, initializeAuthStore } from '@/global/auth';
 import { globalStyles } from '@/global/style';
-import { EmotionCacheProvider } from '@/style/emotion-cache';
 
-type AppProvidersProps = {
-  children: ReactNode;
-};
+const cache = createCache({ key: 'css', prepend: true });
+cache.compat = true;
+
+type AppProvidersProps = { children: ReactNode };
 
 export function Providers({ children }: AppProvidersProps) {
+  const router = useRouter();
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -40,28 +44,25 @@ export function Providers({ children }: AppProvidersProps) {
       }),
   );
 
-  return (
-    <EmotionCacheProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthInitializer />
-        <Global styles={globalStyles} />
-        <UnauthorizedRedirector queryClient={queryClient} />
-        {children}
-      </QueryClientProvider>
-    </EmotionCacheProvider>
-  );
-}
+  useServerInsertedHTML(() => {
+    const entries = Object.entries(cache.inserted);
+    if (entries.length === 0) return null;
 
-function AuthInitializer() {
+    const names = entries.map(([k]) => k).join(' ');
+    const cssText = entries.map(([, v]) => v).join(' ');
+    cache.inserted = {};
+
+    return (
+      <style
+        data-emotion={`${cache.key} ${names}`}
+        dangerouslySetInnerHTML={{ __html: cssText as string }}
+      />
+    );
+  });
+
   useEffect(() => {
     initializeAuthStore();
   }, []);
-
-  return null;
-}
-
-function UnauthorizedRedirector({ queryClient }: { queryClient: QueryClient }) {
-  const router = useRouter();
 
   useEffect(() => {
     configureUnauthorizedHandler(() => {
@@ -75,5 +76,12 @@ function UnauthorizedRedirector({ queryClient }: { queryClient: QueryClient }) {
     return () => configureUnauthorizedHandler(null);
   }, [queryClient, router]);
 
-  return null;
+  return (
+    <CacheProvider value={cache}>
+      <QueryClientProvider client={queryClient}>
+        <Global styles={globalStyles} />
+        {children}
+      </QueryClientProvider>
+    </CacheProvider>
+  );
 }

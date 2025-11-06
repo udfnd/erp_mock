@@ -15,7 +15,7 @@ export const typoWeights = {
 export const typography: { [key: string]: CSSObject } = {
   titleB: { ...baseStyles, fontSize: '32px', fontWeight: typoWeights.B },
   titleM: { ...baseStyles, fontSize: '32px', fontWeight: typoWeights.M },
-  titleSmallB: { ...baseStyles, fontSize: '20px', fontWeight: typoWeights.B },
+  titleSmallB: { ...baseStyles, fontSize: '22px', fontWeight: typoWeights.B },
   titleSmallM: { ...baseStyles, fontSize: '20px', fontWeight: typoWeights.M },
   bodyLargeB: { ...baseStyles, fontSize: '18px', fontWeight: typoWeights.B },
   bodyLargeM: { ...baseStyles, fontSize: '18px', fontWeight: typoWeights.M },
@@ -29,5 +29,3 @@ export const typography: { [key: string]: CSSObject } = {
   captionB: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.B },
   captionR: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.R },
 } as const;
-
-export type TypographyKeys = keyof typeof typography;

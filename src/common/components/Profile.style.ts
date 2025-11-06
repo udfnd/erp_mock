@@ -22,38 +22,42 @@ export const containerRecipe = ({ size = 'medium' }: ContainerRecipeOptions = {}
   return [containerSizeStyles[size]];
 };
 
-export const photoBase = css({
-  display: 'block',
+export const photoWrapperBase = css({
+  position: 'relative',
+  overflow: 'hidden',
   borderRadius: '50%',
-  borderWidth: '1px',
+  borderWidth: 1,
   borderStyle: 'solid',
   backgroundColor: color.cgrey100,
   flexShrink: 0,
-  objectFit: 'cover',
 });
 
-const photoSizeStyles = {
+const photoWrapperSizeStyles = {
   large: css({ width: 48, height: 48 }),
   medium: css({ width: 32, height: 32 }),
   small: css({ width: 16, height: 16 }),
 } as const;
 
-const photoVariantStyles = {
+const photoWrapperVariantStyles = {
   default: css({ borderColor: color.cgrey100 }),
   active: css({ borderColor: color.blue }),
 } as const;
 
 export type PhotoRecipeOptions = {
-  size?: keyof typeof photoSizeStyles;
-  variant?: keyof typeof photoVariantStyles;
+  size?: keyof typeof photoWrapperSizeStyles;
+  variant?: keyof typeof photoWrapperVariantStyles;
 };
 
-export const photoRecipe = ({
+export const photoWrapperRecipe = ({
   size = 'medium',
   variant = 'default',
 }: PhotoRecipeOptions = {}): IT[] => {
-  return [photoSizeStyles[size], photoVariantStyles[variant]];
+  return [photoWrapperSizeStyles[size], photoWrapperVariantStyles[variant]];
 };
+
+export const photoBase = css({
+  objectFit: 'cover',
+});
 
 export const nameBase = css({
   color: color.cgrey700,

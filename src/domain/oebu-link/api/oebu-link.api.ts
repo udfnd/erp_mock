@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import { apiClient } from '@/global';
 
+import { parseOrThrow } from '../../util';
 import {
   CreateOebuLinkRequest,
   CreateOebuLinkRequestSchema,
@@ -21,16 +21,6 @@ import {
   UpdateOebuLinkResponse,
   UpdateOebuLinkResponseSchema,
 } from './oebu-link.schema';
-
-const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
-  const r = schema.safeParse(data);
-  if (!r.success) {
-    const e = new Error('ZodParseError');
-    (e as any).zod = r.error;
-    throw e;
-  }
-  return r.data;
-};
 
 export const getOebuLinks = async (params: GetOebuLinksRequest): Promise<GetOebuLinksResponse> => {
   const validated = GetOebuLinksRequestSchema.parse(params);

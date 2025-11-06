@@ -69,19 +69,33 @@ const inputWrapperDisabledStyles = {
   }),
 } as const;
 
+/** ★ singleLine일 때 wrapper를 48px 높이로 만드는 보조 스타일 */
+const inputWrapperSingleLineBase = css({
+  // 한 줄 필드: 내부 gap 제거, 수직 가운데 정렬, 고정 높이 48px
+  gap: 0,
+  padding: `0 ${spacing.base}`,
+  minHeight: 48,
+  height: 48,
+  flexDirection: 'row',
+  alignItems: 'center',
+});
+
 export type InputWrapperRecipeOptions = {
   status?: keyof typeof inputWrapperStatusStyles;
   disabled?: boolean;
+  singleLine?: boolean; // ★ 추가
 };
 
 export const inputWrapperRecipe = ({
   status = 'normal',
   disabled = false,
+  singleLine = false,
 }: InputWrapperRecipeOptions = {}): IT[] => {
   return [
     inputWrapperBase,
     inputWrapperStatusStyles[status],
     disabled ? inputWrapperDisabledStyles.disabled : inputWrapperDisabledStyles.enabled,
+    singleLine && inputWrapperSingleLineBase, // ★ singleLine 보정
   ];
 };
 
@@ -123,6 +137,7 @@ export const textareaRecipe = ({ resize = 'normal' }: TextareaRecipeOptions = {}
   return [textareaBase, textareaResizeStyles[resize]];
 };
 
+/** 멀티라인 외에, singleLine용 인풋 기본 스타일 */
 export const inputRecipe = css({
   ...typography.bodyR,
   width: '100%',
@@ -135,6 +150,15 @@ export const inputRecipe = css({
   '&:disabled': { color: color.cgrey400 },
   '&:disabled::placeholder': { color: color.cgrey300 },
 });
+
+/** ★ singleLine input의 고정 높이 48px (wrapper와 일치) */
+export const inputSingleLine = css([
+  inputRecipe,
+  css({
+    height: 48,
+    lineHeight: '48px',
+  }),
+]);
 
 export const footer = css({
   display: 'flex',

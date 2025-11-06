@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { z } from 'zod';
 
 import { apiClient } from '@/global';
 
@@ -21,16 +20,6 @@ import {
   UpdateJusoResponse,
   UpdateJusoResponseSchema,
 } from './juso.schema';
-
-const parseOrThrow = <T>(schema: z.ZodSchema<T>, data: unknown): T => {
-  const r = schema.safeParse(data);
-  if (!r.success) {
-    const e = new Error('ZodParseError');
-    (e as any).zod = r.error;
-    throw e;
-  }
-  return r.data;
-};
 
 export const getJusos = async (params: GetJusosRequest): Promise<GetJusosResponse> => {
   const validated = GetJusosRequestSchema.parse(params);
