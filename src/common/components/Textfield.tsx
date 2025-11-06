@@ -1,6 +1,5 @@
 'use client';
 
-import { clsx } from 'clsx';
 import React, { ReactNode, useId } from 'react';
 
 import {
@@ -16,7 +15,7 @@ import {
   textareaRecipe,
   type InputWrapperRecipeOptions,
   type TextareaRecipeOptions,
-} from './Textfield.style.css';
+} from './Textfield.style';
 
 type InputWrapperStatus = NonNullable<InputWrapperRecipeOptions['status']>;
 type TextareaResize = NonNullable<TextareaRecipeOptions['resize']>;
@@ -60,24 +59,24 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
     ref,
   ) => {
     const id = useId();
-    const inputWrapperClasses = inputWrapperRecipe({ status, disabled });
-    const textareaClasses = textareaRecipe({ resize });
-    const helperTextClasses = helperText ? helperTextRecipe({ status }) : undefined;
+    const inputWrapperStyles = inputWrapperRecipe({ status, disabled });
+    const textareaStyles = textareaRecipe({ resize });
+    const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
     const safeValue = value ?? '';
 
     return (
-      <div className={clsx(container, className)}>
+      <div css={[container]} className={className}>
         {label && (
-          <label htmlFor={id} className={labelWrapper}>
-            <span className={labelStyle}>{label}</span>
-            {required && <span className={requiredAsterisk}>*</span>}
+          <label htmlFor={id} css={labelWrapper}>
+            <span css={labelStyle}>{label}</span>
+            {required && <span css={requiredAsterisk}>*</span>}
           </label>
         )}
-        <div className={inputWrapperClasses}>
+        <div css={inputWrapperStyles}>
           <textarea
             ref={ref}
             id={id}
-            className={textareaClasses}
+            css={textareaStyles}
             value={safeValue}
             onChange={(e) => onValueChange?.(e.target.value)}
             placeholder={placeholder}
@@ -86,14 +85,12 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
             {...props}
           />
           {(maxLength || actionButton) && (
-            <div className={footer}>
-              <span className={counter}>
-                {maxLength ? `${safeValue.length}/${maxLength}` : null}
-              </span>
+            <div css={footer}>
+              <span css={counter}>{maxLength ? `${safeValue.length}/${maxLength}` : null}</span>
               {actionButton && (
                 <button
                   type="button"
-                  className={actionButtonStyle}
+                  css={actionButtonStyle}
                   onClick={onActionButtonClick}
                   disabled={disabled}
                 >
@@ -103,9 +100,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement, TextfieldProps>(
             </div>
           )}
         </div>
-        {helperText && helperTextClasses && (
-          <span className={helperTextClasses}>{helperText}</span>
-        )}
+        {helperText && helperTextStyles && <span css={helperTextStyles}>{helperText}</span>}
       </div>
     );
   },

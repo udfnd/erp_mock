@@ -15,8 +15,8 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="ko" className={pretendard.variable}>
-      <body className={pretendard.className}>
+    <html lang="ko" css={pretendard.variable}>
+      <body css={pretendard.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -1,8 +1,10 @@
-import { css, cx } from '@emotion/css';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { color } from '@/style/color';
 import { spacing, radius } from '@/style/primitive';
 import { typography } from '@/style/typo';
+
+type IT = Interpolation<Theme>;
 
 const collapsedRange = '(min-width: 960px) and (max-width: 1279px)';
 
@@ -24,7 +26,7 @@ const navContainerBase = css({
   },
 });
 
-export const navContainerOpen = cx(
+export const navContainerOpen: IT[] = [
   navContainerBase,
   css({
     [`@media ${collapsedRange}`]: {
@@ -33,9 +35,9 @@ export const navContainerOpen = cx(
       alignItems: 'initial',
     },
   }),
-);
+];
 
-export const navContainerClosed = cx(
+export const navContainerClosed: IT[] = [
   navContainerBase,
   css({
     width: '40px',
@@ -49,7 +51,7 @@ export const navContainerClosed = cx(
       overflow: 'hidden',
     },
   }),
-);
+];
 
 export const toggleBar = css({
   display: 'flex',
@@ -85,9 +87,9 @@ const navListBase = css({
   width: '100%',
 });
 
-export const navList = {
-  show: navListBase,
-  hide: cx(navListBase, css({ display: 'none' })),
+export const navList: Record<'show' | 'hide', IT[]> = {
+  show: [navListBase],
+  hide: [navListBase, css({ display: 'none' })],
 };
 
 export const navChildList = css({
@@ -128,10 +130,10 @@ export const navLinkDepth = {
   1: css({}),
   2: css({ paddingLeft: '20px' }),
   3: css({ paddingLeft: '32px' }),
-};
+} as const;
 
-export const navLink = {
-  active: cx(
+export const navLink: Record<'active' | 'inactive', IT[]> = {
+  active: [
     navLinkBase,
     css({
       color: color.blue600,
@@ -141,15 +143,15 @@ export const navLink = {
         background: color.blue200,
       },
     }),
-  ),
-  inactive: cx(
+  ],
+  inactive: [
     navLinkBase,
     css({
       '&:hover': {
         background: color.cgrey50,
       },
     }),
-  ),
+  ],
 };
 
 export const navIcon = css({
@@ -190,9 +192,9 @@ const navFooterBase = css({
   width: '100%',
 });
 
-export const navFooter = {
-  show: navFooterBase,
-  hide: cx(navFooterBase, css({ display: 'none' })),
+export const navFooter: Record<'show' | 'hide', IT[]> = {
+  show: [navFooterBase],
+  hide: [navFooterBase, css({ display: 'none' })],
 };
 
 export const footerVersion = css({

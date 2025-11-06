@@ -1,5 +1,5 @@
 // app/td/g/enter-code/style.ts
-import { css, keyframes } from '@emotion/css';
+import { css, keyframes } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const page = css({

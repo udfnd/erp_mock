@@ -1,5 +1,4 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const filterBaseStyles = css({
@@ -16,9 +15,7 @@ export const filterBaseStyles = css({
   cursor: 'pointer',
   transition: 'all 0.2s ease',
   whiteSpace: 'nowrap',
-  '&:disabled': {
-    cursor: 'not-allowed',
-  },
+  '&:disabled': { cursor: 'not-allowed' },
 });
 
 const styleTypeStyles = {
@@ -51,22 +48,14 @@ const solidStateStyles = {
   inactive: css({
     background: color.cgrey100,
     color: color.cgrey700,
-    '&:not(:disabled):hover': {
-      background: color.cgrey200,
-    },
-    '&:not(:disabled):active': {
-      background: color.cgrey300,
-    },
+    '&:not(:disabled):hover': { background: color.cgrey200 },
+    '&:not(:disabled):active': { background: color.cgrey300 },
   }),
   active: css({
     background: color.cgrey700,
     color: color.white,
-    '&:not(:disabled):hover': {
-      background: color.cgrey600,
-    },
-    '&:not(:disabled):active': {
-      background: color.black,
-    },
+    '&:not(:disabled):hover': { background: color.cgrey600 },
+    '&:not(:disabled):active': { background: color.black },
   }),
 } as const;
 
@@ -75,23 +64,15 @@ const outlinedStateStyles = {
     background: color.white,
     color: color.cgrey700,
     borderColor: color.cgrey200,
-    '&:not(:disabled):hover': {
-      background: color.cgrey50,
-    },
-    '&:not(:disabled):active': {
-      background: color.cgrey100,
-    },
+    '&:not(:disabled):hover': { background: color.cgrey50 },
+    '&:not(:disabled):active': { background: color.cgrey100 },
   }),
   active: css({
     background: color.blue50,
     color: color.blue,
     borderColor: color.blue,
-    '&:not(:disabled):hover': {
-      background: color.blue100,
-    },
-    '&:not(:disabled):active': {
-      background: color.blue200,
-    },
+    '&:not(:disabled):hover': { background: color.blue100 },
+    '&:not(:disabled):active': { background: color.blue200 },
   }),
 } as const;
 
@@ -119,18 +100,16 @@ export const filterRecipe = ({
   size = 'medium',
   active = false,
   disabled = false,
-}: FilterRecipeOptions = {}) => {
+}: FilterRecipeOptions = {}): Interpolation<Theme>[] => {
   const stateKey = active ? 'active' : 'inactive';
   const stateStyles =
     styleType === 'solid' ? solidStateStyles[stateKey] : outlinedStateStyles[stateKey];
 
-  const classes = [
+  return [
     styleTypeStyles[styleType],
     sizeStyles[size],
     disabled ? disabledStyles[styleType] : stateStyles,
-  ];
-
-  return cx(...classes);
+  ] as Interpolation<Theme>[];
 };
 
 export const iconWrapper = css({

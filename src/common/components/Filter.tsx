@@ -1,16 +1,13 @@
 'use client';
 
-import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
-
 import { StateDown, StateUp } from '@/common/icons';
-
 import {
   filterBaseStyles,
   filterRecipe,
   iconWrapper,
   type FilterRecipeOptions,
-} from './Filter.style.css';
+} from './Filter.style';
 
 export type FilterProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   FilterRecipeOptions & {
@@ -32,20 +29,20 @@ export const Filter = React.forwardRef<HTMLButtonElement, FilterProps>(
     },
     ref,
   ) => {
-    const recipeClasses = filterRecipe({
-      styleType,
-      size,
-      active,
-      disabled,
-    });
-
-    const finalClassName = clsx(filterBaseStyles, recipeClasses, className);
+    const recipeStyles = filterRecipe({ styleType, size, active, disabled });
 
     return (
-      <button ref={ref} type="button" className={finalClassName} disabled={disabled} {...props}>
-        {iconLeft && <span className={iconWrapper}>{iconLeft}</span>}
+      <button
+        ref={ref}
+        type="button"
+        css={[filterBaseStyles, ...recipeStyles]}
+        className={className}
+        disabled={disabled}
+        {...props}
+      >
+        {iconLeft && <span css={iconWrapper}>{iconLeft}</span>}
         {children}
-        <span className={iconWrapper}>{active ? <StateUp /> : <StateDown />}</span>
+        <span css={iconWrapper}>{active ? <StateUp /> : <StateDown />}</span>
       </button>
     );
   },

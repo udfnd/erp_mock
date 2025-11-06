@@ -1,35 +1,25 @@
 'use client';
 
-import { CacheProvider } from '@emotion/react';
+import React from 'react';
 import createCache from '@emotion/cache';
+import { CacheProvider } from '@emotion/react';
 import { useServerInsertedHTML } from 'next/navigation';
-import { ReactNode, useState } from 'react';
 
-type EmotionCacheProviderProps = {
-  children: ReactNode;
-};
+const cache = createCache({ key: 'css', prepend: true });
+(cache as any).compat = true;
 
-const createEmotionCache = () => {
-  const cache = createCache({ key: 'css', prepend: true });
-  cache.compat = true;
-  return cache;
-};
-
-export function EmotionCacheProvider({ children }: EmotionCacheProviderProps) {
-  const [cache] = useState(createEmotionCache);
-
+export function EmotionCacheProvider({ children }: { children: React.ReactNode }) {
   useServerInsertedHTML(() => {
     const entries = Object.entries(cache.inserted);
     if (entries.length === 0) return null;
 
-    cache.inserted = {};
+    const names = entries.map(([k]) => k).join(' ');
+    const cssText = entries.map(([, v]) => v).join(' ');
+
+    (cache as any).inserted = {};
 
     return (
-      <style
-        key={cache.key}
-        data-emotion={`${cache.key} ${entries.map(([key]) => key).join(' ')}`}
-        dangerouslySetInnerHTML={{ __html: entries.map(([, value]) => value).join(' ') }}
-      />
+      <style data-emotion={`${cache.key} ${names}`} dangerouslySetInnerHTML={{ __html: cssText }} />
     );
   });
 

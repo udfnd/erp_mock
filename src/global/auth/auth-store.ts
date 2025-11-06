@@ -1,15 +1,15 @@
 'use client';
 
-import { cacheAccessTokenFor, clearAuthHeader, setActiveUserId } from '@/global/apiClient';
+import { cacheAccessTokenFor, clearAllTokens, setActiveUserId } from '@/global/auth/token-store';
 import { setAccessToken as broadcastAccessToken, subscribeAccessToken } from './access-token';
 
 export type AuthState = {
   accessToken: string | null;
-  sayongjaNanoId: string | null; // 사용자 고유 ID(멀티세션 키)
-  sayongjaName: string | null;
+  sayongjaNanoId: string | null;
+  // sayongjaName: string | null;
   gigwanNanoId: string | null;
   gigwanName: string | null;
-  loginId: string | null; // 로그인 ID(표시용)
+  loginId: string | null;
 };
 
 export type AuthSnapshot = {
@@ -24,7 +24,7 @@ const isBrowser = typeof window !== 'undefined';
 const createDefaultState = (): AuthState => ({
   accessToken: null,
   sayongjaNanoId: null,
-  sayongjaName: null,
+  // sayongjaName: null,
   gigwanNanoId: null,
   gigwanName: null,
   loginId: null,
@@ -54,7 +54,7 @@ const runSideEffects = (state: AuthState) => {
       cacheAccessTokenFor(state.sayongjaNanoId, null);
     }
     setActiveUserId(null);
-    clearAuthHeader();
+    clearAllTokens();
     if (isBrowser) {
       window.localStorage.removeItem(STORAGE_KEY);
     }
@@ -134,5 +134,6 @@ export const updateAuthState = (partial: Partial<AuthState>) => {
 };
 
 export const clearAuthState = () => {
+  clearAllTokens();
   applySnapshot(withMeta(createDefaultState(), true));
 };

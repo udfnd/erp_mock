@@ -1,14 +1,12 @@
 'use client';
 
-import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
-
 import {
   buttonBaseStyles,
   buttonRecipe,
   iconWrapper,
   type ButtonRecipeOptions,
-} from './Button.style.css';
+} from './Button.style';
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   ButtonRecipeOptions & {
@@ -33,22 +31,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const recipeClasses = buttonRecipe({
-      styleType,
-      variant,
-      size,
-      iconOnly,
-      disabled,
-    });
-
-    const finalClassName = clsx(buttonBaseStyles, recipeClasses, className);
+    const recipeStyles = buttonRecipe({ styleType, variant, size, iconOnly, disabled });
 
     return (
-      <button ref={ref} type="button" className={finalClassName} disabled={disabled} {...props}>
-        {iconLeft && !iconOnly && <span className={iconWrapper}>{iconLeft}</span>}
+      <button
+        ref={ref}
+        type="button"
+        css={[buttonBaseStyles, ...recipeStyles]}
+        className={className}
+        disabled={disabled}
+        {...props}
+      >
+        {iconLeft && !iconOnly && <span css={iconWrapper}>{iconLeft}</span>}
         {!iconOnly && children}
         {iconOnly && (children || iconRight || iconLeft)}
-        {iconRight && !iconOnly && <span className={iconWrapper}>{iconRight}</span>}
+        {iconRight && !iconOnly && <span css={iconWrapper}>{iconRight}</span>}
       </button>
     );
   },

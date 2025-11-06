@@ -1,7 +1,9 @@
-import { css, cx } from '@emotion/css';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { color } from '@/style/color';
 import { spacing } from '@/style/primitive';
+
+type IT = Interpolation<Theme>;
 
 export const container = css({
   display: 'flex',
@@ -34,22 +36,22 @@ const secondaryWrapperBase = css({
   willChange: 'max-height, opacity',
 });
 
-export const secondaryNavWrapper = {
-  visible: cx(
+export const secondaryNavWrapper: Record<'visible' | 'hidden', IT[]> = {
+  visible: [
     secondaryWrapperBase,
     css({
       maxHeight: '72px',
       opacity: 1,
     }),
-  ),
-  hidden: cx(
+  ],
+  hidden: [
     secondaryWrapperBase,
     css({
       maxHeight: 0,
       opacity: 0,
       pointerEvents: 'none',
     }),
-  ),
+  ],
 };
 
 const tertiaryWrapperBase = css({
@@ -58,22 +60,22 @@ const tertiaryWrapperBase = css({
   willChange: 'max-height, opacity',
 });
 
-export const tertiaryNavWrapper = {
-  visible: cx(
+export const tertiaryNavWrapper: Record<'visible' | 'hidden', IT[]> = {
+  visible: [
     tertiaryWrapperBase,
     css({
       maxHeight: '64px',
       opacity: 1,
     }),
-  ),
-  hidden: cx(
+  ],
+  hidden: [
     tertiaryWrapperBase,
     css({
       maxHeight: 0,
       opacity: 0,
       pointerEvents: 'none',
     }),
-  ),
+  ],
 };
 
 export const content = css({

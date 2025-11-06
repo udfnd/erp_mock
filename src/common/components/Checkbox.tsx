@@ -2,7 +2,7 @@
 
 import { ChangeEventHandler, MutableRefObject, forwardRef, useEffect, useRef } from 'react';
 
-import * as styles from './Checkbox.css';
+import * as styles from './Checkbox.style';
 
 export type CheckboxProps = {
   checked?: boolean;
@@ -25,7 +25,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     }, [indeterminate, ref]);
 
     return (
-      <label className={styles.container}>
+      <label css={styles.container}>
         <input
           ref={(node) => {
             internalRef.current = node;
@@ -36,13 +36,13 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             }
           }}
           type="checkbox"
-          className={styles.input}
+          css={styles.input}
           checked={checked}
           disabled={disabled}
           onChange={onChange}
           aria-label={ariaLabel}
         />
-        <span className={styles.box} />
+        <span css={styles.box} />
       </label>
     );
   },

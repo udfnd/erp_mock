@@ -22,12 +22,10 @@ export default function GigwanHomePage() {
   });
 
   return (
-    <div className={styles.page}>
-      <section className={styles.header}>
-        <h1 className={styles.title}>다시 오신 것을 환영합니다</h1>
-        <p className={styles.subtitle}>
-          {gigwan ? gigwan.name : ''}의 새로운 소식을 확인해 보세요.
-        </p>
+    <div css={styles.page}>
+      <section css={styles.header}>
+        <h1 css={styles.title}>다시 오신 것을 환영합니다</h1>
+        <p css={styles.subtitle}>{gigwan ? gigwan.name : ''}의 새로운 소식을 확인해 보세요.</p>
       </section>
     </div>
   );

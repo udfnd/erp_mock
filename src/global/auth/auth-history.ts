@@ -1,10 +1,9 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import type { AuthState } from './auth-store';
+import { switchUser } from '@/global/apiClient';
 
 export type AuthHistoryEntry = {
-  authState: AuthState;
   sayongjaNanoId: string;
   sayongjaName: string;
   gigwanName: string | null;
@@ -12,20 +11,13 @@ export type AuthHistoryEntry = {
 };
 
 const HISTORY_STORAGE_KEY = 'erp-auth-history';
-const HISTORY_LIMIT = 5;
 
 const createEmpty = (): AuthHistoryEntry[] => [];
 
 const isValidEntry = (v: unknown): v is AuthHistoryEntry => {
-  if (!v || typeof v !== 'object') return false;
-  const e = v as AuthHistoryEntry;
-  return (
-    typeof e.sayongjaNanoId === 'string' &&
-    typeof e.sayongjaName === 'string' &&
-    typeof e.lastUsedAt === 'number' &&
-    typeof e.authState === 'object' &&
-    e.authState !== null
-  );
+  if (v === null || typeof v !== 'object') return false;
+  const e = v as Record<string, unknown>;
+  return typeof e.sayongjaNanoId === 'string';
 };
 
 const readAll = (): AuthHistoryEntry[] => {
@@ -35,9 +27,8 @@ const readAll = (): AuthHistoryEntry[] => {
     if (!raw) return createEmpty();
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return createEmpty();
-    return parsed.filter(isValidEntry).slice(0, HISTORY_LIMIT);
-  } catch (err) {
-    // 손상된 데이터는 제거
+    return parsed.filter(isValidEntry);
+  } catch {
     window.localStorage.removeItem(HISTORY_STORAGE_KEY);
     return createEmpty();
   }
@@ -46,17 +37,15 @@ const readAll = (): AuthHistoryEntry[] => {
 const writeAll = (list: AuthHistoryEntry[]) => {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(list.slice(0, HISTORY_LIMIT)));
-  } catch {
-    // quota 초과 등은 조용히 무시
-  }
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(list));
+  } catch {}
 };
 
 export const upsertAuthHistoryEntry = (entry: AuthHistoryEntry) => {
   if (typeof window === 'undefined') return;
   const cur = readAll();
   const filtered = cur.filter((x) => x.sayongjaNanoId !== entry.sayongjaNanoId);
-  const next = [{ ...entry, lastUsedAt: Date.now() }, ...filtered].slice(0, HISTORY_LIMIT);
+  const next = [{ ...entry, lastUsedAt: Date.now() }, ...filtered];
   writeAll(next);
 };
 
@@ -64,6 +53,14 @@ export const removeAuthHistoryEntry = (sayongjaNanoId: string) => {
   if (typeof window === 'undefined') return;
   writeAll(readAll().filter((x) => x.sayongjaNanoId !== sayongjaNanoId));
 };
+
+export async function activateAuthHistoryEntry(
+  entry: AuthHistoryEntry,
+  onNeedLogin?: (id: string) => void,
+) {
+  await switchUser(entry.sayongjaNanoId, onNeedLogin);
+  upsertAuthHistoryEntry(entry);
+}
 
 export const useAuthHistory = () => {
   const [history, setHistory] = useState<AuthHistoryEntry[]>(() => readAll());
@@ -76,6 +73,13 @@ export const useAuthHistory = () => {
     },
     [refresh],
   );
+  const select = useCallback(
+    async (entry: AuthHistoryEntry, onNeedLogin?: (id: string) => void) => {
+      await activateAuthHistoryEntry(entry, onNeedLogin);
+      refresh();
+    },
+    [refresh],
+  );
 
-  return { history, refresh, remove } as const;
+  return { history, refresh, remove, select } as const;
 };

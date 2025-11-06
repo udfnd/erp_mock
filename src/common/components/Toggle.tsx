@@ -1,9 +1,7 @@
 'use client';
 
-import { clsx } from 'clsx';
 import React, { useState } from 'react';
-
-import { handleRecipe, toggleRecipe, type ToggleRecipeOptions } from './Toggle.style.css';
+import { handleRecipe, toggleRecipe, type ToggleRecipeOptions } from './Toggle.style';
 
 export type ToggleProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> &
   ToggleRecipeOptions & {
@@ -37,17 +35,8 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
       onChange?.(newState);
     };
 
-    const toggleClasses = toggleRecipe({
-      size,
-      active,
-      disabled,
-    });
-    const handleClasses = handleRecipe({
-      size,
-      active,
-    });
-
-    const finalClassName = clsx(toggleClasses, className);
+    const toggleStyles = toggleRecipe({ size, active, disabled });
+    const handleStyles = handleRecipe({ size, active });
 
     return (
       <button
@@ -55,12 +44,13 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
         type="button"
         role="switch"
         aria-checked={active}
-        className={finalClassName}
+        css={toggleStyles}
+        className={className}
         onClick={handleToggle}
         disabled={disabled}
         {...props}
       >
-        <span className={handleClasses} />
+        <span css={handleStyles} />
       </button>
     );
   },

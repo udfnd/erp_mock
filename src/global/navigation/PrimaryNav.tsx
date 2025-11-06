@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { SidebarClose, SidebarOpen } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
@@ -15,9 +16,6 @@ import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
-import { useQueryClient } from '@tanstack/react-query';
-
-const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boolean).join(' ');
 
 type Item = {
   key: string;
@@ -39,12 +37,46 @@ const getParamValue = (params: ReturnType<typeof useParams>, key: string): strin
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
 
+const isPrimaryNavHierarchyEqual = (a: PrimaryNavHierarchy, b: PrimaryNavHierarchy) => {
+  if (Boolean(a.gigwan) !== Boolean(b.gigwan)) return false;
+  if (a.gigwan && b.gigwan) {
+    if (a.gigwan.nanoId !== b.gigwan.nanoId || a.gigwan.name !== b.gigwan.name) {
+      return false;
+    }
+  }
+
+  if (a.jojiks.length !== b.jojiks.length) return false;
+
+  for (let i = 0; i < a.jojiks.length; i += 1) {
+    const aj = a.jojiks[i];
+    const bj = b.jojiks[i];
+
+    if (aj.nanoId !== bj.nanoId || aj.name !== bj.name) {
+      return false;
+    }
+
+    if (aj.sueops.length !== bj.sueops.length) {
+      return false;
+    }
+
+    for (let j = 0; j < aj.sueops.length; j += 1) {
+      const as = aj.sueops[j];
+      const bs = bj.sueops[j];
+
+      if (as.nanoId !== bs.nanoId || as.name !== bs.name) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
 export default function PrimaryNav({ onHierarchyChange }: Props) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
-  const [isCollapsedByBreakpoint, setIsCollapsedByBreakpoint] = useState(false);
   const { state: authState, setAuthState, clearAuthState } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -72,7 +104,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 960px) and (max-width: 1279px)');
     const updateState = (matches: boolean) => {
-      setIsCollapsedByBreakpoint(matches);
       if (matches) {
         setIsOpen(false);
       }
@@ -123,9 +154,9 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     return {
       gigwan: gigwanNanoId
         ? {
-          nanoId: gigwanNanoId,
-          name: gigwanDisplayName,
-        }
+            nanoId: gigwanNanoId,
+            name: gigwanDisplayName,
+          }
         : null,
       jojiks: (sidebarData?.jojiks ?? []).map((jojik) => ({
         nanoId: jojik.nanoId,
@@ -208,23 +239,24 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     return list;
   }, [hierarchy, sidebarData?.jojiks]);
 
+  const { history: authHistory } = useAuthHistory();
   const filteredHistory = useMemo(() => {
-    if (!authState.gigwanNanoId) return [] as typeof history;
-    return history
+    if (!authState.gigwanNanoId) return [] as typeof authHistory;
+    return authHistory
       .filter(
         (entry) =>
           entry.sayongjaNanoId !== myProfileData?.nanoId &&
           entry.authState.gigwanNanoId === authState.gigwanNanoId,
       )
       .sort((a, b) => b.lastUsedAt - a.lastUsedAt);
-  }, [authState.gigwanNanoId, history, myProfileData?.nanoId]);
+  }, [authState.gigwanNanoId, authHistory, myProfileData?.nanoId]);
 
   const handleProfileButtonClick = useCallback(() => {
     setIsProfileMenuOpen((prev) => !prev);
   }, []);
 
   const handleSelectHistory = useCallback(
-    (entry: (typeof history)[number]) => {
+    (entry: (typeof authHistory)[number]) => {
       void (async () => {
         let aborted = false;
 
@@ -273,7 +305,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         }
       })();
     },
-    [queryClient, refreshHistory, removeHistoryEntry, router, setAuthState],
+    [authHistory, queryClient, refreshHistory, removeHistoryEntry, router, setAuthState],
   );
 
   const handleAddUser = useCallback(() => {
@@ -301,33 +333,30 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const renderItems = (list: Item[]) =>
     list.map((item) => {
       const isActive = !!item.href && pathname.startsWith(item.href);
-      const linkCls =
-        styles.navLink[isActive ? 'active' : 'inactive'] + ' ' + styles.navLinkDepth[item.depth];
+      const linkStyles = [
+        ...styles.navLink[isActive ? 'active' : 'inactive'],
+        styles.navLinkDepth[item.depth],
+      ] as const;
 
       return (
-        <li key={item.key} className={styles.navListItem}>
+        <li key={item.key} css={styles.navListItem}>
           {item.href ? (
-            <Link href={item.href} className={linkCls} aria-current={isActive ? 'page' : undefined}>
-              <span className={styles.navIcon} aria-hidden />
+            <Link href={item.href} css={linkStyles} aria-current={isActive ? 'page' : undefined}>
+              <span css={styles.navIcon} aria-hidden />
               <span
-                className={cx(
-                  styles.navLabel,
-                  styles.navLabelWeight[isActive ? 'active' : 'inactive'],
-                )}
+                css={[styles.navLabel, styles.navLabelWeight[isActive ? 'active' : 'inactive']]}
               >
                 {item.label}
               </span>
             </Link>
           ) : (
-            <span className={linkCls} aria-disabled="true">
-              <span className={styles.navIcon} aria-hidden />
-              <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>
-                {item.label}
-              </span>
+            <span css={linkStyles} aria-disabled="true">
+              <span css={styles.navIcon} aria-hidden />
+              <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>{item.label}</span>
             </span>
           )}
           {item.children && item.children.length > 0 && (
-            <ul className={styles.navChildList}>{renderItems(item.children)}</ul>
+            <ul css={styles.navChildList}>{renderItems(item.children)}</ul>
           )}
         </li>
       );
@@ -335,39 +364,35 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   return (
     <aside
-      className={effectiveIsOpen ? styles.navContainerOpen : styles.navContainerClosed}
+      css={effectiveIsOpen ? styles.navContainerOpen : styles.navContainerClosed}
       aria-label="기본 내비게이션"
       data-open={effectiveIsOpen ? 'true' : 'false'}
     >
-      <div className={styles.toggleBar}>
+      <div css={styles.toggleBar}>
         <button
           type="button"
-          className={styles.toggleButton}
+          css={styles.toggleButton}
           onClick={handleToggle}
           aria-expanded={effectiveIsOpen}
           aria-controls="primary-nav-list"
           aria-label={effectiveIsOpen ? '메뉴 접기' : '메뉴 열기'}
         >
-          {effectiveIsOpen ? (
-            <SidebarClose className={styles.icon} />
-          ) : (
-            <SidebarOpen className={styles.icon} />
-          )}
+          {effectiveIsOpen ? <SidebarClose css={styles.icon} /> : <SidebarOpen css={styles.icon} />}
         </button>
       </div>
 
-      <ul id="primary-nav-list" className={styles.navList[effectiveIsOpen ? 'show' : 'hide']}>
+      <ul id="primary-nav-list" css={styles.navList[effectiveIsOpen ? 'show' : 'hide']}>
         {renderItems(items)}
       </ul>
 
-      <div className={styles.navFooter[effectiveIsOpen ? 'show' : 'hide']}>
+      <div css={styles.navFooter[effectiveIsOpen ? 'show' : 'hide']}>
         <a
           href="https://example.com/purchase-strike"
           target="_blank"
           rel="noopener noreferrer"
-          className={cx(styles.navLink.inactive, styles.navLinkDepth[1])}
+          css={[...styles.navLink.inactive, styles.navLinkDepth[1]]}
         >
-          <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>
+          <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>
             마법사 구매 및 파업 신고
           </span>
         </a>
@@ -375,29 +400,27 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           href="https://example.com/feature-request"
           target="_blank"
           rel="noopener noreferrer"
-          className={cx(styles.navLink.inactive, styles.navLinkDepth[1])}
+          css={[...styles.navLink.inactive, styles.navLinkDepth[1]]}
         >
-          <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>기능 요청</span>
+          <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>기능 요청</span>
         </a>
         <a
           href="https://example.com/contact-dada"
           target="_blank"
           rel="noopener noreferrer"
-          className={cx(styles.navLink.inactive, styles.navLinkDepth[1])}
+          css={[...styles.navLink.inactive, styles.navLinkDepth[1]]}
         >
-          <span className={cx(styles.navLabel, styles.navLabelWeight.inactive)}>
-            다다팀에 문의하기
-          </span>
+          <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>다다팀에 문의하기</span>
         </a>
 
-        <div className={styles.footerProfileSection}>
-          <div className={styles.footerVersionGroup}>
-            <span className={styles.footerBrand}>티키타</span>
-            <span className={styles.footerVerText}>&nbsp;Ver 0.1.0</span>
+        <div css={styles.footerProfileSection}>
+          <div css={styles.footerVersionGroup}>
+            <span css={styles.footerBrand}>티키타</span>
+            <span css={styles.footerVerText}>&nbsp;Ver 0.1.0</span>
           </div>
           <button
             type="button"
-            className={styles.profileTriggerButton}
+            css={styles.profileTriggerButton}
             onClick={handleProfileButtonClick}
             ref={profileButtonRef}
             aria-haspopup="dialog"
@@ -409,7 +432,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
               alt="내 프로필"
               width={40}
               height={40}
-              className={styles.profileTriggerImage}
+              css={styles.profileTriggerImage}
               unoptimized
             />
           </button>

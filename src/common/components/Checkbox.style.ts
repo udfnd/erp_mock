@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
 import { color, radius } from '@/style';
 
@@ -45,7 +45,9 @@ export const box = css`
     border-left: none;
     transform: rotate(45deg) scale(0.5);
     opacity: 0;
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
   }
 
   &::before {
@@ -57,7 +59,9 @@ export const box = css`
     background-color: ${color.blue600};
     opacity: 0;
     transform: scaleX(0.4);
-    transition: opacity 0.15s ease, transform 0.15s ease;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
   }
 
   .${input}:disabled + & {

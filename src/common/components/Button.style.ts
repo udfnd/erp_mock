@@ -1,5 +1,4 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const buttonBaseStyles = css({
@@ -14,52 +13,26 @@ export const buttonBaseStyles = css({
   transition: 'all 0.2s ease',
   textAlign: 'center',
   whiteSpace: 'nowrap',
-  '&:disabled': {
-    cursor: 'not-allowed',
-  },
+  '&:disabled': { cursor: 'not-allowed' },
 });
 
 const styleTypeStyles = {
   solid: css({}),
-  outlined: css({
-    background: 'transparent',
-  }),
-  text: css({
-    background: 'transparent',
-  }),
+  outlined: css({ background: 'transparent' }),
+  text: css({ background: 'transparent' }),
 } as const;
 
 const sizeStyles = {
-  large: css({
-    height: '48px',
-    paddingLeft: '24px',
-    paddingRight: '24px',
-    gap: '8px',
-  }),
-  medium: css({
-    height: '40px',
-    paddingLeft: '20px',
-    paddingRight: '20px',
-    gap: '8px',
-  }),
-  small: css({
-    height: '32px',
-    paddingLeft: '12px',
-    paddingRight: '12px',
-    gap: '4px',
-  }),
+  large: css({ height: 48, paddingLeft: 24, paddingRight: 24, gap: 8 }),
+  medium: css({ height: 40, paddingLeft: 20, paddingRight: 20, gap: 8 }),
+  small: css({ height: 32, paddingLeft: 12, paddingRight: 12, gap: 4 }),
 } as const;
 
-const iconOnlyBase = css({
-  paddingLeft: 0,
-  paddingRight: 0,
-  aspectRatio: '1 / 1',
-});
-
+const iconOnlyBase = css({ paddingLeft: 0, paddingRight: 0, aspectRatio: '1 / 1' });
 const iconOnlySizeStyles = {
-  large: css({ width: '48px' }),
-  medium: css({ width: '40px' }),
-  small: css({ width: '32px' }),
+  large: css({ width: 48 }),
+  medium: css({ width: 40 }),
+  small: css({ width: 32 }),
 } as const;
 
 const solidVariantStyles = {
@@ -69,7 +42,7 @@ const solidVariantStyles = {
     '&:not(:disabled):hover': { background: color.blue600 },
     '&:not(:disabled):active': {
       background: color.blue,
-      boxShadow: 'inset 0 0 100px 100px rgba(0, 0, 0, 0.2)',
+      boxShadow: 'inset 0 0 100px 100px rgba(0,0,0,.2)',
     },
   }),
   secondary: css({
@@ -78,7 +51,7 @@ const solidVariantStyles = {
     '&:not(:disabled):hover': { background: color.blue200 },
     '&:not(:disabled):active': {
       background: color.blue100,
-      boxShadow: 'inset 0 0 100px 100px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'inset 0 0 100px 100px rgba(0,0,0,.1)',
     },
   }),
   assistive: css({
@@ -87,7 +60,7 @@ const solidVariantStyles = {
     '&:not(:disabled):hover': { background: color.cgrey100 },
     '&:not(:disabled):active': {
       background: color.cgrey50,
-      boxShadow: 'inset 0 0 100px 100px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'inset 0 0 100px 100px rgba(0,0,0,.1)',
     },
   }),
 } as const;
@@ -132,18 +105,9 @@ const textVariantStyles = {
 } as const;
 
 const disabledStyles = {
-  solid: css({
-    background: color.cgrey100,
-    color: color.cgrey300,
-  }),
-  outlined: css({
-    background: 'transparent',
-    color: color.cgrey300,
-    borderColor: color.cgrey100,
-  }),
-  text: css({
-    color: color.cgrey300,
-  }),
+  solid: css({ background: color.cgrey100, color: color.cgrey300 }),
+  outlined: css({ background: 'transparent', color: color.cgrey300, borderColor: color.cgrey100 }),
+  text: css({ color: color.cgrey300 }),
 } as const;
 
 const variantStyles = {
@@ -166,16 +130,15 @@ export const buttonRecipe = ({
   size = 'medium',
   iconOnly = false,
   disabled = false,
-}: ButtonRecipeOptions = {}) => {
-  const classes = [
+}: ButtonRecipeOptions = {}): Interpolation<Theme>[] => {
+  return [
+    buttonBaseStyles,
     styleTypeStyles[styleType],
     sizeStyles[size],
-    iconOnly ? iconOnlyBase : null,
-    iconOnly ? iconOnlySizeStyles[size] : null,
+    iconOnly && iconOnlyBase,
+    iconOnly && iconOnlySizeStyles[size],
     disabled ? disabledStyles[styleType] : variantStyles[styleType][variant],
-  ];
-
-  return cx(...classes);
+  ].filter(Boolean) as Interpolation<Theme>[];
 };
 
 export const iconWrapper = css({

@@ -1,8 +1,10 @@
-import { css, cx } from '@emotion/css';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { color } from '@/style/color';
 import { radius, shadow, spacing } from '@/style/primitive';
 import { typography } from '@/style/typo';
+
+type IT = Interpolation<Theme>;
 
 export const navContainer = css({
   display: 'flex',
@@ -62,8 +64,8 @@ const navLinkBase = css({
   },
 });
 
-export const navLink = {
-  active: cx(
+export const navLink: Record<'active' | 'inactive', IT[]> = {
+  active: [
     navLinkBase,
     css({
       ...typography.bodySB,
@@ -72,6 +74,6 @@ export const navLink = {
         background: color.blue,
       },
     }),
-  ),
-  inactive: navLinkBase,
+  ],
+  inactive: [navLinkBase],
 };

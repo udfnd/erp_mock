@@ -1,8 +1,7 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, spacing, typography } from '@/style';
 
-const containerBase = css({
+export const containerBase = css({
   display: 'inline-flex',
   alignItems: 'center',
 });
@@ -17,10 +16,13 @@ export type ContainerRecipeOptions = {
   size?: keyof typeof containerSizeStyles;
 };
 
-export const containerRecipe = ({ size = 'medium' }: ContainerRecipeOptions = {}) =>
-  cx(containerBase, containerSizeStyles[size]);
+type IT = Interpolation<Theme>;
 
-const photoBase = css({
+export const containerRecipe = ({ size = 'medium' }: ContainerRecipeOptions = {}): IT[] => {
+  return [containerSizeStyles[size]];
+};
+
+export const photoBase = css({
   display: 'block',
   borderRadius: '50%',
   borderWidth: '1px',
@@ -49,9 +51,11 @@ export type PhotoRecipeOptions = {
 export const photoRecipe = ({
   size = 'medium',
   variant = 'default',
-}: PhotoRecipeOptions = {}) => cx(photoBase, photoSizeStyles[size], photoVariantStyles[variant]);
+}: PhotoRecipeOptions = {}): IT[] => {
+  return [photoSizeStyles[size], photoVariantStyles[variant]];
+};
 
-const nameBase = css({
+export const nameBase = css({
   color: color.cgrey700,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
@@ -68,5 +72,6 @@ export type NameRecipeOptions = {
   size?: keyof typeof nameSizeStyles;
 };
 
-export const nameRecipe = ({ size = 'medium' }: NameRecipeOptions = {}) =>
-  cx(nameBase, nameSizeStyles[size]);
+export const nameRecipe = ({ size = 'medium' }: NameRecipeOptions = {}): IT[] => {
+  return [nameSizeStyles[size]];
+};

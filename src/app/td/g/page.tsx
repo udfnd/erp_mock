@@ -50,13 +50,13 @@ export default function EnterCodePage() {
   const isButtonDisabled = code.length !== 8 || isLoading;
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>기관 코드 입력</h1>
-          <p className={styles.description}>기관에서 발급 받은 8자리 코드를 입력해주세요.</p>
+    <div css={styles.page}>
+      <div css={styles.card}>
+        <header css={styles.header}>
+          <h1 css={styles.title}>기관 코드 입력</h1>
+          <p css={styles.description}>기관에서 발급 받은 8자리 코드를 입력해주세요.</p>
         </header>
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form css={styles.form} onSubmit={handleSubmit}>
           <LabeledInput
             autoFocus
             label="기관 코드"
@@ -70,9 +70,9 @@ export default function EnterCodePage() {
             inputMode="text"
             autoComplete="off"
           />
-          <div className={styles.buttonWrapper}>
+          <div css={styles.buttonWrapper}>
             <Button type="submit" disabled={isButtonDisabled} styleType="solid" variant="primary">
-              {isLoading ? <Progress className={styles.spinner} /> : '확인'}
+              {isLoading ? <Progress css={styles.spinner} /> : '확인'}
             </Button>
           </div>
         </form>

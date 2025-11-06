@@ -1,6 +1,6 @@
 'use client';
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -36,7 +36,7 @@ export default function HomePage() {
   }, [isAuthenticated, isReady, router, state.gigwanNanoId]);
 
   return (
-    <div className={container}>
+    <div css={container}>
       <p>페이지 이동 중입니다..</p>
     </div>
   );

@@ -1,29 +1,32 @@
 'use client';
 
-export type AccessTokenSource = 'api' | 'store';
+import {
+  getActiveUserId,
+  getLegacyAccessToken,
+  getAccessTokenFor,
+  cacheAccessTokenFor,
+  setLegacyAccessToken,
+  subscribeToken,
+  type TokenSource,
+} from '@/global/auth/token-store';
+
 type Token = string | null;
-type Listener = (token: Token, source: AccessTokenSource) => void;
+export type AccessTokenSource = Extract<TokenSource, 'api' | 'store' | 'refresh' | 'clear'>;
+export type AccessTokenListener = (token: Token, source: AccessTokenSource) => void;
 
-let currentToken: Token = null;
-const listeners = new Set<Listener>();
-
-export const getAccessToken = () => currentToken;
+export const getAccessToken = (): Token => {
+  const uid = getActiveUserId();
+  return uid ? getAccessTokenFor(uid) : getLegacyAccessToken();
+};
 
 export const setAccessToken = (token: Token, source: AccessTokenSource = 'api') => {
-  if (currentToken === token) return;
-  currentToken = token;
-  listeners.forEach((l) => {
-    try {
-      l(currentToken, source);
-    } catch {
-      // listener 오류는 삼킨다
-    }
+  const uid = getActiveUserId();
+  if (uid) cacheAccessTokenFor(uid, token, source);
+  else setLegacyAccessToken(token, source);
+};
+
+export const subscribeAccessToken = (listener: AccessTokenListener) => {
+  return subscribeToken(({ token, source }) => {
+    listener(token, source);
   });
 };
-
-export const subscribeAccessToken = (listener: Listener) => {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-};
-
-export type { Listener as AccessTokenListener };

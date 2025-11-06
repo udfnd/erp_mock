@@ -6,6 +6,17 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 
+import {
+  getActiveUserId,
+  setActiveUserId,
+  getLegacyAccessToken,
+  setLegacyAccessToken,
+  getAccessTokenFor as _getAccessTokenFor,
+  cacheAccessTokenFor as _cacheAccessTokenFor,
+  configureUnauthorizedHandler as _configureUnauthorizedHandler,
+  finalizeUnauthorized as _finalizeUnauthorized,
+} from '@/global/auth/token-store';
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://staging.api.v3.teachita.com/api';
 
@@ -26,7 +37,6 @@ const stripTrailingSlash = (path: string) => {
 
 const normalizePath = (url?: string): string => {
   if (!url) return '';
-
   const clean = (raw: string) => {
     const base = raw.split('?')[0] ?? '';
     const withLeadingSlash = base.startsWith('/') ? base : `/${base}`;
@@ -34,7 +44,6 @@ const normalizePath = (url?: string): string => {
     const trimmed = stripTrailingSlash(withoutApi);
     return trimmed === '/' ? '' : trimmed;
   };
-
   try {
     return clean(new URL(url, API_BASE_URL).pathname);
   } catch {
@@ -63,17 +72,25 @@ const isRefreshPath = (url?: string) => {
 };
 
 type NodeBuffer = { from(i: string, e: string): { toString(e: string): string } };
-
 const getNodeBuffer = (): NodeBuffer | null => {
   const g = globalThis as unknown as { Buffer?: NodeBuffer };
   return g && typeof g.Buffer?.from === 'function' ? g.Buffer : null;
 };
 
+const padBase64 = (s: string): string => {
+  const r = s.length % 4;
+  return r === 0 ? s : s + '='.repeat(4 - r);
+};
+
 const b64Decode = (input: string): string => {
-  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
-  if (typeof atob === 'function') return atob(normalized);
-  const B = getNodeBuffer();
-  return B ? B.from(normalized, 'base64').toString('utf-8') : '';
+  try {
+    const normalized = padBase64(input.replace(/-/g, '+').replace(/_/g, '/'));
+    if (typeof atob === 'function') return atob(normalized);
+    const B = getNodeBuffer();
+    return B ? B.from(normalized, 'base64').toString('utf-8') : '';
+  } catch {
+    return '';
+  }
 };
 
 const isTokenExpiring = (token: string, skewSec = 60): boolean => {
@@ -103,82 +120,11 @@ const deleteAuthOn = (headers: AxiosRequestHeaders | undefined): AxiosHeaders =>
   return hx;
 };
 
-let activeUserId: string | null = null;
-let legacyAccessToken: string | null = null;
-let hasTriggeredUnauthorized = false;
-const atByUser = new Map<string, string>();
-
-type OnUnauthorized = () => void;
-let onUnauthorized: OnUnauthorized | null = null;
-
-export const getActiveUserId = () => activeUserId;
-
-export const setActiveUserId = (userId: string | null) => {
-  activeUserId = userId;
-  if (userId) {
-    hasTriggeredUnauthorized = false;
-  }
-};
-
-export const setAccessToken = (token: string | null) => {
-  legacyAccessToken = token;
-};
-
-export const getAccessToken = (): string | null => legacyAccessToken;
-
-export const cacheAccessTokenFor = (userId: string, token: string | null) => {
-  if (token) {
-    atByUser.set(userId, token);
-  } else {
-    atByUser.delete(userId);
-  }
-
-  if (activeUserId === userId) setAccessToken(token);
-};
-
-export const getAccessTokenFor = (userId: string): string | null => atByUser.get(userId) ?? null;
-
-export const configureUnauthorizedHandler = (handler: OnUnauthorized | null) => {
-  onUnauthorized = handler;
-};
-
-const triggerUnauthorized = () => {
-  if (!onUnauthorized) return;
-  try {
-    onUnauthorized();
-  } catch {
-    // ignore listener errors
-  }
-};
-
-const clearUserSession = (uid: string | null) => {
-  if (uid) {
-    cacheAccessTokenFor(uid, null);
-    if (activeUserId === uid) {
-      setActiveUserId(null);
-      setAccessToken(null);
-    }
-  } else {
-    atByUser.clear();
-    setActiveUserId(null);
-    setAccessToken(null);
-  }
-};
-
-const finalizeUnauthorized = (uid?: string | null) => {
-  if (hasTriggeredUnauthorized) return;
-  hasTriggeredUnauthorized = true;
-  clearUserSession(uid ?? getActiveUserId());
-  triggerUnauthorized();
-};
-
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
-
-export default apiClient;
 
 const refreshClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -187,7 +133,6 @@ const refreshClient: AxiosInstance = axios.create({
 });
 
 type AccessTokenPayload = { accessToken: string; nanoId?: string };
-
 const hasAccessToken = (value: unknown): value is AccessTokenPayload =>
   typeof value === 'object' &&
   value !== null &&
@@ -207,26 +152,23 @@ const applyAccessTokenFromResponse = (url: string | undefined, payload: unknown)
   if (path === SIGN_IN_PATH) {
     const userId = getNanoId(payload);
     if (userId) {
-      cacheAccessTokenFor(userId, accessToken);
+      _cacheAccessTokenFor(userId, accessToken, 'api');
       setActiveUserId(userId);
     } else {
-      setAccessToken(accessToken);
+      setLegacyAccessToken(accessToken, 'api');
     }
     return;
   }
 
-  const refreshUserIdFromUrl = getRefreshUserIdFromNormalizedPath(path);
-  const isRefresh = path === `${AUTH_BASE_PATH}/${REFRESH_SEGMENT}` || refreshUserIdFromUrl !== null;
-
+  const uidFromUrl = getRefreshUserIdFromNormalizedPath(path);
+  const isRefresh = path === `${AUTH_BASE_PATH}/${REFRESH_SEGMENT}` || uidFromUrl !== null;
   if (isRefresh) {
-    const responseNanoId = getNanoId(payload);
-    const userId = responseNanoId ?? refreshUserIdFromUrl ?? getActiveUserId() ?? undefined;
-
-    if (userId) {
-      cacheAccessTokenFor(userId, accessToken);
-      setActiveUserId(userId);
+    const uid = getNanoId(payload) ?? uidFromUrl ?? getActiveUserId() ?? undefined;
+    if (uid) {
+      _cacheAccessTokenFor(uid, accessToken, 'refresh');
+      setActiveUserId(uid);
     } else {
-      setAccessToken(accessToken);
+      setLegacyAccessToken(accessToken, 'refresh');
     }
   }
 };
@@ -234,9 +176,10 @@ const applyAccessTokenFromResponse = (url: string | undefined, payload: unknown)
 apiClient.interceptors.request.use(
   (config) => {
     const { url } = config;
+
     if (!isSignInPath(url) && !isRefreshPath(url)) {
       const uid = getActiveUserId();
-      const token = uid ? atByUser.get(uid) : legacyAccessToken;
+      const token = uid ? _getAccessTokenFor(uid) : getLegacyAccessToken();
 
       if (token) {
         config.headers = setAuthOn(config.headers, token);
@@ -244,7 +187,6 @@ apiClient.interceptors.request.use(
         config.headers = deleteAuthOn(config.headers);
       }
     }
-
     return config;
   },
   (error) => Promise.reject(error),
@@ -256,9 +198,9 @@ const requestAccessTokenRefresh = async (userId: string): Promise<string> => {
   const endpoint = `${AUTH_BASE_PATH}/${encodeURIComponent(userId)}/${REFRESH_SEGMENT}`;
   const { data } = await refreshClient.post(endpoint);
   if (!hasAccessToken(data)) throw new Error('No accessToken from refresh');
-  const newAccessToken = data.accessToken;
-  cacheAccessTokenFor(userId, newAccessToken);
-  return newAccessToken;
+  const newToken = data.accessToken;
+  _cacheAccessTokenFor(userId, newToken, 'refresh');
+  return newToken;
 };
 
 const refreshAccessTokenFor = (userId: string): Promise<string> => {
@@ -270,9 +212,9 @@ const refreshAccessTokenFor = (userId: string): Promise<string> => {
       refreshPromises.delete(userId);
       return token;
     })
-    .catch((error) => {
+    .catch((err) => {
       refreshPromises.delete(userId);
-      throw error;
+      throw err;
     });
 
   refreshPromises.set(userId, promise);
@@ -285,26 +227,31 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalConfig = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const originalConfig = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
+
     const status = error.response?.status;
     const url = originalConfig?.url;
 
-    const shouldSkip = !originalConfig || !status || status !== 401 || isSignInPath(url) || isRefreshPath(url);
+    const shouldSkip =
+      !originalConfig || !status || status !== 401 || isSignInPath(url) || isRefreshPath(url);
+
     if (shouldSkip) {
       if (status === 401 && originalConfig?._retry) {
-        finalizeUnauthorized(getActiveUserId());
+        _finalizeUnauthorized(getActiveUserId());
       }
       return Promise.reject(error);
     }
 
     if (originalConfig._retry) {
-      finalizeUnauthorized(getActiveUserId());
+      _finalizeUnauthorized(getActiveUserId());
       return Promise.reject(error);
     }
 
     const uid = getActiveUserId();
     if (!uid) {
-      finalizeUnauthorized(null);
+      _finalizeUnauthorized(null);
       return Promise.reject(error);
     }
 
@@ -314,28 +261,33 @@ apiClient.interceptors.response.use(
       originalConfig.headers = setAuthOn(originalConfig.headers, newToken);
       return apiClient(originalConfig);
     } catch (refreshError) {
-      finalizeUnauthorized(uid);
+      _finalizeUnauthorized(uid);
       return Promise.reject(refreshError);
     }
   },
 );
 
-export const clearAuthHeader = () => {
-  legacyAccessToken = null;
-};
+export const cacheAccessTokenFor = (userId: string, token: string | null) =>
+  _cacheAccessTokenFor(userId, token, 'api');
+
+export const getAccessTokenFor = (userId: string) => _getAccessTokenFor(userId);
+
+export const configureUnauthorizedHandler = (fn: (() => void) | null) =>
+  _configureUnauthorizedHandler(fn);
+
+export const clearAuthHeader = () => setLegacyAccessToken(null, 'clear');
 
 export async function switchUser(userId: string, onNeedLogin?: (id: string) => void) {
-  const cached = getAccessTokenFor(userId);
+  const cached = _getAccessTokenFor(userId);
   if (cached && !isTokenExpiring(cached)) {
     setActiveUserId(userId);
-    setAccessToken(cached);
+    setLegacyAccessToken(cached, 'store');
     return;
   }
-
   try {
     const newToken = await refreshAccessTokenFor(userId);
     setActiveUserId(userId);
-    setAccessToken(newToken);
+    setLegacyAccessToken(newToken, 'refresh');
   } catch {
     if (onNeedLogin) onNeedLogin(userId);
     else throw new Error('Refresh token not found for this user. Redirect to sign-in.');
@@ -343,13 +295,13 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
 }
 
 export async function hydrateAccessTokenFor(userId: string) {
-  const cached = getAccessTokenFor(userId);
+  const cached = _getAccessTokenFor(userId);
   if (cached && !isTokenExpiring(cached)) return;
 
   try {
     const newToken = await refreshAccessTokenFor(userId);
-    if (activeUserId === userId) setAccessToken(newToken);
-  } catch {
-    // ignore hydration errors – they will be handled lazily on request
-  }
+    if (getActiveUserId() === userId) setLegacyAccessToken(newToken, 'refresh');
+  } catch {}
 }
+
+export default apiClient;

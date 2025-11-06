@@ -127,13 +127,13 @@ export default function SignInPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>기관 로그인</h1>
-          <p className={styles.subtitle}>{subtitle}</p>
+    <div css={styles.page}>
+      <div css={styles.card}>
+        <header css={styles.header}>
+          <h1 css={styles.title}>기관 로그인</h1>
+          <p css={styles.subtitle}>{subtitle}</p>
         </header>
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form css={styles.form} onSubmit={handleSubmit}>
           <LabeledInput
             label="아이디"
             placeholder="아이디를 입력하세요"
@@ -154,9 +154,9 @@ export default function SignInPage() {
             helperText={loginError}
             autoComplete="current-password"
           />
-          <div className={styles.buttonWrapper}>
+          <div css={styles.buttonWrapper}>
             <Button type="submit" disabled={isButtonDisabled}>
-              {isBusy ? <Progress className={styles.spinner} /> : '로그인'}
+              {isBusy ? <Progress css={styles.spinner} /> : '로그인'}
             </Button>
           </div>
         </form>

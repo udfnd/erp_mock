@@ -19,14 +19,14 @@ export default function TertiaryNav({ navItems }: Props) {
   if (!navItems || navItems.length === 0) return null;
 
   return (
-    <nav className={styles.navContainer} aria-label="세부 섹션 내비게이션">
-      <ul className={styles.navList}>
+    <nav css={styles.navContainer} aria-label="세부 섹션 내비게이션">
+      <ul css={styles.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
           const isActive = href ? pathname === href : false;
 
           return (
-            <li key={item.name} className={styles.navListItem}>
+            <li key={item.name} css={styles.navListItem}>
               {href ? (
                 <Button
                   size="small"

@@ -1,5 +1,4 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color } from '@/style';
 
 export const buttonBaseStyles = css({
@@ -42,7 +41,9 @@ const styleTypeStyles = {
 export type IconButtonStyleType = keyof typeof styleTypeStyles;
 export type IconButtonSize = 'default' | 'medium' | 'small' | 'micro';
 
-const sizeStylesByType: Record<IconButtonStyleType, Partial<Record<IconButtonSize, string>>> = {
+type IT = Interpolation<Theme>;
+
+const sizeStylesByType: Record<IconButtonStyleType, Partial<Record<IconButtonSize, IT>>> = {
   normal: {
     default: css({ width: 24, height: 24, color: color.cgrey500 }),
     small: css({ width: 20, height: 20, color: color.cgrey500 }),
@@ -65,7 +66,7 @@ const sizeStylesByType: Record<IconButtonStyleType, Partial<Record<IconButtonSiz
   },
 };
 
-const interactiveStyles: Record<IconButtonStyleType, string> = {
+const interactiveStyles: Record<IconButtonStyleType, IT> = {
   normal: css({
     '&:not(:disabled):hover': { background: color.cgrey50 },
     '&:not(:disabled):active': { background: color.cgrey100 },
@@ -87,7 +88,7 @@ const interactiveStyles: Record<IconButtonStyleType, string> = {
   }),
 };
 
-const disabledStyles: Record<IconButtonStyleType, string> = {
+const disabledStyles: Record<IconButtonStyleType, IT> = {
   normal: css({ color: color.cgrey300, background: 'transparent' }),
   background: css({ color: color.cgrey300, background: color.cgrey50 }),
   solid: css({ background: color.cgrey100, color: color.cgrey300 }),
@@ -104,12 +105,10 @@ export const iconButtonRecipe = ({
   styleType = 'normal',
   size = 'default',
   disabled = false,
-}: IconButtonRecipeOptions = {}) => {
-  const classes = [
+}: IconButtonRecipeOptions = {}): IT[] => {
+  return [
     styleTypeStyles[styleType],
     sizeStylesByType[styleType][size],
     disabled ? disabledStyles[styleType] : interactiveStyles[styleType],
-  ];
-
-  return cx(...classes.filter(Boolean));
+  ].filter(Boolean) as IT[];
 };

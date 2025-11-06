@@ -11,7 +11,7 @@ import {
   label as labelStyle,
   labelWrapper,
   requiredAsterisk,
-} from './Textfield.style.css';
+} from './Textfield.style';
 
 type InputWrapperOptions = Exclude<Parameters<typeof inputWrapperRecipe>[0], undefined>;
 type HelperTextOptions = Exclude<Parameters<typeof helperTextRecipe>[0], undefined>;
@@ -55,25 +55,25 @@ export const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
     const helperTextClasses = helperTextRecipe({ status: status as HelperTextStatus });
 
     return (
-      <div className={clsx(container, containerClassName)}>
+      <div css={clsx(container, containerClassName)}>
         {label ? (
-          <label htmlFor={id} className={labelWrapper}>
-            <span className={labelStyle}>{label}</span>
-            {required ? <span className={requiredAsterisk}>*</span> : null}
+          <label htmlFor={id} css={labelWrapper}>
+            <span css={labelStyle}>{label}</span>
+            {required ? <span css={requiredAsterisk}>*</span> : null}
           </label>
         ) : null}
-        <div className={clsx(inputWrapperClasses, className)}>
+        <div css={clsx(inputWrapperClasses, className)}>
           <input
             id={id}
             ref={ref}
-            className={inputRecipe}
+            css={inputRecipe}
             value={value ?? ''}
             onChange={(e) => onValueChange?.(e.target.value)}
             disabled={disabled}
             {...props}
           />
         </div>
-        {helperText ? <span className={helperTextClasses}>{helperText}</span> : null}
+        {helperText ? <span css={helperTextClasses}>{helperText}</span> : null}
       </div>
     );
   },

@@ -1,4 +1,4 @@
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
 import { color } from '@/style/color';
 import { radius, shadow, spacing } from '@/style/primitive';

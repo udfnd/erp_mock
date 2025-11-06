@@ -507,30 +507,26 @@ export default function JoManageSettingPage() {
   const schoolsIsSaving = updateJojikSchoolsMutation.isPending;
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.pageTitle}>조직 설정</h1>
-        <p className={styles.pageDescription}>
+    <div css={styles.page}>
+      <header css={styles.header}>
+        <h1 css={styles.pageTitle}>조직 설정</h1>
+        <p css={styles.pageDescription}>
           조직 기본 정보와 관련 학교, 오픈 파일 접근 정책을 관리합니다.
         </p>
       </header>
-      <div className={styles.cardGrid}>
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardTitleGroup}>
-              <h2 className={styles.cardTitle}>조직 기본 설정</h2>
-              <p className={styles.cardSubtitle}>
-                조직 이름과 소개, 재원생 링크를 관리할 수 있습니다.
-              </p>
+      <div css={styles.cardGrid}>
+        <section css={styles.card}>
+          <div css={styles.cardHeader}>
+            <div css={styles.cardTitleGroup}>
+              <h2 css={styles.cardTitle}>조직 기본 설정</h2>
+              <p css={styles.cardSubtitle}>조직 이름과 소개, 재원생 링크를 관리할 수 있습니다.</p>
             </div>
             <Chip size="sm" variant="outlined" disabled>
               조직 코드 {jojikNanoId}
             </Chip>
           </div>
-          <div className={styles.cardBody}>
-            {jojikError ? (
-              <p className={styles.errorText}>조직 정보를 불러오지 못했습니다.</p>
-            ) : null}
+          <div css={styles.cardBody}>
+            {jojikError ? <p css={styles.errorText}>조직 정보를 불러오지 못했습니다.</p> : null}
             <LabeledInput
               label="조직 이름"
               placeholder="조직 이름을 입력하세요"
@@ -546,9 +542,9 @@ export default function JoManageSettingPage() {
               value={basicState.form.intro}
               onValueChange={(value) => handleBasicChange('intro', value)}
             />
-            <div className={styles.linkField}>
-              <span className={styles.fieldLabel}>재원생 링크 요청 URL</span>
-              <div className={styles.linkRow}>
+            <div css={styles.linkField}>
+              <span css={styles.fieldLabel}>재원생 링크 요청 URL</span>
+              <div css={styles.linkRow}>
                 <LabeledInput
                   value={jojik?.jaewonsaengLinkRequestUrl ?? ''}
                   readOnly
@@ -568,22 +564,20 @@ export default function JoManageSettingPage() {
               </div>
               {copyMessage ? (
                 <span
-                  className={
-                    copyStatus === 'error' ? styles.feedback.error : styles.feedback.success
-                  }
+                  css={copyStatus === 'error' ? styles.feedback.error : styles.feedback.success}
                 >
                   {copyMessage}
                 </span>
               ) : null}
             </div>
           </div>
-          <footer className={styles.cardFooter}>
+          <footer css={styles.cardFooter}>
             {basicState.feedback ? (
-              <span className={styles.feedback[basicState.feedback.type]}>
+              <span css={styles.feedback[basicState.feedback.type]}>
                 {basicState.feedback.message}
               </span>
             ) : (
-              <span className={styles.statusText}>
+              <span css={styles.statusText}>
                 {isJojikLoading || isJojikFetching
                   ? '조직 정보를 불러오는 중입니다.'
                   : '조직 이름과 소개를 수정할 수 있습니다.'}
@@ -601,17 +595,15 @@ export default function JoManageSettingPage() {
           </footer>
         </section>
 
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardTitleGroup}>
-              <h2 className={styles.cardTitle}>관련 학교 설정</h2>
-              <p className={styles.cardSubtitle}>
-                조직과 연계된 학교를 추가하거나 제거할 수 있습니다.
-              </p>
+        <section css={styles.card}>
+          <div css={styles.cardHeader}>
+            <div css={styles.cardTitleGroup}>
+              <h2 css={styles.cardTitle}>관련 학교 설정</h2>
+              <p css={styles.cardSubtitle}>조직과 연계된 학교를 추가하거나 제거할 수 있습니다.</p>
             </div>
           </div>
-          <div className={styles.cardBody}>
-            <div className={styles.inputRow}>
+          <div css={styles.cardBody}>
+            <div css={styles.inputRow}>
               <LabeledInput
                 label="학교 이름"
                 placeholder="학교 이름을 입력하세요"
@@ -632,9 +624,9 @@ export default function JoManageSettingPage() {
               </Button>
             </div>
             {schoolState.feedback?.type === 'error' ? (
-              <span className={styles.feedback.error}>{schoolState.feedback.message}</span>
+              <span css={styles.feedback.error}>{schoolState.feedback.message}</span>
             ) : null}
-            <div className={styles.chipList}>
+            <div css={styles.chipList}>
               {schoolState.schools.length > 0 ? (
                 schoolState.schools.map((school) => (
                   <Chip
@@ -648,15 +640,15 @@ export default function JoManageSettingPage() {
                   </Chip>
                 ))
               ) : (
-                <span className={styles.emptyText}>등록된 학교가 없습니다.</span>
+                <span css={styles.emptyText}>등록된 학교가 없습니다.</span>
               )}
             </div>
           </div>
-          <footer className={styles.cardFooter}>
+          <footer css={styles.cardFooter}>
             {schoolState.feedback && schoolState.feedback.type === 'success' ? (
-              <span className={styles.feedback.success}>{schoolState.feedback.message}</span>
+              <span css={styles.feedback.success}>{schoolState.feedback.message}</span>
             ) : (
-              <span className={styles.statusText}>
+              <span css={styles.statusText}>
                 {schoolState.schools.length > 0
                   ? '등록된 학교를 클릭하여 제거할 수 있습니다.'
                   : '추가하고 싶은 학교 이름을 입력 후 추가 버튼을 눌러주세요.'}
@@ -674,21 +666,21 @@ export default function JoManageSettingPage() {
           </footer>
         </section>
 
-        <section className={clsx(styles.card, styles.cardWide)}>
-          <div className={styles.cardHeader}>
-            <div className={styles.cardTitleGroup}>
-              <h2 className={styles.cardTitle}>오픈 파일 · 컨텐츠 설정</h2>
-              <p className={styles.cardSubtitle}>
+        <section css={clsx(styles.card, styles.cardWide)}>
+          <div css={styles.cardHeader}>
+            <div css={styles.cardTitleGroup}>
+              <h2 css={styles.cardTitle}>오픈 파일 · 컨텐츠 설정</h2>
+              <p css={styles.cardSubtitle}>
                 조직 정보와 오픈 파일 접근 범위를 조정하고, 필요한 파일만 공개하세요.
               </p>
             </div>
           </div>
-          <div className={styles.cardBody}>
-            <div className={styles.selectGroupGrid}>
-              <div className={styles.selectGroup}>
-                <span className={styles.fieldLabel}>조직 기본 정보 공개 범위</span>
+          <div css={styles.cardBody}>
+            <div css={styles.selectGroupGrid}>
+              <div css={styles.selectGroup}>
+                <span css={styles.fieldLabel}>조직 기본 정보 공개 범위</span>
                 <select
-                  className={styles.select}
+                  css={styles.select}
                   value={openState.canAccessBasicInfoNanoId}
                   onChange={(event) => handleChangeBasicInfoAccess(event.target.value)}
                   disabled={isOpenFileSangtaesLoading}
@@ -700,14 +692,14 @@ export default function JoManageSettingPage() {
                     </option>
                   ))}
                 </select>
-                <span className={styles.fieldDescription}>
+                <span css={styles.fieldDescription}>
                   조직 소개, 기본 정보 등의 공개 범위를 지정합니다.
                 </span>
               </div>
-              <div className={styles.selectGroup}>
-                <span className={styles.fieldLabel}>오픈 파일 접근 권한</span>
+              <div css={styles.selectGroup}>
+                <span css={styles.fieldLabel}>오픈 파일 접근 권한</span>
                 <select
-                  className={styles.select}
+                  css={styles.select}
                   value={openState.canAccessOpenFileNanoId}
                   onChange={(event) => handleChangeOpenFileAccess(event.target.value)}
                   disabled={isOpenFileSangtaesLoading}
@@ -719,14 +711,14 @@ export default function JoManageSettingPage() {
                     </option>
                   ))}
                 </select>
-                <span className={styles.fieldDescription}>
+                <span css={styles.fieldDescription}>
                   첨부된 오픈 파일을 조회할 수 있는 대상을 선택하세요.
                 </span>
               </div>
-              <div className={styles.selectGroup}>
-                <span className={styles.fieldLabel}>하다 링크 요청 승인 대상</span>
+              <div css={styles.selectGroup}>
+                <span css={styles.fieldLabel}>하다 링크 요청 승인 대상</span>
                 <select
-                  className={styles.select}
+                  css={styles.select}
                   value={openState.canHadaLinkRequestNanoId}
                   onChange={(event) => handleChangeHadaAccess(event.target.value)}
                   disabled={isHadaSangtaesLoading}
@@ -738,42 +730,42 @@ export default function JoManageSettingPage() {
                     </option>
                   ))}
                 </select>
-                <span className={styles.fieldDescription}>
+                <span css={styles.fieldDescription}>
                   하다 링크 요청을 처리할 수 있는 사용자를 선택하세요.
                 </span>
               </div>
             </div>
 
-            <div className={styles.openFileSection}>
-              <span className={styles.sectionTitle}>공개할 오픈 파일 선택</span>
-              <span className={styles.sectionDescription}>
+            <div css={styles.openFileSection}>
+              <span css={styles.sectionTitle}>공개할 오픈 파일 선택</span>
+              <span css={styles.sectionDescription}>
                 공개할 파일만 선택하면 해당 권한을 가진 사용자에게만 노출됩니다.
               </span>
-              <div className={styles.openFileList}>
+              <div css={styles.openFileList}>
                 {openFileOptions.length > 0 ? (
                   openFileOptions.map((file) => (
-                    <label key={file.nanoId} className={styles.openFileItem}>
+                    <label key={file.nanoId} css={styles.openFileItem}>
                       <Checkbox
                         checked={openState.openFileNanoIds.includes(file.nanoId)}
                         onChange={() => handleToggleOpenFile(file.nanoId)}
                         ariaLabel={`${file.name} 공개 여부`}
                       />
-                      <span className={styles.openFileName}>{file.name}</span>
+                      <span css={styles.openFileName}>{file.name}</span>
                     </label>
                   ))
                 ) : (
-                  <span className={styles.emptyText}>연결된 오픈 파일이 없습니다.</span>
+                  <span css={styles.emptyText}>연결된 오픈 파일이 없습니다.</span>
                 )}
               </div>
             </div>
           </div>
-          <footer className={styles.cardFooter}>
+          <footer css={styles.cardFooter}>
             {openState.feedback ? (
-              <span className={styles.feedback[openState.feedback.type]}>
+              <span css={styles.feedback[openState.feedback.type]}>
                 {openState.feedback.message}
               </span>
             ) : (
-              <span className={styles.statusText}>
+              <span css={styles.statusText}>
                 {isOpenFileSangtaesLoading || isHadaSangtaesLoading
                   ? '접근 권한 옵션을 불러오는 중입니다.'
                   : '공개 범위와 파일 선택을 조정한 후 저장을 눌러주세요.'}

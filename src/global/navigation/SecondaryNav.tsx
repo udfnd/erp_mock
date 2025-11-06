@@ -64,8 +64,8 @@ export default function SecondaryNav({ navItems, hierarchy }: Props) {
   if (!navItems || navItems.length === 0) return null;
 
   return (
-    <nav className={styles.navContainer} aria-label="세부 내비게이션">
-      <ul className={styles.navList}>
+    <nav css={styles.navContainer} aria-label="세부 내비게이션">
+      <ul css={styles.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
           const resolvedBasePath = item.basePath
@@ -78,7 +78,7 @@ export default function SecondaryNav({ navItems, hierarchy }: Props) {
               : false;
 
           return (
-            <li key={item.name} className={styles.navListItem}>
+            <li key={item.name} css={styles.navListItem}>
               {href ? (
                 <Chip
                   size="lg"

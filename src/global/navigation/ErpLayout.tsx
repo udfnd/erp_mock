@@ -132,22 +132,22 @@ export default function ErpLayout({ children }: { children: React.ReactNode }) {
   const tertiaryVisibility = headerVisibility === 'hidden' ? 'hidden' : 'visible';
 
   return (
-    <div className={styles.container}>
+    <div css={styles.container}>
       <PrimaryNav onHierarchyChange={handlePrimaryNavHierarchyChange} />
-      <div className={styles.mainWrapper}>
-        <header className={styles.header}>
+      <div css={styles.mainWrapper}>
+        <header css={styles.header}>
           {currentSecondaryNavItems.length > 0 ? (
-            <div className={styles.secondaryNavWrapper[secondaryVisibility]}>
+            <div css={styles.secondaryNavWrapper[secondaryVisibility]}>
               <SecondaryNav navItems={currentSecondaryNavItems} hierarchy={primaryNavHierarchy} />
             </div>
           ) : null}
           {currentTertiaryNavItems.length > 0 ? (
-            <div className={styles.tertiaryNavWrapper[tertiaryVisibility]}>
+            <div css={styles.tertiaryNavWrapper[tertiaryVisibility]}>
               <TertiaryNav navItems={currentTertiaryNavItems} />
             </div>
           ) : null}
         </header>
-        <main ref={contentRef} className={styles.content}>
+        <main ref={contentRef} css={styles.content}>
           {children}
         </main>
       </div>

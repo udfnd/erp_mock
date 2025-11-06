@@ -61,56 +61,51 @@ export default function MyProfileMenu({
   return (
     <div
       ref={containerRef}
-      className={styles.container}
+      css={styles.container}
       role="dialog"
       aria-modal="false"
       aria-label="내 프로필 메뉴"
     >
-      <div className={styles.header}>
+      <div css={styles.header}>
         <Image
           src={profileImageUrl}
           alt="내 프로필 이미지"
           width={48}
           height={48}
-          className={styles.profileImage}
+          css={styles.profileImage}
           unoptimized
         />
-        <div className={styles.userInfo}>
-          <span className={styles.userName}>{userName}</span>
-          <span className={styles.gigwanName}>{gigwanName ?? '기관 정보 없음'}</span>
+        <div css={styles.userInfo}>
+          <span css={styles.userName}>{userName}</span>
+          <span css={styles.gigwanName}>{gigwanName ?? '기관 정보 없음'}</span>
         </div>
-        <button
-          type="button"
-          className={styles.closeButton}
-          onClick={onClose}
-          aria-label="메뉴 닫기"
-        >
+        <button type="button" css={styles.closeButton} onClick={onClose} aria-label="메뉴 닫기">
           ×
         </button>
       </div>
-      <div className={styles.historySection}>
-        <span className={styles.historyTitle}>같은 기관의 다른 사용자</span>
-        <div className={styles.historyList}>
+      <div css={styles.historySection}>
+        <span css={styles.historyTitle}>같은 기관의 다른 사용자</span>
+        <div css={styles.historyList}>
           {recentHistory.length === 0 ? (
-            <span className={styles.historyEmpty}>같은 기관의 다른 사용자가 없습니다.</span>
+            <span css={styles.historyEmpty}>같은 기관의 다른 사용자가 없습니다.</span>
           ) : (
             recentHistory.map((entry) => (
               <button
                 key={entry.sayongjaNanoId}
                 type="button"
-                className={styles.historyButton}
+                css={styles.historyButton}
                 onClick={() => onSelectHistory(entry)}
               >
-                <span className={styles.historyButtonName}>{entry.sayongjaName}</span>
+                <span css={styles.historyButtonName}>{entry.sayongjaName}</span>
                 {entry.gigwanName ? (
-                  <span className={styles.historyButtonGigwan}>{entry.gigwanName}</span>
+                  <span css={styles.historyButtonGigwan}>{entry.gigwanName}</span>
                 ) : null}
               </button>
             ))
           )}
         </div>
       </div>
-      <div className={styles.actions}>
+      <div css={styles.actions}>
         <Button styleType="text" variant="secondary" size="small" onClick={onLogout}>
           로그아웃
         </Button>

@@ -1,5 +1,4 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const chipBaseStyles = css({
@@ -108,18 +107,16 @@ export const chipRecipe = ({
   variant = 'solid',
   active = false,
   disabled = false,
-}: ChipRecipeOptions = {}) => {
+}: ChipRecipeOptions = {}): Interpolation<Theme>[] => {
   const stateKey = active ? 'active' : 'inactive';
   const stateStyles =
     variant === 'solid' ? solidStateStyles[stateKey] : outlinedStateStyles[stateKey];
 
-  const classes = [
+  return [
     sizeStyles[size],
     variantStyles[variant],
     disabled ? disabledStyles[variant] : stateStyles,
-  ];
-
-  return cx(...classes);
+  ] as Interpolation<Theme>[];
 };
 
 export const chipIconWrapper = css({

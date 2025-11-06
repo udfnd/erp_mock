@@ -1,6 +1,7 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, shadow } from '@/style';
+
+type IT = Interpolation<Theme>;
 
 export const toggleContainer = css({
   display: 'inline-flex',
@@ -50,13 +51,14 @@ export const toggleRecipe = ({
   size = 'md',
   active = false,
   disabled = false,
-}: ToggleRecipeOptions = {}) =>
-  cx(
+}: ToggleRecipeOptions = {}): IT[] => {
+  return [
     toggleContainer,
     toggleSizeStyles[size],
     toggleActiveStyles[active ? 'active' : 'inactive'],
     toggleDisabledStyles[disabled ? 'disabled' : 'enabled'],
-  );
+  ];
+};
 
 const handleSizeStyles = {
   sm: css({ width: 20, height: 20 }),
@@ -75,8 +77,10 @@ export type HandleRecipeOptions = {
   active?: boolean;
 };
 
-export const handleRecipe = ({
-  size = 'md',
-  active = false,
-}: HandleRecipeOptions = {}) =>
-  cx(toggleHandle, handleSizeStyles[size], active ? handleActiveTranslations[size] : handleInactiveStyle);
+export const handleRecipe = ({ size = 'md', active = false }: HandleRecipeOptions = {}): IT[] => {
+  return [
+    toggleHandle,
+    handleSizeStyles[size],
+    active ? handleActiveTranslations[size] : handleInactiveStyle,
+  ];
+};

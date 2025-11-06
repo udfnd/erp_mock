@@ -1,14 +1,7 @@
 'use client';
 
-import { clsx } from 'clsx';
 import React, { ReactNode } from 'react';
-
-import {
-  chipBaseStyles,
-  chipIconWrapper,
-  chipRecipe,
-  type ChipRecipeOptions,
-} from './Chip.style.css';
+import { chipBaseStyles, chipIconWrapper, chipRecipe, type ChipRecipeOptions } from './Chip.style';
 
 export type ChipProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
   ChipRecipeOptions & {
@@ -32,14 +25,20 @@ export const Chip = React.forwardRef<HTMLButtonElement, ChipProps>(
     },
     ref,
   ) => {
-    const recipeClasses = chipRecipe({ variant, size, active, disabled });
-    const finalClassName = clsx(chipBaseStyles, recipeClasses, className);
+    const recipeStyles = chipRecipe({ variant, size, active, disabled });
 
     return (
-      <button ref={ref} type="button" className={finalClassName} disabled={disabled} {...props}>
-        {iconLeft && <span className={chipIconWrapper}>{iconLeft}</span>}
+      <button
+        ref={ref}
+        type="button"
+        css={[chipBaseStyles, ...recipeStyles]}
+        className={className}
+        disabled={disabled}
+        {...props}
+      >
+        {iconLeft && <span css={chipIconWrapper}>{iconLeft}</span>}
         {children}
-        {iconRight && <span className={chipIconWrapper}>{iconRight}</span>}
+        {iconRight && <span css={chipIconWrapper}>{iconRight}</span>}
       </button>
     );
   },

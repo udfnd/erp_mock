@@ -1,6 +1,7 @@
-import { css, cx } from '@emotion/css';
-
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, radius, spacing, typography } from '@/style';
+
+type IT = Interpolation<Theme>;
 
 export const container = css({
   display: 'flex',
@@ -76,12 +77,13 @@ export type InputWrapperRecipeOptions = {
 export const inputWrapperRecipe = ({
   status = 'normal',
   disabled = false,
-}: InputWrapperRecipeOptions = {}) =>
-  cx(
+}: InputWrapperRecipeOptions = {}): IT[] => {
+  return [
     inputWrapperBase,
     inputWrapperStatusStyles[status],
     disabled ? inputWrapperDisabledStyles.disabled : inputWrapperDisabledStyles.enabled,
-  );
+  ];
+};
 
 const textareaBase = css({
   ...typography.bodyR,
@@ -117,8 +119,9 @@ export type TextareaRecipeOptions = {
   resize?: keyof typeof textareaResizeStyles;
 };
 
-export const textareaRecipe = ({ resize = 'normal' }: TextareaRecipeOptions = {}) =>
-  cx(textareaBase, textareaResizeStyles[resize]);
+export const textareaRecipe = ({ resize = 'normal' }: TextareaRecipeOptions = {}): IT[] => {
+  return [textareaBase, textareaResizeStyles[resize]];
+};
 
 export const inputRecipe = css({
   ...typography.bodyR,
@@ -172,6 +175,6 @@ export type HelperTextRecipeOptions = {
   status?: keyof typeof helperTextStatusStyles;
 };
 
-export const helperTextRecipe = ({
-  status = 'normal',
-}: HelperTextRecipeOptions = {}) => cx(helperTextBase, helperTextStatusStyles[status]);
+export const helperTextRecipe = ({ status = 'normal' }: HelperTextRecipeOptions = {}): IT[] => {
+  return [helperTextBase, helperTextStatusStyles[status]];
+};
