@@ -1,7 +1,8 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useForm, useStore } from '@tanstack/react-form';
 
 import { Button, IconButton, LabeledInput } from '@/common/components';
 import { Delete, Plus } from '@/common/icons';
@@ -25,44 +26,8 @@ type WorkTypeStatusForm = {
   isHwalseong: boolean;
 };
 
-type WorkTypeState = {
+type WorkTypeFormValues = {
   statuses: WorkTypeStatusForm[];
-  dirty: boolean;
-  feedback: FeedbackState;
-};
-
-type WorkTypeAction =
-  | { type: 'reset'; payload: WorkTypeStatusForm[] }
-  | { type: 'change'; statusLocalId: string; value: string }
-  | { type: 'add'; status: WorkTypeStatusForm }
-  | { type: 'remove'; statusLocalId: string }
-  | { type: 'feedback'; payload: FeedbackState };
-
-const workTypeReducer = (state: WorkTypeState, action: WorkTypeAction): WorkTypeState => {
-  switch (action.type) {
-    case 'reset':
-      return { statuses: action.payload, dirty: false, feedback: null };
-    case 'change':
-      return {
-        statuses: state.statuses.map((status) =>
-          status.localId === action.statusLocalId ? { ...status, name: action.value } : status,
-        ),
-        dirty: true,
-        feedback: null,
-      };
-    case 'add':
-      return { statuses: [...state.statuses, action.status], dirty: true, feedback: null };
-    case 'remove':
-      return {
-        statuses: state.statuses.filter((status) => status.localId !== action.statusLocalId),
-        dirty: true,
-        feedback: null,
-      };
-    case 'feedback':
-      return { ...state, feedback: action.payload };
-    default:
-      return state;
-  }
 };
 
 export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectionProps) {
@@ -74,49 +39,57 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
   );
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
 
-  const [workTypeState, dispatchWorkType] = useReducer(workTypeReducer, {
-    statuses: [],
-    dirty: false,
-    feedback: null,
+  const form = useForm<WorkTypeFormValues>({
+    defaultValues: { statuses: [] },
   });
+
+  const { values, isDirty } = useStore(form.store, (state) => ({
+    values: state.values,
+    isDirty: state.isDirty,
+  }));
+  const statuses = values.statuses ?? [];
+
+  const [feedback, setFeedback] = useState<FeedbackState>(null);
 
   useEffect(() => {
     if (!workTypeStatusesData) return;
 
-    dispatchWorkType({
-      type: 'reset',
-      payload: workTypeStatusesData.sangtaes.map((status) => ({
+    form.reset({
+      statuses: workTypeStatusesData.sangtaes.map((status) => ({
         nanoId: status.nanoId,
         name: status.name,
         localId: status.nanoId ?? createLocalId(),
         isHwalseong: status.isHwalseong,
       })),
     });
-  }, [workTypeStatusesData]);
-
-  const handleWorkTypeStatusChange = useCallback((statusLocalId: string, value: string) => {
-    dispatchWorkType({ type: 'change', statusLocalId, value });
-  }, []);
+    setFeedback(null);
+  }, [form, workTypeStatusesData]);
 
   const handleAddWorkTypeStatus = useCallback(() => {
-    const local = createLocalId();
-    dispatchWorkType({
-      type: 'add',
-      status: { nanoId: null, name: '', localId: local, isHwalseong: true },
+    form.pushFieldValue('statuses', {
+      nanoId: null,
+      name: '',
+      localId: createLocalId(),
+      isHwalseong: true,
     });
-  }, []);
+    setFeedback(null);
+  }, [form]);
 
-  const handleRemoveWorkTypeStatus = useCallback((statusLocalId: string) => {
-    dispatchWorkType({ type: 'remove', statusLocalId });
-  }, []);
-
-  const workTypeHasEmptyStatus = useMemo(
-    () => workTypeState.statuses.some((status) => status.name.trim().length === 0),
-    [workTypeState.statuses],
+  const handleRemoveWorkTypeStatus = useCallback(
+    (statusIndex: number) => {
+      void form.removeFieldValue('statuses', statusIndex);
+      setFeedback(null);
+    },
+    [form],
   );
 
-  const handleSaveWorkTypeStatuses = useCallback(() => {
-    if (!workTypeState.dirty || workTypeHasEmptyStatus) return;
+  const workTypeHasEmptyStatus = useMemo(
+    () => statuses.some((status) => status.name.trim().length === 0),
+    [statuses],
+  );
+
+  const handleSaveWorkTypeStatuses = useCallback(async () => {
+    if (!isDirty || workTypeHasEmptyStatus) return;
 
     const seen = new Set<string>();
     const sangtaes: Array<
@@ -124,7 +97,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
       | { nanoId: string; name: string; isHwalseong: boolean }
     > = [];
 
-    for (const status of workTypeState.statuses) {
+    for (const status of statuses) {
       const name = status.name.trim();
       if (!name) continue;
 
@@ -144,40 +117,31 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
       }
     }
 
-    upsertWorkTypeStatusesMutation.mutate(
-      { sangtaes },
-      {
-        onSuccess: (data) => {
-          dispatchWorkType({
-            type: 'reset',
-            payload: data.sangtaes.map((status) => ({
-              nanoId: status.nanoId,
-              name: status.name,
-              localId: status.nanoId,
-              isHwalseong: status.isHwalseong,
-            })),
-          });
-          dispatchWorkType({
-            type: 'feedback',
-            payload: { type: 'success', message: '근무 형태 커스텀 상태가 저장되었습니다.' },
-          });
-          queryClient.invalidateQueries({ queryKey: ['workTypeCustomSangtaes', gigwanNanoId] });
-        },
-        onError: () => {
-          dispatchWorkType({
-            type: 'feedback',
-            payload: { type: 'error', message: '근무 형태 상태 저장에 실패했습니다.' },
-          });
-        },
-      },
-    );
+    try {
+      const data = await upsertWorkTypeStatusesMutation.mutateAsync({ sangtaes });
+      form.reset({
+        statuses: data.sangtaes.map((status) => ({
+          nanoId: status.nanoId,
+          name: status.name,
+          localId: status.nanoId,
+          isHwalseong: status.isHwalseong,
+        })),
+      });
+      setFeedback({ type: 'success', message: '근무 형태 커스텀 상태가 저장되었습니다.' });
+      await queryClient.invalidateQueries({
+        queryKey: ['workTypeCustomSangtaes', gigwanNanoId],
+      });
+    } catch {
+      setFeedback({ type: 'error', message: '근무 형태 상태 저장에 실패했습니다.' });
+    }
   }, [
+    form,
     gigwanNanoId,
+    isDirty,
     queryClient,
+    statuses,
     upsertWorkTypeStatusesMutation,
     workTypeHasEmptyStatus,
-    workTypeState.dirty,
-    workTypeState.statuses,
   ]);
 
   const workTypeIsSaving = upsertWorkTypeStatusesMutation.isPending;
@@ -195,23 +159,34 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         {workTypeError ? <p css={cssObj.errorText}>근무 형태 상태를 불러오지 못했습니다.</p> : null}
         <div css={cssObj.statusList}>
           <span css={cssObj.categoryLabel}>재직상태</span>
-          {workTypeState.statuses.map((status) => (
-            <div key={status.localId} css={cssObj.statusItem}>
-              <LabeledInput
-                placeholder="근무 형태 상태 이름"
-                value={status.name}
-                onValueChange={(value) => handleWorkTypeStatusChange(status.localId, value)}
-                maxLength={20}
-              />
-              <IconButton
-                styleType="normal"
-                size="small"
-                onClick={() => handleRemoveWorkTypeStatus(status.localId)}
-                aria-label={`${status.name || '상태'} 삭제`}
-              >
-                <Delete width={16} height={16} />
-              </IconButton>
-            </div>
+          {statuses.map((status, statusIndex) => (
+            <form.Field key={status.localId} name={`statuses.${statusIndex}.name`}>
+              {(field) => {
+                const value = String(field.state.value ?? '');
+                return (
+                  <div css={cssObj.statusItem}>
+                    <LabeledInput
+                      placeholder="근무 형태 상태 이름"
+                      value={value}
+                      onValueChange={(v) => {
+                        setFeedback(null);
+                        field.handleChange(v);
+                      }}
+                      onBlur={field.handleBlur}
+                      maxLength={20}
+                    />
+                    <IconButton
+                      styleType="normal"
+                      size="small"
+                      onClick={() => handleRemoveWorkTypeStatus(statusIndex)}
+                      aria-label={`${value || '상태'} 삭제`}
+                    >
+                      <Delete width={16} height={16} />
+                    </IconButton>
+                  </div>
+                );
+              }}
+            </form.Field>
           ))}
         </div>
         <Button
@@ -225,20 +200,13 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         </Button>
       </div>
       <footer css={cssObj.cardFooter}>
-        {workTypeState.feedback ? (
-          <span css={cssObj.feedback[workTypeState.feedback.type]}>
-            {workTypeState.feedback.message}
-          </span>
-        ) : null}
+        {feedback ? <span css={cssObj.feedback[feedback.type]}>{feedback.message}</span> : null}
         <Button
           size="small"
           styleType="solid"
           variant="primary"
           disabled={
-            !workTypeState.dirty ||
-            workTypeHasEmptyStatus ||
-            workTypeIsSaving ||
-            workTypeState.statuses.length === 0
+            !isDirty || workTypeHasEmptyStatus || workTypeIsSaving || statuses.length === 0
           }
           onClick={handleSaveWorkTypeStatuses}
         >
