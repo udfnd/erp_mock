@@ -120,10 +120,6 @@ const navLinkBase = css({
     outline: `2px solid ${color.blue400}`,
     outlineOffset: '4px',
   },
-  [`@media ${collapsedRange}`]: {
-    justifyContent: 'center',
-    padding: `${spacing.sm} ${spacing.xs}`,
-  },
 });
 
 export const navLinkDepth = {

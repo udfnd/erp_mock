@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useId } from 'react';
+import React, { ReactNode } from 'react';
 import {
   actionButtonStyle,
   container,
@@ -40,12 +40,12 @@ type BaseProps = {
 
 type InputRest = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  'value' | 'defaultValue' | 'onChange' | 'size' // 우리가 관리
+  'value' | 'defaultValue' | 'onChange' | 'size'
 >;
 
 type TextareaRest = Omit<
   React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-  'value' | 'defaultValue' | 'onChange' | 'size' // 우리가 관리
+  'value' | 'defaultValue' | 'onChange' | 'size'
 >;
 
 type SingleLineProps = BaseProps & {
@@ -60,8 +60,6 @@ export type TextfieldProps = SingleLineProps | MultiLineProps;
 
 export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement, TextfieldProps>(
   (props, ref) => {
-    const generatedId = useId();
-
     if (props.singleLine) {
       const {
         label,
@@ -84,21 +82,26 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
       const safeValue = (value ?? '') as string;
       const inputWrapperStyles = inputWrapperRecipe({ status, disabled, singleLine: true });
       const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
-      const controlId = id ?? generatedId;
 
       return (
         <div css={[container]} className={className}>
-          {label && (
-            <label htmlFor={controlId} css={labelWrapper}>
-              <span css={labelStyle}>{label}</span>
-              {required && <span css={requiredAsterisk}>*</span>}
-            </label>
-          )}
+          {label &&
+            (id ? (
+              <label htmlFor={id} css={labelWrapper}>
+                <span css={labelStyle}>{label}</span>
+                {required && <span css={requiredAsterisk}>*</span>}
+              </label>
+            ) : (
+              <div css={labelWrapper}>
+                <span css={labelStyle}>{label}</span>
+                {required && <span css={requiredAsterisk}>*</span>}
+              </div>
+            ))}
 
           <div css={inputWrapperStyles}>
             <input
               ref={ref as React.ForwardedRef<HTMLInputElement>}
-              id={controlId}
+              id={id}
               css={inputSingleLine}
               value={safeValue}
               onChange={(e) => onValueChange?.(e.target.value)}
@@ -135,21 +138,26 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
     const safeValue = (value ?? '') as string;
     const inputWrapperStyles = inputWrapperRecipe({ status, disabled, singleLine: false });
     const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
-    const controlId = id ?? generatedId;
 
     return (
       <div css={[container]} className={className}>
-        {label && (
-          <label htmlFor={controlId} css={labelWrapper}>
-            <span css={labelStyle}>{label}</span>
-            {required && <span css={requiredAsterisk}>*</span>}
-          </label>
-        )}
+        {label &&
+          (id ? (
+            <label htmlFor={id} css={labelWrapper}>
+              <span css={labelStyle}>{label}</span>
+              {required && <span css={requiredAsterisk}>*</span>}
+            </label>
+          ) : (
+            <div css={labelWrapper}>
+              <span css={labelStyle}>{label}</span>
+              {required && <span css={requiredAsterisk}>*</span>}
+            </div>
+          ))}
 
         <div css={inputWrapperStyles}>
           <textarea
             ref={ref as React.ForwardedRef<HTMLTextAreaElement>}
-            id={controlId}
+            id={id}
             css={textareaRecipe({ resize })}
             value={safeValue}
             onChange={(e) => onValueChange?.(e.target.value)}

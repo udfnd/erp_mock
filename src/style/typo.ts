@@ -1,4 +1,4 @@
-import { CSSObject } from '@emotion/styled';
+import type { CSSObject } from '@emotion/react';
 
 const baseStyles: CSSObject = {
   lineHeight: '150%',
@@ -12,7 +12,7 @@ export const typoWeights = {
   R: 400,
 } as const;
 
-export const typography: { [key: string]: CSSObject } = {
+export const typography = {
   titleB: { ...baseStyles, fontSize: '32px', fontWeight: typoWeights.B },
   titleM: { ...baseStyles, fontSize: '32px', fontWeight: typoWeights.M },
   titleSmallB: { ...baseStyles, fontSize: '22px', fontWeight: typoWeights.B },
@@ -28,4 +28,6 @@ export const typography: { [key: string]: CSSObject } = {
   bodySmallR: { ...baseStyles, fontSize: '14px', fontWeight: typoWeights.R },
   captionB: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.B },
   captionR: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.R },
-} as const;
+} satisfies Record<string, CSSObject>;
+
+export type TypographyKey = keyof typeof typography; // "titleB" | "titleM" | ...

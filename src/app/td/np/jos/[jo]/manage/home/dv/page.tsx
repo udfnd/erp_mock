@@ -1,15 +1,18 @@
 'use client';
 
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 
 import { useJojikQuery } from '@/domain/jojik/api';
 import { useAuth } from '@/global/auth';
 
-import * as styles from './style';
+import { cssObj } from './style';
 
 type PageParams = {
   jo?: string | string[];
 };
+
+const PLACEHOLDER = 'https://placehold.co/160x160.png';
 
 export default function JojikHomePage() {
   const params = useParams<PageParams>();
@@ -22,10 +25,17 @@ export default function JojikHomePage() {
   });
 
   return (
-    <div css={styles.page}>
-      <section css={styles.header}>
-        <h1 css={styles.title}>다시 오신 것을 환영합니다</h1>
-        <p css={styles.subtitle}>{jojik ? jojik.name : ''}의 새로운 소식을 확인해 보세요.</p>
+    <div css={cssObj.page}>
+      <section css={cssObj.header}>
+        <Image
+          src={PLACEHOLDER}
+          alt={'Profile Photo'}
+          width={160}
+          height={160}
+          css={cssObj.image}
+        />
+        <h1 css={cssObj.title}>다시 오신 것을 환영합니다</h1>
+        <p css={cssObj.subtitle}>{jojik ? jojik.name : ''}의 새로운 소식을 확인해 보세요.</p>
       </section>
     </div>
   );

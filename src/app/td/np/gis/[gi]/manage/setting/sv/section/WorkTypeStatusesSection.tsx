@@ -160,7 +160,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         <div css={cssObj.statusList}>
           <span css={cssObj.categoryLabel}>재직상태</span>
           {statuses.map((status, statusIndex) => (
-            <form.Field key={status.localId} name={`statuses.${statusIndex}.name`}>
+            <form.Field key={status.localId} name={`statuses[${statusIndex}].name`}>
               {(field) => {
                 const value = String(field.state.value ?? '');
                 return (
@@ -205,9 +205,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
           size="small"
           styleType="solid"
           variant="primary"
-          disabled={
-            !isDirty || workTypeHasEmptyStatus || workTypeIsSaving || statuses.length === 0
-          }
+          disabled={!isDirty || workTypeHasEmptyStatus || workTypeIsSaving || statuses.length === 0}
           onClick={handleSaveWorkTypeStatuses}
         >
           {workTypeIsSaving ? '저장 중...' : '저장'}
