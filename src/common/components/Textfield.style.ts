@@ -7,7 +7,6 @@ export const container = css({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
-  gap: spacing.sm,
   width: '343px',
 });
 
@@ -15,6 +14,7 @@ export const labelWrapper = css({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'flex-start',
+  marginBottom: '4px',
   gap: spacing.xs,
   width: '100%',
 });
@@ -36,6 +36,7 @@ const inputWrapperBase = css({
   alignItems: 'flex-start',
   gap: 10,
   padding: `${spacing.md} ${spacing.base}`,
+  marginBottom: '2px',
   width: '100%',
   background: color.white,
   borderRadius: radius.md,
@@ -95,7 +96,7 @@ export const inputWrapperRecipe = ({
     inputWrapperBase,
     inputWrapperStatusStyles[status],
     disabled ? inputWrapperDisabledStyles.disabled : inputWrapperDisabledStyles.enabled,
-    singleLine && inputWrapperSingleLineBase, // ★ singleLine 보정
+    singleLine && inputWrapperSingleLineBase,
   ];
 };
 

@@ -2,10 +2,12 @@
 
 import { useParams } from 'next/navigation';
 
-import * as styles from './style';
-import { BasicInformationSection } from './sections/BasicInformationSection';
-import { EmploymentCategoriesSection } from './sections/EmploymentCategoriesSection';
-import { WorkTypeStatusesSection } from './sections/WorkTypeStatusesSection';
+import { cssObj } from './style';
+import {
+  BasicInformationSection,
+  EmploymentCategoriesSection,
+  WorkTypeStatusesSection,
+} from './section';
 
 export default function GigwanSettingServicePage() {
   const { gi } = useParams<{ gi: string }>();
@@ -14,7 +16,7 @@ export default function GigwanSettingServicePage() {
   if (!gigwanNanoId) return null;
 
   return (
-    <div css={styles.page}>
+    <div css={cssObj.page}>
       <BasicInformationSection gigwanNanoId={gigwanNanoId} />
       <EmploymentCategoriesSection gigwanNanoId={gigwanNanoId} />
       <WorkTypeStatusesSection gigwanNanoId={gigwanNanoId} />

@@ -10,7 +10,7 @@ import {
   useWorkTypeCustomSangtaesQuery,
 } from '@/domain/gigwan/api';
 
-import * as styles from '../style';
+import { cssObj } from '../style';
 import { createLocalId } from './local-id';
 import { FeedbackState } from './types';
 
@@ -68,10 +68,10 @@ const workTypeReducer = (state: WorkTypeState, action: WorkTypeAction): WorkType
 export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectionProps) {
   const queryClient = useQueryClient();
 
-  const {
-    data: workTypeStatusesData,
-    error: workTypeError,
-  } = useWorkTypeCustomSangtaesQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
+  const { data: workTypeStatusesData, error: workTypeError } = useWorkTypeCustomSangtaesQuery(
+    gigwanNanoId,
+    { enabled: Boolean(gigwanNanoId) },
+  );
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
 
   const [workTypeState, dispatchWorkType] = useReducer(workTypeReducer, {
@@ -183,22 +183,20 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
   const workTypeIsSaving = upsertWorkTypeStatusesMutation.isPending;
 
   return (
-    <section css={styles.card}>
-      <div css={styles.cardHeader}>
-        <div css={styles.cardTitleGroup}>
-          <h2 css={styles.cardTitle}>근무 형태 커스텀 상태</h2>
-          <p css={styles.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
+    <section css={cssObj.card}>
+      <div css={cssObj.cardHeader}>
+        <div css={cssObj.cardTitleGroup}>
+          <h2 css={cssObj.cardTitle}>근무 형태 커스텀 상태</h2>
+          <p css={cssObj.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
         </div>
       </div>
 
-      <div css={styles.cardBody}>
-        {workTypeError ? (
-          <p css={styles.errorText}>근무 형태 상태를 불러오지 못했습니다.</p>
-        ) : null}
-        <div css={styles.statusList}>
-          <span css={styles.categoryLabel}>재직상태</span>
+      <div css={cssObj.cardBody}>
+        {workTypeError ? <p css={cssObj.errorText}>근무 형태 상태를 불러오지 못했습니다.</p> : null}
+        <div css={cssObj.statusList}>
+          <span css={cssObj.categoryLabel}>재직상태</span>
           {workTypeState.statuses.map((status) => (
-            <div key={status.localId} css={styles.statusItem}>
+            <div key={status.localId} css={cssObj.statusItem}>
               <LabeledInput
                 placeholder="근무 형태 상태 이름"
                 value={status.name}
@@ -226,9 +224,9 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
           추가
         </Button>
       </div>
-      <footer css={styles.cardFooter}>
+      <footer css={cssObj.cardFooter}>
         {workTypeState.feedback ? (
-          <span css={styles.feedback[workTypeState.feedback.type]}>
+          <span css={cssObj.feedback[workTypeState.feedback.type]}>
             {workTypeState.feedback.message}
           </span>
         ) : null}

@@ -46,59 +46,13 @@ export const GigwanGetSchema = z.object({
 export type GigwanGet = z.infer<typeof GigwanGetSchema>;
 
 export const UpdateGigwanRequestSchema = z.object({
-  name: z.string().optional(),
-  intro: z.string().optional(),
-  logoImageNanoId: z.string().optional(),
+  name: z.string().trim().max(30).optional(),
+  intro: z.string().trim().max(100).optional(),
 });
 export type UpdateGigwanRequest = z.infer<typeof UpdateGigwanRequestSchema>;
 
-export const UpdateGigwanResponseSchema = z.object({
-  name: z.string(),
-  nanoId: z.string(),
-  intro: z.string().nullable(),
-  juso: z
-    .object({
-      nanoId: z.string(),
-      name: z.string(),
-      juso: z.string(),
-      jusoDetail: z.string(),
-    })
-    .nullable(),
-});
+export const UpdateGigwanResponseSchema = GigwanBasicGetSchema;
 export type UpdateGigwanResponse = z.infer<typeof UpdateGigwanResponseSchema>;
-
-export const UpsertGigwanAddressRequestSchema = z.object({
-  address: z.string(),
-});
-export type UpsertGigwanAddressRequest = z.infer<typeof UpsertGigwanAddressRequestSchema>;
-
-export const UpsertGigwanAddressResponseSchema = z.object({
-  address: z.string(),
-  nanoId: z.string(),
-});
-export type UpsertGigwanAddressResponse = z.infer<typeof UpsertGigwanAddressResponseSchema>;
-
-export const UpdateGigwanIntroRequestSchema = z.object({
-  intro: z.string(),
-});
-export type UpdateGigwanIntroRequest = z.infer<typeof UpdateGigwanIntroRequestSchema>;
-
-export const UpdateGigwanIntroResponseSchema = z.object({
-  intro: z.string(),
-  nanoId: z.string(),
-});
-export type UpdateGigwanIntroResponse = z.infer<typeof UpdateGigwanIntroResponseSchema>;
-
-export const UpdateGigwanNameRequestSchema = z.object({
-  name: z.string(),
-});
-export type UpdateGigwanNameRequest = z.infer<typeof UpdateGigwanNameRequestSchema>;
-
-export const UpdateGigwanNameResponseSchema = z.object({
-  name: z.string(),
-  nanoId: z.string(),
-});
-export type UpdateGigwanNameResponse = z.infer<typeof UpdateGigwanNameResponseSchema>;
 
 export const EmploymentSangtaeSchema = z.object({
   nanoId: z.string(),

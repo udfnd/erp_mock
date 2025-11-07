@@ -12,18 +12,6 @@ import {
   UpdateGigwanRequestSchema,
   UpdateGigwanResponse,
   UpdateGigwanResponseSchema,
-  UpsertGigwanAddressRequest,
-  UpsertGigwanAddressRequestSchema,
-  UpsertGigwanAddressResponse,
-  UpsertGigwanAddressResponseSchema,
-  UpdateGigwanIntroRequest,
-  UpdateGigwanIntroRequestSchema,
-  UpdateGigwanIntroResponse,
-  UpdateGigwanIntroResponseSchema,
-  UpdateGigwanNameRequest,
-  UpdateGigwanNameRequestSchema,
-  UpdateGigwanNameResponse,
-  UpdateGigwanNameResponseSchema,
   GetEmploymentCategoriesResponse,
   GetEmploymentCategoriesResponseSchema,
   UpsertEmploymentCategoriesRequest,
@@ -74,6 +62,7 @@ export const useGigwanQuery = (nanoId: string, options?: { enabled?: boolean }) 
     queryKey: ['gigwan', nanoId] as const,
     queryFn: () => getGigwan(nanoId),
     enabled: options?.enabled ?? true,
+    refetchOnWindowFocus: false,
   });
 
 export const updateGigwan = async (
@@ -88,48 +77,6 @@ export const updateGigwan = async (
 export const useUpdateGigwanMutation = (nanoId: string) =>
   useMutation<UpdateGigwanResponse, unknown, UpdateGigwanRequest>({
     mutationFn: (d) => updateGigwan(nanoId, d),
-  });
-
-export const upsertGigwanAddress = async (
-  nanoId: string,
-  data: UpsertGigwanAddressRequest,
-): Promise<UpsertGigwanAddressResponse> => {
-  const body = UpsertGigwanAddressRequestSchema.parse(data);
-  const res = await apiClient.post(`/T/dl/gigwans/${nanoId}/address`, body);
-  return parseOrThrow(UpsertGigwanAddressResponseSchema, res.data);
-};
-
-export const updateGigwanIntro = async (
-  nanoId: string,
-  data: UpdateGigwanIntroRequest,
-): Promise<UpdateGigwanIntroResponse> => {
-  const body = UpdateGigwanIntroRequestSchema.parse(data);
-  const res = await apiClient.put(`/T/dl/gigwans/${nanoId}/intro`, body);
-  return parseOrThrow(UpdateGigwanIntroResponseSchema, res.data);
-};
-
-export const updateGigwanName = async (
-  nanoId: string,
-  data: UpdateGigwanNameRequest,
-): Promise<UpdateGigwanNameResponse> => {
-  const body = UpdateGigwanNameRequestSchema.parse(data);
-  const res = await apiClient.put(`/T/dl/gigwans/${nanoId}/name`, body);
-  return parseOrThrow(UpdateGigwanNameResponseSchema, res.data);
-};
-
-export const useUpsertGigwanAddressMutation = (nanoId: string) =>
-  useMutation<UpsertGigwanAddressResponse, unknown, UpsertGigwanAddressRequest>({
-    mutationFn: (d) => upsertGigwanAddress(nanoId, d),
-  });
-
-export const useUpdateGigwanIntroMutation = (nanoId: string) =>
-  useMutation<UpdateGigwanIntroResponse, unknown, UpdateGigwanIntroRequest>({
-    mutationFn: (d) => updateGigwanIntro(nanoId, d),
-  });
-
-export const useUpdateGigwanNameMutation = (nanoId: string) =>
-  useMutation<UpdateGigwanNameResponse, unknown, UpdateGigwanNameRequest>({
-    mutationFn: (d) => updateGigwanName(nanoId, d),
   });
 
 export const getEmploymentCategories = async (

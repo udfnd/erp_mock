@@ -10,7 +10,7 @@ import {
   useUpsertEmploymentCategoriesMutation,
 } from '@/domain/gigwan/api';
 
-import * as styles from '../style';
+import { cssObj } from '../style';
 import { createLocalId } from './local-id';
 import { FeedbackState } from './types';
 
@@ -100,10 +100,10 @@ const employmentReducer = (state: EmploymentState, action: EmploymentAction): Em
 export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategoriesSectionProps) {
   const queryClient = useQueryClient();
 
-  const {
-    data: employmentCategoriesData,
-    error: employmentError,
-  } = useEmploymentCategoriesQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
+  const { data: employmentCategoriesData, error: employmentError } = useEmploymentCategoriesQuery(
+    gigwanNanoId,
+    { enabled: Boolean(gigwanNanoId) },
+  );
   const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
 
   const [employmentState, dispatchEmployment] = useReducer(employmentReducer, {
@@ -262,30 +262,30 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
   const employmentIsSaving = upsertEmploymentCategoriesMutation.isPending;
 
   return (
-    <section css={styles.card}>
-      <div css={styles.cardHeader}>
-        <div css={styles.cardTitleGroup}>
-          <h2 css={styles.cardTitle}>사용자 재직 카테고리 상태</h2>
-          <p css={styles.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
+    <section css={cssObj.card}>
+      <div css={cssObj.cardHeader}>
+        <div css={cssObj.cardTitleGroup}>
+          <h2 css={cssObj.cardTitle}>사용자 재직 카테고리 상태</h2>
+          <p css={cssObj.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
         </div>
       </div>
 
-      <div css={styles.cardBody}>
+      <div css={cssObj.cardBody}>
         {employmentError ? (
-          <p css={styles.errorText}>재직 카테고리 정보를 불러오지 못했습니다.</p>
+          <p css={cssObj.errorText}>재직 카테고리 정보를 불러오지 못했습니다.</p>
         ) : null}
         {employmentState.categories.map((category) => (
-          <div key={category.nanoId} css={styles.categorySection}>
-            <span css={styles.categoryLabel}>{category.name}</span>
+          <div key={category.nanoId} css={cssObj.categorySection}>
+            <span css={cssObj.categoryLabel}>{category.name}</span>
 
-            <div css={styles.statusList}>
+            <div css={cssObj.statusList}>
               {category.statuses.map((status) => {
                 const isEditing = Boolean(employmentEditing[status.localId]);
                 return (
-                  <div key={status.localId} css={styles.statusField} role="group">
+                  <div key={status.localId} css={cssObj.statusField} role="group">
                     {isEditing ? (
                       <input
-                        css={styles.statusInputField}
+                        css={cssObj.statusInputField}
                         value={status.name}
                         onChange={(event) =>
                           handleEmploymentStatusChange(
@@ -299,10 +299,10 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                         autoFocus
                       />
                     ) : (
-                      <span css={styles.statusValue}>{status.name?.trim() || '새 상태'}</span>
+                      <span css={cssObj.statusValue}>{status.name?.trim() || '새 상태'}</span>
                     )}
 
-                    <div css={styles.statusActions}>
+                    <div css={cssObj.statusActions}>
                       <IconButton
                         styleType="normal"
                         size="small"
@@ -315,7 +315,9 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                       <IconButton
                         styleType="normal"
                         size="small"
-                        onClick={() => handleRemoveEmploymentStatus(category.nanoId, status.localId)}
+                        onClick={() =>
+                          handleRemoveEmploymentStatus(category.nanoId, status.localId)
+                        }
                         aria-label={`${status.name || '상태'} 삭제`}
                         title="삭제"
                       >
@@ -338,9 +340,9 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
           </div>
         ))}
       </div>
-      <footer css={styles.cardFooter}>
+      <footer css={cssObj.cardFooter}>
         {employmentState.feedback ? (
-          <span css={styles.feedback[employmentState.feedback.type]}>
+          <span css={cssObj.feedback[employmentState.feedback.type]}>
             {employmentState.feedback.message}
           </span>
         ) : null}
