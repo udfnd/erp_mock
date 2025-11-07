@@ -101,7 +101,58 @@ function EmploymentCategoriesCard({
   );
 
   // 폼은 이 컴포넌트가 마운트될 때 한 번 생성됨
-  const form = useForm({ defaultValues: initialValues });
+  const form = useForm<FormValues>({
+    defaultValues: initialValues,
+    onSubmit: async ({ value, formApi }) => {
+      const categoriesPayload = (value.categories ?? []).map((category) => {
+        const seen = new Set<string>();
+        const sangtaes: Array<
+          | { name: string; isHwalseong: boolean }
+          | { nanoId: string; name: string; isHwalseong: boolean }
+        > = [];
+
+        for (const status of category.statuses) {
+          const name = status.name.trim();
+          if (!name) continue;
+
+          if (status.nanoId && !status.nanoId.startsWith('local-')) {
+            if (seen.has(status.nanoId)) continue;
+            seen.add(status.nanoId);
+            sangtaes.push({ nanoId: status.nanoId, name, isHwalseong: status.isHwalseong });
+          } else {
+            sangtaes.push({ name, isHwalseong: status.isHwalseong });
+          }
+        }
+
+        return { nanoId: category.nanoId, sangtaes };
+      });
+
+      try {
+        const saved = await upsertEmploymentCategoriesMutation.mutateAsync({
+          categories: categoriesPayload,
+        });
+
+        formApi.reset({
+          categories: saved.categories.map((category) => ({
+            nanoId: category.nanoId,
+            name: category.name,
+            statuses: category.sangtaes.map((s) => ({
+              nanoId: s.nanoId,
+              name: s.name,
+              localId: s.nanoId,
+              isHwalseong: s.isHwalseong,
+            })),
+          })),
+        });
+
+        setEmploymentEditing({});
+        setFeedback({ type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' });
+        await queryClient.invalidateQueries({ queryKey: ['employmentCategories', gigwanNanoId] });
+      } catch {
+        setFeedback({ type: 'error', message: '재직 카테고리 상태 저장에 실패했습니다.' });
+      }
+    },
+  });
 
   // 루트 값 구독(루트에서 push/remove 안 쓰므로 store 구독이 가장 안전)
   const { values, isDirty } = useStore(form.store, (state) => ({
@@ -126,63 +177,9 @@ function EmploymentCategoriesCard({
 
   const handleSaveEmploymentCategories = useCallback(async () => {
     if (!isDirty || employmentHasEmptyStatus) return;
-
-    const categoriesPayload = (categories ?? []).map((category) => {
-      const seen = new Set<string>();
-      const sangtaes: Array<
-        | { name: string; isHwalseong: boolean }
-        | { nanoId: string; name: string; isHwalseong: boolean }
-      > = [];
-
-      for (const status of category.statuses) {
-        const name = status.name.trim();
-        if (!name) continue;
-
-        if (status.nanoId && !status.nanoId.startsWith('local-')) {
-          if (seen.has(status.nanoId)) continue;
-          seen.add(status.nanoId);
-          sangtaes.push({ nanoId: status.nanoId, name, isHwalseong: status.isHwalseong });
-        } else {
-          sangtaes.push({ name, isHwalseong: status.isHwalseong });
-        }
-      }
-
-      return { nanoId: category.nanoId, sangtaes };
-    });
-
-    try {
-      const saved = await upsertEmploymentCategoriesMutation.mutateAsync({
-        categories: categoriesPayload,
-      });
-
-      form.reset({
-        categories: saved.categories.map((category) => ({
-          nanoId: category.nanoId,
-          name: category.name,
-          statuses: category.sangtaes.map((s) => ({
-            nanoId: s.nanoId,
-            name: s.name,
-            localId: s.nanoId,
-            isHwalseong: s.isHwalseong,
-          })),
-        })),
-      });
-
-      setEmploymentEditing({});
-      setFeedback({ type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' });
-      await queryClient.invalidateQueries({ queryKey: ['employmentCategories', gigwanNanoId] });
-    } catch {
-      setFeedback({ type: 'error', message: '재직 카테고리 상태 저장에 실패했습니다.' });
-    }
-  }, [
-    categories,
-    isDirty,
-    employmentHasEmptyStatus,
-    upsertEmploymentCategoriesMutation,
-    form,
-    queryClient,
-    gigwanNanoId,
-  ]);
+    setFeedback(null);
+    await form.handleSubmit();
+  }, [employmentHasEmptyStatus, form, isDirty]);
 
   const employmentIsSaving = upsertEmploymentCategoriesMutation.isPending;
 

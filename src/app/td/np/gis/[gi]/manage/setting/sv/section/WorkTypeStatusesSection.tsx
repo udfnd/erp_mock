@@ -41,6 +41,44 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
 
   const form = useForm<WorkTypeFormValues>({
     defaultValues: { statuses: [] },
+    onSubmit: async ({ value, formApi }) => {
+      const seen = new Set<string>();
+      const sangtaes: Array<
+        | { name: string; isHwalseong: boolean }
+        | { nanoId: string; name: string; isHwalseong: boolean }
+      > = [];
+
+      for (const status of value.statuses ?? []) {
+        const name = status.name.trim();
+        if (!name) continue;
+
+        if (status.nanoId && !status.nanoId.startsWith('local-')) {
+          if (seen.has(status.nanoId)) continue;
+          seen.add(status.nanoId);
+          sangtaes.push({ nanoId: status.nanoId, name, isHwalseong: status.isHwalseong });
+        } else {
+          sangtaes.push({ name, isHwalseong: status.isHwalseong });
+        }
+      }
+
+      try {
+        const data = await upsertWorkTypeStatusesMutation.mutateAsync({ sangtaes });
+        formApi.reset({
+          statuses: data.sangtaes.map((status) => ({
+            nanoId: status.nanoId,
+            name: status.name,
+            localId: status.nanoId,
+            isHwalseong: status.isHwalseong,
+          })),
+        });
+        setFeedback({ type: 'success', message: '근무 형태 커스텀 상태가 저장되었습니다.' });
+        await queryClient.invalidateQueries({
+          queryKey: ['workTypeCustomSangtaes', gigwanNanoId],
+        });
+      } catch {
+        setFeedback({ type: 'error', message: '근무 형태 상태 저장에 실패했습니다.' });
+      }
+    },
   });
 
   const { values, isDirty } = useStore(form.store, (state) => ({
@@ -90,59 +128,9 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
 
   const handleSaveWorkTypeStatuses = useCallback(async () => {
     if (!isDirty || workTypeHasEmptyStatus) return;
-
-    const seen = new Set<string>();
-    const sangtaes: Array<
-      | { name: string; isHwalseong: boolean }
-      | { nanoId: string; name: string; isHwalseong: boolean }
-    > = [];
-
-    for (const status of statuses) {
-      const name = status.name.trim();
-      if (!name) continue;
-
-      if (status.nanoId && !status.nanoId.startsWith('local-')) {
-        if (seen.has(status.nanoId)) continue;
-        seen.add(status.nanoId);
-        sangtaes.push({
-          nanoId: status.nanoId,
-          name,
-          isHwalseong: status.isHwalseong,
-        });
-      } else {
-        sangtaes.push({
-          name,
-          isHwalseong: status.isHwalseong,
-        });
-      }
-    }
-
-    try {
-      const data = await upsertWorkTypeStatusesMutation.mutateAsync({ sangtaes });
-      form.reset({
-        statuses: data.sangtaes.map((status) => ({
-          nanoId: status.nanoId,
-          name: status.name,
-          localId: status.nanoId,
-          isHwalseong: status.isHwalseong,
-        })),
-      });
-      setFeedback({ type: 'success', message: '근무 형태 커스텀 상태가 저장되었습니다.' });
-      await queryClient.invalidateQueries({
-        queryKey: ['workTypeCustomSangtaes', gigwanNanoId],
-      });
-    } catch {
-      setFeedback({ type: 'error', message: '근무 형태 상태 저장에 실패했습니다.' });
-    }
-  }, [
-    form,
-    gigwanNanoId,
-    isDirty,
-    queryClient,
-    statuses,
-    upsertWorkTypeStatusesMutation,
-    workTypeHasEmptyStatus,
-  ]);
+    setFeedback(null);
+    await form.handleSubmit();
+  }, [form, isDirty, workTypeHasEmptyStatus]);
 
   const workTypeIsSaving = upsertWorkTypeStatusesMutation.isPending;
 

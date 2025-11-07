@@ -27,20 +27,41 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
     [gigwan?.name, gigwan?.intro],
   );
 
-  const form = useForm({ defaultValues: defaults });
+  const form = useForm<Defaults>({
+    defaultValues: defaults,
+    onSubmit: async ({ value, formApi }) => {
+      const nameTrim = value.name.trim();
+      const introTrim = value.intro.trim();
+
+      const payload: { name?: string; intro?: string } = {};
+      if (nameTrim !== defaults.name) payload.name = nameTrim;
+      if (introTrim !== defaults.intro) payload.intro = introTrim;
+      if (Object.keys(payload).length === 0) return;
+
+      try {
+        await updateMutation.mutateAsync(payload);
+        setFeedback({ type: 'success', message: '변경사항이 저장되었습니다.' });
+        formApi.reset({ name: nameTrim, intro: introTrim });
+        await invalidate();
+      } catch {
+        setFeedback({ type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' });
+      }
+    },
+  });
 
   useEffect(() => {
     form.reset(defaults);
   }, [form, defaults]);
 
-  const { isDirty, nameMeta, introMeta } = useStore(form.store, (s) => ({
+  const { isDirty, nameMeta, introMeta, canSubmit } = useStore(form.store, (s) => ({
     isDirty: s.isDirty,
     nameMeta: s.fieldMeta?.['name'] ?? { errors: [] as string[] },
     introMeta: s.fieldMeta?.['intro'] ?? { errors: [] as string[] },
+    canSubmit: s.canSubmit,
   }));
 
   const hasErrors = (nameMeta.errors?.length ?? 0) > 0 || (introMeta.errors?.length ?? 0) > 0;
-  const canSave = isDirty && !hasErrors && !updateMutation.isPending;
+  const canSave = isDirty && canSubmit && !hasErrors && !updateMutation.isPending;
 
   const invalidate = useCallback(async () => {
     await Promise.all([
@@ -50,33 +71,11 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
   }, [gigwanNanoId, queryClient]);
 
   const handleSave = useCallback(async () => {
-    await Promise.all([
-      form.validateField('name', 'submit'),
-      form.validateField('intro', 'submit'),
-    ]);
-
-    const nameErrors = form.getFieldMeta('name')?.errors?.length ?? 0;
-    const introErrors = form.getFieldMeta('intro')?.errors?.length ?? 0;
-    if (nameErrors || introErrors) return;
-
-    const curr = form.state.values;
-    const nameTrim = String(curr.name ?? '').trim();
-    const introTrim = String(curr.intro ?? '').trim();
-
-    const payload: { name?: string; intro?: string } = {};
-    if (nameTrim !== defaults.name) payload.name = nameTrim;
-    if (introTrim !== defaults.intro) payload.intro = introTrim;
-    if (Object.keys(payload).length === 0) return;
-
-    try {
-      await updateMutation.mutateAsync(payload);
-      setFeedback({ type: 'success', message: '변경사항이 저장되었습니다.' });
-      form.reset(form.state.values);
-      await invalidate();
-    } catch {
-      setFeedback({ type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' });
-    }
-  }, [form, updateMutation, invalidate, defaults.name, defaults.intro]);
+    setFeedback(null);
+    await form.validateField('name', 'submit');
+    await form.validateField('intro', 'submit');
+    await form.handleSubmit();
+  }, [form]);
 
   return (
     <section css={cssObj.card}>
