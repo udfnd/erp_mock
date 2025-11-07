@@ -1,7 +1,8 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { startTransition, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useForm, useStore } from '@tanstack/react-form';
 
 import { Button, IconButton } from '@/common/components';
 import { Delete, Edit, Plus } from '@/common/icons';
@@ -31,70 +32,8 @@ type EmploymentCategoryForm = {
   statuses: EmploymentStatusForm[];
 };
 
-type EmploymentState = {
+type EmploymentFormValues = {
   categories: EmploymentCategoryForm[];
-  dirty: boolean;
-  feedback: FeedbackState;
-};
-
-type EmploymentAction =
-  | { type: 'reset'; payload: EmploymentCategoryForm[] }
-  | { type: 'change-status'; categoryId: string; statusLocalId: string; value: string }
-  | { type: 'add-status'; categoryId: string; status: EmploymentStatusForm }
-  | { type: 'remove-status'; categoryId: string; statusLocalId: string }
-  | { type: 'feedback'; payload: FeedbackState };
-
-const employmentReducer = (state: EmploymentState, action: EmploymentAction): EmploymentState => {
-  switch (action.type) {
-    case 'reset':
-      return { categories: action.payload, dirty: false, feedback: null };
-    case 'change-status':
-      return {
-        categories: state.categories.map((category) =>
-          category.nanoId === action.categoryId
-            ? {
-                ...category,
-                statuses: category.statuses.map((status) =>
-                  status.localId === action.statusLocalId
-                    ? { ...status, name: action.value }
-                    : status,
-                ),
-              }
-            : category,
-        ),
-        dirty: true,
-        feedback: null,
-      };
-    case 'add-status':
-      return {
-        categories: state.categories.map((category) =>
-          category.nanoId === action.categoryId
-            ? { ...category, statuses: [...category.statuses, action.status] }
-            : category,
-        ),
-        dirty: true,
-        feedback: null,
-      };
-    case 'remove-status':
-      return {
-        categories: state.categories.map((category) =>
-          category.nanoId === action.categoryId
-            ? {
-                ...category,
-                statuses: category.statuses.filter(
-                  (status) => status.localId !== action.statusLocalId,
-                ),
-              }
-            : category,
-        ),
-        dirty: true,
-        feedback: null,
-      };
-    case 'feedback':
-      return { ...state, feedback: action.payload };
-    default:
-      return state;
-  }
 };
 
 export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategoriesSectionProps) {
@@ -106,20 +45,24 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
   );
   const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
 
-  const [employmentState, dispatchEmployment] = useReducer(employmentReducer, {
-    categories: [],
-    dirty: false,
-    feedback: null,
+  const form = useForm<EmploymentFormValues>({
+    defaultValues: { categories: [] },
   });
 
+  const { values, isDirty } = useStore(form.store, (state) => ({
+    values: state.values,
+    isDirty: state.isDirty,
+  }));
+  const categories = values.categories ?? [];
+
+  const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [employmentEditing, setEmploymentEditing] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!employmentCategoriesData) return;
 
-    dispatchEmployment({
-      type: 'reset',
-      payload: employmentCategoriesData.categories.map((category) => ({
+    form.reset({
+      categories: employmentCategoriesData.categories.map((category) => ({
         nanoId: category.nanoId,
         name: category.name,
         statuses: category.sangtaes.map((status) => ({
@@ -130,65 +73,55 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         })),
       })),
     });
+    setEmploymentEditing({});
+    setFeedback(null);
+  }, [employmentCategoriesData, form]);
 
-    startTransition(() => {
-      setEmploymentEditing({});
-    });
-  }, [employmentCategoriesData]);
-
-  const handleEmploymentStatusChange = useCallback(
-    (categoryNanoId: string, statusLocalId: string, value: string) => {
-      dispatchEmployment({
-        type: 'change-status',
-        categoryId: categoryNanoId,
-        statusLocalId,
-        value,
+  const handleAddEmploymentStatus = useCallback(
+    (categoryIndex: number) => {
+      const local = createLocalId();
+      form.pushFieldValue(`categories.${categoryIndex}.statuses`, {
+        nanoId: null,
+        name: '',
+        localId: local,
+        isHwalseong: true,
       });
+      setEmploymentEditing((prev) => ({ ...prev, [local]: true }));
+      setFeedback(null);
     },
-    [],
+    [form],
   );
 
-  const handleAddEmploymentStatus = useCallback((categoryNanoId: string) => {
-    const local = createLocalId();
-    const newStatus: EmploymentStatusForm = {
-      nanoId: null,
-      name: '',
-      localId: local,
-      isHwalseong: true,
-    };
-
-    dispatchEmployment({ type: 'add-status', categoryId: categoryNanoId, status: newStatus });
-    setEmploymentEditing((prev) => ({ ...prev, [local]: true }));
-  }, []);
-
   const handleRemoveEmploymentStatus = useCallback(
-    (categoryNanoId: string, statusLocalId: string) => {
-      dispatchEmployment({ type: 'remove-status', categoryId: categoryNanoId, statusLocalId });
+    (categoryIndex: number, statusIndex: number, statusLocalId: string) => {
+      void form.removeFieldValue(`categories.${categoryIndex}.statuses`, statusIndex);
       setEmploymentEditing((prev) => {
         const next = { ...prev };
         delete next[statusLocalId];
         return next;
       });
+      setFeedback(null);
     },
-    [],
+    [form],
   );
 
   const toggleEditEmploymentStatus = useCallback((statusLocalId: string) => {
     setEmploymentEditing((prev) => ({ ...prev, [statusLocalId]: !prev[statusLocalId] }));
+    setFeedback(null);
   }, []);
 
   const employmentHasEmptyStatus = useMemo(
     () =>
-      employmentState.categories.some((category) =>
+      categories.some((category) =>
         category.statuses.some((status) => status.name.trim().length === 0),
       ),
-    [employmentState.categories],
+    [categories],
   );
 
-  const handleSaveEmploymentCategories = useCallback(() => {
-    if (!employmentState.dirty || employmentHasEmptyStatus) return;
+  const handleSaveEmploymentCategories = useCallback(async () => {
+    if (!isDirty || employmentHasEmptyStatus) return;
 
-    const categoriesPayload = employmentState.categories.map((category) => {
+    const categoriesPayload = categories.map((category) => {
       const seen = new Set<string>();
       const sangtaes: Array<
         | { name: string; isHwalseong: boolean }
@@ -218,43 +151,37 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
       return { nanoId: category.nanoId, sangtaes };
     });
 
-    upsertEmploymentCategoriesMutation.mutate(
-      { categories: categoriesPayload },
-      {
-        onSuccess: (data) => {
-          dispatchEmployment({
-            type: 'reset',
-            payload: data.categories.map((category) => ({
-              nanoId: category.nanoId,
-              name: category.name,
-              statuses: category.sangtaes.map((status) => ({
-                nanoId: status.nanoId,
-                name: status.name,
-                localId: status.nanoId,
-                isHwalseong: status.isHwalseong,
-              })),
-            })),
-          });
-          setEmploymentEditing({});
-          dispatchEmployment({
-            type: 'feedback',
-            payload: { type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' },
-          });
-          queryClient.invalidateQueries({ queryKey: ['employmentCategories', gigwanNanoId] });
-        },
-        onError: () => {
-          dispatchEmployment({
-            type: 'feedback',
-            payload: { type: 'error', message: '재직 카테고리 상태 저장에 실패했습니다.' },
-          });
-        },
-      },
-    );
+    try {
+      const data = await upsertEmploymentCategoriesMutation.mutateAsync({
+        categories: categoriesPayload,
+      });
+
+      form.reset({
+        categories: data.categories.map((category) => ({
+          nanoId: category.nanoId,
+          name: category.name,
+          statuses: category.sangtaes.map((status) => ({
+            nanoId: status.nanoId,
+            name: status.name,
+            localId: status.nanoId,
+            isHwalseong: status.isHwalseong,
+          })),
+        })),
+      });
+      setEmploymentEditing({});
+      setFeedback({ type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' });
+      await queryClient.invalidateQueries({
+        queryKey: ['employmentCategories', gigwanNanoId],
+      });
+    } catch {
+      setFeedback({ type: 'error', message: '재직 카테고리 상태 저장에 실패했습니다.' });
+    }
   }, [
+    categories,
     employmentHasEmptyStatus,
-    employmentState.categories,
-    employmentState.dirty,
+    form,
     gigwanNanoId,
+    isDirty,
     queryClient,
     upsertEmploymentCategoriesMutation,
   ]);
@@ -274,65 +201,71 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         {employmentError ? (
           <p css={cssObj.errorText}>재직 카테고리 정보를 불러오지 못했습니다.</p>
         ) : null}
-        {employmentState.categories.map((category) => (
+        {categories.map((category, categoryIndex) => (
           <div key={category.nanoId} css={cssObj.categorySection}>
             <span css={cssObj.categoryLabel}>{category.name}</span>
 
             <div css={cssObj.statusList}>
-              {category.statuses.map((status) => {
-                const isEditing = Boolean(employmentEditing[status.localId]);
-                return (
-                  <div key={status.localId} css={cssObj.statusField} role="group">
-                    {isEditing ? (
-                      <input
-                        css={cssObj.statusInputField}
-                        value={status.name}
-                        onChange={(event) =>
-                          handleEmploymentStatusChange(
-                            category.nanoId,
-                            status.localId,
-                            event.target.value,
-                          )
-                        }
-                        placeholder="상태 이름"
-                        maxLength={20}
-                        autoFocus
-                      />
-                    ) : (
-                      <span css={cssObj.statusValue}>{status.name?.trim() || '새 상태'}</span>
-                    )}
+              {category.statuses.map((status, statusIndex) => (
+                <form.Field
+                  key={status.localId}
+                  name={`categories.${categoryIndex}.statuses.${statusIndex}.name`}
+                >
+                  {(field) => {
+                    const isEditing = Boolean(employmentEditing[status.localId]);
+                    const value = String(field.state.value ?? '');
+                    return (
+                      <div css={cssObj.statusField} role="group">
+                        {isEditing ? (
+                          <input
+                            css={cssObj.statusInputField}
+                            value={value}
+                            onChange={(event) => {
+                              setFeedback(null);
+                              field.handleChange(event.target.value);
+                            }}
+                            onBlur={field.handleBlur}
+                            placeholder="상태 이름"
+                            maxLength={20}
+                            autoFocus
+                          />
+                        ) : (
+                          <span css={cssObj.statusValue}>{value.trim() || '새 상태'}</span>
+                        )}
 
-                    <div css={cssObj.statusActions}>
-                      <IconButton
-                        styleType="normal"
-                        size="small"
-                        onClick={() => toggleEditEmploymentStatus(status.localId)}
-                        aria-label={`${status.name || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
-                        title={isEditing ? '편집 종료' : '수정'}
-                      >
-                        <Edit width={16} height={16} />
-                      </IconButton>
-                      <IconButton
-                        styleType="normal"
-                        size="small"
-                        onClick={() =>
-                          handleRemoveEmploymentStatus(category.nanoId, status.localId)
-                        }
-                        aria-label={`${status.name || '상태'} 삭제`}
-                        title="삭제"
-                      >
-                        <Delete width={16} height={16} />
-                      </IconButton>
-                    </div>
-                  </div>
-                );
-              })}
+                        <div css={cssObj.statusActions}>
+                          <IconButton
+                            styleType="normal"
+                            size="small"
+                            onClick={() => toggleEditEmploymentStatus(status.localId)}
+                            aria-label={`${value || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
+                            title={isEditing ? '편집 종료' : '수정'}
+                          >
+                            <Edit width={16} height={16} />
+                          </IconButton>
+                          <IconButton
+                            styleType="normal"
+                            size="small"
+                            onClick={() =>
+                              handleRemoveEmploymentStatus(categoryIndex, statusIndex, status.localId)
+                            }
+                            aria-label={`${value || '상태'} 삭제`}
+                            title="삭제"
+                          >
+                            <Delete width={16} height={16} />
+                          </IconButton>
+                        </div>
+                      </div>
+                    );
+                  }}
+                </form.Field>
+              ))}
               <Button
                 size="medium"
                 styleType="outlined"
                 variant="secondary"
                 iconRight={<Plus width={16} height={16} />}
-                onClick={() => handleAddEmploymentStatus(category.nanoId)}
+                onClick={() => handleAddEmploymentStatus(categoryIndex)}
               >
                 추가
               </Button>
@@ -341,20 +274,16 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         ))}
       </div>
       <footer css={cssObj.cardFooter}>
-        {employmentState.feedback ? (
-          <span css={cssObj.feedback[employmentState.feedback.type]}>
-            {employmentState.feedback.message}
-          </span>
-        ) : null}
+        {feedback ? <span css={cssObj.feedback[feedback.type]}>{feedback.message}</span> : null}
         <Button
           size="small"
           styleType="solid"
           variant="primary"
           disabled={
-            !employmentState.dirty ||
+            !isDirty ||
             employmentHasEmptyStatus ||
             employmentIsSaving ||
-            employmentState.categories.length === 0
+            categories.length === 0
           }
           onClick={handleSaveEmploymentCategories}
         >
