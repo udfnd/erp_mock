@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SidebarClose, SidebarOpen } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
-import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
+import { useAuthSession, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
 import { getAccessTokenFor, switchUser } from '@/global/apiClient';
 
 import * as styles from './PrimaryNav.style';
@@ -42,7 +42,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const params = useParams();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
-  const { state: authState, setAuthState, clearAuthState } = useAuth();
+  const { state: authState, setAuthState, clearAuthState } = useAuthSession();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const { history, refresh: refreshHistory, remove: removeHistoryEntry } = useAuthHistory();
