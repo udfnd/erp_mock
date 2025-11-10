@@ -18,6 +18,8 @@ import MyProfileMenu from './MyProfileMenu';
 import type { PrimaryNavHierarchy } from './navigation.types';
 import type { AuthHistoryEntry } from '@/global/auth';
 
+type ItemEntityType = 'gigwan' | 'jojik' | 'sueop' | 'kon';
+
 type Item = {
   key: string;
   label: string;
@@ -25,6 +27,8 @@ type Item = {
   href?: string | null;
   baseHref?: string | null;
   children?: Item[];
+  entityType?: ItemEntityType;
+  entityNanoId?: string;
 };
 
 type Props = {
@@ -51,18 +55,6 @@ const isWithinPath = (currentPath: string, target: string | null | undefined) =>
     normalizedCurrent === normalizedTarget ||
     normalizedCurrent.startsWith(`${normalizedTarget}/`)
   );
-};
-
-const isItemActive = (item: Item, currentPath: string): boolean => {
-  if (isWithinPath(currentPath, item.href)) {
-    return true;
-  }
-
-  if (isWithinPath(currentPath, item.baseHref)) {
-    return true;
-  }
-
-  return (item.children ?? []).some((child) => isItemActive(child, currentPath));
 };
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
@@ -95,13 +87,22 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
+  const [resolvedGigwanNanoId, setResolvedGigwanNanoId] = useState<string | null>(
+    gigwanNanoId,
+  );
 
-  const { data: gigwanNameData } = useGigwanNameQuery(gigwanNanoId ?? '', {
-    enabled: Boolean(gigwanNanoId),
+  useEffect(() => {
+    if (gigwanNanoId) {
+      setResolvedGigwanNanoId(gigwanNanoId);
+    }
+  }, [gigwanNanoId]);
+
+  const { data: gigwanNameData } = useGigwanNameQuery(resolvedGigwanNanoId ?? '', {
+    enabled: Boolean(resolvedGigwanNanoId),
   });
 
-  const { data: sidebarData } = useGigwanSidebarQuery(gigwanNanoId ?? '', {
-    enabled: Boolean(gigwanNanoId),
+  const { data: sidebarData } = useGigwanSidebarQuery(resolvedGigwanNanoId ?? '', {
+    enabled: Boolean(resolvedGigwanNanoId),
   });
 
   const { data: myProfileData } = useGetMyProfileQuery({
@@ -153,9 +154,9 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const hierarchy = useMemo<PrimaryNavHierarchy>(() => {
     return {
-      gigwan: gigwanNanoId
+      gigwan: resolvedGigwanNanoId
         ? {
-            nanoId: gigwanNanoId,
+            nanoId: resolvedGigwanNanoId,
             name: gigwanDisplayName,
           }
         : null,
@@ -168,7 +169,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         })),
       })),
     };
-  }, [gigwanDisplayName, gigwanNanoId, sidebarData?.jojiks]);
+  }, [gigwanDisplayName, resolvedGigwanNanoId, sidebarData?.jojiks]);
 
   useEffect(() => {
     if (!onHierarchyChange) return;
@@ -186,6 +187,8 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         depth: 1,
         href: `${gigwanBaseHref}/manage/home/dv`,
         baseHref: gigwanBaseHref,
+        entityType: 'gigwan',
+        entityNanoId: hierarchy.gigwan.nanoId,
       });
     }
 
@@ -203,6 +206,8 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
             label: kon.name,
             depth: 3,
             href: null,
+            entityType: 'kon',
+            entityNanoId: kon.nanoId,
           }));
 
           return {
@@ -211,6 +216,8 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
             depth: 2,
             href: null,
             children: konItems.length > 0 ? konItems : undefined,
+            entityType: 'sueop',
+            entityNanoId: sueop.nanoId,
           };
         });
 
@@ -223,6 +230,8 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           href: `${jojikBaseHref}/manage/home/dv`,
           baseHref: jojikBaseHref,
           children: sueopItems.length > 0 ? sueopItems : undefined,
+          entityType: 'jojik',
+          entityNanoId: jojik.nanoId,
         };
       });
 
@@ -235,6 +244,8 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         label: sueop.name,
         depth: 2,
         href: null,
+        entityType: 'sueop',
+        entityNanoId: sueop.nanoId,
       }));
 
       const jojikBaseHref = `/td/np/jos/${jojik.nanoId}`;
@@ -246,11 +257,54 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         href: `${jojikBaseHref}/manage/home/dv`,
         baseHref: jojikBaseHref,
         children: sueopItems.length > 0 ? sueopItems : undefined,
+        entityType: 'jojik',
+        entityNanoId: jojik.nanoId,
       };
     });
 
     return [...list, ...jojikItems];
   }, [hierarchy, sidebarData?.jojiks]);
+
+  const activeJojikNanoId = useMemo(() => getParamValue(params, 'jo'), [params]);
+  const activeSueopNanoId = useMemo(() => getParamValue(params, 'su'), [params]);
+  const activeKonNanoId = useMemo(() => getParamValue(params, 'ko'), [params]);
+
+  const getIsItemActive = useCallback(
+    (item: Item): boolean => {
+      if (item.entityType === 'gigwan' && resolvedGigwanNanoId && item.entityNanoId === resolvedGigwanNanoId) {
+        return true;
+      }
+
+      if (item.entityType === 'jojik' && activeJojikNanoId && item.entityNanoId === activeJojikNanoId) {
+        return true;
+      }
+
+      if (item.entityType === 'sueop' && activeSueopNanoId && item.entityNanoId === activeSueopNanoId) {
+        return true;
+      }
+
+      if (item.entityType === 'kon' && activeKonNanoId && item.entityNanoId === activeKonNanoId) {
+        return true;
+      }
+
+      if (isWithinPath(normalizedPathname, item.href)) {
+        return true;
+      }
+
+      if (isWithinPath(normalizedPathname, item.baseHref)) {
+        return true;
+      }
+
+      return (item.children ?? []).some((child) => getIsItemActive(child));
+    },
+    [
+      activeJojikNanoId,
+      activeKonNanoId,
+      activeSueopNanoId,
+      normalizedPathname,
+      resolvedGigwanNanoId,
+    ],
+  );
 
   const filteredHistory = useMemo(() => {
     if (!authState.gigwanNanoId) return [] as AuthHistoryEntry[];
@@ -354,7 +408,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const renderItems = (list: Item[]) =>
     list.map((item) => {
-      const isActive = isItemActive(item, normalizedPathname);
+      const isActive = getIsItemActive(item);
       const linkStyles = [
         ...styles.navLink[isActive ? 'active' : 'inactive'],
         styles.navLinkDepth[item.depth],
