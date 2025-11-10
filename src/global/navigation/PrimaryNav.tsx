@@ -9,13 +9,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SidebarClose, SidebarOpen } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
-import { useAuth, useAuthHistory, upsertAuthHistoryEntry } from '@/global/auth';
+import { useAuth, useAuthStore } from '@/global/auth';
 import { getAccessTokenFor, switchUser } from '@/global/apiClient';
 
 import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
+import type { AuthHistoryEntry } from '@/global/auth';
 
 type Item = {
   key: string;
@@ -41,13 +42,27 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const [isOpen, setIsOpen] = useState(true);
-  const { state: authState, setAuthState, clearAuthState } = useAuth();
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const { history, refresh: refreshHistory, remove: removeHistoryEntry } = useAuthHistory();
   const storedProfileKeyRef = useRef<string | null>(null);
-  const queryClient = useQueryClient();
+
+  const { state: authState, accessToken, setAuthState, clearAll } = useAuth();
+
+  const history = useAuthStore((s) => s.history);
+  const upsertHistory = useCallback(
+    (
+      entry: Omit<AuthHistoryEntry, 'lastUsedAt'> & Partial<Pick<AuthHistoryEntry, 'lastUsedAt'>>,
+    ) => {
+      useAuthStore.getState().upsertHistory(entry);
+    },
+    [],
+  );
+  const removeHistoryEntry = useCallback((sayongjaNanoId: string) => {
+    useAuthStore.getState().removeHistory(sayongjaNanoId);
+  }, []);
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
@@ -61,50 +76,36 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   });
 
   const { data: myProfileData } = useGetMyProfileQuery({
-    enabled: Boolean(authState.accessToken),
+    enabled: Boolean(accessToken),
   });
 
   const gigwanDisplayName = gigwanNameData?.name ?? authState.gigwanName ?? '기관';
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 960px) and (max-width: 1279px)');
-    const updateState = (matches: boolean) => {
-      if (matches) {
-        setIsOpen(false);
-      }
+    const mq = window.matchMedia('(min-width: 960px) and (max-width: 1279px)');
+    const update = (matches: boolean) => {
+      if (matches) setIsOpen(false);
     };
-
-    updateState(mediaQuery.matches);
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      updateState(event.matches);
-    };
-
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', handleChange);
-      return () => {
-        mediaQuery.removeEventListener('change', handleChange);
-      };
+    update(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => update(e.matches);
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', onChange);
+      return () => mq.removeEventListener('change', onChange);
     }
-
-    mediaQuery.addListener(handleChange);
-    return () => {
-      mediaQuery.removeListener(handleChange);
-    };
+    mq.addListener(onChange);
+    return () => mq.removeListener(onChange);
   }, []);
 
   const effectiveIsOpen = isOpen;
 
-  const handleToggle = () => {
-    setIsOpen((v) => !v);
-  };
+  const handleToggle = () => setIsOpen((v) => !v);
 
   useEffect(() => {
-    if (!myProfileData || !authState.accessToken || !authState.gigwanNanoId) return;
+    if (!myProfileData || !accessToken || !authState.gigwanNanoId) return;
     const historyKey = myProfileData.nanoId;
     if (storedProfileKeyRef.current === historyKey) return;
 
-    upsertAuthHistoryEntry({
+    upsertHistory({
       sayongjaNanoId: myProfileData.nanoId,
       sayongjaName: myProfileData.name,
       gigwanName: gigwanDisplayName,
@@ -112,8 +113,14 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
       lastUsedAt: Date.now(),
     });
     storedProfileKeyRef.current = historyKey;
-    refreshHistory();
-  }, [authState, gigwanDisplayName, gigwanNanoId, myProfileData, refreshHistory]);
+  }, [
+    accessToken,
+    authState.gigwanNanoId,
+    gigwanDisplayName,
+    gigwanNanoId,
+    myProfileData,
+    upsertHistory,
+  ]);
 
   const hierarchy = useMemo<PrimaryNavHierarchy>(() => {
     return {
@@ -205,7 +212,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   }, [hierarchy, sidebarData?.jojiks]);
 
   const filteredHistory = useMemo(() => {
-    if (!authState.gigwanNanoId) return [] as typeof history;
+    if (!authState.gigwanNanoId) return [] as AuthHistoryEntry[];
     return history
       .filter(
         (entry) =>
@@ -220,7 +227,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   }, []);
 
   const handleSelectHistory = useCallback(
-    (entry: (typeof history)[number]) => {
+    (entry: AuthHistoryEntry) => {
       void (async () => {
         let aborted = false;
 
@@ -228,7 +235,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           await switchUser(entry.sayongjaNanoId, () => {
             aborted = true;
             removeHistoryEntry(entry.sayongjaNanoId);
-            refreshHistory();
             setIsProfileMenuOpen(false);
             window.alert('저장된 사용자 세션이 만료되었습니다. 다시 로그인해 주세요.');
             router.replace('/td/g');
@@ -240,16 +246,14 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           if (!token) throw new Error('Missing access token after user switch');
 
           setAuthState({
-            accessToken: token,
-            sayongjaNanoId: entry.sayongjaNanoId,
             gigwanNanoId: authState.gigwanNanoId,
-            gigwanName: entry.gigwanName ?? authState.gigwanName,
+            gigwanName: entry.gigwanName ?? gigwanDisplayName,
             loginId: authState.loginId,
           });
 
           await queryClient.invalidateQueries({ queryKey: ['myProfile'] });
 
-          upsertAuthHistoryEntry({
+          upsertHistory({
             sayongjaNanoId: entry.sayongjaNanoId,
             sayongjaName: entry.sayongjaName,
             gigwanName: entry.gigwanName ?? gigwanDisplayName,
@@ -257,7 +261,6 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
             lastUsedAt: Date.now(),
           });
 
-          refreshHistory();
           setIsProfileMenuOpen(false);
           try {
             router.refresh();
@@ -267,22 +270,20 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         } catch (error) {
           console.error('Failed to switch user', error);
           removeHistoryEntry(entry.sayongjaNanoId);
-          refreshHistory();
           setIsProfileMenuOpen(false);
         }
       })();
     },
     [
       authState.gigwanNanoId,
-      authState.gigwanName,
       authState.loginId,
       gigwanDisplayName,
       gigwanNanoId,
       queryClient,
-      refreshHistory,
       removeHistoryEntry,
       router,
       setAuthState,
+      upsertHistory,
     ],
   );
 
@@ -297,14 +298,14 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const handleLogout = useCallback(() => {
     try {
-      clearAuthState();
+      clearAll();
       storedProfileKeyRef.current = null;
       setIsProfileMenuOpen(false);
       router.replace('/td/g');
     } catch (error) {
       console.error('Failed to logout', error);
     }
-  }, [clearAuthState, router]);
+  }, [clearAll, router]);
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
 

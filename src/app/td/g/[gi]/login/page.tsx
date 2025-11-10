@@ -17,7 +17,7 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const gigwanCode = searchParams.get('code') ?? '';
 
-  const { state, isReady, isAuthenticated, setAuthState } = useAuth();
+  const { state, isReady, isAuthenticated, setAuthState, setActiveUserId } = useAuth();
 
   const {
     data: gigwan,
@@ -35,7 +35,7 @@ export default function SignInPage() {
   const institutionName = gigwan?.name ?? '';
 
   const title = useMemo(() => {
-    if (!institutionName) return `로그인`;
+    if (!institutionName) return '로그인';
     return `${institutionName}`;
   }, [institutionName]);
 
@@ -76,16 +76,17 @@ export default function SignInPage() {
           password,
           gigwanNanoId: gigwanCode,
         });
+
+        setActiveUserId(response.nanoId);
+
         setAuthState({
-          accessToken: response.accessToken,
-          sayongjaNanoId: response.nanoId,
           gigwanNanoId: gigwanCode,
           gigwanName: institutionName,
           loginId: id.trim(),
         });
+
         router.replace(`/td/np/gis/${gigwanCode}/manage/home/dv`);
-      } catch (error) {
-        console.error('로그인 실패', error);
+      } catch {
         setLoginErrorText('아이디/패스워드가 맞지 않습니다. 다시 한 번 확인해 주세요.');
       } finally {
         setIsSubmitting(false);
@@ -100,6 +101,7 @@ export default function SignInPage() {
       mutateAsync,
       password,
       router,
+      setActiveUserId,
       setAuthState,
     ],
   );
@@ -128,9 +130,7 @@ export default function SignInPage() {
     isGigwanError ||
     (isReady && isAuthenticated && Boolean(state.gigwanNanoId));
 
-  if (isRedirecting) {
-    return null;
-  }
+  if (isRedirecting) return null;
 
   return (
     <div css={styles.page}>

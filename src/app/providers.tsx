@@ -8,7 +8,7 @@ import { AxiosError } from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { configureUnauthorizedHandler } from '@/global';
-import { useAuth } from '@/global/auth';
+import { useAuthStore } from '@/global/auth';
 import { globalStyles } from '@/global/style';
 
 const cache = createCache({ key: 'css', prepend: true });
@@ -64,7 +64,7 @@ export function Providers({ children }: AppProvidersProps) {
   useEffect(() => {
     configureUnauthorizedHandler(() => {
       try {
-        useAuth.getState().clearAll();
+        useAuthStore.getState().clearAll();
         queryClient.clear();
       } finally {
         router.replace('/td/g');

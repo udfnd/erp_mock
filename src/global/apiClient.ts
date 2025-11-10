@@ -5,7 +5,7 @@ import axios, {
   AxiosRequestHeaders,
   InternalAxiosRequestConfig,
 } from 'axios';
-import { useAuth } from '@/global/auth';
+import { useAuthStore } from '@/global/auth';
 import type { TokenSource } from '@/global/auth/store';
 
 const API_BASE_URL =
@@ -123,19 +123,19 @@ const refreshClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-const getActiveUserId = () => useAuth.getState().activeUserId;
-const setActiveUserId = (id: string | null) => useAuth.getState().setActiveUser(id);
-const cacheAccessTokenFor = (userId: string, token: string | null,  _s: TokenSource = 'api') =>
-  useAuth.getState().setAccessTokenFor(userId, token, _s);
-const getAccessTokenFor = (userId: string) => useAuth.getState().tokensByUser[userId] ?? null;
-const getCurrentAccessToken = () => useAuth.getState().getCurrentAccessToken();
+const getActiveUserId = () => useAuthStore.getState().activeUserId;
+const setActiveUserId = (id: string | null) => useAuthStore.getState().setActiveUser(id);
+const cacheAccessTokenFor = (userId: string, token: string | null, _s: TokenSource = 'api') =>
+  useAuthStore.getState().setAccessTokenFor(userId, token, _s);
+const getAccessTokenFor = (userId: string) => useAuthStore.getState().tokensByUser[userId] ?? null;
+const getCurrentAccessToken = () => useAuthStore.getState().getCurrentAccessToken();
 
 let onUnauthorized: (() => void) | null = null;
 export const configureUnauthorizedHandler = (fn: (() => void) | null) => {
   onUnauthorized = fn;
 };
 const finalizeUnauthorized = () => {
-  useAuth.getState().handleUnauthorized();
+  useAuthStore.getState().handleUnauthorized();
   onUnauthorized?.();
 };
 
