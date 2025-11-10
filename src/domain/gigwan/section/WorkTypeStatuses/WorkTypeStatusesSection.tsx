@@ -10,11 +10,11 @@ import {
   useUpsertWorkTypeCustomSangtaesMutation,
   useWorkTypeCustomSangtaesQuery,
 } from '@/domain/gigwan/api';
-import type { WorkTypeSangtae } from '@/domain/gigwan/api/gigwan.schema';
+import type { WorkTypeSangtae } from '@/domain/gigwan/api';
 
 import { css } from './styles';
-import { createLocalId } from './local-id';
-import { type FeedbackState } from './types';
+import { createLocalId } from '../local-id';
+import { type FeedbackState } from '../types';
 
 type WorkTypeStatusesSectionProps = {
   gigwanNanoId: string;
@@ -31,9 +31,7 @@ type WorkTypeFormValues = {
   statuses: WorkTypeStatusFormValue[];
 };
 
-const mapWorkTypeSangtaesToFormValues = (
-  sangtaes: WorkTypeSangtae[],
-): WorkTypeFormValues => ({
+const mapWorkTypeSangtaesToFormValues = (sangtaes: WorkTypeSangtae[]): WorkTypeFormValues => ({
   statuses: sangtaes.map((status) => ({
     nanoId: status.nanoId,
     name: status.name,
@@ -42,8 +40,11 @@ const mapWorkTypeSangtaesToFormValues = (
   })),
 });
 
+const INITIAL_VALUES: WorkTypeFormValues = { statuses: [] };
+
 export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectionProps) {
   const queryClient = useQueryClient();
+
   const { data: workTypeStatusesData, error: workTypeError } = useWorkTypeCustomSangtaesQuery(
     gigwanNanoId,
     { enabled: Boolean(gigwanNanoId) },
@@ -52,8 +53,8 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
 
   const [feedback, setFeedback] = useState<FeedbackState>(null);
 
-  const form = useForm<WorkTypeFormValues>({
-    defaultValues: { statuses: [] },
+  const form = useForm({
+    defaultValues: INITIAL_VALUES,
     onSubmit: async ({ value }) => {
       const seen = new Set<string>();
       const sangtaes: Array<
@@ -68,16 +69,9 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         if (status.nanoId && !status.nanoId.startsWith('local-')) {
           if (seen.has(status.nanoId)) continue;
           seen.add(status.nanoId);
-          sangtaes.push({
-            nanoId: status.nanoId,
-            name,
-            isHwalseong: status.isHwalseong,
-          });
+          sangtaes.push({ nanoId: status.nanoId, name, isHwalseong: status.isHwalseong });
         } else {
-          sangtaes.push({
-            name,
-            isHwalseong: status.isHwalseong,
-          });
+          sangtaes.push({ name, isHwalseong: status.isHwalseong });
         }
       }
 
@@ -97,16 +91,18 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
     if (!workTypeStatusesData) return;
     const nextValues = mapWorkTypeSangtaesToFormValues(workTypeStatusesData.sangtaes);
     form.reset(nextValues);
-    setFeedback(null);
-  }, [form, workTypeStatusesData]);
+  }, [workTypeStatusesData, form]);
 
-  const { statuses, isDirty } = useStore(form.store, (state) => ({
-    statuses: state.values.statuses ?? [],
-    isDirty: state.isDirty,
-  }));
+  const { statuses, isDirty } = useStore(form.store, (state) => {
+    const v = state.values as WorkTypeFormValues;
+    return {
+      statuses: v.statuses ?? [],
+      isDirty: state.isDirty,
+    };
+  });
 
   const workTypeHasEmptyStatus = useMemo(
-    () => statuses.some((status) => status.name.trim().length === 0),
+    () => statuses.some((s) => s.name.trim().length === 0),
     [statuses],
   );
 
@@ -117,24 +113,6 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
     setFeedback(null);
     await form.handleSubmit();
   }, [form, isDirty, workTypeHasEmptyStatus]);
-
-  const handleAddWorkTypeStatus = useCallback(() => {
-    form.pushFieldValue('statuses', {
-      nanoId: null,
-      name: '',
-      localId: createLocalId(),
-      isHwalseong: true,
-    });
-    setFeedback(null);
-  }, [form]);
-
-  const handleRemoveWorkTypeStatus = useCallback(
-    (statusIndex: number) => {
-      void form.removeFieldValue('statuses', statusIndex);
-      setFeedback(null);
-    },
-    [form],
-  );
 
   return (
     <section css={css.card}>
@@ -147,48 +125,68 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
 
       <div css={css.cardBody}>
         {workTypeError ? <p css={css.errorText}>근무 형태 상태를 불러오지 못했습니다.</p> : null}
-        <div css={css.statusList}>
-          <span css={css.categoryLabel}>재직상태</span>
-          {statuses.map((status, statusIndex) => (
-            <form.Field key={status.localId} name={`statuses[${statusIndex}].name`}>
-              {(field) => {
-                const value = String(field.state.value ?? '');
-                return (
-                  <div css={css.statusItem}>
-                    <LabeledInput
-                      placeholder="근무 형태 상태 이름"
-                      value={value}
-                      onValueChange={(v) => {
-                        setFeedback(null);
-                        field.handleChange(v);
-                      }}
-                      onBlur={field.handleBlur}
-                      maxLength={20}
-                    />
-                    <IconButton
-                      styleType="normal"
-                      size="small"
-                      onClick={() => handleRemoveWorkTypeStatus(statusIndex)}
-                      aria-label={`${value || '상태'} 삭제`}
-                    >
-                      <Delete width={16} height={16} />
-                    </IconButton>
-                  </div>
-                );
-              }}
-            </form.Field>
-          ))}
-        </div>
-        <Button
-          size="medium"
-          styleType="outlined"
-          variant="secondary"
-          iconRight={<Plus width={16} height={16} />}
-          onClick={handleAddWorkTypeStatus}
-        >
-          추가
-        </Button>
+
+        <form.Field name="statuses" mode="array">
+          {(statusesField) => (
+            <>
+              <span css={css.categoryLabel}>재직상태</span>
+              <div css={css.statusList}>
+                {statusesField.state.value.map((status, statusIndex) => (
+                  <form.Field key={status.localId} name={`statuses[${statusIndex}].name`}>
+                    {(field) => {
+                      const value = String(field.state.value ?? '');
+                      return (
+                        <div css={css.statusItem}>
+                          <LabeledInput
+                            placeholder="근무 형태 상태 이름"
+                            value={value}
+                            onValueChange={(v) => {
+                              setFeedback(null);
+                              field.handleChange(v);
+                            }}
+                            onBlur={field.handleBlur}
+                            maxLength={20}
+                          />
+                          <IconButton
+                            styleType="normal"
+                            size="small"
+                            onClick={() => {
+                              void statusesField.removeValue(statusIndex);
+                              setFeedback(null);
+                            }}
+                            aria-label={`${value || '상태'} 삭제`}
+                          >
+                            <Delete width={16} height={16} />
+                          </IconButton>
+                        </div>
+                      );
+                    }}
+                  </form.Field>
+                ))}
+              </div>
+
+              <Button
+                size="medium"
+                styleType="outlined"
+                variant="secondary"
+                iconRight={<Plus width={16} height={16} />}
+                onClick={() => {
+                  statusesField.pushValue({
+                    nanoId: null,
+                    name: '',
+                    localId: createLocalId(),
+                    isHwalseong: true,
+                  });
+                  setFeedback(null);
+                }}
+              >
+                추가
+              </Button>
+            </>
+          )}
+        </form.Field>
       </div>
+
       <footer css={css.cardFooter}>
         {feedback ? <span css={css.feedback[feedback.type]}>{feedback.message}</span> : null}
         <Button

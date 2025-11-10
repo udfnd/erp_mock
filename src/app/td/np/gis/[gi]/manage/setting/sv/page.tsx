@@ -7,7 +7,7 @@ import {
   BasicInformationSection,
   EmploymentCategoriesSection,
   WorkTypeStatusesSection,
-} from '@/domain/gigwan/components/manage-setting';
+} from '@/domain/gigwan/section';
 
 export default function GigwanSettingServicePage() {
   const { gi } = useParams<{ gi: string }>();

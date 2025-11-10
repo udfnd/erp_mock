@@ -2,24 +2,23 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { useGigwanQuery, useUpdateGigwanMutation } from '@/domain/gigwan/api';
 
 import { css } from './styles';
-import { type FeedbackState } from './types';
+import { type FeedbackState } from '../types';
 
-type BasicInformationSectionProps = {
-  gigwanNanoId: string;
-};
+type BasicInformationSectionProps = { gigwanNanoId: string };
 
 type BasicInformationFormValues = {
   name: string;
   intro: string;
 };
-
 type BasicInformationDefaults = BasicInformationFormValues;
+
+const INITIAL_DEFAULTS: BasicInformationDefaults = { name: '', intro: '' };
 
 export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectionProps) {
   const queryClient = useQueryClient();
@@ -27,28 +26,33 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
   const updateMutation = useUpdateGigwanMutation(gigwanNanoId);
   const [feedback, setFeedback] = useState<FeedbackState>(null);
 
-  const defaultsRef = useRef<BasicInformationDefaults>({ name: '', intro: '' });
+  const defaultsRef = useRef<BasicInformationDefaults>(INITIAL_DEFAULTS);
 
-  const form = useForm<BasicInformationFormValues>({
-    defaultValues: defaultsRef.current,
+  const form = useForm({
+    defaultValues: INITIAL_DEFAULTS,
     onSubmit: async ({ value }) => {
+      const prev = defaultsRef.current;
       const trimmedName = value.name.trim();
       const trimmedIntro = value.intro.trim();
 
       const payload: { name?: string; intro?: string } = {};
-      if (trimmedName !== defaultsRef.current.name) payload.name = trimmedName;
-      if (trimmedIntro !== defaultsRef.current.intro) payload.intro = trimmedIntro;
+      if (trimmedName !== prev.name) payload.name = trimmedName;
+      if (trimmedIntro !== prev.intro) payload.intro = trimmedIntro;
       if (Object.keys(payload).length === 0) return;
 
       try {
         await updateMutation.mutateAsync(payload);
+
         const nextDefaults: BasicInformationDefaults = {
           name: trimmedName,
           intro: trimmedIntro,
         };
+
         defaultsRef.current = nextDefaults;
         form.reset(nextDefaults);
+
         setFeedback({ type: 'success', message: '변경사항이 저장되었습니다.' });
+
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] }),
           queryClient.invalidateQueries({ queryKey: ['gigwanName', gigwanNanoId] }),
@@ -69,8 +73,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
 
     defaultsRef.current = nextDefaults;
     form.reset(nextDefaults);
-    setFeedback(null);
-  }, [gigwan?.name, gigwan?.intro, form]);
+  }, [gigwan?.name, gigwan?.intro, form, gigwan]);
 
   const { isDirty, nameMeta, introMeta } = useStore(form.store, (state) => ({
     isDirty: state.isDirty,
@@ -164,9 +167,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
         </form.Field>
 
         <div css={css.cardFooter}>
-          {feedback ? (
-            <span css={css.feedback[feedback.type]}>{feedback.message}</span>
-          ) : null}
+          {feedback ? <span css={css.feedback[feedback.type]}>{feedback.message}</span> : null}
           <Button
             size="small"
             styleType="solid"

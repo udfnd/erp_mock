@@ -13,8 +13,8 @@ import {
 import type { EmploymentCategory } from '@/domain/gigwan/api/gigwan.schema';
 
 import { css } from './styles';
-import { createLocalId } from './local-id';
-import { type FeedbackState } from './types';
+import { createLocalId } from '../local-id';
+import { type FeedbackState } from '../types';
 
 type EmploymentCategoriesSectionProps = {
   gigwanNanoId: string;
@@ -63,8 +63,10 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
   const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [employmentEditing, setEmploymentEditing] = useState<Record<string, boolean>>({});
 
-  const form = useForm<EmploymentCategoriesFormValues>({
-    defaultValues: { categories: [] },
+  const INITIAL_VALUES: EmploymentCategoriesFormValues = useMemo(() => ({ categories: [] }), []);
+
+  const form = useForm({
+    defaultValues: INITIAL_VALUES,
     onSubmit: async ({ value }) => {
       const categoriesPayload = value.categories.map((category) => {
         const seen = new Set<string>();
@@ -107,21 +109,23 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
 
   useEffect(() => {
     if (!employmentCategoriesData) return;
-
     const nextValues = mapCategoriesToFormValues(employmentCategoriesData.categories);
-
     form.reset(nextValues);
-    setEmploymentEditing({});
-    setFeedback(null);
   }, [employmentCategoriesData, form]);
 
-  const { categories, isDirty } = useStore(form.store, (state) => ({
-    categories: state.values.categories ?? [],
-    isDirty: state.isDirty,
-  }));
+  const { categories, isDirty } = useStore(form.store, (state) => {
+    const v = state.values as EmploymentCategoriesFormValues;
+    return {
+      categories: v.categories ?? [],
+      isDirty: state.isDirty,
+    };
+  });
 
   const employmentHasEmptyStatus = useMemo(
-    () => categories.some((category) => category.statuses.some((status) => status.name.trim().length === 0)),
+    () =>
+      categories.some((category) =>
+        category.statuses.some((status) => status.name.trim().length === 0),
+      ),
     [categories],
   );
 
@@ -169,7 +173,8 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                           >
                             {(field) => {
                               const currentStatus = statusesField.state.value[statusIndex];
-                              const localId = currentStatus?.localId ?? `${category.nanoId}-${statusIndex}`;
+                              const localId =
+                                currentStatus?.localId ?? `${category.nanoId}-${statusIndex}`;
                               const isEditing = Boolean(employmentEditing[localId]);
                               const value = String(field.state.value ?? '');
                               return (
@@ -188,9 +193,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       autoFocus
                                     />
                                   ) : (
-                                    <span css={css.statusValue}>
-                                      {value.trim() || '새 상태'}
-                                    </span>
+                                    <span css={css.statusValue}>{value.trim() || '새 상태'}</span>
                                   )}
 
                                   <div css={css.statusActions}>
@@ -263,10 +266,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
           styleType="solid"
           variant="primary"
           disabled={
-            !isDirty ||
-            employmentHasEmptyStatus ||
-            employmentIsSaving ||
-            categories.length === 0
+            !isDirty || employmentHasEmptyStatus || employmentIsSaving || categories.length === 0
           }
           onClick={handleSaveEmploymentCategories}
         >
