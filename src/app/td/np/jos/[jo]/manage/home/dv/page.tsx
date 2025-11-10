@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 
 import { useJojikQuery } from '@/domain/jojik/api';
-import { useAuth } from '@/global/auth';
+import { useIsAuthenticated } from '@/global/auth';
 
 import { cssObj } from './style';
 
@@ -18,7 +18,7 @@ export default function JojikHomePage() {
   const params = useParams<PageParams>();
   const jojikNanoId = Array.isArray(params?.jo) ? (params?.jo[0] ?? '') : (params?.jo ?? '');
 
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useIsAuthenticated();
 
   const { data: jojik } = useJojikQuery(jojikNanoId, {
     enabled: isAuthenticated && Boolean(jojikNanoId),
