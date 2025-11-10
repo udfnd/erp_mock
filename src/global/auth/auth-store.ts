@@ -1,5 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
+import { create } from 'zustand';
+import { shallow } from 'zustand/shallow';
+
 import { cacheAccessTokenFor, clearAllTokens, setActiveUserId } from '@/global/auth/token-store';
 import { setAccessToken as broadcastAccessToken, subscribeAccessToken } from './access-token';
 
@@ -18,6 +22,13 @@ export type AuthSnapshot = {
   isAuthenticated: boolean;
 };
 
+type AuthStoreState = AuthSnapshot & {
+  initialize: () => void;
+  setAuthState: (next: AuthState) => void;
+  updateAuthState: (partial: Partial<AuthState>) => void;
+  clearAuthState: () => void;
+};
+
 const STORAGE_KEY = 'erp-auth-state';
 const isBrowser = typeof window !== 'undefined';
 
@@ -30,17 +41,26 @@ const createDefaultState = (): AuthState => ({
   loginId: null,
 });
 
-const listeners = new Set<() => void>();
+const toSnapshot = (state: AuthState, isReady: boolean): AuthSnapshot => ({
+  state,
+  isReady,
+  isAuthenticated: Boolean(state.accessToken),
+});
 
-let snapshot: AuthSnapshot = {
-  state: createDefaultState(),
-  isReady: false,
-  isAuthenticated: false,
+const readPersistedState = (): AuthState | null => {
+  if (!isBrowser) return null;
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<AuthState>;
+    return { ...createDefaultState(), ...(parsed ?? {}) };
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
 };
-
-let hasInitialized = false;
-
-const notify = () => listeners.forEach((listener) => listener());
 
 const runSideEffects = (state: AuthState) => {
   if (state.accessToken && state.sayongjaNanoId) {
@@ -63,77 +83,84 @@ const runSideEffects = (state: AuthState) => {
   broadcastAccessToken(state.accessToken, 'store');
 };
 
-const applySnapshot = (next: AuthSnapshot, { sync = true }: { sync?: boolean } = {}) => {
-  snapshot = next;
-  if (sync && next.isReady) runSideEffects(next.state);
-  notify();
+let hasInitialized = false;
+
+const useAuthStore = create<AuthStoreState>((set) => ({
+  state: createDefaultState(),
+  isReady: false,
+  isAuthenticated: false,
+  initialize: () => {
+    if (hasInitialized) return;
+    hasInitialized = true;
+
+    subscribeAccessToken((token, source) => {
+      if (source === 'store') return;
+      set((prev) => {
+        const nextState = { ...prev.state, accessToken: token };
+        return toSnapshot(nextState, prev.isReady);
+      });
+    });
+
+    if (!isBrowser) return;
+
+    const restored = readPersistedState();
+    const nextState = restored ?? createDefaultState();
+    set(() => toSnapshot(nextState, true));
+  },
+  setAuthState: (next) => {
+    const merged: AuthState = { ...createDefaultState(), ...next };
+    set(() => toSnapshot(merged, true));
+  },
+  updateAuthState: (partial) => {
+    set((prev) => {
+      const merged = { ...prev.state, ...partial };
+      return toSnapshot(merged, true);
+    });
+  },
+  clearAuthState: () => {
+    clearAllTokens();
+    set(() => toSnapshot(createDefaultState(), true));
+  },
+}));
+
+useAuthStore.subscribe(
+  (store) => ({ state: store.state, isReady: store.isReady }),
+  ({ state, isReady }, previous) => {
+    if (!isReady) return;
+    if (!previous?.isReady || previous.state !== state) {
+      runSideEffects(state);
+    }
+  },
+);
+
+export const initializeAuthStore = () => useAuthStore.getState().initialize();
+
+export const getAuthSnapshot = (): AuthSnapshot => {
+  const { state, isReady, isAuthenticated } = useAuthStore.getState();
+  return { state, isReady, isAuthenticated };
 };
 
-const withMeta = (state: AuthState, isReady: boolean): AuthSnapshot => ({
-  state,
-  isReady,
-  isAuthenticated: Boolean(state.accessToken),
-});
+export const setAuthState = (next: AuthState) => useAuthStore.getState().setAuthState(next);
 
-const updateSnapshot = (updater: (current: AuthSnapshot) => AuthSnapshot) => {
-  applySnapshot(updater(snapshot));
-};
+export const updateAuthState = (partial: Partial<AuthState>) =>
+  useAuthStore.getState().updateAuthState(partial);
 
-const readPersistedState = (): AuthState | null => {
-  if (!isBrowser) return null;
+export const clearAuthState = () => useAuthStore.getState().clearAuthState();
 
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
+export const useAuth = () => {
+  useEffect(() => {
+    initializeAuthStore();
+  }, []);
 
-    const parsed = JSON.parse(raw) as Partial<AuthState>;
-    return { ...createDefaultState(), ...(parsed ?? {}) };
-  } catch {
-    window.localStorage.removeItem(STORAGE_KEY);
-    return null;
-  }
-};
-
-export const initializeAuthStore = () => {
-  if (hasInitialized) return;
-  hasInitialized = true;
-
-  subscribeAccessToken((token, source) => {
-    if (source === 'store') return;
-    updateSnapshot((prev) => withMeta({ ...prev.state, accessToken: token }, prev.isReady));
-  });
-
-  if (!isBrowser) return;
-
-  const restored = readPersistedState();
-  if (restored) {
-    applySnapshot(withMeta(restored, true));
-    return;
-  }
-
-  applySnapshot(withMeta(createDefaultState(), true));
-};
-
-export const subscribeAuthStore = (listener: () => void) => {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-};
-
-export const getAuthSnapshot = () => snapshot;
-
-export const setAuthState = (next: AuthState) => {
-  const merged: AuthState = { ...createDefaultState(), ...next };
-  applySnapshot(withMeta(merged, true));
-};
-
-export const updateAuthState = (partial: Partial<AuthState>) => {
-  updateSnapshot((prev) => {
-    const nextState: AuthState = { ...prev.state, ...partial };
-    return withMeta(nextState, true);
-  });
-};
-
-export const clearAuthState = () => {
-  clearAllTokens();
-  applySnapshot(withMeta(createDefaultState(), true));
+  return useAuthStore(
+    (store) => ({
+      state: store.state,
+      isReady: store.isReady,
+      isAuthenticated: store.isAuthenticated,
+      setAuthState: store.setAuthState,
+      updateAuthState: store.updateAuthState,
+      clearAuthState: store.clearAuthState,
+    }),
+    shallow,
+  );
 };
