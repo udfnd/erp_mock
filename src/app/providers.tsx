@@ -8,7 +8,7 @@ import { AxiosError } from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { configureUnauthorizedHandler } from '@/global';
-import { clearAuthState, initializeAuthStore } from '@/global/auth';
+import { useAuth } from '@/global/auth';
 import { globalStyles } from '@/global/style';
 
 const cache = createCache({ key: 'css', prepend: true });
@@ -49,25 +49,22 @@ export function Providers({ children }: AppProvidersProps) {
     if (entries.length === 0) return null;
 
     const names = entries.map(([k]) => k).join(' ');
-    const cssText = entries.map(([, v]) => v).join(' ');
-    cache.inserted = {};
+    const cssText = entries.map(([, v]) => (typeof v === 'string' ? v : '')).join(' ');
+
+    const inserted = cache.inserted; // 타입을 좁히지 않음: Record<string, string | true | undefined>
+    for (const key of Object.keys(inserted)) {
+      delete inserted[key];
+    }
 
     return (
-      <style
-        data-emotion={`${cache.key} ${names}`}
-        dangerouslySetInnerHTML={{ __html: cssText as string }}
-      />
+      <style data-emotion={`${cache.key} ${names}`} dangerouslySetInnerHTML={{ __html: cssText }} />
     );
   });
 
   useEffect(() => {
-    initializeAuthStore();
-  }, []);
-
-  useEffect(() => {
     configureUnauthorizedHandler(() => {
       try {
-        clearAuthState();
+        useAuth.getState().clearAll();
         queryClient.clear();
       } finally {
         router.replace('/td/g');

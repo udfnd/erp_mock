@@ -2,9 +2,9 @@
 
 import { css } from '@emotion/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { useAuth } from '@/global/auth';
+import { useAuth, useIsAuthenticated, useActiveUserMeta } from '@/global/auth';
 
 const container = css({
   display: 'flex',
@@ -19,21 +19,25 @@ const container = css({
 
 export default function HomePage() {
   const router = useRouter();
-  const { isReady, isAuthenticated, state } = useAuth();
+
+  const isReady = useAuth((s) => s.isReady);
+  const isAuthenticated = useIsAuthenticated();
+  const activeMeta = useActiveUserMeta();
+  const gigwanNanoId = useMemo(() => activeMeta?.gigwanNanoId ?? null, [activeMeta]);
 
   useEffect(() => {
     if (!isReady) return;
 
     if (isAuthenticated) {
-      if (state.gigwanNanoId) {
-        router.replace(`/td/np/gis/${state.gigwanNanoId}/manage/home/dv`);
+      if (gigwanNanoId) {
+        router.replace(`/td/np/gis/${gigwanNanoId}/manage/home/dv`);
       } else {
         router.replace('/td/np/gis');
       }
     } else {
       router.replace('/td/g');
     }
-  }, [isAuthenticated, isReady, router, state.gigwanNanoId]);
+  }, [isReady, isAuthenticated, gigwanNanoId, router]);
 
   return (
     <div css={container}>
