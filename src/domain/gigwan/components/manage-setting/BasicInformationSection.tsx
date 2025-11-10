@@ -1,20 +1,25 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useForm, useStore } from '@tanstack/react-form';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { useGigwanQuery, useUpdateGigwanMutation } from '@/domain/gigwan/api';
 
-import { cssObj } from '../style';
-import { FeedbackState } from './types';
+import { css } from './styles';
+import { type FeedbackState } from './types';
 
 type BasicInformationSectionProps = {
   gigwanNanoId: string;
 };
 
-type Defaults = { name: string; intro: string };
+type BasicInformationFormValues = {
+  name: string;
+  intro: string;
+};
+
+type BasicInformationDefaults = BasicInformationFormValues;
 
 export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectionProps) {
   const queryClient = useQueryClient();
@@ -22,76 +27,83 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
   const updateMutation = useUpdateGigwanMutation(gigwanNanoId);
   const [feedback, setFeedback] = useState<FeedbackState>(null);
 
-  const defaults = useMemo<Defaults>(
-    () => ({ name: gigwan?.name ?? '', intro: gigwan?.intro ?? '' }),
-    [gigwan?.name, gigwan?.intro],
-  );
+  const defaultsRef = useRef<BasicInformationDefaults>({ name: '', intro: '' });
 
-  const form = useForm({ defaultValues: defaults });
+  const form = useForm<BasicInformationFormValues>({
+    defaultValues: defaultsRef.current,
+    onSubmit: async ({ value }) => {
+      const trimmedName = value.name.trim();
+      const trimmedIntro = value.intro.trim();
+
+      const payload: { name?: string; intro?: string } = {};
+      if (trimmedName !== defaultsRef.current.name) payload.name = trimmedName;
+      if (trimmedIntro !== defaultsRef.current.intro) payload.intro = trimmedIntro;
+      if (Object.keys(payload).length === 0) return;
+
+      try {
+        await updateMutation.mutateAsync(payload);
+        const nextDefaults: BasicInformationDefaults = {
+          name: trimmedName,
+          intro: trimmedIntro,
+        };
+        defaultsRef.current = nextDefaults;
+        form.reset(nextDefaults);
+        setFeedback({ type: 'success', message: '변경사항이 저장되었습니다.' });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] }),
+          queryClient.invalidateQueries({ queryKey: ['gigwanName', gigwanNanoId] }),
+        ]);
+      } catch {
+        setFeedback({ type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' });
+      }
+    },
+  });
 
   useEffect(() => {
-    form.reset(defaults);
-  }, [form, defaults]);
+    if (!gigwan) return;
 
-  const { isDirty, nameMeta, introMeta } = useStore(form.store, (s) => ({
-    isDirty: s.isDirty,
-    nameMeta: s.fieldMeta?.['name'] ?? { errors: [] as string[] },
-    introMeta: s.fieldMeta?.['intro'] ?? { errors: [] as string[] },
+    const nextDefaults: BasicInformationDefaults = {
+      name: gigwan.name ?? '',
+      intro: gigwan.intro ?? '',
+    };
+
+    defaultsRef.current = nextDefaults;
+    form.reset(nextDefaults);
+    setFeedback(null);
+  }, [gigwan?.name, gigwan?.intro, form]);
+
+  const { isDirty, nameMeta, introMeta } = useStore(form.store, (state) => ({
+    isDirty: state.isDirty,
+    nameMeta: state.fieldMeta?.name ?? { errors: [] as string[] },
+    introMeta: state.fieldMeta?.intro ?? { errors: [] as string[] },
   }));
 
-  const hasErrors = (nameMeta.errors?.length ?? 0) > 0 || (introMeta.errors?.length ?? 0) > 0;
+  const hasErrors = useMemo(
+    () => (nameMeta.errors?.length ?? 0) > 0 || (introMeta.errors?.length ?? 0) > 0,
+    [nameMeta.errors, introMeta.errors],
+  );
+
   const canSave = isDirty && !hasErrors && !updateMutation.isPending;
 
-  const invalidate = useCallback(async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] }),
-      queryClient.invalidateQueries({ queryKey: ['gigwanName', gigwanNanoId] }),
-    ]);
-  }, [gigwanNanoId, queryClient]);
-
   const handleSave = useCallback(async () => {
-    await Promise.all([
-      form.validateField('name', 'submit'),
-      form.validateField('intro', 'submit'),
-    ]);
-
-    const nameErrors = form.getFieldMeta('name')?.errors?.length ?? 0;
-    const introErrors = form.getFieldMeta('intro')?.errors?.length ?? 0;
-    if (nameErrors || introErrors) return;
-
-    const curr = form.state.values;
-    const nameTrim = String(curr.name ?? '').trim();
-    const introTrim = String(curr.intro ?? '').trim();
-
-    const payload: { name?: string; intro?: string } = {};
-    if (nameTrim !== defaults.name) payload.name = nameTrim;
-    if (introTrim !== defaults.intro) payload.intro = introTrim;
-    if (Object.keys(payload).length === 0) return;
-
-    try {
-      await updateMutation.mutateAsync(payload);
-      setFeedback({ type: 'success', message: '변경사항이 저장되었습니다.' });
-      form.reset(form.state.values);
-      await invalidate();
-    } catch {
-      setFeedback({ type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' });
-    }
-  }, [form, updateMutation, invalidate, defaults.name, defaults.intro]);
+    setFeedback(null);
+    await form.handleSubmit();
+  }, [form]);
 
   return (
-    <section css={cssObj.card}>
-      <div css={cssObj.cardHeader}>
-        <div css={cssObj.cardTitleGroup}>
-          <h2 css={cssObj.cardTitle}>기관 기본 설정</h2>
+    <section css={css.card}>
+      <div css={css.cardHeader}>
+        <div css={css.cardTitleGroup}>
+          <h2 css={css.cardTitle}>기관 기본 설정</h2>
         </div>
       </div>
 
-      <div css={cssObj.cardBody}>
+      <div css={css.cardBody}>
         <form.Field
           name="name"
           validators={{
             onChange: ({ value }: { value: string }) => {
-              const v = String(value ?? '').trim();
+              const v = value.trim();
               if (v.length === 0) return '이름은 필수입니다.';
               if (v.length > 30) return '30자 이내로 입력하세요.';
               return undefined;
@@ -123,7 +135,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
           name="intro"
           validators={{
             onChange: ({ value }: { value: string }) => {
-              const v = String(value ?? '').trim();
+              const v = value.trim();
               if (v.length === 0) return '소개는 필수입니다.';
               if (v.length > 100) return '최대 100자';
               return undefined;
@@ -151,8 +163,10 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
           }}
         </form.Field>
 
-        <div css={cssObj.cardFooter}>
-          {feedback && <span css={cssObj.feedback[feedback.type]}>{feedback.message}</span>}
+        <div css={css.cardFooter}>
+          {feedback ? (
+            <span css={css.feedback[feedback.type]}>{feedback.message}</span>
+          ) : null}
           <Button
             size="small"
             styleType="solid"
