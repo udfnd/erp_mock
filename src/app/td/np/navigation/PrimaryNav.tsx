@@ -18,6 +18,8 @@ import MyProfileMenu from './MyProfileMenu';
 import type { PrimaryNavHierarchy } from './navigation.types';
 import type { AuthHistoryEntry } from '@/global/auth';
 
+type ItemEntityType = 'gigwan' | 'jojik' | 'sueop' | 'kon';
+
 type Item = {
   key: string;
   label: string;
@@ -25,6 +27,8 @@ type Item = {
   href?: string | null;
   baseHref?: string | null;
   children?: Item[];
+  entityType?: ItemEntityType;
+  entityNanoId?: string;
 };
 
 type Props = {
@@ -51,18 +55,6 @@ const isWithinPath = (currentPath: string, target: string | null | undefined) =>
     normalizedCurrent === normalizedTarget ||
     normalizedCurrent.startsWith(`${normalizedTarget}/`)
   );
-};
-
-const isItemActive = (item: Item, currentPath: string): boolean => {
-  if (isWithinPath(currentPath, item.href)) {
-    return true;
-  }
-
-  if (isWithinPath(currentPath, item.baseHref)) {
-    return true;
-  }
-
-  return (item.children ?? []).some((child) => isItemActive(child, currentPath));
 };
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
@@ -95,13 +87,22 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
+  const [resolvedGigwanNanoId, setResolvedGigwanNanoId] = useState<string | null>(
+    gigwanNanoId,
+  );
 
-  const { data: gigwanNameData } = useGigwanNameQuery(gigwanNanoId ?? '', {
-    enabled: Boolean(gigwanNanoId),
+  useEffect(() => {
+    if (gigwanNanoId) {
+      setResolvedGigwanNanoId(gigwanNanoId);
+    }
+  }, [gigwanNanoId]);
+
+  const { data: gigwanNameData } = useGigwanNameQuery(resolvedGigwanNanoId ?? '', {
+    enabled: Boolean(resolvedGigwanNanoId),
   });
 
-  const { data: sidebarData } = useGigwanSidebarQuery(gigwanNanoId ?? '', {
-    enabled: Boolean(gigwanNanoId),
+  const { data: sidebarData } = useGigwanSidebarQuery(resolvedGigwanNanoId ?? '', {
+    enabled: Boolean(resolvedGigwanNanoId),
   });
 
   const { data: myProfileData } = useGetMyProfileQuery({
@@ -151,11 +152,13 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     upsertHistory,
   ]);
 
+  const normalizedPathname = useMemo(() => normalizePath(pathname), [pathname]);
+
   const hierarchy = useMemo<PrimaryNavHierarchy>(() => {
     return {
-      gigwan: gigwanNanoId
+      gigwan: resolvedGigwanNanoId
         ? {
-            nanoId: gigwanNanoId,
+            nanoId: resolvedGigwanNanoId,
             name: gigwanDisplayName,
           }
         : null,
@@ -168,7 +171,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         })),
       })),
     };
-  }, [gigwanDisplayName, gigwanNanoId, sidebarData?.jojiks]);
+  }, [gigwanDisplayName, resolvedGigwanNanoId, sidebarData?.jojiks]);
 
   useEffect(() => {
     if (!onHierarchyChange) return;
@@ -179,13 +182,17 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     const list: Item[] = [];
 
     if (hierarchy.gigwan) {
-      const gigwanBaseHref = `/td/np/gis/${hierarchy.gigwan.nanoId}`;
+      const { nanoId, name } = hierarchy.gigwan;
+      const gigwanBaseHref = `/td/np/gis/${nanoId}`;
+
       list.push({
-        key: `gigwan-${hierarchy.gigwan.nanoId}`,
-        label: hierarchy.gigwan.name,
+        key: `gigwan-${nanoId}`,
+        label: name,
         depth: 1,
         href: `${gigwanBaseHref}/manage/home/dv`,
         baseHref: gigwanBaseHref,
+        entityType: 'gigwan',
+        entityNanoId: nanoId,
       });
     }
 
@@ -194,48 +201,37 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     type SidebarJojik = { nanoId: string; name: string; sueops?: SidebarSueop[] | null };
 
     const rawJojiks = sidebarData?.jojiks as SidebarJojik[] | undefined;
+    const sourceJojiks: SidebarJojik[] = rawJojiks && rawJojiks.length > 0
+      ? rawJojiks
+      : hierarchy.jojiks.map((jojik) => ({
+          nanoId: jojik.nanoId,
+          name: jojik.name,
+          sueops: jojik.sueops.map((sueop) => ({ nanoId: sueop.nanoId, name: sueop.name })),
+        }));
 
-    if (rawJojiks && rawJojiks.length > 0) {
-      const jojikItems = rawJojiks.map<Item>((jojik) => {
-        const sueopItems = (jojik.sueops ?? []).map<Item>((sueop) => {
-          const konItems = (sueop.kons ?? []).map<Item>((kon) => ({
-            key: `kon-${kon.nanoId}`,
-            label: kon.name,
-            depth: 3,
-            href: null,
-          }));
+    const mapSueopToItem = (sueop: SidebarSueop): Item => {
+      const konItems = (sueop.kons ?? []).map<Item>((kon) => ({
+        key: `kon-${kon.nanoId}`,
+        label: kon.name,
+        depth: 3,
+        href: null,
+        entityType: 'kon',
+        entityNanoId: kon.nanoId,
+      }));
 
-          return {
-            key: `sueop-${sueop.nanoId}`,
-            label: sueop.name,
-            depth: 2,
-            href: null,
-            children: konItems.length > 0 ? konItems : undefined,
-          };
-        });
-
-        const jojikBaseHref = `/td/np/jos/${jojik.nanoId}`;
-
-        return {
-          key: `jojik-${jojik.nanoId}`,
-          label: jojik.name,
-          depth: 1,
-          href: `${jojikBaseHref}/manage/home/dv`,
-          baseHref: jojikBaseHref,
-          children: sueopItems.length > 0 ? sueopItems : undefined,
-        };
-      });
-
-      return [...list, ...jojikItems];
-    }
-
-    const jojikItems = hierarchy.jojiks.map<Item>((jojik) => {
-      const sueopItems = jojik.sueops.map<Item>((sueop) => ({
+      return {
         key: `sueop-${sueop.nanoId}`,
         label: sueop.name,
         depth: 2,
         href: null,
-      }));
+        children: konItems.length > 0 ? konItems : undefined,
+        entityType: 'sueop',
+        entityNanoId: sueop.nanoId,
+      };
+    };
+
+    const jojikItems = sourceJojiks.map<Item>((jojik) => {
+      const sueopItems = (jojik.sueops ?? []).map(mapSueopToItem);
 
       const jojikBaseHref = `/td/np/jos/${jojik.nanoId}`;
 
@@ -246,11 +242,78 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         href: `${jojikBaseHref}/manage/home/dv`,
         baseHref: jojikBaseHref,
         children: sueopItems.length > 0 ? sueopItems : undefined,
+        entityType: 'jojik',
+        entityNanoId: jojik.nanoId,
       };
     });
 
     return [...list, ...jojikItems];
   }, [hierarchy, sidebarData?.jojiks]);
+
+  const activeJojikNanoId = useMemo(() => getParamValue(params, 'jo'), [params]);
+  const activeSueopNanoId = useMemo(() => getParamValue(params, 'su'), [params]);
+  const activeKonNanoId = useMemo(() => getParamValue(params, 'ko'), [params]);
+
+  const flattenedItems = useMemo(() => {
+    const result: Item[] = [];
+    const visit = (nodes: Item[]) => {
+      nodes.forEach((node) => {
+        result.push(node);
+        if (node.children) visit(node.children);
+      });
+    };
+    visit(items);
+    return result;
+  }, [items]);
+
+  const activeItemKey = useMemo(() => {
+    const findByEntity = (type: ItemEntityType, nanoId: string | null | undefined) => {
+      if (!nanoId) return null;
+      return (
+        flattenedItems.find(
+          (item) => item.entityType === type && item.entityNanoId === nanoId,
+        )?.key ?? null
+      );
+    };
+
+    const prioritizedEntityKey =
+      findByEntity('kon', activeKonNanoId) ??
+      findByEntity('sueop', activeSueopNanoId) ??
+      findByEntity('jojik', activeJojikNanoId) ??
+      findByEntity('gigwan', resolvedGigwanNanoId);
+
+    if (prioritizedEntityKey) return prioritizedEntityKey;
+
+    const scoredByPath = flattenedItems
+      .map((item) => {
+        const candidates = [item.href, item.baseHref].filter(Boolean) as string[];
+        let bestScore = -1;
+        candidates.forEach((candidate) => {
+          const normalizedCandidate = normalizePath(candidate);
+          if (isWithinPath(normalizedPathname, normalizedCandidate)) {
+            const exactMatch = normalizedPathname === normalizedCandidate ? 1 : 0;
+            const score = normalizedCandidate.length * 2 + exactMatch;
+            if (score > bestScore) bestScore = score;
+          }
+        });
+        return bestScore >= 0 ? { key: item.key, score: bestScore } : null;
+      })
+      .filter((value): value is { key: string; score: number } => Boolean(value))
+      .sort((a, b) => b.score - a.score);
+
+    if (scoredByPath[0]) return scoredByPath[0].key;
+
+    return flattenedItems[0]?.key ?? null;
+  }, [
+    activeJojikNanoId,
+    activeKonNanoId,
+    activeSueopNanoId,
+    flattenedItems,
+    normalizedPathname,
+    resolvedGigwanNanoId,
+  ]);
+
+  const getIsItemActive = useCallback((item: Item) => item.key === activeItemKey, [activeItemKey]);
 
   const filteredHistory = useMemo(() => {
     if (!authState.gigwanNanoId) return [] as AuthHistoryEntry[];
@@ -350,11 +413,9 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
 
-  const normalizedPathname = useMemo(() => normalizePath(pathname), [pathname]);
-
   const renderItems = (list: Item[]) =>
     list.map((item) => {
-      const isActive = isItemActive(item, normalizedPathname);
+      const isActive = getIsItemActive(item);
       const linkStyles = [
         ...styles.navLink[isActive ? 'active' : 'inactive'],
         styles.navLinkDepth[item.depth],
