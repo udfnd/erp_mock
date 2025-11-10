@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef } from 'react';
 import createCache from '@emotion/cache';
 import { CacheProvider, Global } from '@emotion/react';
 import { useServerInsertedHTML, useRouter } from 'next/navigation';
@@ -19,9 +19,11 @@ type AppProvidersProps = { children: ReactNode };
 export function Providers({ children }: AppProvidersProps) {
   const router = useRouter();
 
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
+  const queryClientRef = useRef<QueryClient>();
+
+  const queryClient = useMemo(() => {
+    if (!queryClientRef.current) {
+      queryClientRef.current = new QueryClient({
         defaultOptions: {
           queries: {
             retry: (failureCount, error) => {
@@ -41,8 +43,11 @@ export function Providers({ children }: AppProvidersProps) {
             },
           },
         },
-      }),
-  );
+      });
+    }
+
+    return queryClientRef.current;
+  }, []);
 
   useServerInsertedHTML(() => {
     const entries = Object.entries(cache.inserted);

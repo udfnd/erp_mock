@@ -27,10 +27,21 @@ export default function SignInPage() {
 
   const { mutateAsync } = useSignInMutation();
 
-  const [id, setId] = useState('');
-  const [password, setPassword] = useState('');
-  const [loginErrorText, setLoginErrorText] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  type SignInFormState = {
+    id: string;
+    password: string;
+    errorText: string;
+    isSubmitting: boolean;
+  };
+
+  const [formState, setFormState] = useState<SignInFormState>({
+    id: '',
+    password: '',
+    errorText: '',
+    isSubmitting: false,
+  });
+
+  const { id, password, errorText, isSubmitting } = formState;
 
   const institutionName = gigwan?.name ?? '';
 
@@ -46,23 +57,48 @@ export default function SignInPage() {
 
   const isFormValid = id.trim().length >= 1 && password.length >= 8;
   const isBusy = isGigwanLoading || isSubmitting;
-  const isButtonDisabled = !isFormValid || isBusy || Boolean(loginErrorText);
+  const isButtonDisabled = !isFormValid || isBusy || Boolean(errorText);
 
   const handleIdChange = useCallback(
     (value: string) => {
-      setId(value);
-      if (loginErrorText) setLoginErrorText('');
+      setFormState((prev) => {
+        if (prev.id === value && !prev.errorText) {
+          return prev;
+        }
+        return {
+          ...prev,
+          id: value,
+          errorText: prev.errorText ? '' : prev.errorText,
+        };
+      });
     },
-    [loginErrorText],
+    [],
   );
 
   const handlePasswordChange = useCallback(
     (value: string) => {
-      setPassword(value);
-      if (loginErrorText) setLoginErrorText('');
+      setFormState((prev) => {
+        if (prev.password === value && !prev.errorText) {
+          return prev;
+        }
+        return {
+          ...prev,
+          password: value,
+          errorText: prev.errorText ? '' : prev.errorText,
+        };
+      });
     },
-    [loginErrorText],
+    [],
   );
+
+  const setErrorText = useCallback((message: string) => {
+    setFormState((prev) => {
+      if (prev.errorText === message) {
+        return prev;
+      }
+      return { ...prev, errorText: message };
+    });
+  }, []);
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -70,7 +106,7 @@ export default function SignInPage() {
       if (!isFormValid || isBusy) return;
 
       try {
-        setIsSubmitting(true);
+        setFormState((prev) => ({ ...prev, isSubmitting: true }));
         const response = await mutateAsync({
           id: id.trim(),
           password,
@@ -87,9 +123,9 @@ export default function SignInPage() {
 
         router.replace(`/td/np/gis/${gigwanCode}/manage/home/dv`);
       } catch {
-        setLoginErrorText('아이디/패스워드가 맞지 않습니다. 다시 한 번 확인해 주세요.');
+        setErrorText('아이디/패스워드가 맞지 않습니다. 다시 한 번 확인해 주세요.');
       } finally {
-        setIsSubmitting(false);
+        setFormState((prev) => ({ ...prev, isSubmitting: false }));
       }
     },
     [
@@ -103,6 +139,7 @@ export default function SignInPage() {
       router,
       setActiveUserId,
       setAuthState,
+      setErrorText,
     ],
   );
 
@@ -148,7 +185,7 @@ export default function SignInPage() {
               onValueChange={handleIdChange}
               disabled={isBusy}
               autoComplete="username"
-              status={loginErrorText ? 'negative' : 'normal'}
+              status={errorText ? 'negative' : 'normal'}
               singleLine
             />
           </div>
@@ -160,12 +197,12 @@ export default function SignInPage() {
               value={password}
               onValueChange={handlePasswordChange}
               disabled={isBusy}
-              status={loginErrorText ? 'negative' : 'normal'}
+              status={errorText ? 'negative' : 'normal'}
               autoComplete="current-password"
               singleLine
             />
           </div>
-          {loginErrorText && <p css={styles.errorText}>{loginErrorText}</p>}
+          {errorText && <p css={styles.errorText}>{errorText}</p>}
           <div css={styles.buttonWrapper}>
             <Button
               isFull
