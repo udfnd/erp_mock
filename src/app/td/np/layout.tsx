@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { ErpLayout } from '@/global/navigation';
+import { ErpLayout } from './navigation';
 
 type AuthenticatedLayoutProps = {
   children: ReactNode;

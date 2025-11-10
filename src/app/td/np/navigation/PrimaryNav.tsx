@@ -23,6 +23,7 @@ type Item = {
   label: string;
   depth: 1 | 2 | 3;
   href?: string | null;
+  baseHref?: string | null;
   children?: Item[];
 };
 
@@ -34,6 +35,34 @@ const getParamValue = (params: ReturnType<typeof useParams>, key: string): strin
   const value = (params as Record<string, string | string[] | undefined>)[key];
   if (!value) return null;
   return typeof value === 'string' ? value : (value[0] ?? null);
+};
+
+const normalizePath = (path: string | null | undefined) => {
+  if (!path) return '/';
+  if (path.length <= 1) return path;
+  return path.replace(/\/+$/, '');
+};
+
+const isWithinPath = (currentPath: string, target: string | null | undefined) => {
+  if (!target) return false;
+  const normalizedCurrent = normalizePath(currentPath);
+  const normalizedTarget = normalizePath(target);
+  return (
+    normalizedCurrent === normalizedTarget ||
+    normalizedCurrent.startsWith(`${normalizedTarget}/`)
+  );
+};
+
+const isItemActive = (item: Item, currentPath: string): boolean => {
+  if (isWithinPath(currentPath, item.href)) {
+    return true;
+  }
+
+  if (isWithinPath(currentPath, item.baseHref)) {
+    return true;
+  }
+
+  return (item.children ?? []).some((child) => isItemActive(child, currentPath));
 };
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
@@ -150,18 +179,24 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     const list: Item[] = [];
 
     if (hierarchy.gigwan) {
+      const gigwanBaseHref = `/td/np/gis/${hierarchy.gigwan.nanoId}`;
       list.push({
         key: `gigwan-${hierarchy.gigwan.nanoId}`,
         label: hierarchy.gigwan.name,
         depth: 1,
-        href: `/td/np/gis/${hierarchy.gigwan.nanoId}/manage/home/dv`,
+        href: `${gigwanBaseHref}/manage/home/dv`,
+        baseHref: gigwanBaseHref,
       });
     }
 
-    const rawJojiks = sidebarData?.jojiks;
+    type SidebarKon = { nanoId: string; name: string };
+    type SidebarSueop = { nanoId: string; name: string; kons?: SidebarKon[] | null };
+    type SidebarJojik = { nanoId: string; name: string; sueops?: SidebarSueop[] | null };
+
+    const rawJojiks = sidebarData?.jojiks as SidebarJojik[] | undefined;
 
     if (rawJojiks && rawJojiks.length > 0) {
-      rawJojiks.forEach((jojik) => {
+      const jojikItems = rawJojiks.map<Item>((jojik) => {
         const sueopItems = (jojik.sueops ?? []).map<Item>((sueop) => {
           const konItems = (sueop.kons ?? []).map<Item>((kon) => ({
             key: `kon-${kon.nanoId}`,
@@ -179,19 +214,22 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           };
         });
 
-        list.push({
+        const jojikBaseHref = `/td/np/jos/${jojik.nanoId}`;
+
+        return {
           key: `jojik-${jojik.nanoId}`,
           label: jojik.name,
           depth: 1,
-          href: `/td/np/jos/${jojik.nanoId}/manage/home/dv`,
+          href: `${jojikBaseHref}/manage/home/dv`,
+          baseHref: jojikBaseHref,
           children: sueopItems.length > 0 ? sueopItems : undefined,
-        });
+        };
       });
 
-      return list;
+      return [...list, ...jojikItems];
     }
 
-    hierarchy.jojiks.forEach((jojik) => {
+    const jojikItems = hierarchy.jojiks.map<Item>((jojik) => {
       const sueopItems = jojik.sueops.map<Item>((sueop) => ({
         key: `sueop-${sueop.nanoId}`,
         label: sueop.name,
@@ -199,16 +237,19 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
         href: null,
       }));
 
-      list.push({
+      const jojikBaseHref = `/td/np/jos/${jojik.nanoId}`;
+
+      return {
         key: `jojik-${jojik.nanoId}`,
         label: jojik.name,
         depth: 1,
-        href: `/td/np/jos/${jojik.nanoId}/manage/home/dv`,
+        href: `${jojikBaseHref}/manage/home/dv`,
+        baseHref: jojikBaseHref,
         children: sueopItems.length > 0 ? sueopItems : undefined,
-      });
+      };
     });
 
-    return list;
+    return [...list, ...jojikItems];
   }, [hierarchy, sidebarData?.jojiks]);
 
   const filteredHistory = useMemo(() => {
@@ -309,12 +350,18 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
 
+  const normalizedPathname = useMemo(() => normalizePath(pathname), [pathname]);
+
   const renderItems = (list: Item[]) =>
     list.map((item) => {
-      const isActive = !!item.href && pathname.startsWith(item.href);
+      const isActive = isItemActive(item, normalizedPathname);
       const linkStyles = [
         ...styles.navLink[isActive ? 'active' : 'inactive'],
         styles.navLinkDepth[item.depth],
+      ] as const;
+      const labelStyles = [
+        styles.navLabel,
+        styles.navLabelWeight[isActive ? 'active' : 'inactive'],
       ] as const;
 
       return (
@@ -322,16 +369,12 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
           {item.href ? (
             <Link href={item.href} css={linkStyles} aria-current={isActive ? 'page' : undefined}>
               <span css={styles.navIcon} aria-hidden />
-              <span
-                css={[styles.navLabel, styles.navLabelWeight[isActive ? 'active' : 'inactive']]}
-              >
-                {item.label}
-              </span>
+              <span css={labelStyles}>{item.label}</span>
             </Link>
           ) : (
             <span css={linkStyles} aria-disabled="true">
               <span css={styles.navIcon} aria-hidden />
-              <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>{item.label}</span>
+              <span css={labelStyles}>{item.label}</span>
             </span>
           )}
           {item.children && item.children.length > 0 && (
