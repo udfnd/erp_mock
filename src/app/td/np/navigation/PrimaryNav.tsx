@@ -254,36 +254,66 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
   const activeSueopNanoId = useMemo(() => getParamValue(params, 'su'), [params]);
   const activeKonNanoId = useMemo(() => getParamValue(params, 'ko'), [params]);
 
-  const getIsItemActive = useCallback(
-    (item: Item): boolean => {
-      if (item.entityType === 'gigwan' && resolvedGigwanNanoId && item.entityNanoId === resolvedGigwanNanoId) {
-        return true;
-      }
+  const flattenedItems = useMemo(() => {
+    const result: Item[] = [];
+    const visit = (nodes: Item[]) => {
+      nodes.forEach((node) => {
+        result.push(node);
+        if (node.children) visit(node.children);
+      });
+    };
+    visit(items);
+    return result;
+  }, [items]);
 
-      if (item.entityType === 'jojik' && activeJojikNanoId && item.entityNanoId === activeJojikNanoId) {
-        return true;
-      }
+  const activeItemKey = useMemo(() => {
+    const findByEntity = (type: ItemEntityType, nanoId: string | null | undefined) => {
+      if (!nanoId) return null;
+      return (
+        flattenedItems.find(
+          (item) => item.entityType === type && item.entityNanoId === nanoId,
+        )?.key ?? null
+      );
+    };
 
-      if (item.entityType === 'sueop' && activeSueopNanoId && item.entityNanoId === activeSueopNanoId) {
-        return true;
-      }
+    const prioritizedEntityKey =
+      findByEntity('kon', activeKonNanoId) ??
+      findByEntity('sueop', activeSueopNanoId) ??
+      findByEntity('jojik', activeJojikNanoId) ??
+      findByEntity('gigwan', resolvedGigwanNanoId);
 
-      if (item.entityType === 'kon' && activeKonNanoId && item.entityNanoId === activeKonNanoId) {
-        return true;
-      }
+    if (prioritizedEntityKey) return prioritizedEntityKey;
 
-      if (isWithinPath(normalizedPathname, item.href)) {
-        return true;
-      }
+    const scoredByPath = flattenedItems
+      .map((item) => {
+        const candidates = [item.href, item.baseHref].filter(Boolean) as string[];
+        let bestScore = -1;
+        candidates.forEach((candidate) => {
+          const normalizedCandidate = normalizePath(candidate);
+          if (isWithinPath(normalizedPathname, normalizedCandidate)) {
+            const exactMatch = normalizedPathname === normalizedCandidate ? 1 : 0;
+            const score = normalizedCandidate.length * 2 + exactMatch;
+            if (score > bestScore) bestScore = score;
+          }
+        });
+        return bestScore >= 0 ? { key: item.key, score: bestScore } : null;
+      })
+      .filter((value): value is { key: string; score: number } => Boolean(value))
+      .sort((a, b) => b.score - a.score);
 
-      if (isWithinPath(normalizedPathname, item.baseHref)) {
-        return true;
-      }
+    if (scoredByPath[0]) return scoredByPath[0].key;
 
-      return (item.children ?? []).some((child) => getIsItemActive(child));
-    },
-    [activeJojikNanoId, activeKonNanoId, activeSueopNanoId, normalizedPathname, resolvedGigwanNanoId],
-  );
+    return flattenedItems[0]?.key ?? null;
+  }, [
+    activeJojikNanoId,
+    activeKonNanoId,
+    activeSueopNanoId,
+    flattenedItems,
+    normalizedPathname,
+    resolvedGigwanNanoId,
+  ]);
+
+  const getIsItemActive = useCallback((item: Item) => item.key === activeItemKey, [activeItemKey]);
 
   const filteredHistory = useMemo(() => {
     if (!authState.gigwanNanoId) return [] as AuthHistoryEntry[];
