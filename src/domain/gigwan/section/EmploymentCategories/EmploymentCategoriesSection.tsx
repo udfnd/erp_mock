@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { Button, IconButton } from '@/common/components';
 import { Delete, Edit, Plus } from '@/common/icons';
@@ -14,7 +14,7 @@ import type { EmploymentCategory } from '@/domain/gigwan/api/gigwan.schema';
 
 import { css } from './styles';
 import { createLocalId } from '../local-id';
-import { type FeedbackState } from '../types';
+import { useFeedback } from '../useFeedback';
 
 type EmploymentCategoriesSectionProps = {
   gigwanNanoId: string;
@@ -52,6 +52,37 @@ const mapCategoriesToFormValues = (
   })),
 });
 
+type EmploymentEditingState = Record<string, boolean>;
+
+type EmploymentEditingAction =
+  | { type: 'toggle'; localId: string }
+  | { type: 'remove'; localId: string }
+  | { type: 'reset' };
+
+const employmentEditingReducer = (
+  state: EmploymentEditingState,
+  action: EmploymentEditingAction,
+): EmploymentEditingState => {
+  switch (action.type) {
+    case 'toggle':
+      return { ...state, [action.localId]: !state[action.localId] };
+    case 'remove': {
+      if (!state[action.localId]) {
+        return state;
+      }
+      const nextState = { ...state };
+      delete nextState[action.localId];
+      return nextState;
+    }
+    case 'reset':
+      return {};
+    default:
+      return state;
+  }
+};
+
+const INITIAL_VALUES: EmploymentCategoriesFormValues = { categories: [] };
+
 export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategoriesSectionProps) {
   const queryClient = useQueryClient();
   const { data: employmentCategoriesData, error: employmentError } = useEmploymentCategoriesQuery(
@@ -60,10 +91,11 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
   );
   const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
 
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
-  const [employmentEditing, setEmploymentEditing] = useState<Record<string, boolean>>({});
-
-  const INITIAL_VALUES: EmploymentCategoriesFormValues = useMemo(() => ({ categories: [] }), []);
+  const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
+  const [employmentEditing, dispatchEmploymentEditing] = useReducer(
+    employmentEditingReducer,
+    {},
+  );
 
   const form = useForm({
     defaultValues: INITIAL_VALUES,
@@ -98,11 +130,11 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         });
         const nextValues = mapCategoriesToFormValues(data.categories);
         form.reset(nextValues);
-        setEmploymentEditing({});
-        setFeedback({ type: 'success', message: '재직 카테고리 상태가 저장되었습니다.' });
+        dispatchEmploymentEditing({ type: 'reset' });
+        showSuccess('재직 카테고리 상태가 저장되었습니다.');
         await queryClient.invalidateQueries({ queryKey: ['employmentCategories', gigwanNanoId] });
       } catch {
-        setFeedback({ type: 'error', message: '재직 카테고리 상태 저장에 실패했습니다.' });
+        showError('재직 카테고리 상태 저장에 실패했습니다.');
       }
     },
   });
@@ -133,14 +165,14 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
 
   const handleSaveEmploymentCategories = useCallback(async () => {
     if (!isDirty || employmentHasEmptyStatus) return;
-    setFeedback(null);
+    clearFeedback();
     await form.handleSubmit();
-  }, [employmentHasEmptyStatus, form, isDirty]);
+  }, [clearFeedback, employmentHasEmptyStatus, form, isDirty]);
 
   const toggleEditEmploymentStatus = useCallback((localId: string) => {
-    setEmploymentEditing((prev) => ({ ...prev, [localId]: !prev[localId] }));
-    setFeedback(null);
-  }, []);
+    dispatchEmploymentEditing({ type: 'toggle', localId });
+    clearFeedback();
+  }, [clearFeedback]);
 
   return (
     <section css={css.card}>
@@ -184,7 +216,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       css={css.statusInputField}
                                       value={value}
                                       onChange={(event) => {
-                                        setFeedback(null);
+                                        clearFeedback();
                                         field.handleChange(event.target.value);
                                       }}
                                       onBlur={field.handleBlur}
@@ -211,12 +243,8 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       size="small"
                                       onClick={() => {
                                         void statusesField.removeValue(statusIndex);
-                                        setEmploymentEditing((prev) => {
-                                          const next = { ...prev };
-                                          delete next[localId];
-                                          return next;
-                                        });
-                                        setFeedback(null);
+                                        dispatchEmploymentEditing({ type: 'remove', localId });
+                                        clearFeedback();
                                       }}
                                       aria-label={`${value || '상태'} 삭제`}
                                       title="삭제"
@@ -243,8 +271,8 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                               isHwalseong: true,
                               localId,
                             });
-                            setEmploymentEditing((prev) => ({ ...prev, [localId]: true }));
-                            setFeedback(null);
+                            dispatchEmploymentEditing({ type: 'toggle', localId });
+                            clearFeedback();
                           }}
                         >
                           추가

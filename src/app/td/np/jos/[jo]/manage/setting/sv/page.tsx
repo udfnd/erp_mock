@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { z } from 'zod';
 
 import { apiClient } from '@/global';
@@ -248,8 +248,34 @@ export default function JoManageSettingPage() {
     feedback: null,
   });
 
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [savingTarget, setSavingTarget] = useState<'basic' | 'open' | null>(null);
+  type UiStatusState = {
+    copyStatus: 'idle' | 'success' | 'error';
+    savingTarget: 'basic' | 'open' | null;
+  };
+
+  type UiStatusAction =
+    | { type: 'setCopyStatus'; status: UiStatusState['copyStatus'] }
+    | { type: 'setSavingTarget'; target: UiStatusState['savingTarget'] };
+
+  const uiStatusReducer = (state: UiStatusState, action: UiStatusAction): UiStatusState => {
+    switch (action.type) {
+      case 'setCopyStatus':
+        if (state.copyStatus === action.status) return state;
+        return { ...state, copyStatus: action.status };
+      case 'setSavingTarget':
+        if (state.savingTarget === action.target) return state;
+        return { ...state, savingTarget: action.target };
+      default:
+        return state;
+    }
+  };
+
+  const [uiStatus, dispatchUiStatus] = useReducer(uiStatusReducer, {
+    copyStatus: 'idle',
+    savingTarget: null,
+  });
+
+  const { copyStatus, savingTarget } = uiStatus;
 
   useEffect(() => {
     if (!jojik) return;
@@ -306,7 +332,7 @@ export default function JoManageSettingPage() {
       payload.canHadaLinkRequestSangtaeNanoId = jojik.canHadaLinkRequestSangtaeNanoId;
     }
 
-    setSavingTarget('basic');
+    dispatchUiStatus({ type: 'setSavingTarget', target: 'basic' });
     updateJojikMutation.mutate(payload, {
       onSuccess: (data) => {
         dispatchBasic({
@@ -335,7 +361,7 @@ export default function JoManageSettingPage() {
         });
       },
       onSettled: () => {
-        setSavingTarget(null);
+        dispatchUiStatus({ type: 'setSavingTarget', target: null });
       },
     });
   }, [
@@ -427,7 +453,7 @@ export default function JoManageSettingPage() {
       canHadaLinkRequestSangtaeNanoId: openState.canHadaLinkRequestNanoId,
     };
 
-    setSavingTarget('open');
+    dispatchUiStatus({ type: 'setSavingTarget', target: 'open' });
     updateJojikMutation.mutate(payload, {
       onSuccess: (data) => {
         dispatchOpenState({
@@ -456,7 +482,7 @@ export default function JoManageSettingPage() {
         });
       },
       onSettled: () => {
-        setSavingTarget(null);
+        dispatchUiStatus({ type: 'setSavingTarget', target: null });
       },
     });
   }, [
@@ -478,11 +504,11 @@ export default function JoManageSettingPage() {
     if (!linkRequestUrl) return;
     try {
       await navigator.clipboard.writeText(linkRequestUrl);
-      setCopyStatus('success');
-      setTimeout(() => setCopyStatus('idle'), 2000);
+      dispatchUiStatus({ type: 'setCopyStatus', status: 'success' });
+      setTimeout(() => dispatchUiStatus({ type: 'setCopyStatus', status: 'idle' }), 2000);
     } catch (error) {
-      setCopyStatus('error');
-      setTimeout(() => setCopyStatus('idle'), 2000);
+      dispatchUiStatus({ type: 'setCopyStatus', status: 'error' });
+      setTimeout(() => dispatchUiStatus({ type: 'setCopyStatus', status: 'idle' }), 2000);
     }
   }, [linkRequestUrl]);
 

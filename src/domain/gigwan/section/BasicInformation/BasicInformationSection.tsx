@@ -2,13 +2,13 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { useCallback, useMemo, useRef, useEffect } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { useGigwanQuery, useUpdateGigwanMutation } from '@/domain/gigwan/api';
 
 import { css } from './styles';
-import { type FeedbackState } from '../types';
+import { useFeedback } from '../useFeedback';
 
 type BasicInformationSectionProps = { gigwanNanoId: string };
 
@@ -24,7 +24,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
   const queryClient = useQueryClient();
   const { data: gigwan } = useGigwanQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
   const updateMutation = useUpdateGigwanMutation(gigwanNanoId);
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
+  const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
 
   const defaultsRef = useRef<BasicInformationDefaults>(INITIAL_DEFAULTS);
 
@@ -51,14 +51,14 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
         defaultsRef.current = nextDefaults;
         form.reset(nextDefaults);
 
-        setFeedback({ type: 'success', message: '변경사항이 저장되었습니다.' });
+        showSuccess('변경사항이 저장되었습니다.');
 
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] }),
           queryClient.invalidateQueries({ queryKey: ['gigwanName', gigwanNanoId] }),
         ]);
       } catch {
-        setFeedback({ type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' });
+        showError('저장에 실패했습니다. 다시 시도해주세요.');
       }
     },
   });
@@ -89,9 +89,9 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
   const canSave = isDirty && !hasErrors && !updateMutation.isPending;
 
   const handleSave = useCallback(async () => {
-    setFeedback(null);
+    clearFeedback();
     await form.handleSubmit();
-  }, [form]);
+  }, [clearFeedback, form]);
 
   return (
     <section css={css.card}>
@@ -122,7 +122,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
                 placeholder="기관 이름을 입력하세요"
                 value={field.state.value}
                 onValueChange={(v) => {
-                  setFeedback(null);
+                  clearFeedback();
                   field.handleChange(v);
                 }}
                 onBlur={field.handleBlur}
@@ -154,7 +154,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
                 placeholder="기관의 특징이나 안내 문구를 입력하세요"
                 value={field.state.value}
                 onValueChange={(v) => {
-                  setFeedback(null);
+                  clearFeedback();
                   field.handleChange(v);
                 }}
                 onBlur={field.handleBlur}

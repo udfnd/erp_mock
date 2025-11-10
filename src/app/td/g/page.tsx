@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FormEvent, useCallback, useState } from 'react';
+import { FormEvent, useCallback, useMemo, useState } from 'react';
 
 import { getGigwanName } from '@/domain/gigwan/api';
 import { ArrowLgRight, Progress } from '@/common/icons';
@@ -12,21 +12,30 @@ import { color } from '@/style';
 
 export default function EnterCodePage() {
   const router = useRouter();
-  const [code, setCode] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, setState] = useState({
+    code: '',
+    errorMessage: '',
+    isLoading: false,
+  });
+
+  const { code, errorMessage, isLoading } = state;
 
   const handleChange = useCallback(
     (value: string) => {
       const sanitized = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8);
-      setCode((prev) => {
-        if (errorMessage && sanitized !== prev) {
-          setErrorMessage('');
+      setState((prev) => {
+        if (prev.code === sanitized && !prev.errorMessage) {
+          return prev;
         }
-        return sanitized;
+
+        return {
+          ...prev,
+          code: sanitized,
+          errorMessage: prev.errorMessage ? '' : prev.errorMessage,
+        };
       });
     },
-    [errorMessage],
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -34,26 +43,36 @@ export default function EnterCodePage() {
       event.preventDefault();
       if (code.length !== 8 || isLoading) return;
 
-      setIsLoading(true);
+      setState((prev) => ({
+        ...prev,
+        isLoading: true,
+        errorMessage: prev.errorMessage ? '' : prev.errorMessage,
+      }));
       try {
         await getGigwanName(code);
         router.push(`/td/g/[gi]/login?code=${code}`);
+        setState((prev) => ({ ...prev, isLoading: false }));
       } catch (error) {
         console.error('기관 코드 확인 실패', error);
-        setErrorMessage('기관 코드를 확인해주세요.');
-      } finally {
-        setIsLoading(false);
+        setState((prev) => {
+          const nextErrorMessage = '기관 코드를 확인해주세요.';
+          if (prev.errorMessage === nextErrorMessage && !prev.isLoading) {
+            return prev;
+          }
+
+          return { ...prev, isLoading: false, errorMessage: nextErrorMessage };
+        });
       }
     },
     [code, isLoading, router],
   );
 
   const isButtonDisabled = code.length !== 8 || isLoading;
-  const helperText = () => {
+  const helperText = useMemo(() => {
     if (errorMessage) return errorMessage;
-    else if (isLoading) return '잠시만 기다려 주세요...';
-    else return '코드는 8자리 입니다.';
-  };
+    if (isLoading) return '잠시만 기다려 주세요...';
+    return '코드는 8자리 입니다.';
+  }, [errorMessage, isLoading]);
 
   return (
     <div css={styles.page}>
@@ -70,7 +89,7 @@ export default function EnterCodePage() {
             onValueChange={handleChange}
             maxLength={8}
             status={errorMessage ? 'negative' : 'normal'}
-            helperText={helperText()}
+            helperText={helperText}
             disabled={isLoading}
           />
           <div css={styles.buttonWrapper}>

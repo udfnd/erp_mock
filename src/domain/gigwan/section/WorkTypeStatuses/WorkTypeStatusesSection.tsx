@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { Button, IconButton, LabeledInput } from '@/common/components';
 import { Delete, Plus } from '@/common/icons';
@@ -14,7 +14,7 @@ import type { WorkTypeSangtae } from '@/domain/gigwan/api';
 
 import { css } from './styles';
 import { createLocalId } from '../local-id';
-import { type FeedbackState } from '../types';
+import { useFeedback } from '../useFeedback';
 
 type WorkTypeStatusesSectionProps = {
   gigwanNanoId: string;
@@ -51,7 +51,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
   );
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
 
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
+  const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
 
   const form = useForm({
     defaultValues: INITIAL_VALUES,
@@ -79,10 +79,10 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         const data = await upsertWorkTypeStatusesMutation.mutateAsync({ sangtaes });
         const nextValues = mapWorkTypeSangtaesToFormValues(data.sangtaes);
         form.reset(nextValues);
-        setFeedback({ type: 'success', message: '근무 형태 커스텀 상태가 저장되었습니다.' });
+        showSuccess('근무 형태 커스텀 상태가 저장되었습니다.');
         await queryClient.invalidateQueries({ queryKey: ['workTypeCustomSangtaes', gigwanNanoId] });
       } catch {
-        setFeedback({ type: 'error', message: '근무 형태 상태 저장에 실패했습니다.' });
+        showError('근무 형태 상태 저장에 실패했습니다.');
       }
     },
   });
@@ -110,9 +110,9 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
 
   const handleSaveWorkTypeStatuses = useCallback(async () => {
     if (!isDirty || workTypeHasEmptyStatus) return;
-    setFeedback(null);
+    clearFeedback();
     await form.handleSubmit();
-  }, [form, isDirty, workTypeHasEmptyStatus]);
+  }, [clearFeedback, form, isDirty, workTypeHasEmptyStatus]);
 
   return (
     <section css={css.card}>
@@ -141,19 +141,19 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                             placeholder="근무 형태 상태 이름"
                             value={value}
                             onValueChange={(v) => {
-                              setFeedback(null);
+                              clearFeedback();
                               field.handleChange(v);
                             }}
                             onBlur={field.handleBlur}
                             maxLength={20}
                           />
-                          <IconButton
-                            styleType="normal"
-                            size="small"
-                            onClick={() => {
-                              void statusesField.removeValue(statusIndex);
-                              setFeedback(null);
-                            }}
+                            <IconButton
+                              styleType="normal"
+                              size="small"
+                              onClick={() => {
+                                void statusesField.removeValue(statusIndex);
+                                clearFeedback();
+                              }}
                             aria-label={`${value || '상태'} 삭제`}
                           >
                             <Delete width={16} height={16} />
@@ -177,7 +177,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                     localId: createLocalId(),
                     isHwalseong: true,
                   });
-                  setFeedback(null);
+                  clearFeedback();
                 }}
               >
                 추가
