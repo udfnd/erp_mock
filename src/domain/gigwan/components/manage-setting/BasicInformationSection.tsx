@@ -70,7 +70,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
     defaultsRef.current = nextDefaults;
     form.reset(nextDefaults);
     setFeedback(null);
-  }, [gigwan, form]);
+  }, [gigwan?.name, gigwan?.intro, form]);
 
   const { isDirty, nameMeta, introMeta } = useStore(form.store, (state) => ({
     isDirty: state.isDirty,
