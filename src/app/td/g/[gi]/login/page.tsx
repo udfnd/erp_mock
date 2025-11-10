@@ -7,7 +7,7 @@ import { useSignInMutation } from '@/domain/auth/api';
 import { useGigwanNameQuery } from '@/domain/gigwan/api';
 import { ArrowLgRight, Progress } from '@/common/icons';
 import { Button, Textfield } from '@/common/components';
-import { useAuth } from '@/global/auth';
+import { useAuthSession } from '@/global/auth';
 
 import * as styles from './style';
 import { color } from '@/style';
@@ -17,7 +17,7 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const gigwanCode = searchParams.get('code') ?? '';
 
-  const { state, isReady, isAuthenticated, setAuthState } = useAuth();
+  const { state, isReady, isAuthenticated, setAuthState } = useAuthSession();
 
   const {
     data: gigwan,

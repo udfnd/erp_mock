@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { subscribeWithSelector } from 'zustand/middleware';
@@ -17,7 +18,7 @@ export type AuthHistoryEntry = {
 
 export type UserMeta = {
   sayongjaNanoId: string;
-  sayongjaName: string;
+  sayongjaName: string | null;
   gigwanName: string | null;
   gigwanNanoId: string | null;
   loginId: string | null;
@@ -162,6 +163,103 @@ export const useIsAuthenticated = () => useAuth((s) => s.isAuthenticated());
 export const useAccessToken = () => useAuth((s) => s.getCurrentAccessToken());
 export const useActiveUserMeta = () => useAuth((s) => s.getActiveUserMeta());
 export const useUnauthorizedTick = () => useAuth((s) => s.unauthorizedTick);
+
+export type AuthSessionUpdate = {
+  accessToken: string;
+  sayongjaNanoId: string;
+  gigwanNanoId?: string | null;
+  gigwanName?: string | null;
+  loginId?: string | null;
+  sayongjaName?: string | null;
+  tokenSource?: TokenSource;
+};
+
+const resolveField = <T,>(value: T | undefined, fallback: T): T =>
+  value === undefined ? fallback : value;
+
+export const setAuthSession = ({
+  accessToken,
+  sayongjaNanoId,
+  gigwanNanoId,
+  gigwanName,
+  loginId,
+  sayongjaName,
+  tokenSource = 'api',
+}: AuthSessionUpdate) => {
+  const store = useAuth.getState();
+  const previous = store.users[sayongjaNanoId] ?? null;
+  store.upsertUser({
+    sayongjaNanoId,
+    sayongjaName: resolveField(sayongjaName, previous?.sayongjaName ?? null),
+    gigwanName: resolveField(gigwanName, previous?.gigwanName ?? null),
+    gigwanNanoId: resolveField(gigwanNanoId, previous?.gigwanNanoId ?? null),
+    loginId: resolveField(loginId, previous?.loginId ?? null),
+  });
+  store.setAccessTokenFor(sayongjaNanoId, accessToken, tokenSource);
+  store.setActiveUser(sayongjaNanoId);
+};
+
+export const clearAuthSession = () => {
+  useAuth.getState().clearAll();
+};
+
+export const useAuthSession = () => {
+  const isReady = useAuth((s) => s.isReady);
+  const isAuthenticated = useIsAuthenticated();
+  const accessToken = useAccessToken();
+  const activeMeta = useActiveUserMeta();
+
+  const state = useMemo(
+    () => ({
+      accessToken,
+      sayongjaNanoId: activeMeta?.sayongjaNanoId ?? null,
+      gigwanNanoId: activeMeta?.gigwanNanoId ?? null,
+      gigwanName: activeMeta?.gigwanName ?? null,
+      loginId: activeMeta?.loginId ?? null,
+    }),
+    [accessToken, activeMeta],
+  );
+
+  const setAuthState = useCallback(
+    (update: AuthSessionUpdate) => {
+      setAuthSession(update);
+    },
+    [],
+  );
+
+  const clearAuthState = useCallback(() => {
+    clearAuthSession();
+  }, []);
+
+  return {
+    state,
+    isReady,
+    isAuthenticated,
+    setAuthState,
+    clearAuthState,
+  };
+};
+
+export const useAuthHistory = () => {
+  const history = useAuth((s) => s.history);
+
+  const refresh = useCallback(() => {
+    useAuth.setState((s) => ({ history: [...s.history] }));
+  }, []);
+
+  const remove = useCallback((userId: string) => {
+    useAuth.getState().removeHistory(userId);
+  }, []);
+
+  return { history, refresh, remove };
+};
+
+export const upsertAuthHistoryEntry = (
+  entry: Omit<AuthHistoryEntry, 'lastUsedAt'> &
+    Partial<Pick<AuthHistoryEntry, 'lastUsedAt'>>,
+) => {
+  useAuth.getState().upsertHistory(entry);
+};
 
 export const authGetState = () => useAuth.getState();
 export const authSetState = (
