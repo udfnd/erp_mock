@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 
 import { useGigwanNameQuery } from '@/domain/gigwan/api';
-import { useAuth } from '@/global/auth';
+import { useIsAuthenticated } from '@/global/auth';
 
 import { cssObj } from './style';
 
@@ -18,7 +18,7 @@ export default function GigwanHomePage() {
   const params = useParams<PageParams>();
   const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
 
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useIsAuthenticated();
 
   const { data: gigwan } = useGigwanNameQuery(gigwanNanoId, {
     enabled: isAuthenticated && Boolean(gigwanNanoId),

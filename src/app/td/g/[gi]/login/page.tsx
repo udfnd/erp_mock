@@ -7,7 +7,7 @@ import { useSignInMutation } from '@/domain/auth/api';
 import { useGigwanNameQuery } from '@/domain/gigwan/api';
 import { ArrowLgRight, Progress } from '@/common/icons';
 import { Button, Textfield } from '@/common/components';
-import { useAuth } from '@/global/auth';
+import { useAuth, useActiveUserMeta, useIsAuthenticated } from '@/global/auth';
 
 import * as styles from './style';
 import { color } from '@/style';
@@ -17,7 +17,13 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const gigwanCode = searchParams.get('code') ?? '';
 
-  const { state, isReady, isAuthenticated, setAuthState } = useAuth();
+  const isReady = useAuth((s) => s.isReady);
+  const isAuthenticated = useIsAuthenticated();
+  const activeUserMeta = useActiveUserMeta();
+  const activeGigwanNanoId = activeUserMeta?.gigwanNanoId ?? null;
+  const upsertUser = useAuth((s) => s.upsertUser);
+  const setActiveUser = useAuth((s) => s.setActiveUser);
+  const setAccessTokenFor = useAuth((s) => s.setAccessTokenFor);
 
   const {
     data: gigwan,
@@ -76,13 +82,15 @@ export default function SignInPage() {
           password,
           gigwanNanoId: gigwanCode,
         });
-        setAuthState({
-          accessToken: response.accessToken,
+        setAccessTokenFor(response.nanoId, response.accessToken);
+        upsertUser({
           sayongjaNanoId: response.nanoId,
-          gigwanNanoId: gigwanCode,
-          gigwanName: institutionName,
+          sayongjaName: id.trim(),
+          gigwanNanoId: gigwanCode || null,
+          gigwanName: institutionName || null,
           loginId: id.trim(),
         });
+        setActiveUser(response.nanoId);
         router.replace(`/td/np/gis/${gigwanCode}/manage/home/dv`);
       } catch (error) {
         console.error('로그인 실패', error);
@@ -100,7 +108,9 @@ export default function SignInPage() {
       mutateAsync,
       password,
       router,
-      setAuthState,
+      setAccessTokenFor,
+      setActiveUser,
+      upsertUser,
     ],
   );
 
@@ -117,16 +127,16 @@ export default function SignInPage() {
   }, [isGigwanError, router]);
 
   useEffect(() => {
-    if (isReady && isAuthenticated && state.gigwanNanoId) {
-      router.replace(`/td/np/gis/${state.gigwanNanoId}/manage/home/dv`);
+    if (isReady && isAuthenticated && activeGigwanNanoId) {
+      router.replace(`/td/np/gis/${activeGigwanNanoId}/manage/home/dv`);
     }
-  }, [isAuthenticated, isReady, router, state.gigwanNanoId]);
+  }, [activeGigwanNanoId, isAuthenticated, isReady, router]);
 
   const isRedirecting =
     !gigwanCode ||
     gigwanCode.length !== 8 ||
     isGigwanError ||
-    (isReady && isAuthenticated && Boolean(state.gigwanNanoId));
+    (isReady && isAuthenticated && Boolean(activeGigwanNanoId));
 
   if (isRedirecting) {
     return null;
