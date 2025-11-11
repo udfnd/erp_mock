@@ -1,8 +1,9 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
 
 import { apiClient } from '@/global';
 
 import { parseOrThrow } from '../../util';
+import { gigwanQueryKeys } from './gigwan.query-keys';
 import {
   GigwanSidebarResponse,
   GigwanSidebarResponseSchema,
@@ -35,7 +36,7 @@ export const getGigwanSidebar = async (nanoId: string): Promise<GigwanSidebarRes
 
 export const useGigwanSidebarQuery = (nanoId: string, options?: { enabled?: boolean }) =>
   useQuery<GigwanSidebarResponse, unknown>({
-    queryKey: ['gigwanSidebar', nanoId],
+    queryKey: gigwanQueryKeys.sidebar(nanoId),
     queryFn: () => getGigwanSidebar(nanoId),
     enabled: options?.enabled ?? true,
   });
@@ -47,7 +48,7 @@ export const getGigwanName = async (nanoId: string): Promise<GigwanBasicGet> => 
 
 export const useGigwanNameQuery = (nanoId: string, options?: { enabled?: boolean }) =>
   useQuery<GigwanBasicGet, unknown>({
-    queryKey: ['gigwanName', nanoId],
+    queryKey: gigwanQueryKeys.name(nanoId),
     queryFn: () => getGigwanName(nanoId),
     enabled: options?.enabled ?? true,
   });
@@ -58,8 +59,8 @@ export const getGigwan = async (nanoId: string): Promise<GigwanGet> => {
 };
 
 export const useGigwanQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GigwanGet, unknown, GigwanGet, readonly ['gigwan', string]>({
-    queryKey: ['gigwan', nanoId] as const,
+  useQuery<GigwanGet, unknown, GigwanGet, ReturnType<typeof gigwanQueryKeys.detail>>({
+    queryKey: gigwanQueryKeys.detail(nanoId),
     queryFn: () => getGigwan(nanoId),
     enabled: options?.enabled ?? true,
     refetchOnWindowFocus: false,
@@ -88,7 +89,7 @@ export const getEmploymentCategories = async (
 
 export const useEmploymentCategoriesQuery = (nanoId: string, options?: { enabled?: boolean }) =>
   useQuery<GetEmploymentCategoriesResponse, unknown>({
-    queryKey: ['employmentCategories', nanoId],
+    queryKey: gigwanQueryKeys.employmentCategories(nanoId),
     queryFn: () => getEmploymentCategories(nanoId),
     enabled: options?.enabled ?? true,
   });
@@ -116,10 +117,23 @@ export const getWorkTypeCustomSangtaes = async (
 
 export const useWorkTypeCustomSangtaesQuery = (nanoId: string, options?: { enabled?: boolean }) =>
   useQuery<GetWorkTypeSangtaesResponse, unknown>({
-    queryKey: ['workTypeCustomSangtaes', nanoId],
+    queryKey: gigwanQueryKeys.workTypeCustomSangtaes(nanoId),
     queryFn: () => getWorkTypeCustomSangtaes(nanoId),
     enabled: options?.enabled ?? true,
   });
+
+export const invalidateGigwanIdentityQueries = async (
+  queryClient: QueryClient,
+  nanoId: string,
+) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: gigwanQueryKeys.detail(nanoId) }),
+    queryClient.invalidateQueries({ queryKey: gigwanQueryKeys.name(nanoId) }),
+    queryClient.invalidateQueries({ queryKey: gigwanQueryKeys.sidebar(nanoId) }),
+  ]);
+
+export const invalidateGigwanAllQueries = (queryClient: QueryClient, nanoId: string) =>
+  queryClient.invalidateQueries({ queryKey: gigwanQueryKeys.byNanoId(nanoId) });
 
 export const upsertWorkTypeCustomSangtaes = async (
   nanoId: string,

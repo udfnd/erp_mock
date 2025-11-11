@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Button, IconButton, LabeledInput } from '@/common/components';
 import { Delete, Plus } from '@/common/icons';
 import {
+  gigwanQueryKeys,
   useUpsertWorkTypeCustomSangtaesMutation,
   useWorkTypeCustomSangtaesQuery,
 } from '@/domain/gigwan/api';
@@ -80,7 +81,9 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         const nextValues = mapWorkTypeSangtaesToFormValues(data.sangtaes);
         form.reset(nextValues);
         showSuccess('근무 형태 커스텀 상태가 저장되었습니다.');
-        await queryClient.invalidateQueries({ queryKey: ['workTypeCustomSangtaes', gigwanNanoId] });
+        await queryClient.invalidateQueries({
+          queryKey: gigwanQueryKeys.workTypeCustomSangtaes(gigwanNanoId),
+        });
       } catch {
         showError('근무 형태 상태 저장에 실패했습니다.');
       }
@@ -147,13 +150,13 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                             onBlur={field.handleBlur}
                             maxLength={20}
                           />
-                            <IconButton
-                              styleType="normal"
-                              size="small"
-                              onClick={() => {
-                                void statusesField.removeValue(statusIndex);
-                                clearFeedback();
-                              }}
+                          <IconButton
+                            styleType="normal"
+                            size="small"
+                            onClick={() => {
+                              void statusesField.removeValue(statusIndex);
+                              clearFeedback();
+                            }}
                             aria-label={`${value || '상태'} 삭제`}
                           >
                             <Delete width={16} height={16} />
