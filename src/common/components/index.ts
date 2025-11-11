@@ -7,3 +7,5 @@ export * from './Toggle';
 export * from './Chip';
 export * from './Checkbox';
 export * from './LabeledInput';
+export * from './Modal';
+export * from './Toast';
