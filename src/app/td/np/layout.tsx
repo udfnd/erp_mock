@@ -1,15 +1,10 @@
 import { ReactNode } from 'react';
-import { PrimaryNav } from '@/global/navigation';
+import { NavigationFrame } from './NavigationFrame';
 
 type AuthenticatedLayoutProps = {
   children: ReactNode;
 };
 
 export default function NpPrimaryNavigation({ children }: AuthenticatedLayoutProps) {
-  return (
-    <>
-      <PrimaryNav />
-      {children}
-    </>
-  );
+  return <NavigationFrame>{children}</NavigationFrame>;
 }
