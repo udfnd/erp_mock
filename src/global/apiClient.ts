@@ -9,9 +9,9 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 import {
+  authStore,
   setActiveUserId,
   setAccessTokenFor as cacheAccessTokenFor,
-  authGetState,
 } from '@/global/auth';
 import type { TokenSource } from '@/global/auth';
 
@@ -99,11 +99,13 @@ const refreshClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-const getActiveUserId = () => authGetState().activeUserId;
-const getAccessTokenFor = (userId: string) => authGetState().tokensByUser[userId] ?? null;
+const getAuthState = () => authStore.getState();
+const getActiveUserId = () => getAuthState().activeUserId;
+const getAccessTokenFor = (userId: string) => getAuthState().tokensByUser[userId] ?? null;
 const tokenForActive = () => {
-  const uid = getActiveUserId();
-  return uid ? getAccessTokenFor(uid) : authGetState().getCurrentAccessToken();
+  const state = getAuthState();
+  const uid = state.activeUserId;
+  return uid ? state.tokensByUser[uid] ?? null : state.getCurrentAccessToken();
 };
 const setAccessTokenFor = (userId: string, token: string | null, src: TokenSource = 'api') =>
   cacheAccessTokenFor(userId, token, src);
@@ -113,7 +115,7 @@ export const configureUnauthorizedHandler = (fn: (() => void) | null) => {
   onUnauthorized = fn;
 };
 const finalizeUnauthorized = () => {
-  authGetState().handleUnauthorized();
+  getAuthState().handleUnauthorized();
   onUnauthorized?.();
 };
 
@@ -173,11 +175,6 @@ const refreshAccessTokenFor = (userId: string) => {
   return p;
 };
 
-export const clearAuthHeader = () => {
-  const uid = getActiveUserId();
-  if (uid) setAccessTokenFor(uid, null, 'clear');
-};
-
 export async function switchUser(userId: string, onNeedLogin?: (id: string) => void) {
   const cached = getAccessTokenFor(userId);
   if (cached && !isTokenExpiring(cached)) {
@@ -193,15 +190,6 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
     if (onNeedLogin) onNeedLogin(userId);
     else throw new Error('Refresh token not found for this user. Redirect to sign-in.');
   }
-}
-
-export async function hydrateAccessTokenFor(userId: string) {
-  const cached = getAccessTokenFor(userId);
-  if (cached && !isTokenExpiring(cached)) return;
-  try {
-    const newToken = await refreshAccessTokenFor(userId);
-    if (getActiveUserId() === userId) setAccessTokenFor(userId, newToken, 'refresh');
-  } catch {}
 }
 
 export const apiClient: AxiosInstance = axios.create({

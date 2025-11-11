@@ -6,6 +6,7 @@ import { useCallback, useMemo } from 'react';
 import { Chip } from '@/common/components';
 
 import { NavItem, getDynamicHref } from './nav.data';
+import { useNavigationHierarchy } from './NavigationHierarchyContext';
 import * as styles from './SecondaryNav.style';
 
 import type { PrimaryNavHierarchy } from './navigation.types';
@@ -26,26 +27,29 @@ export const SecondaryNav = ({ navItems, hierarchy }: Props) => {
   const params = useParams();
   const router = useRouter();
 
+  const hierarchyFromContext = useNavigationHierarchy();
+  const effectiveHierarchy = hierarchy ?? hierarchyFromContext;
+
   const gigwanParam = useMemo(() => getParamValue(params, 'gi'), [params]);
   const jojikParam = useMemo(() => getParamValue(params, 'jo'), [params]);
 
   const gigwanName = useMemo(() => {
-    if (!hierarchy?.gigwan) {
+    if (!effectiveHierarchy?.gigwan) {
       return gigwanParam;
     }
 
-    if (gigwanParam && hierarchy.gigwan.nanoId !== gigwanParam) {
+    if (gigwanParam && effectiveHierarchy.gigwan.nanoId !== gigwanParam) {
       return gigwanParam;
     }
 
-    return hierarchy.gigwan.name;
-  }, [gigwanParam, hierarchy]);
+    return effectiveHierarchy.gigwan.name;
+  }, [effectiveHierarchy, gigwanParam]);
 
   const jojikName = useMemo(() => {
     if (!jojikParam) return null;
-    const matched = hierarchy?.jojiks.find((item) => item.nanoId === jojikParam);
+    const matched = effectiveHierarchy?.jojiks.find((item) => item.nanoId === jojikParam);
     return matched?.name ?? jojikParam;
-  }, [hierarchy, jojikParam]);
+  }, [effectiveHierarchy, jojikParam]);
 
   const resolveDisplayName = useCallback(
     (name: string) => {

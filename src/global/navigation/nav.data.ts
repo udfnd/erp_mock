@@ -101,3 +101,14 @@ export const secondaryNavItems: Record<string, NavItem[]> = {
     },
   ],
 };
+
+type SecondaryNavKey = keyof typeof secondaryNavItems;
+
+export const getSecondaryNavGroup = (key: SecondaryNavKey): NavItem[] =>
+  secondaryNavItems[key] ?? [];
+
+export const getTertiaryNavItems = (key: SecondaryNavKey, basePath: string): NavItem[] => {
+  const group = getSecondaryNavGroup(key);
+  const matched = group.find((item) => item.basePath === basePath);
+  return matched?.items ?? [];
+};

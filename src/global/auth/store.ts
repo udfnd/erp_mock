@@ -48,7 +48,7 @@ type AuthState = {
 const safeStorage =
   typeof window === 'undefined' ? undefined : createJSONStorage(() => localStorage);
 
-export const useAuth = create<AuthState>()(
+export const useAuthStore = create<AuthState>()(
   subscribeWithSelector(
     devtools(
       persist(
@@ -148,24 +148,27 @@ export const useAuth = create<AuthState>()(
   ),
 );
 
-export const useIsAuthenticated = () => useAuth((s) => s.isAuthenticated());
-export const useAccessToken = () => useAuth((s) => s.getCurrentAccessToken());
-export const useActiveUserMeta = () => useAuth((s) => s.getActiveUserMeta());
-export const useUnauthorizedTick = () => useAuth((s) => s.unauthorizedTick);
+export const authStore = {
+  getState: () => useAuthStore.getState(),
+  setState: (
+    updater: Partial<AuthState> | ((s: AuthState) => Partial<AuthState>),
+    replace?: boolean,
+  ) => useAuthStore.setState(updater, replace),
+};
 
-export const authGetState = () => useAuth.getState();
-export const authSetState = (
-  updater: Partial<AuthState> | ((s: AuthState) => Partial<AuthState>),
-) => useAuth.setState(updater);
+export const useIsAuthenticated = () => useAuthStore((s) => s.isAuthenticated());
+export const useAccessToken = () => useAuthStore((s) => s.getCurrentAccessToken());
+export const useActiveUserMeta = () => useAuthStore((s) => s.getActiveUserMeta());
+export const useUnauthorizedTick = () => useAuthStore((s) => s.unauthorizedTick);
 
-export const setActiveUserId = (id: string | null) => useAuth.getState().setActiveUser(id);
+export const setActiveUserId = (id: string | null) => useAuthStore.getState().setActiveUser(id);
 
 export type AuthStatePatch = Partial<
   Pick<UserMeta, 'gigwanNanoId' | 'gigwanName' | 'sayongjaName' | 'loginId'>
 >;
 
 export const setAuthState = (patch: AuthStatePatch): void => {
-  const st = useAuth.getState();
+  const st = useAuthStore.getState();
   const uid = st.activeUserId;
   if (!uid) return;
   const prev = st.users[uid];
@@ -173,10 +176,10 @@ export const setAuthState = (patch: AuthStatePatch): void => {
   st.upsertUser({ ...prev, ...patch, sayongjaNanoId: uid });
 };
 
-export const upsertUser = (meta: UserMeta) => useAuth.getState().upsertUser(meta);
-export const clearAll = () => useAuth.getState().clearAll();
+export const upsertUser = (meta: UserMeta) => useAuthStore.getState().upsertUser(meta);
+export const clearAll = () => useAuthStore.getState().clearAll();
 export const setAccessTokenFor = (
   userId: string,
   token: string | null,
   source: TokenSource = 'api',
-) => useAuth.getState().setAccessTokenFor(userId, token, source);
+) => useAuthStore.getState().setAccessTokenFor(userId, token, source);

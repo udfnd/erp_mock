@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { z } from 'zod';
 
 import { apiClient } from '@/global';
+import { TertiaryNav } from '@/global/navigation';
+import { getTertiaryNavItems } from '@/global/navigation/nav.data';
 import {
   type JojikDetailResponse,
   type UpdateJojikRequest,
@@ -17,6 +19,8 @@ import { Copy } from '@/common/icons';
 import { LabeledInput, Checkbox, Button, Chip, Textfield } from '@/common/components';
 
 import { cssObj } from './style';
+
+const JOJIK_MANAGE_TERTIARY_ITEMS = getTertiaryNavItems('/td/np/jos', '/td/np/jos/[jo]/manage');
 
 type FeedbackState = { type: 'success' | 'error'; message: string } | null;
 
@@ -524,8 +528,10 @@ export default function JoManageSettingPage() {
   const schoolsIsSaving = updateJojikSchoolsMutation.isPending;
 
   return (
-    <div css={cssObj.page}>
-      <section css={cssObj.card}>
+    <>
+      <TertiaryNav navItems={JOJIK_MANAGE_TERTIARY_ITEMS} />
+      <div css={cssObj.page}>
+        <section css={cssObj.card}>
         <div css={cssObj.cardHeader}>
           <div css={cssObj.cardTitleGroup}>
             <h2 css={cssObj.cardTitle}>조직 기본 설정</h2>
@@ -716,7 +722,8 @@ export default function JoManageSettingPage() {
             {openIsSaving ? '저장 중...' : '저장'}
           </Button>
         </footer>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }

@@ -8,6 +8,10 @@ import {
   EmploymentCategoriesSection,
   WorkTypeStatusesSection,
 } from '@/domain/gigwan/section';
+import { TertiaryNav } from '@/global/navigation';
+import { getTertiaryNavItems } from '@/global/navigation/nav.data';
+
+const GIGWAN_MANAGE_TERTIARY_ITEMS = getTertiaryNavItems('/td/np/gis', '/td/np/gis/[gi]/manage');
 
 export default function GigwanSettingServicePage() {
   const { gi } = useParams<{ gi: string }>();
@@ -16,10 +20,13 @@ export default function GigwanSettingServicePage() {
   if (!gigwanNanoId) return null;
 
   return (
-    <div css={cssObj.page}>
-      <BasicInformationSection gigwanNanoId={gigwanNanoId} />
-      <EmploymentCategoriesSection gigwanNanoId={gigwanNanoId} />
-      <WorkTypeStatusesSection gigwanNanoId={gigwanNanoId} />
-    </div>
+    <>
+      <TertiaryNav navItems={GIGWAN_MANAGE_TERTIARY_ITEMS} />
+      <div css={cssObj.page}>
+        <BasicInformationSection gigwanNanoId={gigwanNanoId} />
+        <EmploymentCategoriesSection gigwanNanoId={gigwanNanoId} />
+        <WorkTypeStatusesSection gigwanNanoId={gigwanNanoId} />
+      </div>
+    </>
   );
 }

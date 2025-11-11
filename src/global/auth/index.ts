@@ -3,13 +3,12 @@
 import type { AuthHistoryEntry } from './store';
 import { useShallow } from 'zustand/react/shallow';
 import {
-  useAuth as _useAuthStore,
+  useAuthStore,
   useIsAuthenticated,
   useAccessToken,
   useActiveUserMeta,
   useUnauthorizedTick,
-  authGetState,
-  authSetState,
+  authStore,
   setActiveUserId,
   setAuthState,
   upsertUser,
@@ -20,12 +19,12 @@ import {
 export type { TokenSource, AuthHistoryEntry, UserMeta } from './store';
 
 export {
+  useAuthStore,
   useIsAuthenticated,
   useAccessToken,
   useActiveUserMeta,
   useUnauthorizedTick,
-  authGetState,
-  authSetState,
+  authStore,
   setActiveUserId,
   setAuthState,
   upsertUser,
@@ -69,7 +68,7 @@ export function useAuth(): UseAuthResult {
     sayongjaName,
     loginId,
     accessToken,
-  } = _useAuthStore(
+  } = useAuthStore(
     useShallow((s) => ({
       activeUserId: s.activeUserId,
       isReady: s.isReady,
