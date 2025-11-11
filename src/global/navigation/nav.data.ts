@@ -33,19 +33,6 @@ export const getDynamicHref = (
   return dynamicHref.includes('[') ? null : dynamicHref;
 };
 
-export const primaryNavItems: NavItem[] = [
-  {
-    name: '기관 관리',
-    href: '/td/np/gis/[gi]',
-    basePath: '/td/np/gis',
-  },
-  {
-    name: '조직 관리',
-    href: '/td/np/jos/[jo]',
-    basePath: '/td/np/jos',
-  },
-];
-
 export const secondaryNavItems: Record<string, NavItem[]> = {
   '/td/np/gis': [
     {

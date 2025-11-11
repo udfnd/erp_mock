@@ -1,23 +1,20 @@
-import type { CSSProperties, ReactNode } from 'react';
+'use client';
+
+import type { ReactNode } from 'react';
 
 import { SecondaryNav } from '@/global/navigation';
 import { getSecondaryNavGroup } from '@/global/navigation/nav.data';
+import { cssObj } from '../../style';
 
 const NAV_ITEMS = getSecondaryNavGroup('/td/np/gis');
-
-const contentStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-};
 
 type LayoutProps = {
   children: ReactNode;
 };
 
-export default function GigwanSectionLayout({ children }: LayoutProps) {
+export default function NpSecondaryNavigation({ children }: LayoutProps) {
   return (
-    <div style={contentStyle}>
+    <div css={cssObj.secondaryNavStyle}>
       <SecondaryNav navItems={NAV_ITEMS} />
       {children}
     </div>

@@ -1,10 +1,19 @@
-import { ReactNode } from 'react';
-import { NavigationFrame } from './NavigationFrame';
+'use client';
 
-type AuthenticatedLayoutProps = {
+import type { ReactNode } from 'react';
+
+import { PrimaryNav } from '@/global/navigation';
+import { cssObj } from './style';
+
+type Props = {
   children: ReactNode;
 };
 
-export default function NpPrimaryNavigation({ children }: AuthenticatedLayoutProps) {
-  return <NavigationFrame>{children}</NavigationFrame>;
+export default function NpPrimaryNavigation({ children }: Props) {
+  return (
+    <div css={cssObj.layoutStyles}>
+      <PrimaryNav />
+      <div css={cssObj.contentStyles}>{children}</div>
+    </div>
+  );
 }

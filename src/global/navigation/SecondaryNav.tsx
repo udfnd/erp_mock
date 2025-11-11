@@ -4,16 +4,15 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useCallback, useMemo } from 'react';
 
 import { Chip } from '@/common/components';
+import { useGigwanNameQuery } from '@/domain/gigwan/api';
+import { useJojikQuery } from '@/domain/jojik/api';
 
 import { NavItem, getDynamicHref } from './nav.data';
-import { useNavigationHierarchy } from './NavigationHierarchyContext';
 import * as styles from './SecondaryNav.style';
 
-import type { PrimaryNavHierarchy } from './navigation.types';
 
 type Props = {
   navItems: NavItem[];
-  hierarchy?: PrimaryNavHierarchy;
 };
 
 const getParamValue = (params: ReturnType<typeof useParams>, key: string): string | null => {
@@ -22,47 +21,29 @@ const getParamValue = (params: ReturnType<typeof useParams>, key: string): strin
   return typeof value === 'string' ? value : (value[0] ?? null);
 };
 
-export const SecondaryNav = ({ navItems, hierarchy }: Props) => {
+export const SecondaryNav = ({ navItems }: Props) => {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
 
-  const hierarchyFromContext = useNavigationHierarchy();
-  const effectiveHierarchy = hierarchy ?? hierarchyFromContext;
+  const gi = useMemo(() => getParamValue(params, 'gi'), [params]);
+  const jo = useMemo(() => getParamValue(params, 'jo'), [params]);
 
-  const gigwanParam = useMemo(() => getParamValue(params, 'gi'), [params]);
-  const jojikParam = useMemo(() => getParamValue(params, 'jo'), [params]);
+  const { data: gigwanData } = useGigwanNameQuery(gi ?? '', { enabled: Boolean(gi) });
+  const { data: jojikData } = useJojikQuery(jo ?? '', { enabled: Boolean(jo) });
 
-  const gigwanName = useMemo(() => {
-    if (!effectiveHierarchy?.gigwan) {
-      return gigwanParam;
-    }
-
-    if (gigwanParam && effectiveHierarchy.gigwan.nanoId !== gigwanParam) {
-      return gigwanParam;
-    }
-
-    return effectiveHierarchy.gigwan.name;
-  }, [effectiveHierarchy, gigwanParam]);
-
-  const jojikName = useMemo(() => {
-    if (!jojikParam) return null;
-    const matched = effectiveHierarchy?.jojiks.find((item) => item.nanoId === jojikParam);
-    return matched?.name ?? jojikParam;
-  }, [effectiveHierarchy, jojikParam]);
+  const gigwanName = useMemo(() => gigwanData?.name ?? gi ?? null, [gigwanData, gi]);
+  const jojikName = useMemo(() => jojikData?.name ?? jo ?? null, [jojikData, jo]);
 
   const resolveDisplayName = useCallback(
-    (name: string) => {
-      let result = name;
-      if (gigwanName) {
-        result = result.replace(/{기관명}/g, gigwanName);
-      }
-      if (jojikName) {
-        result = result.replace(/{조직명}/g, jojikName);
-      }
+    (raw: string) => {
+      if (!raw) return raw;
+      let result = raw;
+      if (result.includes('{기관명}')) result = result.replaceAll('{기관명}', gigwanName ?? '');
+      if (result.includes('{조직명}')) result = result.replaceAll('{조직명}', jojikName ?? '');
       return result;
     },
-    [gigwanName, jojikName],
+    [gigwanName, jojikName]
   );
 
   if (!navItems || navItems.length === 0) return null;
@@ -72,9 +53,7 @@ export const SecondaryNav = ({ navItems, hierarchy }: Props) => {
       <ul css={styles.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
-          const resolvedBasePath = item.basePath
-            ? getDynamicHref(item.basePath, params)
-            : undefined;
+          const resolvedBasePath = item.basePath ? getDynamicHref(item.basePath, params) : undefined;
           const isActive = resolvedBasePath
             ? pathname.startsWith(resolvedBasePath)
             : href

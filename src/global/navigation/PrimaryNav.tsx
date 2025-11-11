@@ -15,8 +15,19 @@ import { getAccessTokenFor, switchUser } from '@/global/apiClient';
 import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
 
-import type { PrimaryNavHierarchy } from './navigation.types';
 import type { AuthHistoryEntry } from '@/global/auth';
+
+type PrimaryNavHierarchy = {
+    gigwan: { nanoId: string; name: string } | null;
+  jojiks: Array<{
+      nanoId: string;
+      name: string;
+      sueops: Array<{
+          nanoId: string;
+          name: string;
+        }>;
+    }>;
+};
 
 type ItemEntityType = 'gigwan' | 'jojik' | 'sueop' | 'kon';
 
