@@ -11,7 +11,7 @@ type Props = {
   navItems: NavItem[];
 };
 
-export default function TertiaryNav({ navItems }: Props) {
+export const TertiaryNav = ({ navItems }: Props) => {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
@@ -47,4 +47,4 @@ export default function TertiaryNav({ navItems }: Props) {
       </ul>
     </nav>
   );
-}
+};

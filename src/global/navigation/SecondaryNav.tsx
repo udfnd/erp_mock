@@ -21,7 +21,7 @@ const getParamValue = (params: ReturnType<typeof useParams>, key: string): strin
   return typeof value === 'string' ? value : (value[0] ?? null);
 };
 
-export default function SecondaryNav({ navItems, hierarchy }: Props) {
+export const SecondaryNav = ({ navItems, hierarchy }: Props) => {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
@@ -100,4 +100,4 @@ export default function SecondaryNav({ navItems, hierarchy }: Props) {
       </ul>
     </nav>
   );
-}
+};

@@ -52,14 +52,13 @@ const isWithinPath = (currentPath: string, target: string | null | undefined) =>
   const normalizedCurrent = normalizePath(currentPath);
   const normalizedTarget = normalizePath(target);
   return (
-    normalizedCurrent === normalizedTarget ||
-    normalizedCurrent.startsWith(`${normalizedTarget}/`)
+    normalizedCurrent === normalizedTarget || normalizedCurrent.startsWith(`${normalizedTarget}/`)
   );
 };
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
 
-export default function PrimaryNav({ onHierarchyChange }: Props) {
+export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
@@ -87,9 +86,7 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
 
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
-  const [resolvedGigwanNanoId, setResolvedGigwanNanoId] = useState<string | null>(
-    gigwanNanoId,
-  );
+  const [resolvedGigwanNanoId, setResolvedGigwanNanoId] = useState<string | null>(gigwanNanoId);
 
   useEffect(() => {
     if (gigwanNanoId) {
@@ -201,13 +198,14 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     type SidebarJojik = { nanoId: string; name: string; sueops?: SidebarSueop[] | null };
 
     const rawJojiks = sidebarData?.jojiks as SidebarJojik[] | undefined;
-    const sourceJojiks: SidebarJojik[] = rawJojiks && rawJojiks.length > 0
-      ? rawJojiks
-      : hierarchy.jojiks.map((jojik) => ({
-          nanoId: jojik.nanoId,
-          name: jojik.name,
-          sueops: jojik.sueops.map((sueop) => ({ nanoId: sueop.nanoId, name: sueop.name })),
-        }));
+    const sourceJojiks: SidebarJojik[] =
+      rawJojiks && rawJojiks.length > 0
+        ? rawJojiks
+        : hierarchy.jojiks.map((jojik) => ({
+            nanoId: jojik.nanoId,
+            name: jojik.name,
+            sueops: jojik.sueops.map((sueop) => ({ nanoId: sueop.nanoId, name: sueop.name })),
+          }));
 
     const mapSueopToItem = (sueop: SidebarSueop): Item => {
       const konItems = (sueop.kons ?? []).map<Item>((kon) => ({
@@ -270,9 +268,8 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
     const findByEntity = (type: ItemEntityType, nanoId: string | null | undefined) => {
       if (!nanoId) return null;
       return (
-        flattenedItems.find(
-          (item) => item.entityType === type && item.entityNanoId === nanoId,
-        )?.key ?? null
+        flattenedItems.find((item) => item.entityType === type && item.entityNanoId === nanoId)
+          ?.key ?? null
       );
     };
 
@@ -536,4 +533,4 @@ export default function PrimaryNav({ onHierarchyChange }: Props) {
       </div>
     </aside>
   );
-}
+};
