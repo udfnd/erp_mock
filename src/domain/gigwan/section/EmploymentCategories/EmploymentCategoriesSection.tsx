@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { Button, IconButton } from '@/common/components';
 import { Delete, Edit, Plus } from '@/common/icons';
 import {
+  gigwanQueryKeys,
   useEmploymentCategoriesQuery,
   useUpsertEmploymentCategoriesMutation,
 } from '@/domain/gigwan/api';
@@ -132,7 +133,9 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         form.reset(nextValues);
         dispatchEmploymentEditing({ type: 'reset' });
         showSuccess('재직 카테고리 상태가 저장되었습니다.');
-        await queryClient.invalidateQueries({ queryKey: ['employmentCategories', gigwanNanoId] });
+        await queryClient.invalidateQueries({
+          queryKey: gigwanQueryKeys.employmentCategories(gigwanNanoId),
+        });
       } catch {
         showError('재직 카테고리 상태 저장에 실패했습니다.');
       }

@@ -5,7 +5,11 @@ import { useForm, useStore } from '@tanstack/react-form';
 import { useCallback, useMemo, useRef, useEffect } from 'react';
 
 import { Button, Textfield } from '@/common/components';
-import { useGigwanQuery, useUpdateGigwanMutation } from '@/domain/gigwan/api';
+import {
+  invalidateGigwanIdentityQueries,
+  useGigwanQuery,
+  useUpdateGigwanMutation,
+} from '@/domain/gigwan/api';
 
 import { css } from './styles';
 import { useFeedback } from '../useFeedback';
@@ -53,10 +57,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
 
         showSuccess('변경사항이 저장되었습니다.');
 
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['gigwan', gigwanNanoId] }),
-          queryClient.invalidateQueries({ queryKey: ['gigwanName', gigwanNanoId] }),
-        ]);
+        await invalidateGigwanIdentityQueries(queryClient, gigwanNanoId);
       } catch {
         showError('저장에 실패했습니다. 다시 시도해주세요.');
       }
