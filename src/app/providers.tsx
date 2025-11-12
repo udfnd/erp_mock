@@ -19,7 +19,7 @@ type AppProvidersProps = { children: ReactNode };
 export function Providers({ children }: AppProvidersProps) {
   const router = useRouter();
 
-  const queryClientRef = useRef<QueryClient>();
+  const queryClientRef = useRef<QueryClient | null>(null);
 
   const queryClient = useMemo(() => {
     if (!queryClientRef.current) {

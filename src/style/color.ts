@@ -25,6 +25,7 @@ export const color = {
   purple10: '#F3EDFF',
 
   red: '#FF5226',
+  red40: '#FFBAA8',
   red10: '#FFE7E1',
 
   yellow: '#FF9A17',

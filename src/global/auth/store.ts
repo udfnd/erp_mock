@@ -150,10 +150,8 @@ export const useAuthStore = create<AuthState>()(
 
 export const authStore = {
   getState: () => useAuthStore.getState(),
-  setState: (
-    updater: Partial<AuthState> | ((s: AuthState) => Partial<AuthState>),
-    replace?: boolean,
-  ) => useAuthStore.setState(updater, replace),
+  setState: (updater: Partial<AuthState> | ((s: AuthState) => AuthState | Partial<AuthState>)) =>
+    useAuthStore.setState(updater, false),
 };
 
 export const useIsAuthenticated = () => useAuthStore((s) => s.isAuthenticated());

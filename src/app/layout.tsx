@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 
 import { Providers } from './providers';
+import { ToastProvider } from '@/common/components/Toast';
 import { pretendard } from '@/style/fonts/pretendard';
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ko" css={pretendard.variable}>
       <body css={pretendard.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <ToastProvider>{children}</ToastProvider>
+        </Providers>
       </body>
     </html>
   );

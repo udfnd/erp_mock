@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   activeMenuItemStyle,
@@ -39,83 +39,49 @@ export const Modal: React.FC<ModalProps> = ({
   initialMenuId,
   className,
 }) => {
-  const [isMounted, setIsMounted] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | undefined>(initialMenuId);
-  const titleId = useMemo(
-    () => `modal-title-${Math.random().toString(36).slice(2, 9)}`,
-    [],
-  );
+
+  const titleId = useId();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const originalOverflow = document.body.style.overflow;
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = prev;
     };
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) {
-      return;
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
+  const effectiveActiveMenuId = useMemo(() => {
+    if (!menus.length) return undefined;
+
+    if (activeMenuId && menus.some((m) => m.id === activeMenuId)) {
+      return activeMenuId;
     }
-
-    const defaultMenuId = initialMenuId ?? menus[0]?.id;
-    setActiveMenuId((prev) => prev ?? defaultMenuId);
-  }, [initialMenuId, isOpen, menus]);
-
-  useEffect(() => {
-    if (!menus.length) {
-      setActiveMenuId(undefined);
-      return;
-    }
-
-    const exists = menus.some((menu) => menu.id === activeMenuId);
-
-    if (!exists) {
-      setActiveMenuId(initialMenuId ?? menus[0].id);
-    }
+    return (
+      (initialMenuId && menus.some((m) => m.id === initialMenuId) && initialMenuId) || menus[0].id
+    );
   }, [activeMenuId, initialMenuId, menus]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  const activeMenu = useMemo(() => {
+    if (!menus.length) return undefined;
+    return menus.find((m) => m.id === effectiveActiveMenuId) ?? menus[0];
+  }, [menus, effectiveActiveMenuId]);
 
   const handleSelectMenu = useCallback((menuId: string) => {
     setActiveMenuId(menuId);
   }, []);
 
-  const activeMenu = useMemo(() => {
-    if (!menus.length) {
-      return undefined;
-    }
-
-    return menus.find((menu) => menu.id === activeMenuId) ?? menus[0];
-  }, [activeMenuId, menus]);
-
-  if (!isOpen || !isMounted) {
+  if (!isOpen || typeof document === 'undefined') {
     return null;
   }
 
@@ -137,12 +103,12 @@ export const Modal: React.FC<ModalProps> = ({
             ×
           </button>
         </div>
+
         <div css={bodyLayoutStyle}>
           <nav aria-label={`${title} 메뉴`}>
             <ul css={menuListStyle}>
               {menus.map((menu) => {
-                const isActive = (activeMenu?.id ?? menus[0]?.id) === menu.id;
-
+                const isActive = (effectiveActiveMenuId ?? menus[0]?.id) === menu.id;
                 return (
                   <li key={menu.id}>
                     <button
@@ -157,6 +123,7 @@ export const Modal: React.FC<ModalProps> = ({
               })}
             </ul>
           </nav>
+
           <section css={contentWrapperStyle} aria-live="polite">
             <div css={contentInnerStyle}>{activeMenu?.content}</div>
           </section>
