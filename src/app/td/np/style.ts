@@ -3,6 +3,12 @@
 import { css } from '@emotion/react';
 import { color } from '@/style';
 
+const navLayout = css`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
 export const cssObj = {
   layoutStyles: css`
     display: flex;
@@ -20,9 +26,6 @@ export const cssObj = {
     background-color: ${color.white};
   `,
 
-  secondaryNavStyle: css`
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  `,
+  secondaryNavStyle: navLayout,
+  tertiaryNavStyle: navLayout,
 };
