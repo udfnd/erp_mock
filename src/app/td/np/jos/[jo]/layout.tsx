@@ -22,20 +22,11 @@ const NAV_ITEMS = [
     name: '{조직명} 관리',
     href: join(MANAGE_BASE, 'home', 'dv'),
     basePath: MANAGE_BASE,
-    items: [
-      { name: '홈', href: join(MANAGE_BASE, 'home', 'dv') },
-      { name: '조직 설정', href: join(MANAGE_BASE, 'setting', 'sv') },
-    ],
   },
   {
     name: '자원들',
     href: join(JAWONS_BASE, 'memos', 'lv'),
     basePath: JAWONS_BASE,
-    items: [
-      { name: '메모들', href: join(JAWONS_BASE, 'memos', 'lv') },
-      { name: '외부링크들', href: join(JAWONS_BASE, 'oebu-links', 'lv') },
-      { name: '주소들', href: join(JAWONS_BASE, 'jusos', 'lv') },
-    ],
   },
 ];
 
