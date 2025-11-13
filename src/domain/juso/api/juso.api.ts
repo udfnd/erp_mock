@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { apiClient } from '@/global';
+import { parseOrThrow } from '../../util';
 
 import {
   CreateJusoRequest,
