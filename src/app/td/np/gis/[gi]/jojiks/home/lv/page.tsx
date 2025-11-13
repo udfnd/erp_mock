@@ -1,14 +1,6 @@
-// page.tsx
 'use client';
 
-import {
-  type ChangeEvent,
-  type FormEvent,
-  type MouseEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { type ChangeEvent, type FormEvent, type MouseEvent, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import {
   type SortingState,
@@ -96,50 +88,81 @@ const getSortOptionFromState = (sorting: SortingState): string | undefined => {
   return `${current.id}:${current.desc ? 'desc' : 'asc'}`;
 };
 
-const createSortableHeader =
-  (label: string) =>
-    ({ column }: HeaderContext<JojikListItem, unknown>) =>
-      (
-        <button
-          type="button"
-          css={cssObj.sortButton}
-          onClick={column.getToggleSortingHandler()}
-        >
-          {label}
-          <span css={cssObj.sortIcon}>
-          {column.getIsSorted() === 'asc' && '▲'}
-            {column.getIsSorted() === 'desc' && '▼'}
-            {!column.getIsSorted() && '⇅'}
-        </span>
-        </button>
-      );
+const CREATED_AT_FILTER_NOW = Date.now();
+
+const createSortableHeader = (label: string) => {
+  const SortableHeader = ({ column }: HeaderContext<JojikListItem, unknown>) => (
+    <button type="button" css={cssObj.sortButton} onClick={column.getToggleSortingHandler()}>
+      {label}
+      <span css={cssObj.sortIcon}>
+        {column.getIsSorted() === 'asc' && '▲'}
+        {column.getIsSorted() === 'desc' && '▼'}
+        {!column.getIsSorted() && '⇅'}
+      </span>
+    </button>
+  );
+
+  SortableHeader.displayName = `SortableHeader(${label})`;
+
+  return SortableHeader;
+};
 
 export default function NpGigwanJojikListViewPage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? params?.gi[0] ?? '' : params?.gi ?? '';
-
+  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
   const { isAuthenticated } = useAuth();
 
+  return (
+    <JojikListView
+      key={gigwanNanoId || 'no-gi'}
+      gigwanNanoId={gigwanNanoId}
+      isAuthenticated={isAuthenticated}
+    />
+  );
+}
+
+type JojikListViewProps = {
+  gigwanNanoId: string;
+  isAuthenticated: boolean;
+};
+
+function JojikListView({ gigwanNanoId, isAuthenticated }: JojikListViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const listViewState = useListViewHeadlessState<JojikListItem>({
+  const baseState = useListViewHeadlessState<JojikListItem>({
     initialSorting: [{ id: 'createdAt', desc: true }],
     initialPagination: { pageIndex: 0, pageSize: 10 },
   });
+
+  const setSortingWithReset: typeof baseState.setSorting = (updater) => {
+    baseState.setSorting(updater);
+    baseState.setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const listViewState = {
+    ...baseState,
+    setSorting: setSortingWithReset,
+  };
+
   const {
     sorting,
-    setSorting,
     columnFilters,
-    setColumnFilters,
     rowSelection,
-    setRowSelection,
     pagination,
+    setSorting,
+    setColumnFilters,
+    setRowSelection,
     setPagination,
   } = listViewState;
+
   const [isCreating, setIsCreating] = useState(false);
 
   const sortByOption = getSortOptionFromState(sorting);
 
-  const { data: jojiksData, isLoading: isListLoading, refetch } = useJojiksQuery(
+  const {
+    data: jojiksData,
+    isLoading: isListLoading,
+    refetch,
+  } = useJojiksQuery(
     {
       gigwanNanoId,
       jojikNameSearch: searchTerm ? searchTerm : undefined,
@@ -156,27 +179,6 @@ export default function NpGigwanJojikListViewPage() {
   const totalCount = (jojiksData?.totalCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  useEffect(() => {
-    setRowSelection({});
-    setIsCreating(false);
-  }, [gigwanNanoId, setRowSelection]);
-
-  useEffect(() => {
-    if (isCreating) {
-      setRowSelection({});
-    }
-  }, [isCreating, setRowSelection]);
-
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-  }, [searchTerm, sortByOption, setPagination]);
-
-  useEffect(() => {
-    if (Object.keys(rowSelection).length > 0 && isCreating) {
-      setIsCreating(false);
-    }
-  }, [rowSelection, isCreating]);
-
   const columns = useMemo(
     () => [
       columnHelper.display({
@@ -186,7 +188,10 @@ export default function NpGigwanJojikListViewPage() {
             <Checkbox
               checked={table.getIsAllPageRowsSelected()}
               indeterminate={table.getIsSomePageRowsSelected()}
-              onChange={table.getToggleAllPageRowsSelectedHandler()}
+              onChange={(event) => {
+                setIsCreating(false);
+                table.getToggleAllPageRowsSelectedHandler()(event);
+              }}
               ariaLabel="전체 조직 선택"
             />
           </div>
@@ -196,7 +201,10 @@ export default function NpGigwanJojikListViewPage() {
             <Checkbox
               checked={row.getIsSelected()}
               indeterminate={row.getIsSomeSelected()}
-              onChange={row.getToggleSelectedHandler()}
+              onChange={(event) => {
+                setIsCreating(false);
+                row.getToggleSelectedHandler()(event);
+              }}
               ariaLabel={`${row.original.name} 선택`}
             />
           </div>
@@ -223,14 +231,14 @@ export default function NpGigwanJojikListViewPage() {
             return true;
           }
 
-          const diff = Date.now() - parsed.getTime();
+          const diff = CREATED_AT_FILTER_NOW - parsed.getTime();
           const threshold = days * 24 * 60 * 60 * 1000;
 
           return diff <= threshold;
         },
       }),
     ],
-    [],
+    [setIsCreating],
   );
 
   const currentCreatedFilter =
@@ -240,6 +248,7 @@ export default function NpGigwanJojikListViewPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
   const handleCreatedFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -263,12 +272,25 @@ export default function NpGigwanJojikListViewPage() {
     setPagination({ pageIndex: 0, pageSize: size });
   };
 
-  const handleAddClick = () => {
+  const clearSelection = () => {
+    setRowSelection({});
+  };
+
+  const startCreate = () => {
     setIsCreating(true);
+    clearSelection();
+  };
+
+  const stopCreate = () => {
+    setIsCreating(false);
+  };
+
+  const handleAddClick = () => {
+    startCreate();
   };
 
   const handleClearSelection = () => {
-    setRowSelection({});
+    clearSelection();
   };
 
   return (
@@ -350,68 +372,64 @@ export default function NpGigwanJojikListViewPage() {
                 <div css={cssObj.tableWrapper}>
                   <table css={cssObj.table}>
                     <thead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
-                        {headerGroup.headers.map((header) => (
-                          <th
-                            key={header.id}
-                            css={cssObj.tableHeaderCell}
-                            colSpan={header.colSpan}
-                          >
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                          </th>
-                        ))}
-                      </tr>
-                    ))}
-                    </thead>
-                    <tbody>
-                    {isListLoading ? (
-                      <tr>
-                        <td colSpan={visibleColumnsLength} css={cssObj.loadingState}>
-                          조직 데이터를 불러오는 중입니다...
-                        </td>
-                      </tr>
-                    ) : table.getRowModel().rows.length > 0 ? (
-                      table.getRowModel().rows.map((row) => (
-                        <tr
-                          key={row.id}
-                          css={[
-                            cssObj.tableRow,
-                            row.getIsSelected() && cssObj.tableRowSelected,
-                          ]}
-                          onClick={(event: MouseEvent<HTMLTableRowElement>) => {
-                            const target = event.target as HTMLElement | null;
-                            if (target?.closest('label')) {
-                              return;
-                            }
-                            row.toggleSelected();
-                          }}
-                        >
-                          {row.getVisibleCells().map((cell) => (
-                            <td
-                              key={cell.id}
-                              css={[
-                                cssObj.tableCell,
-                                cell.column.id === 'selection' && cssObj.checkboxCell,
-                              ]}
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
+                          {headerGroup.headers.map((header) => (
+                            <th
+                              key={header.id}
+                              css={cssObj.tableHeaderCell}
+                              colSpan={header.colSpan}
                             >
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(header.column.columnDef.header, header.getContext())}
+                            </th>
                           ))}
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={visibleColumnsLength} css={cssObj.emptyState}>
-                          조건에 맞는 조직이 없습니다. 검색어나 필터를 조정해 보세요.
-                        </td>
-                      </tr>
-                    )}
+                      ))}
+                    </thead>
+                    <tbody>
+                      {isListLoading ? (
+                        <tr>
+                          <td colSpan={visibleColumnsLength} css={cssObj.loadingState}>
+                            조직 데이터를 불러오는 중입니다...
+                          </td>
+                        </tr>
+                      ) : table.getRowModel().rows.length > 0 ? (
+                        table.getRowModel().rows.map((row) => (
+                          <tr
+                            key={row.id}
+                            css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
+                            onClick={(event: MouseEvent<HTMLTableRowElement>) => {
+                              const target = event.target as HTMLElement | null;
+                              if (target?.closest('label')) {
+                                return;
+                              }
+                              // 행 클릭으로 선택 시에도 생성 모드 종료
+                              stopCreate();
+                              row.toggleSelected();
+                            }}
+                          >
+                            {row.getVisibleCells().map((cell) => (
+                              <td
+                                key={cell.id}
+                                css={[
+                                  cssObj.tableCell,
+                                  cell.column.id === 'selection' && cssObj.checkboxCell,
+                                ]}
+                              >
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={visibleColumnsLength} css={cssObj.emptyState}>
+                            조건에 맞는 조직이 없습니다. 검색어나 필터를 조정해 보세요.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -467,8 +485,8 @@ export default function NpGigwanJojikListViewPage() {
               gigwanNanoId={gigwanNanoId}
               selectedJojiks={selectedJojiks}
               isCreating={isCreating}
-              onStartCreate={() => setIsCreating(true)}
-              onExitCreate={() => setIsCreating(false)}
+              onStartCreate={startCreate}
+              onExitCreate={stopCreate}
               onAfterMutation={refetch}
               onClearSelection={handleClearSelection}
               isAuthenticated={isAuthenticated}
@@ -492,15 +510,15 @@ type SettingsPanelProps = {
 };
 
 function SettingsPanel({
-                         gigwanNanoId,
-                         selectedJojiks,
-                         isCreating,
-                         onStartCreate,
-                         onExitCreate,
-                         onAfterMutation,
-                         onClearSelection,
-                         isAuthenticated,
-                       }: SettingsPanelProps) {
+  gigwanNanoId,
+  selectedJojiks,
+  isCreating,
+  onStartCreate,
+  onExitCreate,
+  onAfterMutation,
+  onClearSelection,
+  isAuthenticated,
+}: SettingsPanelProps) {
   if (!gigwanNanoId) {
     return (
       <aside css={cssObj.settingsPanel}>
@@ -583,7 +601,8 @@ function EmptyStatePanel({ onStartCreate }: EmptyStatePanelProps) {
         <div css={cssObj.panelSection}>
           <span css={cssObj.panelLabel}>조직 관리 팁</span>
           <p css={cssObj.panelText}>
-            검색과 필터 기능을 함께 사용하면 수백 개의 조직 중에서도 원하는 데이터를 빠르게 찾을 수 있습니다.
+            검색과 필터 기능을 함께 사용하면 수백 개의 조직 중에서도 원하는 데이터를 빠르게 찾을 수
+            있습니다.
           </p>
         </div>
       </div>
@@ -677,32 +696,86 @@ type SingleSelectionPanelProps = {
   isAuthenticated: boolean;
 };
 
+type UpdateJojikMutationResult = ReturnType<typeof useUpdateJojikMutation>;
+type DeleteJojikMutationResult = ReturnType<typeof useDeleteJojikMutation>;
+
+type SingleSelectionPanelContentProps = {
+  jojikNanoId: string;
+  jojikName: string;
+  jojikIntro: string;
+  jojikDetailNanoId?: string;
+  openFiles?: { nanoId: string; name: string }[];
+  onAfterMutation: () => Promise<unknown> | void;
+  onClearSelection: () => void;
+  updateMutation: UpdateJojikMutationResult;
+  deleteMutation: DeleteJojikMutationResult;
+};
+
 function SingleSelectionPanel({
-                                jojikNanoId,
-                                jojikName,
-                                onAfterMutation,
-                                onClearSelection,
-                                isAuthenticated,
-                              }: SingleSelectionPanelProps) {
+  jojikNanoId,
+  jojikName,
+  onAfterMutation,
+  onClearSelection,
+  isAuthenticated,
+}: SingleSelectionPanelProps) {
   const { data: jojikDetail, isLoading } = useJojikQuery(jojikNanoId, {
     enabled: isAuthenticated && Boolean(jojikNanoId),
   });
   const updateMutation = useUpdateJojikMutation(jojikNanoId);
   const deleteMutation = useDeleteJojikMutation(jojikNanoId);
 
-  const [name, setName] = useState('');
-  const [intro, setIntro] = useState('');
+  if (isLoading && !jojikDetail) {
+    return (
+      <>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>{jojikName}</h2>
+          <p css={cssObj.panelSubtitle}>선택한 조직 정보를 불러오는 중입니다...</p>
+        </div>
+        <div css={cssObj.panelBody}>
+          <p css={cssObj.helperText}>선택한 조직 정보를 불러오는 중입니다...</p>
+        </div>
+      </>
+    );
+  }
 
-  useEffect(() => {
-    setName(jojikDetail?.name ?? jojikName ?? '');
-    setIntro(jojikDetail?.intro ?? '');
-  }, [jojikDetail?.name, jojikDetail?.intro, jojikName]);
+  const effectiveName = jojikDetail?.name ?? jojikName ?? '';
+  const effectiveIntro = jojikDetail?.intro ?? '';
+
+  return (
+    <SingleSelectionPanelContent
+      key={`${jojikNanoId}:${effectiveName}:${effectiveIntro}`}
+      jojikNanoId={jojikNanoId}
+      jojikName={effectiveName}
+      jojikIntro={effectiveIntro}
+      jojikDetailNanoId={jojikDetail?.nanoId ?? jojikNanoId}
+      openFiles={jojikDetail?.openFiles}
+      onAfterMutation={onAfterMutation}
+      onClearSelection={onClearSelection}
+      updateMutation={updateMutation}
+      deleteMutation={deleteMutation}
+    />
+  );
+}
+
+function SingleSelectionPanelContent({
+  jojikNanoId,
+  jojikName,
+  jojikIntro,
+  jojikDetailNanoId,
+  openFiles,
+  onAfterMutation,
+  onClearSelection,
+  updateMutation,
+  deleteMutation,
+}: SingleSelectionPanelContentProps) {
+  const [name, setName] = useState(() => jojikName);
+  const [intro, setIntro] = useState(() => jojikIntro);
 
   const formId = 'jojik-update-form';
   const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
-  const originalName = jojikDetail?.name ?? jojikName ?? '';
-  const originalIntro = jojikDetail?.intro ?? '';
+  const originalName = jojikName;
+  const originalIntro = jojikIntro;
   const trimmedName = name.trim();
   const normalizedIntro = intro ?? '';
   const hasChanges = trimmedName !== originalName || normalizedIntro !== originalIntro;
@@ -736,59 +809,44 @@ function SingleSelectionPanel({
   return (
     <>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>{jojikDetail?.name ?? jojikName}</h2>
+        <h2 css={cssObj.panelTitle}>{jojikName}</h2>
         <p css={cssObj.panelSubtitle}>조직 정보를 수정하거나 삭제할 수 있습니다.</p>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
-        {isLoading ? (
-          <p css={cssObj.helperText}>선택한 조직 정보를 불러오는 중입니다...</p>
-        ) : (
-          <>
-            <div css={cssObj.panelSection}>
-              <Textfield
-                singleLine
-                required
-                label="조직 이름"
-                value={name}
-                onValueChange={setName}
-                maxLength={60}
-              />
+        <div css={cssObj.panelSection}>
+          <Textfield
+            singleLine
+            required
+            label="조직 이름"
+            value={name}
+            onValueChange={setName}
+            maxLength={60}
+          />
+        </div>
+        <div css={cssObj.panelSection}>
+          <Textfield label="조직 소개" value={intro} onValueChange={setIntro} maxLength={500} />
+        </div>
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelLabel}>조직 식별자</span>
+          <span css={cssObj.panelText}>{jojikDetailNanoId ?? jojikNanoId}</span>
+        </div>
+        {openFiles?.length ? (
+          <div css={cssObj.panelSection}>
+            <span css={cssObj.panelLabel}>공유 파일</span>
+            <div css={cssObj.chipList}>
+              {openFiles.map((file) => (
+                <span key={file.nanoId} css={cssObj.chip}>
+                  {file.name}
+                </span>
+              ))}
             </div>
-            <div css={cssObj.panelSection}>
-              <Textfield
-                label="조직 소개"
-                value={intro}
-                onValueChange={setIntro}
-                maxLength={500}
-              />
-            </div>
-            <div css={cssObj.panelSection}>
-              <span css={cssObj.panelLabel}>조직 식별자</span>
-              <span css={cssObj.panelText}>{jojikDetail?.nanoId ?? jojikNanoId}</span>
-            </div>
-            {jojikDetail?.openFiles?.length ? (
-              <div css={cssObj.panelSection}>
-                <span css={cssObj.panelLabel}>공유 파일</span>
-                <div css={cssObj.chipList}>
-                  {jojikDetail.openFiles.map((file) => (
-                    <span key={file.nanoId} css={cssObj.chip}>
-                      {file.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-            {updateMutation.isError && (
-              <p css={cssObj.helperText}>
-                조직 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.
-              </p>
-            )}
-            {deleteMutation.isError && (
-              <p css={cssObj.helperText}>
-                조직 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.
-              </p>
-            )}
-          </>
+          </div>
+        ) : null}
+        {updateMutation.isError && (
+          <p css={cssObj.helperText}>조직 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
+        )}
+        {deleteMutation.isError && (
+          <p css={cssObj.helperText}>조직 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
         )}
       </form>
       <div css={cssObj.panelFooter}>
@@ -808,11 +866,7 @@ function SingleSelectionPanel({
         >
           삭제
         </Button>
-        <Button
-          type="submit"
-          form={formId}
-          disabled={isLoading || isUpdating || !hasChanges}
-        >
+        <Button type="submit" form={formId} disabled={isUpdating || !hasChanges}>
           변경 사항 저장
         </Button>
       </div>
@@ -826,7 +880,11 @@ type MultiSelectionPanelProps = {
   onClearSelection: () => void;
 };
 
-function MultiSelectionPanel({ jojiks, onStartCreate, onClearSelection }: MultiSelectionPanelProps) {
+function MultiSelectionPanel({
+  jojiks,
+  onStartCreate,
+  onClearSelection,
+}: MultiSelectionPanelProps) {
   const displayList = useMemo(() => jojiks.slice(0, 6), [jojiks]);
   const overflowCount = Math.max(jojiks.length - displayList.length, 0);
 
@@ -853,7 +911,8 @@ function MultiSelectionPanel({ jojiks, onStartCreate, onClearSelection }: MultiS
         <div css={cssObj.panelSection}>
           <span css={cssObj.panelLabel}>일괄 작업 아이디어</span>
           <p css={cssObj.panelText}>
-            일괄 태그 지정, 접근 권한 조정, 일괄 삭제 등 다양한 작업을 이 패널에서 구현할 수 있습니다.
+            일괄 태그 지정, 접근 권한 조정, 일괄 삭제 등 다양한 작업을 이 패널에서 구현할 수
+            있습니다.
           </p>
         </div>
       </div>

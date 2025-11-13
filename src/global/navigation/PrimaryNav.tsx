@@ -9,8 +9,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SidebarClose, SidebarOpen } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
-import { useAuth, useAuthStore } from '@/global/auth';
-import { getAccessTokenFor, switchUser } from '@/global/apiClient';
+import { useAuth, useAuthStore, switchUser } from '@/global/auth';
+import { getAccessTokenFor } from '@/global/apiClient';
 
 import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
@@ -18,15 +18,15 @@ import MyProfileMenu from './MyProfileMenu';
 import type { AuthHistoryEntry } from '@/global/auth';
 
 type PrimaryNavHierarchy = {
-    gigwan: { nanoId: string; name: string } | null;
+  gigwan: { nanoId: string; name: string } | null;
   jojiks: Array<{
+    nanoId: string;
+    name: string;
+    sueops: Array<{
       nanoId: string;
       name: string;
-      sueops: Array<{
-          nanoId: string;
-          name: string;
-        }>;
     }>;
+  }>;
 };
 
 type ItemEntityType = 'gigwan' | 'jojik' | 'sueop' | 'kon';
