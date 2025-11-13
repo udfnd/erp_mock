@@ -1,3 +1,4 @@
+// headless-template.tsx
 'use client';
 
 import { useCallback, useState } from 'react';
@@ -18,6 +19,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
+
+const DEFAULT_PAGINATION: PaginationState = { pageIndex: 0, pageSize: 10 };
 
 export type ListViewHeadlessState<TData> = {
   sorting: SortingState;
@@ -48,7 +51,7 @@ export function useListViewHeadlessState<TData>(
     options.initialRowSelection ?? {},
   );
   const [paginationState, setPaginationState] = useState<PaginationState>(
-    options.initialPagination ?? { pageIndex: 0, pageSize: 10 },
+    options.initialPagination ?? DEFAULT_PAGINATION,
   );
 
   const setSorting = useCallback<OnChangeFn<SortingState>>((updater) => {
@@ -79,60 +82,42 @@ export function useListViewHeadlessState<TData>(
   };
 }
 
+// 템플릿 내부에서 직접 관리하는 필드를 제외한 나머지 TableOptions를 한 번에 받기 위함
+type ListViewTableOptions<TData> = Omit<
+  TableOptions<TData>,
+  | 'data'
+  | 'columns'
+  | 'state'
+  | 'getCoreRowModel'
+  | 'getFilteredRowModel'
+  | 'getSortedRowModel'
+  | 'getPaginationRowModel'
+  | 'onSortingChange'
+  | 'onColumnFiltersChange'
+  | 'onRowSelectionChange'
+  | 'onPaginationChange'
+>;
+
+export type ListViewHeadlessRenderProps<TData> = {
+  table: Table<TData>;
+  headlessState: ListViewHeadlessState<TData>;
+  selectedFlatRows: Row<TData>[];
+};
+
 export type ListViewHeadlessTemplateProps<TData> = {
   data: TData[];
   columns: ColumnDef<TData, any>[];
   state: ListViewHeadlessState<TData>;
   children: (context: ListViewHeadlessRenderProps<TData>) => ReactNode;
-  manualPagination?: boolean;
-  manualSorting?: boolean;
-  pageCount?: number;
-  getRowId?: TableOptions<TData>['getRowId'];
-  enableRowSelection?: boolean | ((row: Row<TData>) => boolean);
-  enableMultiRowSelection?: boolean;
-  meta?: TableOptions<TData>['meta'];
-  debugTable?: boolean;
-  debugHeaders?: boolean;
-  debugColumns?: boolean;
-  autoResetPageIndex?: boolean;
-  autoResetExpanded?: boolean;
-};
-
-export type ListViewHeadlessRenderProps<TData> = {
-  table: Table<TData>;
-  state: {
-    sorting: SortingState;
-    columnFilters: ColumnFiltersState;
-    rowSelection: RowSelectionState;
-    pagination: PaginationState;
-  };
-  setState: {
-    setSorting: OnChangeFn<SortingState>;
-    setColumnFilters: OnChangeFn<ColumnFiltersState>;
-    setRowSelection: OnChangeFn<RowSelectionState>;
-    setPagination: OnChangeFn<PaginationState>;
-  };
-  selectedFlatRows: Row<TData>[];
-};
+} & ListViewTableOptions<TData>;
 
 export function ListViewHeadlessTemplate<TData>({
-  data,
-  columns,
-  state,
-  children,
-  manualPagination,
-  manualSorting,
-  pageCount,
-  getRowId,
-  enableRowSelection,
-  enableMultiRowSelection,
-  meta,
-  debugTable,
-  debugHeaders,
-  debugColumns,
-  autoResetPageIndex,
-  autoResetExpanded,
-}: ListViewHeadlessTemplateProps<TData>) {
+                                                  data,
+                                                  columns,
+                                                  state,
+                                                  children,
+                                                  ...tableOptions
+                                                }: ListViewHeadlessTemplateProps<TData>) {
   const table = useReactTable({
     data,
     columns,
@@ -150,38 +135,12 @@ export function ListViewHeadlessTemplate<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    manualPagination,
-    manualSorting,
-    pageCount,
-    getRowId,
-    enableRowSelection,
-    enableMultiRowSelection,
-    meta,
-    debugTable,
-    debugHeaders,
-    debugColumns,
-    autoResetPageIndex,
-    autoResetExpanded,
+    ...tableOptions,
   });
 
-  return (
-    <>
-      {children({
-        table,
-        state: {
-          sorting: state.sorting,
-          columnFilters: state.columnFilters,
-          rowSelection: state.rowSelection,
-          pagination: state.pagination,
-        },
-        setState: {
-          setSorting: state.setSorting,
-          setColumnFilters: state.setColumnFilters,
-          setRowSelection: state.setRowSelection,
-          setPagination: state.setPagination,
-        },
-        selectedFlatRows: table.getSelectedRowModel().flatRows,
-      })}
-    </>
-  );
+  return children({
+    table,
+    headlessState: state,
+    selectedFlatRows: table.getSelectedRowModel().flatRows,
+  });
 }

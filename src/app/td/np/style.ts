@@ -8,8 +8,8 @@ export const cssObj = {
     display: flex;
     min-height: 100vh;
     width: 100%;
-    color: ${color.red};
-    background-color: ${color.red};
+    color: ${color.white};
+    background-color: ${color.white};
   `,
 
   contentStyles: css`

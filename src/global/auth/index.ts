@@ -1,3 +1,5 @@
+// global/auth/index.ts
+
 'use client';
 
 import type { AuthHistoryEntry } from './store';
@@ -16,6 +18,8 @@ import {
   setAccessTokenFor,
 } from './store';
 
+import { switchUser } from './session';
+
 export type { TokenSource, AuthHistoryEntry, UserMeta } from './store';
 
 export {
@@ -30,6 +34,7 @@ export {
   upsertUser,
   clearAll,
   setAccessTokenFor,
+  switchUser,
 };
 
 export type AuthUIState = {
