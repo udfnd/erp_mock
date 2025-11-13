@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 
 import { color } from '@/style';
 
-export const cssObj = {
+export const jojikListViewCss = {
   page: css`
     display: flex;
     gap: 24px;
@@ -133,6 +133,13 @@ export const cssObj = {
     font-size: 14px;
   `,
 
+  loadingState: css`
+    padding: 40px 16px;
+    text-align: center;
+    color: ${color.cgrey400};
+    font-size: 14px;
+  `,
+
   tableFooter: css`
     padding: 12px 16px;
     border-top: 1px solid ${color.cgrey100};
@@ -159,26 +166,23 @@ export const cssObj = {
     gap: 6px;
     background: none;
     border: none;
-    padding: 0;
-    font: inherit;
-    color: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: ${color.cgrey500};
     cursor: pointer;
   `,
 
   sortIcon: css`
-    font-size: 11px;
-    color: ${color.cgrey400};
+    font-size: 12px;
   `,
 
   settingsPanel: css`
-    width: 400px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
+    width: 340px;
     background: ${color.white};
     border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
-    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    display: flex;
+    flex-direction: column;
   `,
 
   panelHeader: css`
@@ -193,8 +197,8 @@ export const cssObj = {
   `,
 
   panelSubtitle: css`
-    margin-top: 6px;
-    font-size: 14px;
+    margin-top: 4px;
+    font-size: 13px;
     color: ${color.cgrey500};
   `,
 
@@ -202,51 +206,33 @@ export const cssObj = {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
     padding: 24px;
-    overflow: auto;
+  `,
+
+  panelSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+
+  panelLabel: css`
+    font-size: 13px;
+    font-weight: 600;
+    color: ${color.cgrey500};
+  `,
+
+  panelText: css`
+    font-size: 14px;
+    color: ${color.cgrey700};
   `,
 
   panelFooter: css`
     padding: 16px 24px;
     border-top: 1px solid ${color.cgrey100};
     display: flex;
-    gap: 8px;
+    gap: 12px;
     justify-content: flex-end;
-  `,
-
-  panelSection: css`
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  `,
-
-  panelLabel: css`
-    font-size: 12px;
-    font-weight: 600;
-    color: ${color.cgrey400};
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  `,
-
-  panelText: css`
-    font-size: 14px;
-    color: ${color.cgrey600};
-  `,
-
-  chipList: css`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  `,
-
-  chip: css`
-    padding: 12px;
-    border-radius: 12px;
-    background: ${color.blue10};
-    color: ${color.blue600};
-    font-size: 14px;
-    font-weight: 500;
   `,
 
   helperText: css`
@@ -254,26 +240,19 @@ export const cssObj = {
     color: ${color.cgrey400};
   `,
 
-  divider: css`
-    width: 100%;
-    height: 1px;
-    background: ${color.cgrey100};
-    margin: 8px 0;
-  `,
-
-  inlineButtonGroup: css`
+  chipList: css`
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   `,
 
-  fullWidth: css`
-    width: 100%;
-  `,
-
-  loadingState: css`
-    padding: 24px;
-    text-align: center;
-    color: ${color.cgrey400};
+  chip: css`
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: ${color.blue10};
+    color: ${color.blue500};
     font-size: 13px;
   `,
 };
