@@ -53,12 +53,14 @@ type AuthState = {
 const safeStorage =
   typeof window === 'undefined' ? undefined : createJSONStorage(() => localStorage);
 
+const initialIsReady = typeof window === 'undefined';
+
 export const useAuthStore = create<AuthState>()(
   subscribeWithSelector(
     devtools(
       persist(
         (set, get) => ({
-          isReady: true,
+          isReady: initialIsReady,
           activeUserId: null,
           users: {},
           tokensByUser: {},
@@ -178,6 +180,7 @@ export const useAuthStore = create<AuthState>()(
           partialize: (s) => ({
             activeUserId: s.activeUserId,
             users: s.users,
+            tokensByUser: s.tokensByUser,
             history: s.history,
           }),
         },
@@ -186,6 +189,34 @@ export const useAuthStore = create<AuthState>()(
     ),
   ),
 );
+
+type PersistApi = {
+  onHydrate: (fn: (state: AuthState) => void) => () => void;
+  onFinishHydration: (fn: (state: AuthState) => void) => () => void;
+  hasHydrated: () => boolean;
+};
+
+const withPersist = useAuthStore as typeof useAuthStore & { persist?: PersistApi };
+
+if (typeof window !== 'undefined') {
+  const persistApi = withPersist.persist;
+
+  if (persistApi) {
+    persistApi.onHydrate(() => {
+      useAuthStore.setState({ isReady: false }, false);
+    });
+
+    persistApi.onFinishHydration(() => {
+      useAuthStore.setState({ isReady: true }, false);
+    });
+
+    if (persistApi.hasHydrated()) {
+      useAuthStore.setState({ isReady: true }, false);
+    }
+  } else {
+    useAuthStore.setState({ isReady: true }, false);
+  }
+}
 
 export const authStore = {
   getState: () => useAuthStore.getState(),
@@ -224,3 +255,20 @@ export const setAccessTokenFor = (
   token: string | null,
   source: TokenSource = 'api',
 ) => useAuthStore.getState().setAccessTokenFor(userId, token, source);
+
+export const waitForAuthReady = (): Promise<void> => {
+  const state = useAuthStore.getState();
+  if (state.isReady) return Promise.resolve();
+
+  return new Promise<void>((resolve) => {
+    const unsubscribe = useAuthStore.subscribe(
+      (s) => s.isReady,
+      (ready) => {
+        if (ready) {
+          unsubscribe();
+          resolve();
+        }
+      },
+    );
+  });
+};

@@ -9,6 +9,7 @@ import axios, {
 } from 'axios';
 
 import { API_BASE_URL, handleAuthResponse, handleAuthError } from '@/global/auth/session';
+import { authStore, waitForAuthReady } from '@/global/auth/store';
 
 export { configureUnauthorizedHandler } from '@/global/auth/session';
 
@@ -41,12 +42,18 @@ export const apiClient: AxiosInstance = axios.create({
 });
 
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    await waitForAuthReady();
+
     const cfg = config as AuthenticatedRequestConfig;
     const headers = ensureHeaders(cfg.headers);
 
-    const token = cfg._authOverrideToken ?? authContext.token;
-    const userId = cfg._authUserId ?? authContext.userId;
+    const state = authStore.getState();
+    const storeToken = state.getCurrentAccessToken();
+    const storeUserId = state.activeUserId;
+
+    const token = cfg._authOverrideToken ?? authContext.token ?? storeToken;
+    const userId = cfg._authUserId ?? authContext.userId ?? storeUserId;
 
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);

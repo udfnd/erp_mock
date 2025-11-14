@@ -208,16 +208,20 @@ export function useAuthedQuery<
   TQueryKey extends QueryKey = QueryKey,
 >(options: UseAuthedQueryOptions<TData, TError, TQueryKey>) {
   const { userId, token } = useApiAuthContext();
+  const isReady = useAuthStore((s) => s.isReady);
 
   const authedApi = useMemo(
     () => createAuthedApiClient(apiClient, { token, userId }),
     [token, userId],
   );
 
+  const enabled = (options?.enabled ?? true) && isReady;
+
   return useQuery<TData, TError, TData, TQueryKey>({
     ...options,
     queryKey: options.queryKey,
     queryFn: () => options.queryFn({ api: authedApi, token, userId }),
+    enabled,
   });
 }
 
