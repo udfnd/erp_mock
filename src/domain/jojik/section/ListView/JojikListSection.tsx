@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 
-import { flexRender, type Row, type Table } from '@tanstack/react-table';
+import type { Row } from '@tanstack/react-table';
 
 import { Button } from '@/common/components';
-import { Search } from '@/common/icons';
-import { ListViewHeadlessTemplate } from '@/common/list-view';
-import { type JojikListSectionProps } from '@/domain/jojik/section';
+import {
+  ListViewTemplate,
+  type ListViewTemplateRenderContext,
+  type ListViewTemplateRowEventHandlers,
+} from '@/common/list-view';
 import type { JojikListItem } from '@/domain/jojik/api';
+import { type JojikListSectionProps } from '@/domain/jojik/section';
 
 import { type CreatedAtFilterValue } from './constants';
-import { jojikListViewCss } from './styles';
 
 export type JojikListSectionComponentProps = JojikListSectionProps & {
   createdAtFilterOptions: { label: string; value: CreatedAtFilterValue }[];
@@ -19,187 +21,38 @@ export type JojikListSectionComponentProps = JojikListSectionProps & {
   pageSizeOptions: number[];
 };
 
-type ListContentProps = {
-  table: Table<JojikListItem>;
-  selectedFlatRows: Row<JojikListItem>[];
-  isListLoading: boolean;
-  totalCount: number;
-  totalPages: number;
-  searchTerm: string;
-  sortByOption?: string;
-  pagination: JojikListSectionProps['pagination'];
-  handlers: JojikListSectionProps['handlers'];
-  sortOptions: { label: string; value: string }[];
-};
+const CLEAR_SELECTION_THRESHOLD = 0;
 
-function ListContent({
-  table,
-  selectedFlatRows,
-  isListLoading,
-  totalCount,
-  totalPages,
-  searchTerm,
-  sortByOption,
-  handlers,
-  sortOptions,
-}: ListContentProps) {
-  const selectedJojiks = useMemo(
-    () => selectedFlatRows.map((row) => row.original),
-    [selectedFlatRows],
-  );
-  const { onSelectedJojiksChange, ...listHandlers } = handlers;
+function renderSelectionActions(
+  handlers: JojikListSectionProps['handlers'],
+): (context: ListViewTemplateRenderContext<JojikListItem>) => ReactNode {
+  return ({ selectedRows }) => {
+    if (selectedRows.length <= CLEAR_SELECTION_THRESHOLD) {
+      return null;
+    }
 
-  useEffect(() => {
-    onSelectedJojiksChange(selectedJojiks);
-  }, [onSelectedJojiksChange, selectedJojiks]);
+    return (
+      <Button
+        styleType="text"
+        variant="secondary"
+        size="small"
+        onClick={handlers.onClearSelection}
+      >
+        선택 해제 ({selectedRows.length})
+      </Button>
+    );
+  };
+}
 
-  const visibleColumnsLength = table.getVisibleFlatColumns().length;
-
-  return (
-    <section css={jojikListViewCss.listSection}>
-      <div css={jojikListViewCss.listHeader}>
-        <div css={jojikListViewCss.searchContainer}>
-          <Search css={jojikListViewCss.searchIcon} />
-          <input
-            css={jojikListViewCss.searchTextfield}
-            placeholder="조직 이름으로 검색"
-            value={searchTerm}
-            onChange={() => listHandlers.onSearchChange}
-          />
-        </div>
-        <div css={jojikListViewCss.toolbarGroup}>
-          <label>
-            <select
-              css={jojikListViewCss.toolbarSelect}
-              value={sortByOption ?? 'createdAt:desc'}
-              onChange={(event) => listHandlers.onSortChange(event.target.value)}
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </div>
-      <div css={jojikListViewCss.tableContainer}>
-        <div css={jojikListViewCss.tableWrapper}>
-          <Button variant="primary" size="medium" onClick={listHandlers.onAddClick}>
-            새 조직 추가
-          </Button>
-          <table css={jojikListViewCss.table}>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} css={jojikListViewCss.tableHeadRow}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      css={jojikListViewCss.tableHeaderCell}
-                      colSpan={header.colSpan}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {isListLoading ? (
-                <tr>
-                  <td colSpan={visibleColumnsLength} css={jojikListViewCss.loadingState}>
-                    조직 데이터를 불러오는 중입니다...
-                  </td>
-                </tr>
-              ) : table.getRowModel().rows.length > 0 ? (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    css={[
-                      jojikListViewCss.tableRow,
-                      row.getIsSelected() && jojikListViewCss.tableRowSelected,
-                    ]}
-                    onClick={(event) => {
-                      const target = event.target as HTMLElement | null;
-                      if (target?.closest('label')) {
-                        return;
-                      }
-                      listHandlers.onStopCreate();
-                      row.toggleSelected();
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        css={[
-                          jojikListViewCss.tableCell,
-                          cell.column.id === 'selection' && jojikListViewCss.checkboxCell,
-                        ]}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={visibleColumnsLength} css={jojikListViewCss.emptyState}>
-                    조건에 맞는 조직이 없습니다. 검색어나 필터를 조정해 보세요.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div css={jojikListViewCss.tableFooter}>
-          <span css={jojikListViewCss.paginationInfo}>
-            총 {totalCount}개 조직 · {table.getState().pagination.pageIndex + 1} / {totalPages}{' '}
-            페이지
-          </span>
-          <div css={jojikListViewCss.paginationButtons}>
-            <Button
-              styleType="text"
-              variant="secondary"
-              size="small"
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              처음
-            </Button>
-            <Button
-              styleType="text"
-              variant="secondary"
-              size="small"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              이전
-            </Button>
-            <Button
-              styleType="text"
-              variant="secondary"
-              size="small"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              다음
-            </Button>
-            <Button
-              styleType="text"
-              variant="secondary"
-              size="small"
-              onClick={() => table.setPageIndex(totalPages - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              마지막
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+function createRowEventHandlers(
+  handlers: JojikListSectionProps['handlers'],
+): ListViewTemplateRowEventHandlers<JojikListItem> {
+  return {
+    selectOnClick: true,
+    onClick: () => {
+      handlers.onStopCreate();
+    },
+  };
 }
 
 export function JojikListSection({
@@ -211,12 +64,24 @@ export function JojikListSection({
   totalPages,
   searchTerm,
   sortByOption,
-  pagination,
+  currentCreatedFilter,
   handlers,
   sortOptions,
+  createdAtFilterOptions,
+  pageSizeOptions,
 }: JojikListSectionComponentProps) {
+  const toolbarActions = useMemo(() => renderSelectionActions(handlers), [handlers]);
+  const rowEventHandlers = useMemo(
+    () => createRowEventHandlers(handlers),
+    [handlers],
+  );
+
+  const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
+
   return (
-    <ListViewHeadlessTemplate
+    <ListViewTemplate
+      title="조직 목록"
+      description="기관에 속한 조직 정보를 확인하고 관리하세요."
       data={data}
       columns={columns}
       state={state}
@@ -226,21 +91,42 @@ export function JojikListSection({
       enableRowSelection
       autoResetPageIndex={false}
       autoResetExpanded={false}
-    >
-      {({ table, selectedFlatRows }) => (
-        <ListContent
-          table={table}
-          selectedFlatRows={selectedFlatRows}
-          isListLoading={isListLoading}
-          totalCount={totalCount}
-          totalPages={totalPages}
-          searchTerm={searchTerm}
-          sortByOption={sortByOption}
-          pagination={pagination}
-          handlers={handlers}
-          sortOptions={sortOptions}
-        />
-      )}
-    </ListViewHeadlessTemplate>
+      isLoading={isListLoading}
+      totalCount={totalCount}
+      loadingMessage="조직 데이터를 불러오는 중입니다..."
+      emptyMessage="조건에 맞는 조직이 없습니다. 검색어나 필터를 조정해 보세요."
+      search={{
+        value: searchTerm,
+        onChange: handlers.onSearchChange,
+        placeholder: '조직 이름으로 검색',
+      }}
+      filters={[
+        {
+          key: 'createdAt',
+          label: '생성일 필터',
+          value: currentCreatedFilter,
+          options: createdAtFilterOptions,
+          onChange: (value) =>
+            handlers.onCreatedFilterChange(value as CreatedAtFilterValue),
+        },
+      ]}
+      sort={{
+        label: '정렬 기준',
+        value: sortValue,
+        options: sortOptions,
+        onChange: handlers.onSortChange,
+      }}
+      toolbarActions={toolbarActions}
+      primaryAction={{
+        label: '새 조직 추가',
+        onClick: handlers.onAddClick,
+      }}
+      pageSizeOptions={pageSizeOptions}
+      onPageSizeChange={handlers.onPageSizeChange}
+      onSelectedRowsChange={(rows: Row<JojikListItem>[]) => {
+        handlers.onSelectedJojiksChange(rows.map((row) => row.original));
+      }}
+      rowEventHandlers={rowEventHandlers}
+    />
   );
 }

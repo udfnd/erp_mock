@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
 import { Checkbox } from '@/common/components';
-import { ListViewHeadlessState, useListViewHeadlessState } from '@/common/list-view';
+import { ListViewState, useListViewState } from '@/common/list-view';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
 import {
@@ -27,7 +27,7 @@ export type JojikListViewHookParams = {
   isAuthenticated: boolean;
 };
 
-export type ListSectionState = ListViewHeadlessState<JojikListItem>;
+export type ListSectionState = ListViewState<JojikListItem>;
 
 export type JojikListSectionHandlers = {
   onSearchChange: (value: string) => void;
@@ -79,7 +79,7 @@ export function useJojikListViewSections({
   isAuthenticated,
 }: JojikListViewHookParams): UseJojikListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
-  const baseState = useListViewHeadlessState<JojikListItem>({
+  const baseState = useListViewState<JojikListItem>({
     initialSorting: [{ id: 'createdAt', desc: true }],
     initialPagination: { pageIndex: 0, pageSize: 10 },
   });
