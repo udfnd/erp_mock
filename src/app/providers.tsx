@@ -6,8 +6,9 @@ import { CacheProvider, Global } from '@emotion/react';
 import { useServerInsertedHTML, useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useShallow } from 'zustand/react/shallow';
 
-import { configureUnauthorizedHandler } from '@/global';
+import { configureUnauthorizedHandler, setApiClientAuthContext } from '@/global';
 import { useAuthStore } from '@/global/auth';
 import { globalStyles } from '@/global/style';
 
@@ -18,6 +19,14 @@ type AppProvidersProps = { children: ReactNode };
 
 export function Providers({ children }: AppProvidersProps) {
   const router = useRouter();
+
+  const { isReady: isAuthReady, activeUserId, accessToken } = useAuthStore(
+    useShallow((state) => ({
+      isReady: state.isReady,
+      activeUserId: state.activeUserId,
+      accessToken: state.getCurrentAccessToken(),
+    })),
+  );
 
   const queryClientRef = useRef<QueryClient | null>(null);
 
@@ -77,6 +86,18 @@ export function Providers({ children }: AppProvidersProps) {
     });
     return () => configureUnauthorizedHandler(null);
   }, [queryClient, router]);
+
+  useEffect(() => {
+    if (!isAuthReady) {
+      setApiClientAuthContext({ userId: null, token: null });
+      return;
+    }
+
+    setApiClientAuthContext({
+      userId: activeUserId,
+      token: accessToken,
+    });
+  }, [activeUserId, accessToken, isAuthReady]);
 
   return (
     <CacheProvider value={cache}>
