@@ -54,8 +54,6 @@ const isRefreshPath = (url?: string) => {
   return path.includes(REFRESH_SEGMENT) || getRefreshUserId(path) !== null;
 };
 
-const isAuthExempt = (url?: string) => isSignInPath(url) || isRefreshPath(url);
-
 type NodeBuffer = { from(i: string, e: string): { toString(e: string): string } };
 
 const getNodeBuffer = (): NodeBuffer | null => {
@@ -93,12 +91,6 @@ export const getActiveUserId = () => getAuthState().activeUserId;
 
 export const getAccessTokenForUser = (userId: string): string | null =>
   getAuthState().tokensByUser[userId] ?? null;
-
-const tokenForActive = (): string | null => {
-  const state = getAuthState();
-  const uid = state.activeUserId;
-  return uid ? (state.tokensByUser[uid] ?? null) : null;
-};
 
 const setAccessTokenFor = (userId: string, token: string | null, source: TokenSource = 'api') =>
   cacheAccessTokenFor(userId, token, source);
@@ -206,15 +198,6 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
   }
 }
 
-export const attachAuthHeader = (
-  config: InternalAxiosRequestConfig,
-): InternalAxiosRequestConfig => {
-  if (!isAuthExempt(config.url)) {
-    config.headers = withAuth(config.headers, tokenForActive());
-  }
-  return config;
-};
-
 export const handleAuthResponse = (response: AxiosResponse): AxiosResponse => {
   applyAccessTokenFromResponse(response.config?.url, response.data);
   return response;
@@ -224,10 +207,17 @@ export const handleAuthError = async (
   error: AxiosError,
   client: AxiosInstance,
 ): Promise<AxiosResponse<unknown> | never> => {
-  const cfg = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+  const cfg =
+    error.config as
+      | (InternalAxiosRequestConfig & {
+          _retry?: boolean;
+          _authUserId?: string;
+          _authOverrideToken?: string;
+        })
+      | undefined;
   const status = error.response?.status;
 
-  if (!cfg || status !== 401 || isAuthExempt(cfg.url)) {
+  if (!cfg || status !== 401) {
     if (status === 401 && cfg?._retry) finalizeUnauthorized();
     return Promise.reject(error);
   }
@@ -237,7 +227,7 @@ export const handleAuthError = async (
     return Promise.reject(error);
   }
 
-  const uid = getActiveUserId();
+  const uid = cfg._authUserId ?? getActiveUserId();
   if (!uid) {
     finalizeUnauthorized();
     return Promise.reject(error);
@@ -247,6 +237,8 @@ export const handleAuthError = async (
     const newToken = await refreshAccessTokenFor(uid);
     cfg._retry = true;
     cfg.headers = withAuth(cfg.headers, newToken);
+    cfg._authOverrideToken = newToken;
+    cfg._authUserId = uid;
     return client(cfg);
   } catch (e) {
     finalizeUnauthorized();

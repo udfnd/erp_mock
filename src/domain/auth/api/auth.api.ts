@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { apiClient } from '@/global';
+import { apiClient, publicApiClient } from '@/global';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -20,7 +20,7 @@ import {
 
 export const signIn = async (data: SignInRequest): Promise<SignInResponse> => {
   const validated = SignInRequestSchema.parse(data);
-  const res = await apiClient.post('T/dl/sayongjas/sign-in', validated);
+  const res = await publicApiClient.post('T/dl/sayongjas/sign-in', validated);
   return parseOrThrow(SignInResponseSchema, res.data);
 };
 
@@ -29,7 +29,7 @@ export const useSignInMutation = () => {
 };
 
 export const refreshAccessToken = async (nanoId: string): Promise<RefreshTokenResponse> => {
-  const res = await apiClient.post(
+  const res = await publicApiClient.post(
     `T/dl/sayongjas/${encodeURIComponent(nanoId)}/refresh-access`,
     {},
   );
