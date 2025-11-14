@@ -27,14 +27,18 @@ export default function NpGigwanJojikListViewPage() {
     pageSizeOptions,
   } = useJojikListViewSections({ gigwanNanoId, isAuthenticated });
 
+  const listSectionAllProps = {
+    ...listSectionProps,
+    createdAtFilterOptions,
+    sortOptions,
+    pageSizeOptions,
+  };
+
+  const pageKey = gigwanNanoId || 'no-gi';
+
   return (
-    <div css={cssObj.page} key={gigwanNanoId || 'no-gi'}>
-      <JojikListSection
-        {...listSectionProps}
-        createdAtFilterOptions={createdAtFilterOptions}
-        sortOptions={sortOptions}
-        pageSizeOptions={pageSizeOptions}
-      />
+    <div css={cssObj.page} key={pageKey}>
+      <JojikListSection {...listSectionAllProps} />
       <JojikSettingsSection {...settingsSectionProps} />
     </div>
   );
