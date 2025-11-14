@@ -7,8 +7,8 @@ import {
   JojikListSection,
   JojikSettingsSection,
   useJojikListViewSections,
-  jojikListViewCss,
 } from '@/domain/jojik/section';
+import { cssObj } from './style';
 
 type PageParams = {
   gi?: string | string[];
@@ -16,14 +16,19 @@ type PageParams = {
 
 export default function NpGigwanJojikListViewPage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? params?.gi[0] ?? '' : params?.gi ?? '';
+  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, createdAtFilterOptions, sortOptions, pageSizeOptions } =
-    useJojikListViewSections({ gigwanNanoId, isAuthenticated });
+  const {
+    listSectionProps,
+    settingsSectionProps,
+    createdAtFilterOptions,
+    sortOptions,
+    pageSizeOptions,
+  } = useJojikListViewSections({ gigwanNanoId, isAuthenticated });
 
   return (
-    <div css={jojikListViewCss.page} key={gigwanNanoId || 'no-gi'}>
+    <div css={cssObj.page} key={gigwanNanoId || 'no-gi'}>
       <JojikListSection
         {...listSectionProps}
         createdAtFilterOptions={createdAtFilterOptions}

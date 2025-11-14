@@ -1,7 +1,7 @@
 import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { color } from '@/style/color';
-import { radius, shadow, spacing } from '@/style/primitive';
+import { radius, spacing } from '@/style/primitive';
 import { typography } from '@/style/typo';
 
 type IT = Interpolation<Theme>;
@@ -11,7 +11,6 @@ export const navContainer = css({
   alignItems: 'center',
   padding: `0 ${spacing.xxl}`,
   background: color.cgrey10,
-  boxShadow: shadow.sm,
   minHeight: '52px',
   boxSizing: 'border-box',
   '@media (max-width: 959px)': {

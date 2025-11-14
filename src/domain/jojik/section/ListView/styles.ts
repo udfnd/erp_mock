@@ -5,39 +5,41 @@ import { css } from '@emotion/react';
 import { color } from '@/style';
 
 export const jojikListViewCss = {
-  page: css`
-    display: flex;
-    gap: 24px;
-    padding: 24px;
-    background-color: ${color.cgrey50};
-    min-height: 100vh;
-    box-sizing: border-box;
-  `,
-
   listSection: css`
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding: 16px;
+    border-right: 1px solid ${color.cgrey100};
     gap: 16px;
     min-width: 0;
   `,
 
-  listTitle: css`
-    font-size: 24px;
-    font-weight: 600;
-    color: ${color.black};
+  listHeader: css`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
   `,
 
-  listSubtitle: css`
-    font-size: 14px;
-    color: ${color.cgrey500};
-  `,
-
-  toolbar: css`
+  searchContainer: css`
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+    position: relative;
+  `,
+
+  searchIcon: css`
+    position: absolute;
+    left: 8px;
+  `,
+
+  searchTextfield: css`
+    flex: 1;
+    height: 32px;
+    padding: 4px 12px 4px 24px;
+    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
   `,
 
   toolbarGroup: css`
@@ -56,19 +58,12 @@ export const jojikListViewCss = {
     font-size: 14px;
   `,
 
-  toolbarTextfield: css`
-    flex: 1;
-    min-width: 220px;
-  `,
-
   tableContainer: css`
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: ${color.white};
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
   `,
 
   tableWrapper: css`
@@ -179,8 +174,6 @@ export const jojikListViewCss = {
   settingsPanel: css`
     width: 340px;
     background: ${color.white};
-    border-radius: 16px;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
     display: flex;
     flex-direction: column;
   `,
