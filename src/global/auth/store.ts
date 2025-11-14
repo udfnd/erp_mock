@@ -180,6 +180,7 @@ export const useAuthStore = create<AuthState>()(
           partialize: (s) => ({
             activeUserId: s.activeUserId,
             users: s.users,
+            tokensByUser: s.tokensByUser,
             history: s.history,
           }),
         },
@@ -254,3 +255,20 @@ export const setAccessTokenFor = (
   token: string | null,
   source: TokenSource = 'api',
 ) => useAuthStore.getState().setAccessTokenFor(userId, token, source);
+
+export const waitForAuthReady = (): Promise<void> => {
+  const state = useAuthStore.getState();
+  if (state.isReady) return Promise.resolve();
+
+  return new Promise<void>((resolve) => {
+    const unsubscribe = useAuthStore.subscribe(
+      (s) => s.isReady,
+      (ready) => {
+        if (ready) {
+          unsubscribe();
+          resolve();
+        }
+      },
+    );
+  });
+};
