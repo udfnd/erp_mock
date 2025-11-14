@@ -1,6 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -32,7 +31,7 @@ export const useGetOebuLinksQuery = (
   params: GetOebuLinksRequest,
   options?: { enabled?: boolean },
 ) =>
-  useQuery<GetOebuLinksResponse, unknown>({
+  useAuthedQuery<GetOebuLinksResponse, unknown>({
     queryKey: ['oebuLinks', params],
     queryFn: () => getOebuLinks(params),
     enabled: options?.enabled ?? true,
@@ -47,7 +46,7 @@ export const createOebuLink = async (
 };
 
 export const useCreateOebuLinkMutation = () =>
-  useMutation<CreateOebuLinkResponse, unknown, CreateOebuLinkRequest>({
+  useAuthedMutation<CreateOebuLinkResponse, unknown, CreateOebuLinkRequest>({
     mutationFn: createOebuLink,
   });
 
@@ -57,7 +56,7 @@ export const getOebuLinkDetail = async (nanoId: string): Promise<GetOebuLinkDeta
 };
 
 export const useGetOebuLinkDetailQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetOebuLinkDetailResponse, unknown>({
+  useAuthedQuery<GetOebuLinkDetailResponse, unknown>({
     queryKey: ['oebuLink', nanoId],
     queryFn: () => getOebuLinkDetail(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -73,7 +72,7 @@ export const updateOebuLink = async (
 };
 
 export const useUpdateOebuLinkMutation = (nanoId: string) =>
-  useMutation<UpdateOebuLinkResponse, unknown, UpdateOebuLinkRequest>({
+  useAuthedMutation<UpdateOebuLinkResponse, unknown, UpdateOebuLinkRequest>({
     mutationFn: (data) => updateOebuLink(nanoId, data),
   });
 
@@ -83,6 +82,6 @@ export const deleteOebuLink = async (nanoId: string): Promise<DeleteOebuLinkResp
 };
 
 export const useDeleteOebuLinkMutation = (nanoId: string) =>
-  useMutation<DeleteOebuLinkResponse, unknown, void>({
+  useAuthedMutation<DeleteOebuLinkResponse, unknown, void>({
     mutationFn: () => deleteOebuLink(nanoId),
   });

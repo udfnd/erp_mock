@@ -1,6 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -40,7 +39,7 @@ export const useGetSayongjasQuery = (
   params: GetSayongjasRequest,
   options?: { enabled?: boolean },
 ) =>
-  useQuery<GetSayongjasResponse, unknown>({
+  useAuthedQuery<GetSayongjasResponse, unknown>({
     queryKey: ['sayongjas', params],
     queryFn: () => getSayongjas(params),
     enabled: options?.enabled ?? true,
@@ -55,7 +54,7 @@ export const createSayongja = async (
 };
 
 export const useCreateSayongjaMutation = () =>
-  useMutation<CreateSayongjaResponse, unknown, CreateSayongjaRequest>({
+  useAuthedMutation<CreateSayongjaResponse, unknown, CreateSayongjaRequest>({
     mutationFn: createSayongja,
   });
 
@@ -65,7 +64,7 @@ export const getSayongjaDetail = async (nanoId: string): Promise<GetSayongjaDeta
 };
 
 export const useGetSayongjaDetailQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetSayongjaDetailResponse, unknown>({
+  useAuthedQuery<GetSayongjaDetailResponse, unknown>({
     queryKey: ['sayongja', nanoId],
     queryFn: () => getSayongjaDetail(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -81,7 +80,7 @@ export const updateSayongja = async (
 };
 
 export const useUpdateSayongjaMutation = (nanoId: string) =>
-  useMutation<UpdateSayongjaResponse, unknown, UpdateSayongjaRequest>({
+  useAuthedMutation<UpdateSayongjaResponse, unknown, UpdateSayongjaRequest>({
     mutationFn: (data) => updateSayongja(nanoId, data),
   });
 
@@ -91,7 +90,7 @@ export const deleteSayongja = async (nanoId: string): Promise<DeleteSayongjaResp
 };
 
 export const useDeleteSayongjaMutation = (nanoId: string) =>
-  useMutation<DeleteSayongjaResponse, unknown, void>({
+  useAuthedMutation<DeleteSayongjaResponse, unknown, void>({
     mutationFn: () => deleteSayongja(nanoId),
   });
 
@@ -105,7 +104,11 @@ export const batchlinkSayongjaPermissions = async (
 };
 
 export const useBatchlinkSayongjaPermissionsMutation = (nanoId: string) =>
-  useMutation<BatchlinkSayongjaPermissionsResponse, unknown, BatchlinkSayongjaPermissionsRequest>({
+  useAuthedMutation<
+    BatchlinkSayongjaPermissionsResponse,
+    unknown,
+    BatchlinkSayongjaPermissionsRequest
+  >({
     mutationFn: (data) => batchlinkSayongjaPermissions(nanoId, data),
   });
 
@@ -117,7 +120,7 @@ export const getSayongjaPermissions = async (
 };
 
 export const useGetSayongjaPermissionsQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetSayongjaPermissionsResponse, unknown>({
+  useAuthedQuery<GetSayongjaPermissionsResponse, unknown>({
     queryKey: ['sayongjaPermissions', nanoId],
     queryFn: () => getSayongjaPermissions(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -129,7 +132,7 @@ export const getMyJojiks = async (): Promise<GetMyJojiksResponse> => {
 };
 
 export const useGetMyJojiksQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetMyJojiksResponse, unknown>({
+  useAuthedQuery<GetMyJojiksResponse, unknown>({
     queryKey: ['myJojiks'],
     queryFn: getMyJojiks,
     enabled: options?.enabled ?? true,

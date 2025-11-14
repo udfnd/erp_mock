@@ -93,10 +93,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
   const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
 
   const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
-  const [employmentEditing, dispatchEmploymentEditing] = useReducer(
-    employmentEditingReducer,
-    {},
-  );
+  const [employmentEditing, dispatchEmploymentEditing] = useReducer(employmentEditingReducer, {});
 
   const form = useForm({
     defaultValues: INITIAL_VALUES,
@@ -172,10 +169,13 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
     await form.handleSubmit();
   }, [clearFeedback, employmentHasEmptyStatus, form, isDirty]);
 
-  const toggleEditEmploymentStatus = useCallback((localId: string) => {
-    dispatchEmploymentEditing({ type: 'toggle', localId });
-    clearFeedback();
-  }, [clearFeedback]);
+  const toggleEditEmploymentStatus = useCallback(
+    (localId: string) => {
+      dispatchEmploymentEditing({ type: 'toggle', localId });
+      clearFeedback();
+    },
+    [clearFeedback],
+  );
 
   return (
     <section css={css.card}>

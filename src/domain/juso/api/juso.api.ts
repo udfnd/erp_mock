@@ -1,6 +1,6 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
+
 import { parseOrThrow } from '../../util';
 
 import {
@@ -29,7 +29,7 @@ export const getJusos = async (params: GetJusosRequest): Promise<GetJusosRespons
 };
 
 export const useGetJusosQuery = (params: GetJusosRequest, options?: { enabled?: boolean }) =>
-  useQuery<GetJusosResponse, unknown>({
+  useAuthedQuery<GetJusosResponse, unknown>({
     queryKey: ['jusos', params],
     queryFn: () => getJusos(params),
     enabled: options?.enabled ?? true,
@@ -42,7 +42,7 @@ export const createJuso = async (data: CreateJusoRequest): Promise<CreateJusoRes
 };
 
 export const useCreateJusoMutation = () =>
-  useMutation<CreateJusoResponse, unknown, CreateJusoRequest>({
+  useAuthedMutation<CreateJusoResponse, unknown, CreateJusoRequest>({
     mutationFn: createJuso,
   });
 
@@ -52,7 +52,7 @@ export const getJusoDetail = async (nanoId: string): Promise<GetJusoDetailRespon
 };
 
 export const useGetJusoDetailQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetJusoDetailResponse, unknown>({
+  useAuthedQuery<GetJusoDetailResponse, unknown>({
     queryKey: ['juso', nanoId],
     queryFn: () => getJusoDetail(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -68,7 +68,7 @@ export const updateJuso = async (
 };
 
 export const useUpdateJusoMutation = (nanoId: string) =>
-  useMutation<UpdateJusoResponse, unknown, UpdateJusoRequest>({
+  useAuthedMutation<UpdateJusoResponse, unknown, UpdateJusoRequest>({
     mutationFn: (data) => updateJuso(nanoId, data),
   });
 
@@ -78,6 +78,6 @@ export const deleteJuso = async (nanoId: string): Promise<DeleteJusoResponse> =>
 };
 
 export const useDeleteJusoMutation = (nanoId: string) =>
-  useMutation<DeleteJusoResponse, unknown, void>({
+  useAuthedMutation<DeleteJusoResponse, unknown, void>({
     mutationFn: () => deleteJuso(nanoId),
   });

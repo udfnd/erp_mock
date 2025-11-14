@@ -1,6 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -20,7 +19,7 @@ export const deleteWorkTypeCustomSangtae = async (
 };
 
 export const useDeleteWorkTypeCustomSangtaeMutation = (nanoId: string) =>
-  useMutation<DeleteWorkTypeCustomSangtaeResponse, unknown, void>({
+  useAuthedMutation<DeleteWorkTypeCustomSangtaeResponse, unknown, void>({
     mutationFn: () => deleteWorkTypeCustomSangtae(nanoId),
   });
 
@@ -33,6 +32,6 @@ export const deleteEmploymentCategorySangtae = async (
 };
 
 export const useDeleteEmploymentCategorySangtaeMutation = (nanoId: string) =>
-  useMutation<DeleteEmploymentCategorySangtaeResponse, unknown, void>({
+  useAuthedMutation<DeleteEmploymentCategorySangtaeResponse, unknown, void>({
     mutationFn: () => deleteEmploymentCategorySangtae(nanoId),
   });

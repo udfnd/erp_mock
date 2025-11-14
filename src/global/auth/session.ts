@@ -1,3 +1,4 @@
+// global/auth/session.ts
 'use client';
 
 import axios, {
@@ -8,8 +9,10 @@ import axios, {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from 'axios';
+
 import { authStore, setActiveUserId, setAccessTokenFor as cacheAccessTokenFor } from './store';
 import type { TokenSource } from './store';
+import { setApiClientAuthContext } from '../apiClient';
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://staging.api.v3.teachita.com/api';
@@ -24,12 +27,14 @@ const stripTrailingSlash = (p: string) =>
 
 const normalizePath = (url?: string): string => {
   if (!url) return '';
+
   const clean = (raw: string) => {
     const base = (raw.split('?')[0] ?? '').trim();
     const withSlash = base.startsWith('/') ? base : `/${base}`;
     const path = stripTrailingSlash(dropApiPrefix(withSlash));
     return path === '/' ? '' : path;
   };
+
   try {
     return clean(new URL(url, API_BASE_URL).pathname);
   } catch {
@@ -78,6 +83,7 @@ export const isTokenExpiring = (token: string, skewSec = 60): boolean => {
   try {
     const [, payload] = token.split('.');
     if (!payload) return true;
+
     const exp = (JSON.parse(b64Decode(payload)) as { exp?: number }).exp ?? 0;
     return Date.now() >= exp * 1000 - skewSec * 1000;
   } catch {
@@ -128,14 +134,25 @@ const refreshInflight = new Map<string, Promise<string>>();
 const requestRefresh = async (userId: string): Promise<string> => {
   const endpoint = `/T/dl/sayongjas/${encodeURIComponent(userId)}/${REFRESH_SEGMENT}`;
   const { data } = await refreshClient.post<AccessTokenPayload>(endpoint);
-  if (!hasAccessToken(data)) throw new Error('No accessToken from refresh');
-  setAccessTokenFor(userId, data.accessToken, 'refresh');
-  return data.accessToken;
+
+  if (!hasAccessToken(data)) {
+    throw new Error('No accessToken from refresh');
+  }
+
+  const token = data.accessToken;
+
+  // store에 저장
+  setAccessTokenFor(userId, token, 'refresh');
+  // axios authContext도 동기화
+  setApiClientAuthContext({ userId, token });
+
+  return token;
 };
 
 export const refreshAccessTokenFor = (userId: string): Promise<string> => {
   const existing = refreshInflight.get(userId);
   if (existing) return existing;
+
   const p = requestRefresh(userId)
     .finally(() => {
       refreshInflight.delete(userId);
@@ -143,6 +160,7 @@ export const refreshAccessTokenFor = (userId: string): Promise<string> => {
     .catch((e) => {
       throw e;
     });
+
   refreshInflight.set(userId, p);
   return p;
 };
@@ -154,44 +172,57 @@ export const configureUnauthorizedHandler = (fn: (() => void) | null) => {
 };
 
 export const finalizeUnauthorized = () => {
+  // store 상태 정리
   getAuthState().handleUnauthorized();
+  // axios authContext도 초기화
+  setApiClientAuthContext({ token: null, userId: null });
+  // 상위 레이아웃에서 /td/g 로 보내는 콜백
   onUnauthorized?.();
 };
 
 const applyAccessTokenFromResponse = (url: string | undefined, payload: unknown) => {
   if (!hasAccessToken(payload)) return;
+
   const path = normalizePath(url);
   const token = payload.accessToken;
 
-  if (path === SIGN_IN_PATH) {
+  // 로그인 응답
+  if (isSignInPath(url)) {
     const uid = getNanoId(payload) ?? getActiveUserId() ?? undefined;
     if (uid) {
       setAccessTokenFor(uid, token, 'api');
       setActiveUserId(uid);
+      setApiClientAuthContext({ userId: uid, token });
     }
     return;
   }
 
+  // refresh 응답
   if (isRefreshPath(url)) {
     const uid = getNanoId(payload) ?? getRefreshUserId(path) ?? getActiveUserId() ?? undefined;
     if (uid) {
       setAccessTokenFor(uid, token, 'refresh');
       setActiveUserId(uid);
+      setApiClientAuthContext({ userId: uid, token });
     }
   }
 };
 
 export async function switchUser(userId: string, onNeedLogin?: (id: string) => void) {
   const cached = getAccessTokenForUser(userId);
+
   if (cached && !isTokenExpiring(cached)) {
     setActiveUserId(userId);
     setAccessTokenFor(userId, cached, 'store');
+    setApiClientAuthContext({ userId, token: cached });
     return;
   }
+
   try {
     const newToken = await refreshAccessTokenFor(userId);
     setActiveUserId(userId);
     setAccessTokenFor(userId, newToken, 'refresh');
+    setApiClientAuthContext({ userId, token: newToken });
   } catch {
     if (onNeedLogin) onNeedLogin(userId);
     else throw new Error('Refresh token not found for this user. Redirect to sign-in.');
@@ -207,26 +238,40 @@ export const handleAuthError = async (
   error: AxiosError,
   client: AxiosInstance,
 ): Promise<AxiosResponse<unknown> | never> => {
-  const cfg =
-    error.config as
-      | (InternalAxiosRequestConfig & {
-          _retry?: boolean;
-          _authUserId?: string;
-          _authOverrideToken?: string;
-        })
-      | undefined;
+  const cfg = error.config as
+    | (InternalAxiosRequestConfig & {
+        _retry?: boolean;
+        _authUserId?: string;
+        _authOverrideToken?: string;
+      })
+    | undefined;
+
   const status = error.response?.status;
 
+  // 401이 아니거나 config가 없으면 그대로 처리
   if (!cfg || status !== 401) {
-    if (status === 401 && cfg?._retry) finalizeUnauthorized();
+    if (status === 401 && cfg?._retry) {
+      // 같은 요청에서 refresh 후에도 또 401이면 강제 로그아웃
+      finalizeUnauthorized();
+    }
     return Promise.reject(error);
   }
 
+  // 이 요청에 대해서 이미 refresh를 한 번 시도한 상태라면 → 두 번째 401
   if (cfg._retry) {
     finalizeUnauthorized();
     return Promise.reject(error);
   }
 
+  const url = cfg.url;
+
+  // 로그인/refresh 호출에서의 401은 그냥 바로 정리
+  if (isSignInPath(url) || isRefreshPath(url)) {
+    finalizeUnauthorized();
+    return Promise.reject(error);
+  }
+
+  // refresh 대상 유저 id 결정
   const uid = cfg._authUserId ?? getActiveUserId();
   if (!uid) {
     finalizeUnauthorized();
@@ -234,13 +279,18 @@ export const handleAuthError = async (
   }
 
   try {
+    // 첫 번째 401 → refresh 시도
     const newToken = await refreshAccessTokenFor(uid);
+
     cfg._retry = true;
     cfg.headers = withAuth(cfg.headers, newToken);
     cfg._authOverrideToken = newToken;
     cfg._authUserId = uid;
+
+    // 같은 요청을 새 토큰으로 한 번만 재시도
     return client(cfg);
   } catch (e) {
+    // refresh 자체가 실패한 경우 → 강제 로그아웃
     finalizeUnauthorized();
     return Promise.reject(e);
   }

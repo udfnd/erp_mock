@@ -1,6 +1,7 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-
+// auth.api.ts
+import { useMutation } from '@tanstack/react-query';
 import { apiClient, publicApiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -42,7 +43,7 @@ export const getMyProfile = async (): Promise<MyProfileResponse> => {
 };
 
 export const useGetMyProfileQuery = (options?: { enabled?: boolean }) => {
-  return useQuery<MyProfileResponse, unknown>({
+  return useAuthedQuery<MyProfileResponse, unknown, ['myProfile']>({
     queryKey: ['myProfile'],
     queryFn: getMyProfile,
     ...options,
@@ -58,7 +59,7 @@ export const updateMyPassword = async (
 };
 
 export const useUpdateMyPasswordMutation = () => {
-  return useMutation<UpdatePasswordResponse, unknown, UpdatePasswordRequest>({
+  return useAuthedMutation<UpdatePasswordResponse, unknown, UpdatePasswordRequest>({
     mutationFn: updateMyPassword,
   });
 };

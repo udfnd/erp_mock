@@ -1,6 +1,7 @@
-import { QueryClient, useMutation, useQuery } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 
 import { apiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import { gigwanQueryKeys } from './gigwan.query-keys';
@@ -35,7 +36,7 @@ export const getGigwanSidebar = async (nanoId: string): Promise<GigwanSidebarRes
 };
 
 export const useGigwanSidebarQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GigwanSidebarResponse, unknown>({
+  useAuthedQuery<GigwanSidebarResponse, unknown>({
     queryKey: gigwanQueryKeys.sidebar(nanoId),
     queryFn: () => getGigwanSidebar(nanoId),
     enabled: options?.enabled ?? true,
@@ -47,7 +48,7 @@ export const getGigwanName = async (nanoId: string): Promise<GigwanBasicGet> => 
 };
 
 export const useGigwanNameQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GigwanBasicGet, unknown>({
+  useAuthedQuery<GigwanBasicGet, unknown>({
     queryKey: gigwanQueryKeys.name(nanoId),
     queryFn: () => getGigwanName(nanoId),
     enabled: options?.enabled ?? true,
@@ -59,7 +60,7 @@ export const getGigwan = async (nanoId: string): Promise<GigwanGet> => {
 };
 
 export const useGigwanQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GigwanGet, unknown, GigwanGet, ReturnType<typeof gigwanQueryKeys.detail>>({
+  useAuthedQuery<GigwanGet, unknown, GigwanGet, ReturnType<typeof gigwanQueryKeys.detail>>({
     queryKey: gigwanQueryKeys.detail(nanoId),
     queryFn: () => getGigwan(nanoId),
     enabled: options?.enabled ?? true,
@@ -76,7 +77,7 @@ export const updateGigwan = async (
 };
 
 export const useUpdateGigwanMutation = (nanoId: string) =>
-  useMutation<UpdateGigwanResponse, unknown, UpdateGigwanRequest>({
+  useAuthedMutation<UpdateGigwanResponse, unknown, UpdateGigwanRequest>({
     mutationFn: (d) => updateGigwan(nanoId, d),
   });
 
@@ -88,7 +89,7 @@ export const getEmploymentCategories = async (
 };
 
 export const useEmploymentCategoriesQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetEmploymentCategoriesResponse, unknown>({
+  useAuthedQuery<GetEmploymentCategoriesResponse, unknown>({
     queryKey: gigwanQueryKeys.employmentCategories(nanoId),
     queryFn: () => getEmploymentCategories(nanoId),
     enabled: options?.enabled ?? true,
@@ -104,9 +105,11 @@ export const upsertEmploymentCategories = async (
 };
 
 export const useUpsertEmploymentCategoriesMutation = (nanoId: string) =>
-  useMutation<UpsertEmploymentCategoriesResponse, unknown, UpsertEmploymentCategoriesRequest>({
-    mutationFn: (d) => upsertEmploymentCategories(nanoId, d),
-  });
+  useAuthedMutation<UpsertEmploymentCategoriesResponse, unknown, UpsertEmploymentCategoriesRequest>(
+    {
+      mutationFn: (d) => upsertEmploymentCategories(nanoId, d),
+    },
+  );
 
 export const getWorkTypeCustomSangtaes = async (
   nanoId: string,
@@ -116,16 +119,13 @@ export const getWorkTypeCustomSangtaes = async (
 };
 
 export const useWorkTypeCustomSangtaesQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetWorkTypeSangtaesResponse, unknown>({
+  useAuthedQuery<GetWorkTypeSangtaesResponse, unknown>({
     queryKey: gigwanQueryKeys.workTypeCustomSangtaes(nanoId),
     queryFn: () => getWorkTypeCustomSangtaes(nanoId),
     enabled: options?.enabled ?? true,
   });
 
-export const invalidateGigwanIdentityQueries = async (
-  queryClient: QueryClient,
-  nanoId: string,
-) =>
+export const invalidateGigwanIdentityQueries = async (queryClient: QueryClient, nanoId: string) =>
   Promise.all([
     queryClient.invalidateQueries({ queryKey: gigwanQueryKeys.detail(nanoId) }),
     queryClient.invalidateQueries({ queryKey: gigwanQueryKeys.name(nanoId) }),
@@ -145,6 +145,6 @@ export const upsertWorkTypeCustomSangtaes = async (
 };
 
 export const useUpsertWorkTypeCustomSangtaesMutation = (nanoId: string) =>
-  useMutation<UpsertWorkTypeSangtaesResponse, unknown, UpsertWorkTypeSangtaesRequest>({
+  useAuthedMutation<UpsertWorkTypeSangtaesResponse, unknown, UpsertWorkTypeSangtaesRequest>({
     mutationFn: (d) => upsertWorkTypeCustomSangtaes(nanoId, d),
   });

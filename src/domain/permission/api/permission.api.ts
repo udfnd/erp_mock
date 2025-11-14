@@ -1,6 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -30,7 +29,7 @@ export const getPermissionSayongjas = async (
 };
 
 export const useGetPermissionSayongjasQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetPermissionSayongjasResponse, unknown>({
+  useAuthedQuery<GetPermissionSayongjasResponse, unknown>({
     queryKey: ['permissionSayongjas', nanoId],
     queryFn: () => getPermissionSayongjas(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -48,7 +47,7 @@ export const useGetPermissionsQuery = (
   params: GetPermissionsRequest,
   options?: { enabled?: boolean },
 ) =>
-  useQuery<GetPermissionsResponse, unknown>({
+  useAuthedQuery<GetPermissionsResponse, unknown>({
     queryKey: ['permissions', params],
     queryFn: () => getPermissions(params),
     enabled: options?.enabled ?? true,
@@ -60,7 +59,7 @@ export const getPermissionDetail = async (nanoId: string): Promise<GetPermission
 };
 
 export const useGetPermissionDetailQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetPermissionDetailResponse, unknown>({
+  useAuthedQuery<GetPermissionDetailResponse, unknown>({
     queryKey: ['permission', nanoId],
     queryFn: () => getPermissionDetail(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -76,7 +75,7 @@ export const updatePermission = async (
 };
 
 export const useUpdatePermissionMutation = (nanoId: string) =>
-  useMutation<UpdatePermissionResponse, unknown, UpdatePermissionRequest>({
+  useAuthedMutation<UpdatePermissionResponse, unknown, UpdatePermissionRequest>({
     mutationFn: (data) => updatePermission(nanoId, data),
   });
 
@@ -90,6 +89,10 @@ export const batchlinkPermissionSayongja = async (
 };
 
 export const useBatchlinkPermissionSayongjaMutation = (nanoId: string) =>
-  useMutation<BatchlinkPermissionSayongjaResponse, unknown, BatchlinkPermissionSayongjaRequest>({
+  useAuthedMutation<
+    BatchlinkPermissionSayongjaResponse,
+    unknown,
+    BatchlinkPermissionSayongjaRequest
+  >({
     mutationFn: (data) => batchlinkPermissionSayongja(nanoId, data),
   });

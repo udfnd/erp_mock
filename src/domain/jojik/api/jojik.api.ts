@@ -1,6 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -57,7 +56,7 @@ export const getJojiks = async (params: GetJojiksRequest): Promise<GetJojiksResp
 };
 
 export const useJojiksQuery = (params: GetJojiksRequest, options?: { enabled?: boolean }) =>
-  useQuery<GetJojiksResponse, unknown>({
+  useAuthedQuery<GetJojiksResponse, unknown>({
     queryKey: ['jojiks', params],
     queryFn: () => getJojiks(params),
     enabled: options?.enabled ?? true,
@@ -70,7 +69,7 @@ export const createJojik = async (data: CreateJojikRequest): Promise<CreateJojik
 };
 
 export const useCreateJojikMutation = () =>
-  useMutation<CreateJojikResponse, unknown, CreateJojikRequest>({
+  useAuthedMutation<CreateJojikResponse, unknown, CreateJojikRequest>({
     mutationFn: (d) => createJojik(d),
   });
 
@@ -80,7 +79,7 @@ export const getJojik = async (nanoId: string): Promise<JojikDetailResponse> => 
 };
 
 export const useJojikQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<JojikDetailResponse, unknown>({
+  useAuthedQuery<JojikDetailResponse, unknown>({
     queryKey: ['jojik', nanoId],
     queryFn: () => getJojik(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -96,7 +95,7 @@ export const updateJojik = async (
 };
 
 export const useUpdateJojikMutation = (nanoId: string) =>
-  useMutation<UpdateJojikResponse, unknown, UpdateJojikRequest>({
+  useAuthedMutation<UpdateJojikResponse, unknown, UpdateJojikRequest>({
     mutationFn: (d) => updateJojik(nanoId, d),
   });
 
@@ -106,7 +105,7 @@ export const deleteJojik = async (nanoId: string): Promise<DeleteJojikResponse> 
 };
 
 export const useDeleteJojikMutation = (nanoId: string) =>
-  useMutation<DeleteJojikResponse, unknown, void>({
+  useAuthedMutation<DeleteJojikResponse, unknown, void>({
     mutationFn: () => deleteJojik(nanoId),
   });
 
@@ -116,7 +115,7 @@ export const getJojikPermissions = async (nanoId: string): Promise<GetJojikPermi
 };
 
 export const useJojikPermissionsQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetJojikPermissionsResponse, unknown>({
+  useAuthedQuery<GetJojikPermissionsResponse, unknown>({
     queryKey: ['jojikPermissions', nanoId],
     queryFn: () => getJojikPermissions(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -130,7 +129,7 @@ export const getJojikSettingSidebar = async (
 };
 
 export const useJojikSettingSidebarQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useQuery<GetJojikSettingSidebarResponse, unknown>({
+  useAuthedQuery<GetJojikSettingSidebarResponse, unknown>({
     queryKey: ['jojikSettingSidebar', nanoId],
     queryFn: () => getJojikSettingSidebar(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
@@ -146,7 +145,7 @@ export const upsertJojikAddress = async (
 };
 
 export const useUpsertJojikAddressMutation = (nanoId: string) =>
-  useMutation<UpsertJojikAddressResponse, unknown, UpsertJojikAddressRequest>({
+  useAuthedMutation<UpsertJojikAddressResponse, unknown, UpsertJojikAddressRequest>({
     mutationFn: (d) => upsertJojikAddress(nanoId, d),
   });
 
@@ -160,7 +159,7 @@ export const updateJojikName = async (
 };
 
 export const useUpdateJojikNameMutation = (nanoId: string) =>
-  useMutation<UpdateJojikNameResponse, unknown, UpdateJojikNameRequest>({
+  useAuthedMutation<UpdateJojikNameResponse, unknown, UpdateJojikNameRequest>({
     mutationFn: (d) => updateJojikName(nanoId, d),
   });
 
@@ -174,7 +173,7 @@ export const updateJojikIntro = async (
 };
 
 export const useUpdateJojikIntroMutation = (nanoId: string) =>
-  useMutation<UpdateJojikIntroResponse, unknown, UpdateJojikIntroRequest>({
+  useAuthedMutation<UpdateJojikIntroResponse, unknown, UpdateJojikIntroRequest>({
     mutationFn: (d) => updateJojikIntro(nanoId, d),
   });
 
@@ -188,7 +187,7 @@ export const updateJojikSchools = async (
 };
 
 export const useUpdateJojikSchoolsMutation = (nanoId: string) =>
-  useMutation<UpdateJojikSchoolsResponse, unknown, UpdateJojikSchoolsRequest>({
+  useAuthedMutation<UpdateJojikSchoolsResponse, unknown, UpdateJojikSchoolsRequest>({
     mutationFn: (d) => updateJojikSchools(nanoId, d),
   });
 
@@ -202,7 +201,7 @@ export const updateJojikOpenSetting = async (
 };
 
 export const useUpdateJojikOpenSettingMutation = (nanoId: string) =>
-  useMutation<UpdateJojikOpenSettingResponse, unknown, UpdateJojikOpenSettingRequest>({
+  useAuthedMutation<UpdateJojikOpenSettingResponse, unknown, UpdateJojikOpenSettingRequest>({
     mutationFn: (d) => updateJojikOpenSetting(nanoId, d),
   });
 
@@ -216,6 +215,6 @@ export const upsertJojikHomepage = async (
 };
 
 export const useUpsertJojikHomepageMutation = (nanoId: string) =>
-  useMutation<UpsertJojikHomepageResponse, unknown, UpsertJojikHomepageRequest>({
+  useAuthedMutation<UpsertJojikHomepageResponse, unknown, UpsertJojikHomepageRequest>({
     mutationFn: (d) => upsertJojikHomepage(nanoId, d),
   });

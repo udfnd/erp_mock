@@ -7,7 +7,7 @@ import { useServerInsertedHTML, useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { configureUnauthorizedHandler, useSyncApiClientAuthContext } from '@/global';
+import { configureUnauthorizedHandler } from '@/global';
 import { useAuthStore } from '@/global/auth';
 import { globalStyles } from '@/global/style';
 
@@ -20,8 +20,6 @@ export function Providers({ children }: AppProvidersProps) {
   const router = useRouter();
 
   const queryClientRef = useRef<QueryClient | null>(null);
-
-  useSyncApiClientAuthContext();
 
   const queryClient = useMemo(() => {
     if (!queryClientRef.current) {

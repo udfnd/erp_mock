@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { apiClient } from '@/global';
+import { useAuthedQuery } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -23,7 +22,7 @@ export const getHadaJaewonsangLinkRequestPermissions =
   };
 
 export const useGetHadaJaewonsangLinkRequestPermissionsQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetHadaJaewonsangLinkRequestPermissionsResponse, unknown>({
+  useAuthedQuery<GetHadaJaewonsangLinkRequestPermissionsResponse, unknown>({
     queryKey: ['hadaJaewonsangLinkRequestPermissions'],
     queryFn: getHadaJaewonsangLinkRequestPermissions,
     enabled: options?.enabled ?? true,
@@ -35,7 +34,7 @@ export const getOpenContentsPermissions = async (): Promise<GetOpenContentsPermi
 };
 
 export const useGetOpenContentsPermissionsQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetOpenContentsPermissionsResponse, unknown>({
+  useAuthedQuery<GetOpenContentsPermissionsResponse, unknown>({
     queryKey: ['openContentsPermissions'],
     queryFn: getOpenContentsPermissions,
     enabled: options?.enabled ?? true,
@@ -47,7 +46,7 @@ export const getPermissionTypes = async (): Promise<GetPermissionTypesResponse> 
 };
 
 export const useGetPermissionTypesQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetPermissionTypesResponse, unknown>({
+  useAuthedQuery<GetPermissionTypesResponse, unknown>({
     queryKey: ['permissionTypes'],
     queryFn: getPermissionTypes,
     enabled: options?.enabled ?? true,
@@ -59,7 +58,7 @@ export const getOpenSangtaes = async (): Promise<GetOpenSangtaesResponse> => {
 };
 
 export const useGetOpenSangtaesQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetOpenSangtaesResponse, unknown>({
+  useAuthedQuery<GetOpenSangtaesResponse, unknown>({
     queryKey: ['openSangtaes'],
     queryFn: getOpenSangtaes,
     enabled: options?.enabled ?? true,
@@ -71,7 +70,7 @@ export const getLinkIcons = async (): Promise<GetLinkIconsResponse> => {
 };
 
 export const useGetLinkIconsQuery = (options?: { enabled?: boolean }) =>
-  useQuery<GetLinkIconsResponse, unknown>({
+  useAuthedQuery<GetLinkIconsResponse, unknown>({
     queryKey: ['linkIcons'],
     queryFn: getLinkIcons,
     enabled: options?.enabled ?? true,
