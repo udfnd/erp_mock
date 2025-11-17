@@ -1,14 +1,9 @@
 'use client';
 
-import { useMemo, type ReactNode } from 'react';
+import { useMemo } from 'react';
 import type { Row } from '@tanstack/react-table';
 
-import { Button } from '@/common/components';
-import {
-  ListViewTemplate,
-  type ListViewTemplateRenderContext,
-  type ListViewTemplateRowEventHandlers,
-} from '@/common/list-view';
+import { ListViewTemplate, type ListViewTemplateRowEventHandlers } from '@/common/list-view';
 import type { JojikListItem } from '@/domain/jojik/api';
 import type { JojikListSectionProps } from '@/domain/jojik/section';
 
@@ -19,28 +14,6 @@ export type JojikListSectionComponentProps = JojikListSectionProps & {
   sortOptions: { label: string; value: string }[];
   pageSizeOptions: number[];
 };
-
-const CLEAR_SELECTION_THRESHOLD = 0;
-
-function renderSelectionActions(
-  handlers: JojikListSectionProps['handlers'],
-): (context: ListViewTemplateRenderContext<JojikListItem>) => ReactNode {
-  function SelectionActions({
-    selectedRows,
-  }: ListViewTemplateRenderContext<JojikListItem>): ReactNode {
-    if (selectedRows.length <= CLEAR_SELECTION_THRESHOLD) {
-      return null;
-    }
-
-    return (
-      <Button styleType="text" variant="secondary" size="small" onClick={handlers.onClearSelection}>
-        선택 해제 ({selectedRows.length})
-      </Button>
-    );
-  }
-
-  return SelectionActions;
-}
 
 function createRowEventHandlers(
   handlers: JojikListSectionProps['handlers'],
@@ -68,10 +41,6 @@ export function JojikListSection({
   createdAtFilterOptions,
   pageSizeOptions,
 }: JojikListSectionComponentProps) {
-  const toolbarActions = useMemo<
-    (context: ListViewTemplateRenderContext<JojikListItem>) => ReactNode
-  >(() => renderSelectionActions(handlers), [handlers]);
-
   const rowEventHandlers = useMemo(() => createRowEventHandlers(handlers), [handlers]);
 
   const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
@@ -111,7 +80,6 @@ export function JojikListSection({
         options: sortOptions,
         onChange: handlers.onSortChange,
       }}
-      toolbarActions={toolbarActions}
       primaryAction={{
         label: '새 조직 추가',
         onClick: handlers.onAddClick,
@@ -119,6 +87,7 @@ export function JojikListSection({
       pageSizeOptions={pageSizeOptions}
       onPageSizeChange={handlers.onPageSizeChange}
       onSelectedRowsChange={(rows: Row<JojikListItem>[]) => {
+        handlers.onStopCreate();
         handlers.onSelectedJojiksChange(rows.map((row) => row.original));
       }}
       rowEventHandlers={rowEventHandlers}
