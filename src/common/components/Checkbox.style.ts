@@ -23,6 +23,8 @@ export const input = css({
   },
 });
 
+const inputClassName = input.name;
+
 export const box = css`
   width: 100%;
   height: 100%;
@@ -64,33 +66,33 @@ export const box = css`
       transform 0.15s ease;
   }
 
-  .${input}:disabled + & {
+  .${inputClassName}:disabled + & {
     cursor: not-allowed;
     background-color: ${color.cgrey50};
     border-color: ${color.cgrey200};
   }
 
-  .${input}:checked + & {
+  .${inputClassName}:checked + & {
     background-color: ${color.blue600};
     border-color: ${color.blue600};
   }
 
-  .${input}:checked + &::after {
+  .${inputClassName}:checked + &::after {
     opacity: 1;
     transform: scale(1) rotate(45deg);
   }
 
-  .${input}:indeterminate + & {
+  .${inputClassName}:indeterminate + & {
     background-color: ${color.blue100};
     border-color: ${color.blue400};
   }
 
-  .${input}:indeterminate + &::before {
+  .${inputClassName}:indeterminate + &::before {
     opacity: 1;
     transform: scaleX(1);
   }
 
-  .${input}:focus-visible + & {
+  .${inputClassName}:focus-visible + & {
     box-shadow: 0 0 0 4px ${color.blue50};
   }
 `;
