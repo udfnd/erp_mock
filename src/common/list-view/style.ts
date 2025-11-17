@@ -4,52 +4,34 @@ import { css } from '@emotion/react';
 
 import { color } from '@/style';
 
-export const listViewTemplateCss = {
+export const cssObj = {
   container: css`
+    padding: 16px;
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
     min-width: 0;
     background: ${color.white};
-    border-radius: 12px;
-    border: 1px solid ${color.cgrey100};
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    border-right: 1px solid ${color.cgrey100};
   `,
-  header: css`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid ${color.cgrey100};
-  `,
-  headerContent: css`
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  `,
-  title: css`
-    font-size: 20px;
-    font-weight: 600;
-    color: ${color.black};
-  `,
-  description: css`
-    font-size: 13px;
-    color: ${color.cgrey500};
-  `,
+
   toolbar: css`
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid ${color.cgrey100};
+    background: ${color.white};
+  `,
+  toolbarTopRow: css`
+    display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 24px;
-    border-bottom: 1px solid ${color.cgrey100};
-    background: ${color.blue10};
   `,
   searchBox: css`
-    flex: 1 1 240px;
+    flex: 1 1 auto;
+    min-width: 240px;
     display: flex;
     align-items: center;
     position: relative;
@@ -75,9 +57,15 @@ export const listViewTemplateCss = {
   `,
   toolbarControls: css`
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: flex-end;
+    gap: 8px;
+  `,
+  filterRow: css`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
   `,
   selectLabel: css`
@@ -96,20 +84,24 @@ export const listViewTemplateCss = {
     color: ${color.cgrey700};
     font-size: 14px;
   `,
+
   tableContainer: css`
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    background: ${color.white};
   `,
   tableWrapper: css`
     flex: 1;
     overflow: auto;
+    background: ${color.white};
   `,
   table: css`
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    background: ${color.white};
   `,
   tableHeadRow: css`
     background: ${color.white};
@@ -124,7 +116,11 @@ export const listViewTemplateCss = {
     font-weight: 600;
     color: ${color.cgrey500};
     border-bottom: 1px solid ${color.cgrey100};
-    background: ${color.blue10};
+    background: ${color.white};
+  `,
+  headerActionCell: css`
+    display: flex;
+    justify-content: flex-end;
   `,
   tableCell: css`
     padding: 16px 18px;
@@ -137,13 +133,13 @@ export const listViewTemplateCss = {
     transition: background 0.2s ease;
     cursor: pointer;
     &:hover {
-      background: ${color.blue100};
+      background: ${color.white};
     }
   `,
   tableRowSelected: css`
-    background: ${color.blue50};
+    background: ${color.white};
     &:hover {
-      background: ${color.blue100};
+      background: ${color.white};
     }
   `,
   stateCell: css`
@@ -151,38 +147,84 @@ export const listViewTemplateCss = {
     text-align: center;
     color: ${color.cgrey400};
     font-size: 14px;
+    background: ${color.white};
   `,
+
   footer: css`
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: center;
     padding: 12px 24px;
     border-top: 1px solid ${color.cgrey100};
     background: ${color.white};
   `,
-  paginationInfo: css`
-    font-size: 13px;
-    color: ${color.cgrey500};
-  `,
+
   paginationControls: css`
     display: flex;
     align-items: center;
     gap: 8px;
   `,
-  footerControls: css`
+  paginationPageList: css`
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 4px;
   `,
-  pageSizeSelect: css`
-    height: 32px;
-    padding: 0 10px;
-    border-radius: 8px;
-    border: 1px solid ${color.cgrey200};
+  paginationPageButton: css`
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 0;
+    border: none;
     background: ${color.white};
-    color: ${color.cgrey700};
-    font-size: 13px;
+    font-size: 12px;
+    color: ${color.cgrey600};
+    cursor: pointer;
+    transition: color 0.15s ease;
+    &:hover {
+      color: ${color.cgrey600};
+    }
+  `,
+  paginationPageButtonActive: css`
+    background: ${color.white};
+    border-radius: 0;
+    border: none;
+    color: ${color.blue600};
+    font-weight: 600;
+  `,
+  paginationMoreButton: css`
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 0;
+    border: none;
+    background: ${color.white};
+    font-size: 16px;
+    line-height: 1;
+    color: ${color.cgrey600};
+    cursor: pointer;
+    transition: color 0.15s ease;
+    &:hover {
+      color: ${color.cgrey600};
+    }
+  `,
+  paginationArrowButton: css`
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 0;
+    border: none;
+    background: ${color.white};
+    font-size: 12px;
+    color: ${color.cgrey600};
+    cursor: pointer;
+    transition: color 0.15s ease;
+    &:hover:not(:disabled) {
+      color: ${color.cgrey600};
+    }
+    &:disabled {
+      cursor: default;
+      color: ${color.cgrey200};
+      background: ${color.white};
+    }
   `,
 };

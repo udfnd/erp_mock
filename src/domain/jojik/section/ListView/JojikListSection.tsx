@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, type ReactNode } from 'react';
-
 import type { Row } from '@tanstack/react-table';
 
 import { Button } from '@/common/components';
@@ -11,9 +10,9 @@ import {
   type ListViewTemplateRowEventHandlers,
 } from '@/common/list-view';
 import type { JojikListItem } from '@/domain/jojik/api';
-import { type JojikListSectionProps } from '@/domain/jojik/section';
+import type { JojikListSectionProps } from '@/domain/jojik/section';
 
-import { type CreatedAtFilterValue } from './constants';
+import type { CreatedAtFilterValue } from './constants';
 
 export type JojikListSectionComponentProps = JojikListSectionProps & {
   createdAtFilterOptions: { label: string; value: CreatedAtFilterValue }[];
@@ -26,22 +25,21 @@ const CLEAR_SELECTION_THRESHOLD = 0;
 function renderSelectionActions(
   handlers: JojikListSectionProps['handlers'],
 ): (context: ListViewTemplateRenderContext<JojikListItem>) => ReactNode {
-  return ({ selectedRows }) => {
+  function SelectionActions({
+    selectedRows,
+  }: ListViewTemplateRenderContext<JojikListItem>): ReactNode {
     if (selectedRows.length <= CLEAR_SELECTION_THRESHOLD) {
       return null;
     }
 
     return (
-      <Button
-        styleType="text"
-        variant="secondary"
-        size="small"
-        onClick={handlers.onClearSelection}
-      >
+      <Button styleType="text" variant="secondary" size="small" onClick={handlers.onClearSelection}>
         선택 해제 ({selectedRows.length})
       </Button>
     );
-  };
+  }
+
+  return SelectionActions;
 }
 
 function createRowEventHandlers(
@@ -70,18 +68,16 @@ export function JojikListSection({
   createdAtFilterOptions,
   pageSizeOptions,
 }: JojikListSectionComponentProps) {
-  const toolbarActions = useMemo(() => renderSelectionActions(handlers), [handlers]);
-  const rowEventHandlers = useMemo(
-    () => createRowEventHandlers(handlers),
-    [handlers],
-  );
+  const toolbarActions = useMemo<
+    (context: ListViewTemplateRenderContext<JojikListItem>) => ReactNode
+  >(() => renderSelectionActions(handlers), [handlers]);
+
+  const rowEventHandlers = useMemo(() => createRowEventHandlers(handlers), [handlers]);
 
   const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
 
   return (
     <ListViewTemplate
-      title="조직 목록"
-      description="기관에 속한 조직 정보를 확인하고 관리하세요."
       data={data}
       columns={columns}
       state={state}
@@ -106,8 +102,7 @@ export function JojikListSection({
           label: '생성일 필터',
           value: currentCreatedFilter,
           options: createdAtFilterOptions,
-          onChange: (value) =>
-            handlers.onCreatedFilterChange(value as CreatedAtFilterValue),
+          onChange: (value) => handlers.onCreatedFilterChange(value as CreatedAtFilterValue),
         },
       ]}
       sort={{

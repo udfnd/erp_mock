@@ -13,14 +13,17 @@ const navContainerBase = css({
   display: 'flex',
   flexDirection: 'column',
   width: '200px',
+  maxWidth: '200px',
+  minWidth: '40px',
   padding: '10px 12px 24px',
   background: color.cgrey10,
   borderRight: `1px solid ${color.cgrey100}`,
   color: color.black,
   gap: spacing.xl,
-  transition: 'width 0.2s ease-in-out, padding 0.2s ease-in-out',
   height: '100vh',
   boxSizing: 'border-box',
+  flexShrink: 0,
+  transition: 'max-width 0.2s ease-in-out, padding 0.2s ease-in-out',
   '@media (max-width: 959px)': {
     display: 'none',
   },
@@ -29,10 +32,15 @@ const navContainerBase = css({
 export const navContainerOpen: IT[] = [
   navContainerBase,
   css({
+    maxWidth: '200px',
+    padding: '10px 12px 24px',
+    alignItems: 'initial',
+    overflow: 'visible',
     [`@media ${collapsedRange}`]: {
-      width: '200px',
+      maxWidth: '200px',
       padding: '10px 12px 24px',
       alignItems: 'initial',
+      overflow: 'visible',
     },
   }),
 ];
@@ -40,12 +48,12 @@ export const navContainerOpen: IT[] = [
 export const navContainerClosed: IT[] = [
   navContainerBase,
   css({
-    width: '40px',
+    maxWidth: '40px',
     padding: '8px',
     alignItems: 'center',
     overflow: 'hidden',
     [`@media ${collapsedRange}`]: {
-      width: '40px',
+      maxWidth: '40px',
       padding: '8px',
       alignItems: 'center',
       overflow: 'hidden',

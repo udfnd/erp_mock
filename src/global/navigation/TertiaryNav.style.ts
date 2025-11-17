@@ -9,9 +9,9 @@ type IT = Interpolation<Theme>;
 export const navContainer = css({
   display: 'flex',
   alignItems: 'center',
-  padding: `0 ${spacing.xxl}`,
+  paddingLeft: '8px',
+  paddingBottom: '4px',
   background: color.cgrey10,
-  minHeight: '52px',
   boxSizing: 'border-box',
   '@media (max-width: 959px)': {
     padding: `0 ${spacing.base}`,

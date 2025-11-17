@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import {
   type ColumnDef,
   type OnChangeFn,
   type Row,
   type Table,
   type TableOptions,
+  type SortingState,
+  type ColumnFiltersState,
+  type RowSelectionState,
+  type PaginationState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -17,14 +21,19 @@ import {
 import type { MouseEvent, ReactNode } from 'react';
 
 import { Button, type ButtonProps } from '@/common/components';
-import { Search } from '@/common/icons';
+import {
+  ArrowMdLeftDouble,
+  ArrowMdLeftSingle,
+  ArrowMdRightDouble,
+  ArrowMdRightSingle,
+  Search,
+} from '@/common/icons';
 
-import { listViewTemplateCss } from './styles';
+import { cssObj } from './style';
 import type { ListViewState } from './useListViewState';
 
 const DEFAULT_ROW_CLICK_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
-// 템플릿 내부에서 직접 관리하는 필드를 제외한 나머지 TableOptions를 한 번에 받기 위함
 export type ListViewTableOptions<TData> = Omit<
   TableOptions<TData>,
   | 'data'
@@ -86,14 +95,12 @@ export type ListViewTemplateProps<TData> = {
   title?: string;
   description?: string;
   data: TData[];
-  columns: ColumnDef<TData, any>[];
+  columns: ColumnDef<TData>[];
   state: ListViewState<TData>;
   search?: ListViewTemplateSearch;
   filters?: ListViewTemplateToolbarFilter[];
   sort?: ListViewTemplateToolbarSort;
-  toolbarActions?:
-    | ReactNode
-    | ((context: ListViewTemplateRenderContext<TData>) => ReactNode);
+  toolbarActions?: ReactNode | ((context: ListViewTemplateRenderContext<TData>) => ReactNode);
   primaryAction?: ListViewTemplatePrimaryAction;
   pageSizeOptions?: number[];
   onPageSizeChange?: (size: number) => void;
@@ -106,8 +113,6 @@ export type ListViewTemplateProps<TData> = {
 } & ListViewTableOptions<TData>;
 
 export function ListViewTemplate<TData>({
-  title,
-  description,
   data,
   columns,
   state,
@@ -116,8 +121,7 @@ export function ListViewTemplate<TData>({
   sort,
   toolbarActions,
   primaryAction,
-  pageSizeOptions = [],
-  onPageSizeChange,
+  onPageSizeChange: _onPageSizeChange,
   totalCount: totalCountProp,
   isLoading = false,
   loadingMessage = '데이터를 불러오는 중입니다...',
@@ -126,27 +130,52 @@ export function ListViewTemplate<TData>({
   rowEventHandlers,
   ...tableOptions
 }: ListViewTemplateProps<TData>) {
-  const {
-    manualPagination,
-    manualSorting,
-    manualFiltering,
-    pageCount,
-    ...restTableOptions
-  } = tableOptions;
+  const { manualPagination, manualSorting, manualFiltering, pageCount, ...restTableOptions } =
+    tableOptions;
+
+  const [paginationViewMode, setPaginationViewMode] = useState<'segment' | 'centered'>('segment');
+
+  let primaryActionLabel: ReactNode | undefined;
+  let primaryActionProps: Omit<ListViewTemplatePrimaryAction, 'label'> | undefined;
+  if (primaryAction) {
+    const { label, ...rest } = primaryAction;
+    primaryActionLabel = label;
+    primaryActionProps = rest;
+  }
+
+  const effectiveColumns: ColumnDef<TData>[] = primaryActionProps
+    ? [
+        ...columns,
+        {
+          id: '__primary_action__',
+          header: () =>
+            primaryActionProps ? (
+              <div css={cssObj.headerActionCell}>
+                <Button styleType="solid" variant="primary" size="medium" {...primaryActionProps}>
+                  {primaryActionLabel}
+                </Button>
+              </div>
+            ) : null,
+          cell: () => null,
+          enableSorting: false,
+          enableColumnFilter: false,
+        } as ColumnDef<TData>,
+      ]
+    : columns;
 
   const table = useReactTable({
     data,
-    columns,
+    columns: effectiveColumns,
     state: {
       sorting: state.sorting,
       columnFilters: state.columnFilters,
       rowSelection: state.rowSelection,
       pagination: state.pagination,
     },
-    onSortingChange: state.setSorting as OnChangeFn<any>,
-    onColumnFiltersChange: state.setColumnFilters as OnChangeFn<any>,
-    onRowSelectionChange: state.setRowSelection as OnChangeFn<any>,
-    onPaginationChange: state.setPagination as OnChangeFn<any>,
+    onSortingChange: state.setSorting as OnChangeFn<SortingState>,
+    onColumnFiltersChange: state.setColumnFilters as OnChangeFn<ColumnFiltersState>,
+    onRowSelectionChange: state.setRowSelection as OnChangeFn<RowSelectionState>,
+    onPaginationChange: state.setPagination as OnChangeFn<PaginationState>,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -158,11 +187,9 @@ export function ListViewTemplate<TData>({
     ...restTableOptions,
   });
 
-  const rowSelectionState = table.getState().rowSelection;
-  const selectedRows = useMemo(() => table.getSelectedRowModel().flatRows, [
-    table,
-    rowSelectionState,
-  ]);
+  const pageSize = table.getState().pagination.pageSize || 10;
+
+  const selectedRows = table.getSelectedRowModel().flatRows;
 
   useEffect(() => {
     if (onSelectedRowsChange) {
@@ -170,25 +197,18 @@ export function ListViewTemplate<TData>({
     }
   }, [onSelectedRowsChange, selectedRows]);
 
-  const toolbarActionsNode = useMemo(() => {
-    if (typeof toolbarActions === 'function') {
-      return toolbarActions({ table, selectedRows });
-    }
-    return toolbarActions;
-  }, [selectedRows, table, toolbarActions]);
+  const toolbarActionsNode =
+    typeof toolbarActions === 'function' ? toolbarActions({ table, selectedRows }) : toolbarActions;
 
   const totalCount = totalCountProp ?? table.getPrePaginationRowModel().rows.length;
   const pageIndex = table.getState().pagination.pageIndex;
-  const pageSize = table.getState().pagination.pageSize || 1;
   const isManualPagination = Boolean(manualPagination);
   const totalPages = isManualPagination
     ? Math.max(1, pageCount ?? Math.ceil(totalCount / pageSize))
     : Math.max(1, table.getPageCount() || 1);
   const visibleColumnsLength = table.getVisibleFlatColumns().length || 1;
 
-  const hasToolbar = Boolean(
-    search || filters.length > 0 || sort || toolbarActionsNode,
-  );
+  const hasToolbar = Boolean(search || filters.length > 0 || sort || toolbarActionsNode);
 
   const shouldIgnoreRowClick =
     rowEventHandlers?.shouldIgnoreRowClick ??
@@ -197,121 +217,146 @@ export function ListViewTemplate<TData>({
       return Boolean(target?.closest(DEFAULT_ROW_CLICK_IGNORE_SELECTOR));
     });
 
-  let primaryActionLabel: ReactNode | undefined;
-  let primaryActionProps: Omit<ListViewTemplatePrimaryAction, 'label'> | undefined;
-  if (primaryAction) {
-    const { label, ...rest } = primaryAction;
-    primaryActionLabel = label;
-    primaryActionProps = rest;
-  }
+  const currentPage = pageIndex + 1;
+  const blockSize = 10;
+  const hasMultiBlocks = totalPages > blockSize;
 
-  const handlePageSizeChange = (size: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(size);
-      return;
+  const clampPage = (page: number) => {
+    if (!Number.isFinite(page)) return 1;
+    if (page < 1) return 1;
+    if (page > totalPages) return totalPages;
+    return page;
+  };
+
+  const handleGoToPage = (page: number, viewMode: 'segment' | 'centered' = 'segment') => {
+    const next = clampPage(page);
+    setPaginationViewMode(viewMode);
+    table.setPageIndex(next - 1);
+  };
+
+  const canGoPrev = currentPage > 1;
+  const canGoNext = currentPage < totalPages;
+  const canUseDoubleArrows = hasMultiBlocks;
+
+  const getPageRange = () => {
+    if (totalPages <= blockSize) {
+      return { start: 1, end: totalPages };
     }
 
-    table.setPageSize(size);
+    if (paginationViewMode === 'centered') {
+      let start = currentPage - 4;
+      let end = currentPage + 5;
+
+      if (start < 1) {
+        const diff = 1 - start;
+        start = 1;
+        end = Math.min(totalPages, end + diff);
+      }
+
+      if (end > totalPages) {
+        const diff = end - totalPages;
+        end = totalPages;
+        start = Math.max(1, start - diff);
+      }
+
+      if (end - start + 1 > blockSize) {
+        end = start + blockSize - 1;
+      }
+
+      return { start, end };
+    }
+
+    const blockIndex = Math.floor((currentPage - 1) / blockSize);
+    const start = blockIndex * blockSize + 1;
+    const end = Math.min(start + blockSize - 1, totalPages);
+    return { start, end };
+  };
+
+  const { start: blockStartPage, end: blockEndPage } = getPageRange();
+
+  const pageNumbers: number[] = [];
+  for (let p = blockStartPage; p <= blockEndPage; p += 1) {
+    pageNumbers.push(p);
+  }
+
+  const hasRightMore = blockEndPage < totalPages;
+
+  const handleClickMore = () => {
+    const targetPage = clampPage(blockEndPage + 1);
+    handleGoToPage(targetPage, 'centered');
   };
 
   return (
-    <section css={listViewTemplateCss.container}>
-      {(title || description || primaryAction) && (
-        <header css={listViewTemplateCss.header}>
-          <div css={listViewTemplateCss.headerContent}>
-            {title && <h1 css={listViewTemplateCss.title}>{title}</h1>}
-            {description && (
-              <p css={listViewTemplateCss.description}>{description}</p>
-            )}
-          </div>
-          {primaryActionProps && (
-            <Button
-              styleType="solid"
-              variant="primary"
-              size="medium"
-              {...primaryActionProps}
-            >
-              {primaryActionLabel}
-            </Button>
-          )}
-        </header>
-      )}
-
+    <section css={cssObj.container}>
       {hasToolbar && (
-        <div css={listViewTemplateCss.toolbar}>
-          {search && (
-            <div css={listViewTemplateCss.searchBox}>
-              <Search css={listViewTemplateCss.searchIcon} />
-              <input
-                css={listViewTemplateCss.searchInput}
-                value={search.value}
-                placeholder={search.placeholder ?? '검색어를 입력하세요'}
-                onChange={(event) => search.onChange(event.target.value)}
-              />
+        <div css={cssObj.toolbar}>
+          <div css={cssObj.toolbarTopRow}>
+            {search && (
+              <div css={cssObj.searchBox}>
+                <Search css={cssObj.searchIcon} />
+                <input
+                  css={cssObj.searchInput}
+                  value={search.value}
+                  placeholder={search.placeholder ?? '검색어를 입력하세요'}
+                  onChange={(event) => search.onChange(event.target.value)}
+                />
+              </div>
+            )}
+            <div css={cssObj.toolbarControls}>
+              {sort && (
+                <label css={cssObj.selectLabel}>
+                  <select
+                    css={cssObj.select}
+                    value={sort.value}
+                    onChange={(event) => sort.onChange(event.target.value)}
+                  >
+                    {sort.placeholder && <option value="">{sort.placeholder}</option>}
+                    {sort.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {toolbarActionsNode}
+            </div>
+          </div>
+
+          {filters.length > 0 && (
+            <div css={cssObj.filterRow}>
+              {filters.map((filter) => (
+                <label key={filter.key} css={cssObj.selectLabel}>
+                  <select
+                    css={cssObj.select}
+                    value={filter.value}
+                    onChange={(event) => filter.onChange(event.target.value)}
+                  >
+                    {filter.placeholder && <option value="">{filter.placeholder}</option>}
+                    {filter.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
             </div>
           )}
-          <div css={listViewTemplateCss.toolbarControls}>
-            {filters.map((filter) => (
-              <label key={filter.key} css={listViewTemplateCss.selectLabel}>
-                {filter.label && <span>{filter.label}</span>}
-                <select
-                  css={listViewTemplateCss.select}
-                  value={filter.value}
-                  onChange={(event) => filter.onChange(event.target.value)}
-                >
-                  {filter.placeholder && (
-                    <option value="">{filter.placeholder}</option>
-                  )}
-                  {filter.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-            {sort && (
-              <label css={listViewTemplateCss.selectLabel}>
-                {sort.label && <span>{sort.label}</span>}
-                <select
-                  css={listViewTemplateCss.select}
-                  value={sort.value}
-                  onChange={(event) => sort.onChange(event.target.value)}
-                >
-                  {sort.placeholder && (
-                    <option value="">{sort.placeholder}</option>
-                  )}
-                  {sort.options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {toolbarActionsNode}
-          </div>
         </div>
       )}
 
-      <div css={listViewTemplateCss.tableContainer}>
-        <div css={listViewTemplateCss.tableWrapper}>
-          <table css={listViewTemplateCss.table}>
+      <div css={cssObj.tableContainer}>
+        <div css={cssObj.tableWrapper}>
+          <table css={cssObj.table}>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} css={listViewTemplateCss.tableHeadRow}>
+                <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      css={listViewTemplateCss.tableHeaderCell}
-                    >
+                    <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
@@ -320,10 +365,7 @@ export function ListViewTemplate<TData>({
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td
-                    colSpan={visibleColumnsLength}
-                    css={listViewTemplateCss.stateCell}
-                  >
+                  <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
                     {loadingMessage}
                   </td>
                 </tr>
@@ -331,10 +373,7 @@ export function ListViewTemplate<TData>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    css={[
-                      listViewTemplateCss.tableRow,
-                      row.getIsSelected() && listViewTemplateCss.tableRowSelected,
-                    ]}
+                    css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
                     onClick={(event) => {
                       if (shouldIgnoreRowClick(event)) {
                         return;
@@ -348,7 +387,7 @@ export function ListViewTemplate<TData>({
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} css={listViewTemplateCss.tableCell}>
+                      <td key={cell.id} css={cssObj.tableCell}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
@@ -356,10 +395,7 @@ export function ListViewTemplate<TData>({
                 ))
               ) : (
                 <tr>
-                  <td
-                    colSpan={visibleColumnsLength}
-                    css={listViewTemplateCss.stateCell}
-                  >
+                  <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
                     {emptyMessage}
                   </td>
                 </tr>
@@ -367,65 +403,66 @@ export function ListViewTemplate<TData>({
             </tbody>
           </table>
         </div>
-        <footer css={listViewTemplateCss.footer}>
-          <div css={listViewTemplateCss.paginationInfo}>
-            총 {totalCount}개 · {pageIndex + 1} / {totalPages} 페이지
-          </div>
-          <div css={listViewTemplateCss.footerControls}>
-            {pageSizeOptions.length > 0 && (
-              <label css={listViewTemplateCss.selectLabel}>
-                페이지당
-                <select
-                  css={listViewTemplateCss.pageSizeSelect}
-                  value={pageSize}
-                  onChange={(event) => handlePageSizeChange(Number(event.target.value))}
-                >
-                  {pageSizeOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}개
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            <div css={listViewTemplateCss.paginationControls}>
-              <Button
-                styleType="text"
-                variant="secondary"
-                size="small"
-                disabled={!table.getCanPreviousPage()}
-                onClick={() => table.setPageIndex(0)}
-              >
-                처음
-              </Button>
-              <Button
-                styleType="text"
-                variant="secondary"
-                size="small"
-                disabled={!table.getCanPreviousPage()}
-                onClick={() => table.previousPage()}
-              >
-                이전
-              </Button>
-              <Button
-                styleType="text"
-                variant="secondary"
-                size="small"
-                disabled={!table.getCanNextPage()}
-                onClick={() => table.nextPage()}
-              >
-                다음
-              </Button>
-              <Button
-                styleType="text"
-                variant="secondary"
-                size="small"
-                disabled={!table.getCanNextPage()}
-                onClick={() => table.setPageIndex(totalPages - 1)}
-              >
-                마지막
-              </Button>
+
+        <footer css={cssObj.footer}>
+          <div css={cssObj.paginationControls}>
+            <button
+              type="button"
+              css={cssObj.paginationArrowButton}
+              disabled={!canUseDoubleArrows || !canGoPrev}
+              onClick={() => handleGoToPage(1, 'segment')}
+            >
+              <ArrowMdLeftDouble />
+            </button>
+            <button
+              type="button"
+              css={cssObj.paginationArrowButton}
+              disabled={!canGoPrev}
+              onClick={() => handleGoToPage(currentPage - 1, 'segment')}
+            >
+              <ArrowMdLeftSingle />
+            </button>
+
+            <div css={cssObj.paginationPageList}>
+              {pageNumbers.map((page) => {
+                const isActive = page === currentPage;
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    css={[
+                      cssObj.paginationPageButton,
+                      isActive && cssObj.paginationPageButtonActive,
+                    ]}
+                    onClick={() => handleGoToPage(page, 'segment')}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              {hasRightMore && (
+                <button type="button" css={cssObj.paginationMoreButton} onClick={handleClickMore}>
+                  …
+                </button>
+              )}
             </div>
+            <button
+              type="button"
+              css={cssObj.paginationArrowButton}
+              disabled={!canGoNext}
+              onClick={() => handleGoToPage(currentPage + 1, 'segment')}
+            >
+              <ArrowMdRightSingle />
+            </button>
+            <button
+              type="button"
+              css={cssObj.paginationArrowButton}
+              disabled={!canUseDoubleArrows || !canGoNext}
+              onClick={() => handleGoToPage(totalPages, 'segment')}
+            >
+              <ArrowMdRightDouble />
+            </button>
           </div>
         </footer>
       </div>

@@ -7,10 +7,9 @@ export const navContainer = css({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-start',
-  padding: `0 ${spacing.xxl}`,
+  paddingTop: '4px',
+  paddingLeft: '8px',
   background: color.cgrey10,
-  borderBottom: `1px solid ${color.cgrey100}`,
-  minHeight: '64px',
   boxSizing: 'border-box',
   '@media (max-width: 959px)': {
     padding: `0 ${spacing.base}`,

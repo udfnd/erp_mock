@@ -353,7 +353,6 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
 
           if (aborted) return;
 
-          // ✅ 새 구조: 현재 활성 유저의 토큰은 store에서 직접 읽는다.
           const token = useAuthStore.getState().getCurrentAccessToken();
           if (!token) throw new Error('Missing access token after user switch');
 

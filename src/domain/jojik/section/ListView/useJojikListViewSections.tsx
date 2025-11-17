@@ -29,6 +29,8 @@ export type JojikListViewHookParams = {
 
 export type ListSectionState = ListViewState<JojikListItem>;
 
+type JojikColumnDef = ColumnDef<JojikListItem, unknown>;
+
 export type JojikListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
@@ -42,7 +44,7 @@ export type JojikListSectionHandlers = {
 
 export type JojikListSectionProps = {
   data: JojikListItem[];
-  columns: ColumnDef<JojikListItem>[];
+  columns: JojikColumnDef[];
   state: ListSectionState;
   isListLoading: boolean;
   totalCount: number;
@@ -130,7 +132,7 @@ export function useJojikListViewSections({
   const totalCount = (jojiksData?.totalCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  const columns = useMemo<ColumnDef<JojikListItem, any>[]>(
+  const columns = useMemo(
     () => [
       columnHelper.display({
         id: 'selection',
@@ -171,11 +173,13 @@ export function useJojikListViewSections({
         header: createSortableHeader('생성일'),
         cell: (info) => formatDate(info.getValue()),
         filterFn: (row, columnId, filterValue) => {
-          if (!filterValue || filterValue === 'all') {
+          const value = filterValue as CreatedAtFilterValue | undefined;
+
+          if (!value || value === 'all') {
             return true;
           }
 
-          const days = Number(filterValue);
+          const days = Number(value);
           const rawValue = row.getValue<string>(columnId);
           const parsed = new Date(rawValue);
           if (Number.isNaN(parsed.getTime())) {
@@ -190,11 +194,12 @@ export function useJojikListViewSections({
       }),
     ],
     [setIsCreating],
-  );
+  ) as JojikColumnDef[];
 
   const currentCreatedFilter =
-    (columnFilters.find((filter) => filter.id === 'createdAt')?.value as CreatedAtFilterValue | undefined) ??
-    'all';
+    (columnFilters.find((filter) => filter.id === 'createdAt')?.value as
+      | CreatedAtFilterValue
+      | undefined) ?? 'all';
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
