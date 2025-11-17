@@ -25,12 +25,13 @@ import {
   ArrowMdLeftDouble,
   ArrowMdLeftSingle,
   ArrowMdRightDouble,
-  ArrowMdRightSingle,
+  ArrowMdRightSingle, Plus,
   Search,
 } from '@/common/icons';
 
 import { cssObj } from './style';
 import type { ListViewState } from './useListViewState';
+import {color} from "@/style";
 
 const DEFAULT_ROW_CLICK_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
@@ -187,14 +188,12 @@ export function ListViewTemplate<TData>({
             header: () =>
               primaryActionProps ? (
                 <div css={cssObj.headerActionCell}>
-                  <Button
-                    styleType="solid"
-                    variant="primary"
-                    size="medium"
+                  <button css={cssObj.addElementButton}
                     {...primaryActionProps}
                   >
-                    {primaryActionLabel}
-                  </Button>
+                    <>{primaryActionLabel}
+                    <Plus width={16} height={16} color={`${color.white}`}/></>
+                  </button>
                 </div>
               ) : null,
             cell: () => null,

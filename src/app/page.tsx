@@ -25,11 +25,7 @@ export default function HomePage() {
     if (!isReady) return;
 
     if (isAuthenticated) {
-      if (state.gigwanNanoId) {
-        router.replace(`/td/np/gis/${state.gigwanNanoId}/manage/home/dv`);
-      } else {
-        router.replace('/td/np/gis');
-      }
+      router.replace(`/td/np/gis/${state.gigwanNanoId}/manage/home/dv`);
     } else {
       router.replace('/td/g');
     }

@@ -134,6 +134,19 @@ export const cssObj = {
     display: flex;
     justify-content: flex-end;
   `,
+  addElementButton: css`
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 120px;
+      height: 24px;
+      border: none;
+      color: ${color.white};
+      border-radius: 6px;
+      background-color: ${color.cgrey300};
+      ${typography.captionB};
+  `,
   tableCell: css`
     padding: 8px;
     border-bottom: 1px solid ${color.cgrey100};
