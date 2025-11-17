@@ -180,6 +180,7 @@ export function ListViewTemplate<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    enableSorting: false,
     manualPagination,
     manualSorting,
     manualFiltering,
@@ -353,7 +354,15 @@ export function ListViewTemplate<TData>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
+                    <th
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      css={cssObj.tableHeaderCell}
+                      onClickCapture={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
