@@ -209,6 +209,12 @@ export const jojikListViewCss = {
     gap: 8px;
   `,
 
+  sectionActions: css`
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  `,
+
   panelLabel: css`
     font-size: 13px;
     font-weight: 600;
