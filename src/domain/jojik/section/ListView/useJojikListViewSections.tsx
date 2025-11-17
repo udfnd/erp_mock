@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { Checkbox } from '@/common/components';
 import { ListViewState, useListViewState } from '@/common/list-view';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
@@ -20,7 +19,6 @@ import {
   getSortStateFromOption,
   type CreatedAtFilterValue,
 } from './constants';
-import { jojikListViewCss } from './styles';
 
 export type JojikListViewHookParams = {
   gigwanNanoId: string;
@@ -39,7 +37,6 @@ export type JojikListSectionHandlers = {
   onSelectedJojiksChange: (jojiks: JojikListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
-  onClearSelection: () => void;
 };
 
 export type JojikListSectionProps = {
@@ -64,7 +61,6 @@ export type JojikSettingsSectionProps = {
   onStartCreate: () => void;
   onExitCreate: () => void;
   onAfterMutation: () => Promise<unknown> | void;
-  onClearSelection: () => void;
   isAuthenticated: boolean;
 };
 
@@ -134,37 +130,6 @@ export function useJojikListViewSections({
 
   const columns = useMemo(
     () => [
-      columnHelper.display({
-        id: 'selection',
-        header: ({ table }) => (
-          <div css={jojikListViewCss.checkboxCell}>
-            <Checkbox
-              checked={table.getIsAllPageRowsSelected()}
-              indeterminate={table.getIsSomePageRowsSelected()}
-              onChange={(event) => {
-                setIsCreating(false);
-                table.getToggleAllPageRowsSelectedHandler()(event);
-              }}
-              ariaLabel="전체 조직 선택"
-            />
-          </div>
-        ),
-        cell: ({ row }) => (
-          <div css={jojikListViewCss.checkboxCell}>
-            <Checkbox
-              checked={row.getIsSelected()}
-              indeterminate={row.getIsSomeSelected()}
-              onChange={(event) => {
-                setIsCreating(false);
-                row.getToggleSelectedHandler()(event);
-              }}
-              ariaLabel={`${row.original.name} 선택`}
-            />
-          </div>
-        ),
-        enableSorting: false,
-        enableColumnFilter: false,
-      }),
       columnHelper.accessor('name', {
         header: createSortableHeader('조직 이름'),
         cell: (info) => info.getValue(),
@@ -193,7 +158,7 @@ export function useJojikListViewSections({
         },
       }),
     ],
-    [setIsCreating],
+    [],
   ) as JojikColumnDef[];
 
   const currentCreatedFilter =
@@ -241,10 +206,6 @@ export function useJojikListViewSections({
     startCreate();
   };
 
-  const handleClearSelection = () => {
-    clearSelection();
-  };
-
   const handleAfterMutation = async () => {
     await refetch();
     setIsCreating(false);
@@ -271,7 +232,6 @@ export function useJojikListViewSections({
       onSelectedJojiksChange: setSelectedJojiks,
       onAddClick: handleAddClick,
       onStopCreate: stopCreate,
-      onClearSelection: handleClearSelection,
     },
   };
 
@@ -282,7 +242,6 @@ export function useJojikListViewSections({
     onStartCreate: startCreate,
     onExitCreate: stopCreate,
     onAfterMutation: handleAfterMutation,
-    onClearSelection: handleClearSelection,
     isAuthenticated,
   };
 
