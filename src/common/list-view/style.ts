@@ -118,6 +118,13 @@ export const cssObj = {
     border-bottom: 1px solid ${color.cgrey100};
     background: ${color.white};
   `,
+  selectionCell: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 52px;
+  `,
   headerActionCell: css`
     display: flex;
     justify-content: flex-end;

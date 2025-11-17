@@ -20,7 +20,6 @@ export function JojikSettingsSection({
   isCreating,
   onExitCreate,
   onAfterMutation,
-  onClearSelection,
   isAuthenticated,
 }: JojikSettingsSectionProps) {
   if (!gigwanNanoId) {
@@ -56,7 +55,6 @@ export function JojikSettingsSection({
           jojikNanoId={selectedJojiks[0].nanoId}
           jojikName={selectedJojiks[0].name}
           onAfterMutation={onAfterMutation}
-          onClearSelection={onClearSelection}
           isAuthenticated={isAuthenticated}
         />
       </aside>
@@ -65,7 +63,7 @@ export function JojikSettingsSection({
 
   return (
     <aside css={jojikListViewCss.settingsPanel}>
-      <MultiSelectionPanel jojiks={selectedJojiks} onClearSelection={onClearSelection} />
+      <MultiSelectionPanel jojiks={selectedJojiks} />
     </aside>
   );
 }
@@ -138,7 +136,6 @@ type SingleSelectionPanelProps = {
   jojikNanoId: string;
   jojikName: string;
   onAfterMutation: () => Promise<unknown> | void;
-  onClearSelection: () => void;
   isAuthenticated: boolean;
 };
 
@@ -154,7 +151,6 @@ type SingleSelectionPanelContentProps = {
   openSangtae?: boolean;
   openFiles?: { nanoId: string; name: string }[];
   onAfterMutation: () => Promise<unknown> | void;
-  onClearSelection: () => void;
   updateMutation: UpdateJojikMutationResult;
   deleteMutation: DeleteJojikMutationResult;
 };
@@ -163,7 +159,6 @@ function SingleSelectionPanel({
   jojikNanoId,
   jojikName,
   onAfterMutation,
-  onClearSelection,
   isAuthenticated,
 }: SingleSelectionPanelProps) {
   const { data: jojikDetail, isLoading } = useJojikQuery(jojikNanoId, {
@@ -200,7 +195,6 @@ function SingleSelectionPanel({
       openSangtae={jojikDetail?.openSangtae}
       openFiles={jojikDetail?.openFiles}
       onAfterMutation={onAfterMutation}
-      onClearSelection={onClearSelection}
       updateMutation={updateMutation}
       deleteMutation={deleteMutation}
     />
@@ -216,7 +210,6 @@ function SingleSelectionPanelContent({
   openSangtae,
   openFiles,
   onAfterMutation,
-  onClearSelection,
   updateMutation,
   deleteMutation,
 }: SingleSelectionPanelContentProps) {
@@ -326,14 +319,6 @@ function SingleSelectionPanelContent({
       </div>
       <div css={jojikListViewCss.panelFooter}>
         <Button
-          styleType="text"
-          variant="secondary"
-          onClick={onClearSelection}
-          disabled={isUpdating || isDeleting}
-        >
-          선택 해제
-        </Button>
-        <Button
           styleType="outlined"
           variant="secondary"
           onClick={handleDelete}
@@ -348,10 +333,9 @@ function SingleSelectionPanelContent({
 
 type MultiSelectionPanelProps = {
   jojiks: JojikListItem[];
-  onClearSelection: () => void;
 };
 
-function MultiSelectionPanel({ jojiks, onClearSelection }: MultiSelectionPanelProps) {
+function MultiSelectionPanel({ jojiks }: MultiSelectionPanelProps) {
   const displayList = useMemo(() => jojiks.slice(0, 6), [jojiks]);
   const overflowCount = Math.max(jojiks.length - displayList.length, 0);
 
@@ -379,11 +363,6 @@ function MultiSelectionPanel({ jojiks, onClearSelection }: MultiSelectionPanelPr
           <span css={jojikListViewCss.panelLabel}>다중 선택 기능</span>
           <p css={jojikListViewCss.panelText}>여러 조직 선택 시 기능을 준비 중입니다.</p>
         </div>
-      </div>
-      <div css={jojikListViewCss.panelFooter}>
-        <Button styleType="outlined" variant="secondary" onClick={onClearSelection}>
-          선택 해제
-        </Button>
       </div>
     </>
   );
