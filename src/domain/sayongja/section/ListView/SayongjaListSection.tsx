@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import type { Row } from '@tanstack/react-table';
 
 import { ListViewTemplate, type ListViewTemplateRowEventHandlers } from '@/common/list-view';
-import type { SayongjaListItem } from '@/domain/sayongja/api';
+import type { SayongjaDetail } from '@/domain/sayongja/api';
 import type { SayongjaListSectionProps } from './useSayongjaListViewSections';
 import type { SayongjaFilters } from './useSayongjaListViewSections';
 
@@ -19,7 +19,7 @@ export type SayongjaListSectionComponentProps = SayongjaListSectionProps & {
 
 function createRowEventHandlers(
   handlers: SayongjaListSectionProps['handlers'],
-): ListViewTemplateRowEventHandlers<SayongjaListItem> {
+): ListViewTemplateRowEventHandlers<SayongjaDetail> {
   return {
     selectOnClick: true,
     onClick: () => {
@@ -122,7 +122,7 @@ export function SayongjaListSection({
       }}
       pageSizeOptions={pageSizeOptions}
       onPageSizeChange={handlers.onPageSizeChange}
-      onSelectedRowsChange={(rows: Row<SayongjaListItem>[]) => {
+      onSelectedRowsChange={(rows: Row<SayongjaDetail>[]) => {
         handlers.onStopCreate();
         handlers.onSelectedSayongjasChange(rows.map((row) => row.original));
       }}

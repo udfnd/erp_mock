@@ -5,16 +5,16 @@ import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Checkbox, Modal, Textfield } from '@/common/components';
 import {
   useBatchlinkPermissionSayongjaMutation,
-  useDeleteSayongjaMutation,
   useGetPermissionsQuery,
 } from '@/domain/permission/api';
 import {
   useCreateSayongjaMutation,
+  useDeleteSayongjaMutation,
   useGetSayongjaDetailQuery,
   useGetSayongjaPermissionsQuery,
   useUpdateSayongjaMutation,
 } from '@/domain/sayongja/api';
-import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/api';
+import type { SayongjaDetail, UpdateSayongjaRequest } from '@/domain/sayongja/api';
 
 import { sayongjaListViewCss } from './styles';
 import type { SayongjaSettingsSectionProps } from './useSayongjaListViewSections';
@@ -581,7 +581,7 @@ function SingleSelectionPanelContent({
 }
 
 type MultiSelectionPanelProps = {
-  sayongjas: SayongjaListItem[];
+  sayongjas: SayongjaDetail[];
 };
 
 function MultiSelectionPanel({ sayongjas }: MultiSelectionPanelProps) {
