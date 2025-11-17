@@ -2,7 +2,7 @@
 
 import { css } from '@emotion/react';
 
-import { color } from '@/style';
+import { color, typography } from '@/style';
 
 export const cssObj = {
   container: css`
@@ -110,24 +110,42 @@ export const cssObj = {
     position: sticky;
     top: 0;
     z-index: 1;
-    padding: 12px 18px;
+    padding: 8px;
     text-align: left;
-    font-size: 13px;
-    font-weight: 600;
+    ${typography.bodySB};
     color: ${color.cgrey500};
     border-bottom: 1px solid ${color.cgrey100};
     background: ${color.white};
+    &:first-of-type {
+      padding-right: 4px;
+    }
+    &:nth-of-type(2) {
+      padding-left: 4px;
+    }
+  `,
+  selectionCell: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 52px;
   `,
   headerActionCell: css`
     display: flex;
     justify-content: flex-end;
   `,
   tableCell: css`
-    padding: 16px 18px;
+    padding: 8px;
     border-bottom: 1px solid ${color.cgrey100};
-    font-size: 14px;
-    color: ${color.cgrey700};
+    ${typography.bodySmallR};
+    color: ${color.black};
     background: ${color.white};
+    &:first-of-type {
+      padding-right: 4px;
+    }
+    &:nth-of-type(2) {
+      padding-left: 4px;
+    }
   `,
   tableRow: css`
     transition: background 0.2s ease;
@@ -143,7 +161,7 @@ export const cssObj = {
     }
   `,
   stateCell: css`
-    padding: 40px 18px;
+    padding: 8px;
     text-align: center;
     color: ${color.cgrey400};
     font-size: 14px;

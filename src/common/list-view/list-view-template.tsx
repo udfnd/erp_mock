@@ -20,7 +20,7 @@ import {
 } from '@tanstack/react-table';
 import type { MouseEvent, ReactNode } from 'react';
 
-import { Button, type ButtonProps } from '@/common/components';
+import { Button, Checkbox, type ButtonProps } from '@/common/components';
 import {
   ArrowMdLeftDouble,
   ArrowMdLeftSingle,
@@ -143,25 +143,67 @@ export function ListViewTemplate<TData>({
     primaryActionProps = rest;
   }
 
-  const effectiveColumns: ColumnDef<TData>[] = primaryActionProps
-    ? [
-        ...columns,
-        {
-          id: '__primary_action__',
-          header: () =>
-            primaryActionProps ? (
-              <div css={cssObj.headerActionCell}>
-                <Button styleType="solid" variant="primary" size="medium" {...primaryActionProps}>
-                  {primaryActionLabel}
-                </Button>
-              </div>
-            ) : null,
-          cell: () => null,
+  const selectionColumn: ColumnDef<TData> | null =
+    tableOptions.enableRowSelection ?? false
+      ? {
+          id: '__row_selection__',
+          size: 52,
+          minSize: 52,
+          maxSize: 52,
+          header: ({ table }) => (
+            <div css={cssObj.selectionCell}>
+              <Checkbox
+                checked={table.getIsAllPageRowsSelected()}
+                indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                onChange={table.getToggleAllPageRowsSelectedHandler()}
+                ariaLabel="전체 행 선택"
+              />
+            </div>
+          ),
+          cell: ({ row }) => (
+            <div css={cssObj.selectionCell}>
+              <Checkbox
+                checked={row.getIsSelected()}
+                indeterminate={row.getIsSomeSelected()}
+                disabled={!row.getCanSelect()}
+                onChange={row.getToggleSelectedHandler()}
+                ariaLabel="행 선택"
+              />
+            </div>
+          ),
           enableSorting: false,
           enableColumnFilter: false,
-        } as ColumnDef<TData>,
-      ]
-    : columns;
+          enableHiding: false,
+        }
+      : null;
+
+  const effectiveColumns: ColumnDef<TData>[] = [
+    ...(selectionColumn ? [selectionColumn] : []),
+    ...columns,
+    ...(primaryActionProps
+      ? [
+          {
+            id: '__primary_action__',
+            header: () =>
+              primaryActionProps ? (
+                <div css={cssObj.headerActionCell}>
+                  <Button
+                    styleType="solid"
+                    variant="primary"
+                    size="medium"
+                    {...primaryActionProps}
+                  >
+                    {primaryActionLabel}
+                  </Button>
+                </div>
+              ) : null,
+            cell: () => null,
+            enableSorting: false,
+            enableColumnFilter: false,
+          } as ColumnDef<TData>,
+        ]
+      : []),
+  ];
 
   const table = useReactTable({
     data,
@@ -180,6 +222,7 @@ export function ListViewTemplate<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    enableSorting: false,
     manualPagination,
     manualSorting,
     manualFiltering,
@@ -353,7 +396,15 @@ export function ListViewTemplate<TData>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
+                    <th
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      css={cssObj.tableHeaderCell}
+                      onClickCapture={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
