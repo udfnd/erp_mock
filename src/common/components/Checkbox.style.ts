@@ -23,7 +23,7 @@ export const input = css({
   },
 });
 
-const inputClassName = input.name;
+const inputClassName = `css-${input.name}`;
 
 export const box = css`
   width: 100%;

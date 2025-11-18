@@ -70,6 +70,8 @@ export const permissionListViewCss = {
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #111827;
+    font-size: 14px;
     cursor: pointer;
     &:hover {
       background: #f9fafb;
