@@ -1,6 +1,13 @@
 'use client';
 
-import { ChangeEventHandler, MutableRefObject, forwardRef, useEffect, useRef } from 'react';
+import {
+  ChangeEventHandler,
+  MouseEventHandler,
+  MutableRefObject,
+  forwardRef,
+  useEffect,
+  useRef,
+} from 'react';
 
 import * as styles from './Checkbox.style';
 
@@ -9,11 +16,15 @@ export type CheckboxProps = {
   indeterminate?: boolean;
   disabled?: boolean;
   onChange?: ChangeEventHandler<HTMLInputElement>;
+  onClick?: MouseEventHandler<HTMLInputElement>;
   ariaLabel?: string;
 };
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ checked = false, indeterminate = false, disabled = false, onChange, ariaLabel }, ref) => {
+  (
+    { checked = false, indeterminate = false, disabled = false, onChange, onClick, ariaLabel },
+    ref,
+  ) => {
     const internalRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
@@ -40,6 +51,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           checked={checked}
           disabled={disabled}
           onChange={onChange}
+          onClick={onClick}
           aria-label={ariaLabel}
         />
         <span css={styles.box} />

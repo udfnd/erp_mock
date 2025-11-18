@@ -2,12 +2,14 @@
 
 import { type FormEvent, useState } from 'react';
 
-import { Button, Textfield } from '@/common/components';
+import { Button, Checkbox, Textfield } from '@/common/components';
 import {
   useGetPermissionDetailQuery,
   useGetPermissionSayongjasQuery,
+  useBatchlinkPermissionSayongjaMutation,
   useUpdatePermissionMutation,
 } from '@/domain/permission/api';
+import { useGetSayongjasQuery } from '@/domain/sayongja/api';
 
 import { permissionListViewCss } from './styles';
 import type { PermissionSettingsSectionProps } from './usePermissionListViewSections';
@@ -53,6 +55,7 @@ export function PermissionSettingsSection({
       <SinglePermissionPanel
         key={selectedPermissions[0].nanoId}
         nanoId={selectedPermissions[0].nanoId}
+        gigwanNanoId={gigwanNanoId}
         isAuthenticated={isAuthenticated}
         onAfterMutation={onAfterMutation}
       />
@@ -62,22 +65,41 @@ export function PermissionSettingsSection({
 
 type SinglePermissionPanelProps = {
   nanoId: string;
+  gigwanNanoId: string;
   isAuthenticated: boolean;
   onAfterMutation: () => Promise<unknown> | void;
 };
 
 function SinglePermissionPanel({
   nanoId,
+  gigwanNanoId,
   isAuthenticated,
   onAfterMutation,
 }: SinglePermissionPanelProps) {
   const { data: permissionDetail } = useGetPermissionDetailQuery(nanoId, {
     enabled: isAuthenticated && Boolean(nanoId),
   });
-  const { data: sayongjaLinks } = useGetPermissionSayongjasQuery(nanoId, {
-    enabled: isAuthenticated && Boolean(nanoId),
-  });
+  const { data: sayongjaLinks, refetch: refetchPermissionSayongjas } =
+    useGetPermissionSayongjasQuery(nanoId, {
+      enabled: isAuthenticated && Boolean(nanoId),
+    });
   const updateMutation = useUpdatePermissionMutation(nanoId);
+  const batchlinkMutation = useBatchlinkPermissionSayongjaMutation(nanoId);
+
+  const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
+  const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
+
+  const { data: sayongjasData } = useGetSayongjasQuery(
+    {
+      gigwanNanoId,
+      pageNumber: 1,
+      pageSize: 50,
+    },
+    {
+      enabled: isAuthenticated && Boolean(gigwanNanoId) && isAddUserPopupOpen,
+    },
+  );
+  const availableSayongjas = sayongjasData?.sayongjas ?? [];
 
   const [nameInput, setNameInput] = useState<string | null>(null);
 
@@ -97,6 +119,33 @@ function SinglePermissionPanel({
 
   const isSaving = updateMutation.isPending;
   const hasChanged = currentName.trim() !== originalName.trim();
+
+  const toggleSayongjaSelection = (sayongjaNanoId: string) => {
+    setAddUserSelection((prev) => {
+      const next = new Set(prev);
+      if (next.has(sayongjaNanoId)) {
+        next.delete(sayongjaNanoId);
+      } else {
+        next.add(sayongjaNanoId);
+      }
+      return next;
+    });
+  };
+
+  const clearAddUserPopup = () => {
+    setIsAddUserPopupOpen(false);
+    setAddUserSelection(new Set());
+  };
+
+  const handleApplyAddUsers = async () => {
+    if (addUserSelection.size === 0) return;
+    await batchlinkMutation.mutateAsync({
+      sayongjas: Array.from(addUserSelection).map((nanoId) => ({ nanoId })),
+    });
+    await refetchPermissionSayongjas();
+    clearAddUserPopup();
+    await onAfterMutation();
+  };
 
   return (
     <>
