@@ -2,8 +2,6 @@ import { createColumnHelper, type HeaderContext, type SortingState } from '@tans
 
 import type { JojikListItem } from '@/domain/jojik/api/jojik.schema';
 
-import { jojikListViewCss } from './styles';
-
 export type CreatedAtFilterValue = 'all' | '7' | '30';
 
 export const columnHelper = createColumnHelper<JojikListItem>();

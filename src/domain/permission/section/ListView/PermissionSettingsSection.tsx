@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -25,7 +25,9 @@ export function PermissionSettingsSection({
           <h2 css={permissionListViewCss.panelTitle}>기관이 선택되지 않았습니다</h2>
           <p css={permissionListViewCss.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
         </div>
-        <p css={permissionListViewCss.helperText}>기관 ID가 없으면 권한 데이터를 불러올 수 없습니다.</p>
+        <p css={permissionListViewCss.helperText}>
+          기관 ID가 없으면 권한 데이터를 불러올 수 없습니다.
+        </p>
       </aside>
     );
   }
@@ -49,6 +51,7 @@ export function PermissionSettingsSection({
   return (
     <aside css={permissionListViewCss.panel}>
       <SinglePermissionPanel
+        key={selectedPermissions[0].nanoId}
         nanoId={selectedPermissions[0].nanoId}
         isAuthenticated={isAuthenticated}
         onAfterMutation={onAfterMutation}
@@ -63,7 +66,11 @@ type SinglePermissionPanelProps = {
   onAfterMutation: () => Promise<unknown> | void;
 };
 
-function SinglePermissionPanel({ nanoId, isAuthenticated, onAfterMutation }: SinglePermissionPanelProps) {
+function SinglePermissionPanel({
+  nanoId,
+  isAuthenticated,
+  onAfterMutation,
+}: SinglePermissionPanelProps) {
   const { data: permissionDetail } = useGetPermissionDetailQuery(nanoId, {
     enabled: isAuthenticated && Boolean(nanoId),
   });
@@ -71,23 +78,25 @@ function SinglePermissionPanel({ nanoId, isAuthenticated, onAfterMutation }: Sin
     enabled: isAuthenticated && Boolean(nanoId),
   });
   const updateMutation = useUpdatePermissionMutation(nanoId);
-  const [name, setName] = useState('');
 
-  useEffect(() => {
-    setName(permissionDetail?.name ?? '');
-  }, [permissionDetail?.name]);
+  const [nameInput, setNameInput] = useState<string | null>(null);
+
+  const originalName = permissionDetail?.name ?? '';
+  const currentName = nameInput ?? originalName;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmed = name.trim();
+    const trimmed = currentName.trim();
     if (!trimmed) return;
 
     await updateMutation.mutateAsync({ name: trimmed });
+
+    setNameInput(null);
     await onAfterMutation();
   };
 
   const isSaving = updateMutation.isPending;
-  const hasChanged = name.trim() !== (permissionDetail?.name ?? '');
+  const hasChanged = currentName.trim() !== originalName.trim();
 
   return (
     <>
@@ -99,8 +108,8 @@ function SinglePermissionPanel({ nanoId, isAuthenticated, onAfterMutation }: Sin
         <div css={permissionListViewCss.panelSection}>
           <Textfield
             label="권한 이름"
-            value={name}
-            onValueChange={setName}
+            value={currentName}
+            onValueChange={setNameInput}
             singleLine
             required
           />

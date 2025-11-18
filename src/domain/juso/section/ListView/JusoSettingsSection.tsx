@@ -9,7 +9,7 @@ import {
   useGetJusoDetailQuery,
   useUpdateJusoMutation,
 } from '@/domain/juso/api';
-import type { JusoListItem, UpdateJusoRequest } from '@/domain/juso/api/juso.schema';
+import type { UpdateJusoRequest } from '@/domain/juso/api/juso.schema';
 
 import { jusoListViewCss } from './styles';
 import type { JusoSettingsSectionProps } from './useJusoListViewSections';
@@ -110,7 +110,11 @@ export function JusoSettingsSection({
   if (isCreating || selectedJusos.length === 0) {
     return (
       <aside css={jusoListViewCss.settingsPanel}>
-        <CreateJusoPanel jojikNanoId={jojikNanoId} onExit={isCreating ? onExitCreate : undefined} onAfterMutation={onAfterMutation} />
+        <CreateJusoPanel
+          jojikNanoId={jojikNanoId}
+          onExit={isCreating ? onExitCreate : undefined}
+          onAfterMutation={onAfterMutation}
+        />
       </aside>
     );
   }
@@ -132,7 +136,9 @@ export function JusoSettingsSection({
     <aside css={jusoListViewCss.settingsPanel}>
       <div css={jusoListViewCss.panelHeader}>
         <h2 css={jusoListViewCss.panelTitle}>여러 주소가 선택되었습니다</h2>
-        <p css={jusoListViewCss.panelSubtitle}>한 번에 하나의 주소만 수정하거나 삭제할 수 있습니다.</p>
+        <p css={jusoListViewCss.panelSubtitle}>
+          한 번에 하나의 주소만 수정하거나 삭제할 수 있습니다.
+        </p>
       </div>
       <div css={jusoListViewCss.panelBody}>
         <p css={jusoListViewCss.helperText}>하나의 주소만 선택하거나 새 주소를 추가해 보세요.</p>
@@ -215,10 +221,14 @@ function CreateJusoPanel({ jojikNanoId, onExit, onAfterMutation }: CreateJusoPan
             value={jusoDetail}
             onValueChange={setJusoDetail}
           />
-          <p css={jusoListViewCss.helperText}>주소 입력창을 클릭하면 카카오 주소 검색을 사용할 수 있습니다.</p>
+          <p css={jusoListViewCss.helperText}>
+            주소 입력창을 클릭하면 카카오 주소 검색을 사용할 수 있습니다.
+          </p>
         </div>
         {createMutation.isError && (
-          <p css={jusoListViewCss.helperText}>주소 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</p>
+          <p css={jusoListViewCss.helperText}>
+            주소 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
         )}
       </form>
       <div css={jusoListViewCss.panelFooter}>
@@ -235,7 +245,12 @@ function CreateJusoPanel({ jojikNanoId, onExit, onAfterMutation }: CreateJusoPan
   );
 }
 
-function SingleSelectionPanel({ jusoNanoId, jusoName, onAfterMutation, isAuthenticated }: SingleSelectionPanelProps) {
+function SingleSelectionPanel({
+  jusoNanoId,
+  jusoName,
+  onAfterMutation,
+  isAuthenticated,
+}: SingleSelectionPanelProps) {
   const { data: jusoDetail, isLoading } = useGetJusoDetailQuery(jusoNanoId, {
     enabled: isAuthenticated && Boolean(jusoNanoId),
   });
@@ -369,20 +384,35 @@ function SingleSelectionPanelContent({
             value={formState.jusoDetail}
             onValueChange={(value) => setFormState((prev) => ({ ...prev, jusoDetail: value }))}
           />
-          <p css={jusoListViewCss.helperText}>주소 입력창을 클릭하면 카카오 주소 검색을 사용할 수 있습니다.</p>
+          <p css={jusoListViewCss.helperText}>
+            주소 입력창을 클릭하면 카카오 주소 검색을 사용할 수 있습니다.
+          </p>
         </div>
         {updateMutation.isError && (
-          <p css={jusoListViewCss.helperText}>주소 업데이트 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</p>
+          <p css={jusoListViewCss.helperText}>
+            주소 업데이트 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
         )}
         {deleteMutation.isError && (
-          <p css={jusoListViewCss.helperText}>주소 삭제 중 문제가 발생했습니다. 다시 시도해 주세요.</p>
+          <p css={jusoListViewCss.helperText}>
+            주소 삭제 중 문제가 발생했습니다. 다시 시도해 주세요.
+          </p>
         )}
       </form>
       <div css={jusoListViewCss.panelFooter}>
-        <Button styleType="text" variant="secondary" onClick={handleDelete} disabled={isSaving || isDeleting}>
+        <Button
+          styleType="text"
+          variant="secondary"
+          onClick={handleDelete}
+          disabled={isSaving || isDeleting}
+        >
           주소 삭제
         </Button>
-        <Button type="submit" form={formId} disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}>
+        <Button
+          type="submit"
+          form={formId}
+          disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}
+        >
           변경 사항 저장
         </Button>
       </div>

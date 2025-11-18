@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import { Button, Checkbox, Modal, Textfield } from '@/common/components';
 import {
@@ -42,7 +42,9 @@ export function SayongjaSettingsSection({
           <p css={sayongjaListViewCss.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
         </div>
         <div css={sayongjaListViewCss.panelBody}>
-          <p css={sayongjaListViewCss.helperText}>기관 ID가 없으면 사용자 데이터를 불러올 수 없습니다.</p>
+          <p css={sayongjaListViewCss.helperText}>
+            기관 ID가 없으면 사용자 데이터를 불러올 수 없습니다.
+          </p>
         </div>
       </aside>
     );
@@ -221,7 +223,9 @@ function CreateSayongjaPanel({
           <Checkbox checked={isHwalseong} onChange={(e) => setIsHwalseong(e.target.checked)} />
         </div>
         {createMutation.isError && (
-          <p css={sayongjaListViewCss.helperText}>사용자 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</p>
+          <p css={sayongjaListViewCss.helperText}>
+            사용자 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
         )}
       </form>
       <div css={sayongjaListViewCss.panelFooter}>
@@ -230,7 +234,11 @@ function CreateSayongjaPanel({
             취소
           </Button>
         ) : null}
-        <Button type="submit" form={formId} disabled={isSaving || !name.trim() || !employedAt || !loginId || !password}>
+        <Button
+          type="submit"
+          form={formId}
+          disabled={isSaving || !name.trim() || !employedAt || !loginId || !password}
+        >
           사용자 생성
         </Button>
       </div>
@@ -346,6 +354,7 @@ function SingleSelectionPanelContent({
   employmentCategoryOptions,
   workTypeOptions,
 }: SingleSelectionPanelContentProps) {
+  // 초기 값은 props에서 한 번만 가져오고, 이후엔 입력 이벤트를 통해서만 변경된다.
   const [name, setName] = useState(sayongjaName);
   const [employedAtValue, setEmployedAtValue] = useState(employedAt);
   const [loginIdValue, setLoginIdValue] = useState(loginId);
@@ -361,16 +370,9 @@ function SingleSelectionPanelContent({
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
     { enabled: isPermissionModalOpen && Boolean(gigwanNanoId) },
   );
-  const permissionLinkMutation = useBatchlinkPermissionSayongjaMutation(selectedPermissionNanoId || '');
-
-  useEffect(() => {
-    setName(sayongjaName);
-    setEmployedAtValue(employedAt);
-    setLoginIdValue(loginId);
-    setEmploymentValue(employmentNanoId);
-    setWorkTypeValue(workTypeNanoId);
-    setIsHwalseongValue(isHwalseong);
-  }, [sayongjaName, employedAt, loginId, employmentNanoId, workTypeNanoId, isHwalseong]);
+  const permissionLinkMutation = useBatchlinkPermissionSayongjaMutation(
+    selectedPermissionNanoId || '',
+  );
 
   const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
@@ -406,10 +408,7 @@ function SingleSelectionPanelContent({
     await onAfterMutation();
   };
 
-  const availablePermissions = useMemo(
-    () => permissionsQuery.data?.permissions ?? [],
-    [permissionsQuery.data?.permissions],
-  );
+  const availablePermissions = permissionsQuery.data?.permissions ?? [];
 
   const handlePermissionLink = async () => {
     if (!selectedPermissionNanoId) return;
@@ -504,7 +503,9 @@ function SingleSelectionPanelContent({
           </div>
         </div>
         {updateMutation.isError && (
-          <p css={sayongjaListViewCss.helperText}>사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
+          <p css={sayongjaListViewCss.helperText}>
+            사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.
+          </p>
         )}
         <div css={sayongjaListViewCss.panelSection}>
           <span css={sayongjaListViewCss.panelLabel}>연결 객체들</span>
@@ -522,7 +523,11 @@ function SingleSelectionPanelContent({
               )}
             </div>
             <div css={sayongjaListViewCss.sectionActions}>
-              <Button styleType="outlined" variant="secondary" onClick={() => setIsPermissionModalOpen(true)}>
+              <Button
+                styleType="outlined"
+                variant="secondary"
+                onClick={() => setIsPermissionModalOpen(true)}
+              >
                 권한 추가
               </Button>
             </div>
@@ -530,7 +535,12 @@ function SingleSelectionPanelContent({
         </div>
       </form>
       <div css={sayongjaListViewCss.panelFooter}>
-        <Button styleType="outlined" variant="secondary" onClick={handleDelete} disabled={isDeleting}>
+        <Button
+          styleType="outlined"
+          variant="secondary"
+          onClick={handleDelete}
+          disabled={isDeleting}
+        >
           사용자 삭제
         </Button>
         <Button type="submit" form={formId} disabled={isUpdating}>
@@ -585,7 +595,7 @@ type MultiSelectionPanelProps = {
 };
 
 function MultiSelectionPanel({ sayongjas }: MultiSelectionPanelProps) {
-  const displayList = useMemo(() => sayongjas.slice(0, 6), [sayongjas]);
+  const displayList = sayongjas.slice(0, 6);
   const overflowCount = Math.max(sayongjas.length - displayList.length, 0);
 
   return (
@@ -605,7 +615,9 @@ function MultiSelectionPanel({ sayongjas }: MultiSelectionPanelProps) {
             ))}
           </div>
           {overflowCount > 0 && (
-            <p css={sayongjaListViewCss.helperText}>외 {overflowCount}명의 사용자가 더 선택되어 있습니다.</p>
+            <p css={sayongjaListViewCss.helperText}>
+              외 {overflowCount}명의 사용자가 더 선택되어 있습니다.
+            </p>
           )}
         </div>
         <div css={sayongjaListViewCss.panelSection}>

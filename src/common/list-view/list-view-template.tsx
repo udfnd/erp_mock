@@ -20,18 +20,19 @@ import {
 } from '@tanstack/react-table';
 import type { MouseEvent, ReactNode } from 'react';
 
-import { Button, Checkbox, type ButtonProps } from '@/common/components';
+import { Checkbox, type ButtonProps } from '@/common/components';
 import {
   ArrowMdLeftDouble,
   ArrowMdLeftSingle,
   ArrowMdRightDouble,
-  ArrowMdRightSingle, Plus,
+  ArrowMdRightSingle,
+  Plus,
   Search,
 } from '@/common/icons';
 
 import { cssObj } from './style';
 import type { ListViewState } from './useListViewState';
-import {color} from "@/style";
+import { color } from '@/style';
 
 const DEFAULT_ROW_CLICK_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
@@ -145,7 +146,7 @@ export function ListViewTemplate<TData>({
   }
 
   const selectionColumn: ColumnDef<TData> | null =
-    tableOptions.enableRowSelection ?? false
+    (tableOptions.enableRowSelection ?? false)
       ? {
           id: '__row_selection__',
           size: 52,
@@ -155,7 +156,9 @@ export function ListViewTemplate<TData>({
             <div css={cssObj.selectionCell}>
               <Checkbox
                 checked={table.getIsAllPageRowsSelected()}
-                indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+                indeterminate={
+                  table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()
+                }
                 onChange={table.getToggleAllPageRowsSelectedHandler()}
                 ariaLabel="전체 행 선택"
               />
@@ -188,11 +191,11 @@ export function ListViewTemplate<TData>({
             header: () =>
               primaryActionProps ? (
                 <div css={cssObj.headerActionCell}>
-                  <button css={cssObj.addElementButton}
-                    {...primaryActionProps}
-                  >
-                    <>{primaryActionLabel}
-                    <Plus width={16} height={16} color={`${color.white}`}/></>
+                  <button css={cssObj.addElementButton} {...primaryActionProps}>
+                    <>
+                      {primaryActionLabel}
+                      <Plus width={16} height={16} color={`${color.white}`} />
+                    </>
                   </button>
                 </div>
               ) : null,
