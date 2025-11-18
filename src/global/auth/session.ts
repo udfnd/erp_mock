@@ -211,11 +211,29 @@ const applyAccessTokenFromResponse = (url: string | undefined, payload: unknown)
 export async function switchUser(userId: string, onNeedLogin?: (id: string) => void) {
   const cached = getAccessTokenForUser(userId);
 
-  if (cached && !isTokenExpiring(cached)) {
+  if (cached) {
+    const isExpired = isTokenExpiring(cached, 0);
+    const isCloseToExpiry = isTokenExpiring(cached);
+
     setActiveUserId(userId);
     setAccessTokenFor(userId, cached, 'store');
     setApiClientAuthContext({ userId, token: cached });
-    return;
+
+    if (!isCloseToExpiry) return;
+
+    try {
+      const refreshed = await refreshAccessTokenFor(userId);
+      setAccessTokenFor(userId, refreshed, 'refresh');
+      setApiClientAuthContext({ userId, token: refreshed });
+      return;
+    } catch {
+      if (isExpired) {
+        if (onNeedLogin) onNeedLogin(userId);
+        else throw new Error('Refresh token not found for this user. Redirect to sign-in.');
+      }
+      // expiring이긴 하지만 아직 유효한 토큰이 있으므로 그대로 진행
+      return;
+    }
   }
 
   try {
