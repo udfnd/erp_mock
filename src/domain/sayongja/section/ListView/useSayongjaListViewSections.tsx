@@ -129,12 +129,14 @@ export function useSayongjaListViewSections({
   const employmentCategoryOptions = useMemo(
     () => [
       { label: '전체 재직 상태', value: 'all' },
-      ...(employmentCategoriesData?.sangtaes.map((item) => ({
-        label: item.name,
-        value: item.nanoId,
-      })) ?? []),
+      ...(employmentCategoriesData?.categories.flatMap((category) =>
+        category.sangtaes.map((item) => ({
+          label: item.name,
+          value: item.nanoId,
+        })),
+      ) ?? []),
     ],
-    [employmentCategoriesData?.sangtaes],
+    [employmentCategoriesData?.categories],
   );
 
   const { data: workTypeData } = useWorkTypeCustomSangtaesQuery(gigwanNanoId, {
