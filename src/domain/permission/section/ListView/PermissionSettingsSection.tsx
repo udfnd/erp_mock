@@ -132,6 +132,77 @@ function SinglePermissionPanel({
               <p css={permissionListViewCss.helperText}>아직 연결된 사용자가 없습니다.</p>
             ) : null}
           </div>
+          <div css={permissionListViewCss.addUserContainer}>
+            <Button
+              styleType="outlined"
+              variant="secondary"
+              size="small"
+              onClick={() => setIsAddUserPopupOpen((prev) => !prev)}
+              aria-expanded={isAddUserPopupOpen}
+            >
+              사용자 추가
+            </Button>
+            {isAddUserPopupOpen ? (
+              <div css={permissionListViewCss.addUserPopup}>
+                <div css={permissionListViewCss.listBox}>
+                  {availableSayongjas.map((sayongja) => {
+                    const isChecked = addUserSelection.has(sayongja.nanoId);
+                    const toggle = () => toggleSayongjaSelection(sayongja.nanoId);
+
+                    return (
+                      <div
+                        key={sayongja.nanoId}
+                        css={permissionListViewCss.listRow}
+                        role="button"
+                        tabIndex={0}
+                        onClick={toggle}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            toggle();
+                          }
+                        }}
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onChange={(event) => {
+                            event.stopPropagation();
+                            toggle();
+                          }}
+                          onClick={(event) => event.stopPropagation()}
+                          ariaLabel={`${sayongja.name} 선택`}
+                        />
+                        <span>
+                          {sayongja.name}
+                          {sayongja.employedAt ? ` · ${sayongja.employedAt}` : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {availableSayongjas.length === 0 ? (
+                    <p css={permissionListViewCss.helperText}>추가할 사용자를 찾지 못했습니다.</p>
+                  ) : null}
+                </div>
+                <div css={permissionListViewCss.popupActions}>
+                  <Button
+                    styleType="solid"
+                    variant="secondary"
+                    size="small"
+                    onClick={clearAddUserPopup}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleApplyAddUsers}
+                    disabled={addUserSelection.size === 0 || batchlinkMutation.isPending}
+                  >
+                    추가
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
         <div css={permissionListViewCss.panelFooter}>
           <Button type="submit" disabled={isSaving || !hasChanged}>
