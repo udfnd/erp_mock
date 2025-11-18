@@ -241,9 +241,16 @@ export const setAuthState = (patch: AuthStatePatch): void => {
   if (!uid) return;
 
   const prev = st.users[uid];
-  if (!prev) return;
 
-  st.upsertUser({ ...prev, ...patch, sayongjaNanoId: uid });
+  const merged: UserMeta = {
+    sayongjaNanoId: uid,
+    sayongjaName: patch.sayongjaName ?? prev?.sayongjaName ?? '',
+    gigwanName: patch.gigwanName ?? prev?.gigwanName ?? null,
+    gigwanNanoId: patch.gigwanNanoId ?? prev?.gigwanNanoId ?? null,
+    loginId: patch.loginId ?? prev?.loginId ?? null,
+  };
+
+  st.upsertUser(merged);
 };
 
 export const upsertUser = (meta: UserMeta) => useAuthStore.getState().upsertUser(meta);
