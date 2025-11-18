@@ -2,12 +2,14 @@
 
 import { type FormEvent, useState } from 'react';
 
-import { Button, Textfield } from '@/common/components';
+import { Button, Checkbox, Textfield } from '@/common/components';
 import {
   useGetPermissionDetailQuery,
   useGetPermissionSayongjasQuery,
+  useBatchlinkPermissionSayongjaMutation,
   useUpdatePermissionMutation,
 } from '@/domain/permission/api';
+import { useGetSayongjasQuery } from '@/domain/sayongja/api';
 
 import { permissionListViewCss } from './styles';
 import type { PermissionSettingsSectionProps } from './usePermissionListViewSections';
@@ -53,6 +55,7 @@ export function PermissionSettingsSection({
       <SinglePermissionPanel
         key={selectedPermissions[0].nanoId}
         nanoId={selectedPermissions[0].nanoId}
+        gigwanNanoId={gigwanNanoId}
         isAuthenticated={isAuthenticated}
         onAfterMutation={onAfterMutation}
       />
@@ -62,22 +65,41 @@ export function PermissionSettingsSection({
 
 type SinglePermissionPanelProps = {
   nanoId: string;
+  gigwanNanoId: string;
   isAuthenticated: boolean;
   onAfterMutation: () => Promise<unknown> | void;
 };
 
 function SinglePermissionPanel({
   nanoId,
+  gigwanNanoId,
   isAuthenticated,
   onAfterMutation,
 }: SinglePermissionPanelProps) {
   const { data: permissionDetail } = useGetPermissionDetailQuery(nanoId, {
     enabled: isAuthenticated && Boolean(nanoId),
   });
-  const { data: sayongjaLinks } = useGetPermissionSayongjasQuery(nanoId, {
-    enabled: isAuthenticated && Boolean(nanoId),
-  });
+  const { data: sayongjaLinks, refetch: refetchPermissionSayongjas } =
+    useGetPermissionSayongjasQuery(nanoId, {
+      enabled: isAuthenticated && Boolean(nanoId),
+    });
   const updateMutation = useUpdatePermissionMutation(nanoId);
+  const batchlinkMutation = useBatchlinkPermissionSayongjaMutation(nanoId);
+
+  const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
+  const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
+
+  const { data: sayongjasData } = useGetSayongjasQuery(
+    {
+      gigwanNanoId,
+      pageNumber: 1,
+      pageSize: 50,
+    },
+    {
+      enabled: isAuthenticated && Boolean(gigwanNanoId) && isAddUserPopupOpen,
+    },
+  );
+  const availableSayongjas = sayongjasData?.sayongjas ?? [];
 
   const [nameInput, setNameInput] = useState<string | null>(null);
 
@@ -97,6 +119,33 @@ function SinglePermissionPanel({
 
   const isSaving = updateMutation.isPending;
   const hasChanged = currentName.trim() !== originalName.trim();
+
+  const toggleSayongjaSelection = (sayongjaNanoId: string) => {
+    setAddUserSelection((prev) => {
+      const next = new Set(prev);
+      if (next.has(sayongjaNanoId)) {
+        next.delete(sayongjaNanoId);
+      } else {
+        next.add(sayongjaNanoId);
+      }
+      return next;
+    });
+  };
+
+  const clearAddUserPopup = () => {
+    setIsAddUserPopupOpen(false);
+    setAddUserSelection(new Set());
+  };
+
+  const handleApplyAddUsers = async () => {
+    if (addUserSelection.size === 0) return;
+    await batchlinkMutation.mutateAsync({
+      sayongjas: Array.from(addUserSelection).map((nanoId) => ({ nanoId })),
+    });
+    await refetchPermissionSayongjas();
+    clearAddUserPopup();
+    await onAfterMutation();
+  };
 
   return (
     <>
@@ -130,6 +179,77 @@ function SinglePermissionPanel({
             ))}
             {sayongjaLinks?.sayongjas.length === 0 ? (
               <p css={permissionListViewCss.helperText}>아직 연결된 사용자가 없습니다.</p>
+            ) : null}
+          </div>
+          <div css={permissionListViewCss.addUserContainer}>
+            <Button
+              styleType="outlined"
+              variant="secondary"
+              size="small"
+              onClick={() => setIsAddUserPopupOpen((prev) => !prev)}
+              aria-expanded={isAddUserPopupOpen}
+            >
+              사용자 추가
+            </Button>
+            {isAddUserPopupOpen ? (
+              <div css={permissionListViewCss.addUserPopup}>
+                <div css={permissionListViewCss.listBox}>
+                  {availableSayongjas.map((sayongja) => {
+                    const isChecked = addUserSelection.has(sayongja.nanoId);
+                    const toggle = () => toggleSayongjaSelection(sayongja.nanoId);
+
+                    return (
+                      <div
+                        key={sayongja.nanoId}
+                        css={permissionListViewCss.listRow}
+                        role="button"
+                        tabIndex={0}
+                        onClick={toggle}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            toggle();
+                          }
+                        }}
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onChange={(event) => {
+                            event.stopPropagation();
+                            toggle();
+                          }}
+                          onClick={(event) => event.stopPropagation()}
+                          ariaLabel={`${sayongja.name} 선택`}
+                        />
+                        <span>
+                          {sayongja.name}
+                          {sayongja.employedAt ? ` · ${sayongja.employedAt}` : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {availableSayongjas.length === 0 ? (
+                    <p css={permissionListViewCss.helperText}>추가할 사용자를 찾지 못했습니다.</p>
+                  ) : null}
+                </div>
+                <div css={permissionListViewCss.popupActions}>
+                  <Button
+                    styleType="ghost"
+                    variant="secondary"
+                    size="small"
+                    onClick={clearAddUserPopup}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={handleApplyAddUsers}
+                    disabled={addUserSelection.size === 0 || batchlinkMutation.isPending}
+                  >
+                    추가
+                  </Button>
+                </div>
+              </div>
             ) : null}
           </div>
         </div>

@@ -67,6 +67,12 @@ export const permissionListViewCss = {
   listRow: css`
     padding: 6px 8px;
     border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #111827;
+    font-size: 14px;
+    cursor: pointer;
     &:hover {
       background: #f9fafb;
     }
@@ -76,8 +82,8 @@ export const permissionListViewCss = {
   `,
   addUserPopup: css`
     position: absolute;
-    right: 0;
-    top: 44px;
+    right: calc(100% + 12px);
+    top: 0;
     width: 320px;
     background: #fff;
     border: 1px solid #e5e7eb;

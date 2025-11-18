@@ -2,7 +2,7 @@
 
 import { type FormEvent, useState } from 'react';
 
-import { Button, Checkbox, Modal, Textfield } from '@/common/components';
+import { Button, Checkbox, Textfield } from '@/common/components';
 import {
   useBatchlinkPermissionSayongjaMutation,
   useGetPermissionsQuery,
@@ -362,13 +362,13 @@ function SingleSelectionPanelContent({
   const [workTypeValue, setWorkTypeValue] = useState(workTypeNanoId);
   const [isHwalseongValue, setIsHwalseongValue] = useState(isHwalseong);
   const [password, setPassword] = useState('');
-  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+  const [isPermissionTooltipOpen, setIsPermissionTooltipOpen] = useState(false);
   const [selectedPermissionNanoId, setSelectedPermissionNanoId] = useState<string>('');
   const formId = 'sayongja-update-form';
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
-    { enabled: isPermissionModalOpen && Boolean(gigwanNanoId) },
+    { enabled: isPermissionTooltipOpen && Boolean(gigwanNanoId) },
   );
   const permissionLinkMutation = useBatchlinkPermissionSayongjaMutation(
     selectedPermissionNanoId || '',
@@ -413,7 +413,7 @@ function SingleSelectionPanelContent({
   const handlePermissionLink = async () => {
     if (!selectedPermissionNanoId) return;
     await permissionLinkMutation.mutateAsync({ sayongjas: [{ nanoId: sayongjaNanoId }] });
-    setIsPermissionModalOpen(false);
+    setIsPermissionTooltipOpen(false);
     setSelectedPermissionNanoId('');
     await onRefreshPermissions();
   };
@@ -522,14 +522,57 @@ function SingleSelectionPanelContent({
                 <p css={sayongjaListViewCss.helperText}>아직 연결된 권한이 없습니다.</p>
               )}
             </div>
-            <div css={sayongjaListViewCss.sectionActions}>
+            <div
+              css={[sayongjaListViewCss.sectionActions, sayongjaListViewCss.permissionActionContainer]}
+            >
               <Button
                 styleType="outlined"
                 variant="secondary"
-                onClick={() => setIsPermissionModalOpen(true)}
+                onClick={() => setIsPermissionTooltipOpen((prev) => !prev)}
+                aria-expanded={isPermissionTooltipOpen}
               >
                 권한 추가
               </Button>
+              {isPermissionTooltipOpen ? (
+                <div css={sayongjaListViewCss.permissionTooltip}>
+                  <label css={sayongjaListViewCss.panelLabel}>추가할 권한 선택</label>
+                  <select
+                    css={sayongjaListViewCss.toolbarSelect}
+                    value={selectedPermissionNanoId}
+                    onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
+                  >
+                    <option value="">권한을 선택하세요</option>
+                    {availablePermissions.map((permission) => (
+                      <option key={permission.nanoId} value={permission.nanoId}>
+                        {permission.name}
+                      </option>
+                    ))}
+                  </select>
+                  {permissionsQuery.isError && (
+                    <p css={sayongjaListViewCss.helperText}>권한 목록을 불러오지 못했습니다.</p>
+                  )}
+                  <div css={sayongjaListViewCss.permissionTooltipActions}>
+                    <Button
+                      styleType="ghost"
+                      variant="secondary"
+                      size="small"
+                      onClick={() => {
+                        setIsPermissionTooltipOpen(false);
+                        setSelectedPermissionNanoId('');
+                      }}
+                    >
+                      취소
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={handlePermissionLink}
+                      disabled={!selectedPermissionNanoId || permissionsQuery.isLoading}
+                    >
+                      연결
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -547,45 +590,6 @@ function SingleSelectionPanelContent({
           저장
         </Button>
       </div>
-      <Modal
-        isOpen={isPermissionModalOpen}
-        onClose={() => setIsPermissionModalOpen(false)}
-        title="권한 추가"
-        menus={[
-          {
-            id: 'permissions',
-            label: '권한 목록',
-            content: (
-              <div css={sayongjaListViewCss.panelSection}>
-                <label css={sayongjaListViewCss.panelLabel}>추가할 권한 선택</label>
-                <select
-                  css={sayongjaListViewCss.toolbarSelect}
-                  value={selectedPermissionNanoId}
-                  onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
-                >
-                  <option value="">권한을 선택하세요</option>
-                  {availablePermissions.map((permission) => (
-                    <option key={permission.nanoId} value={permission.nanoId}>
-                      {permission.name}
-                    </option>
-                  ))}
-                </select>
-                {permissionsQuery.isError && (
-                  <p css={sayongjaListViewCss.helperText}>권한 목록을 불러오지 못했습니다.</p>
-                )}
-                <div css={sayongjaListViewCss.sectionActions}>
-                  <Button
-                    onClick={handlePermissionLink}
-                    disabled={!selectedPermissionNanoId || permissionsQuery.isLoading}
-                  >
-                    연결
-                  </Button>
-                </div>
-              </div>
-            ),
-          },
-        ]}
-      />
     </>
   );
 }
