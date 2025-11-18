@@ -107,7 +107,7 @@ export function JusoSettingsSection({
     );
   }
 
-  if (isCreating || selectedJusos.length === 0) {
+  if (isCreating) {
     return (
       <aside css={jusoListViewCss.settingsPanel}>
         <CreateJusoPanel
@@ -115,6 +115,22 @@ export function JusoSettingsSection({
           onExit={isCreating ? onExitCreate : undefined}
           onAfterMutation={onAfterMutation}
         />
+      </aside>
+    );
+  }
+
+  if (selectedJusos.length === 0) {
+    return (
+      <aside css={jusoListViewCss.settingsPanel}>
+        <div css={jusoListViewCss.panelHeader}>
+          <h2 css={jusoListViewCss.panelTitle}>주소를 선택해 주세요</h2>
+          <p css={jusoListViewCss.panelSubtitle}>
+            왼쪽 목록에서 주소를 선택하거나 상단의 추가 버튼을 눌러 새 주소를 만드세요.
+          </p>
+        </div>
+        <div css={jusoListViewCss.panelBody}>
+          <p css={jusoListViewCss.helperText}>선택된 항목이 없으면 상세 정보를 표시할 수 없습니다.</p>
+        </div>
       </aside>
     );
   }

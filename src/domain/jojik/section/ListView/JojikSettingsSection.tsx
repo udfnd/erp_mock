@@ -36,7 +36,7 @@ export function JojikSettingsSection({
     );
   }
 
-  if (isCreating || selectedJojiks.length === 0) {
+  if (isCreating) {
     return (
       <aside css={jojikListViewCss.settingsPanel}>
         <CreateJojikPanel
@@ -44,6 +44,22 @@ export function JojikSettingsSection({
           onExit={isCreating ? onExitCreate : undefined}
           onAfterMutation={onAfterMutation}
         />
+      </aside>
+    );
+  }
+
+  if (selectedJojiks.length === 0) {
+    return (
+      <aside css={jojikListViewCss.settingsPanel}>
+        <div css={jojikListViewCss.panelHeader}>
+          <h2 css={jojikListViewCss.panelTitle}>조직을 선택해 주세요</h2>
+          <p css={jojikListViewCss.panelSubtitle}>
+            왼쪽 목록에서 조직을 선택하거나 상단의 추가 버튼으로 새 조직을 생성하세요.
+          </p>
+        </div>
+        <div css={jojikListViewCss.panelBody}>
+          <p css={jojikListViewCss.helperText}>선택된 조직이 없으면 상세 정보를 볼 수 없습니다.</p>
+        </div>
       </aside>
     );
   }

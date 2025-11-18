@@ -6,13 +6,17 @@ import { color } from '@/style';
 
 export const jojikListViewCss = {
   listSection: css`
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     padding: 16px;
     border-right: 1px solid ${color.cgrey100};
     gap: 16px;
     min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
   `,
 
   listHeader: css`
@@ -173,9 +177,13 @@ export const jojikListViewCss = {
 
   settingsPanel: css`
     width: 340px;
+    flex: 0 0 340px;
     background: ${color.white};
     display: flex;
     flex-direction: column;
+    min-height: 100%;
+    max-height: 100%;
+    overflow: auto;
   `,
 
   panelHeader: css`

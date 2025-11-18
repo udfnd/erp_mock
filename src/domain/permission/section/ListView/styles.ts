@@ -5,10 +5,14 @@ import { css } from '@emotion/react';
 export const permissionListViewCss = {
   panel: css`
     width: 360px;
+    flex: 0 0 360px;
     border-left: 1px solid #e5e7eb;
     padding: 20px;
     box-sizing: border-box;
     background: #fff;
+    min-height: 100%;
+    max-height: 100%;
+    overflow: auto;
   `,
   panelHeader: css`
     margin-bottom: 12px;

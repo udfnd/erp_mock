@@ -398,15 +398,7 @@ export function ListViewTemplate<TData>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      css={cssObj.tableHeaderCell}
-                      onClickCapture={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                      }}
-                    >
+                    <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}

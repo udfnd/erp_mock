@@ -351,7 +351,7 @@ export function OebuLinkSettingsSection({
     );
   }
 
-  if (isCreating || selectedLinks.length === 0) {
+  if (isCreating) {
     return (
       <aside css={oebuLinkListViewCss.settingsPanel}>
         <CreateOebuLinkPanel
@@ -360,6 +360,24 @@ export function OebuLinkSettingsSection({
           onAfterMutation={onAfterMutation}
           onExit={isCreating ? onExitCreate : undefined}
         />
+      </aside>
+    );
+  }
+
+  if (selectedLinks.length === 0) {
+    return (
+      <aside css={oebuLinkListViewCss.settingsPanel}>
+        <div css={oebuLinkListViewCss.panelHeader}>
+          <h2 css={oebuLinkListViewCss.panelTitle}>외부 링크를 선택해 주세요</h2>
+          <p css={oebuLinkListViewCss.panelSubtitle}>
+            목록에서 항목을 선택하거나 상단의 추가 버튼으로 새 외부 링크를 만들어 보세요.
+          </p>
+        </div>
+        <div css={oebuLinkListViewCss.panelBody}>
+          <p css={oebuLinkListViewCss.helperText}>
+            선택된 링크가 없어서 상세 정보를 표시할 수 없습니다.
+          </p>
+        </div>
       </aside>
     );
   }
