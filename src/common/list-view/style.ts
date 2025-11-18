@@ -35,6 +35,7 @@ export const cssObj = {
     display: flex;
     align-items: center;
     position: relative;
+    ${typography.bodySmallR};
   `,
   searchIcon: css`
     position: absolute;
@@ -44,14 +45,14 @@ export const cssObj = {
   searchInput: css`
     width: 100%;
     height: 36px;
-    padding: 0 12px 0 36px;
+    padding: 0 12px 0 30px;
     border-radius: 10px;
     border: 1px solid ${color.cgrey200};
     background: ${color.white};
     font-size: 14px;
     color: ${color.cgrey700};
     &:focus {
-      outline: 2px solid ${color.blue100};
+      outline: 1px solid ${color.blue};
       border-color: transparent;
     }
   `,
@@ -135,17 +136,17 @@ export const cssObj = {
     justify-content: flex-end;
   `,
   addElementButton: css`
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      width: 120px;
-      height: 24px;
-      border: none;
-      color: ${color.white};
-      border-radius: 6px;
-      background-color: ${color.cgrey300};
-      ${typography.captionB};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 120px;
+    height: 24px;
+    border: none;
+    color: ${color.white};
+    border-radius: 6px;
+    background-color: ${color.cgrey300};
+    ${typography.captionB};
   `,
   tableCell: css`
     padding: 8px;

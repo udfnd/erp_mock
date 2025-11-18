@@ -63,7 +63,7 @@ export function JojikListSection({
       search={{
         value: searchTerm,
         onChange: handlers.onSearchChange,
-        placeholder: '조직 이름으로 검색',
+        placeholder: '조직 이름을 검색해주세요.',
       }}
       filters={[
         {
