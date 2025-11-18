@@ -7,9 +7,13 @@ import { color } from '@/style';
 export const oebuLinkListViewCss = {
   settingsPanel: css`
     width: 360px;
+    flex: 0 0 360px;
     background: ${color.white};
     display: flex;
     flex-direction: column;
+    min-height: 100%;
+    max-height: 100%;
+    overflow: auto;
   `,
   panelHeader: css`
     padding: 24px;

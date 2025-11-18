@@ -50,7 +50,7 @@ export function SayongjaSettingsSection({
     );
   }
 
-  if (isCreating || selectedSayongjas.length === 0) {
+  if (isCreating) {
     return (
       <aside css={sayongjaListViewCss.settingsPanel}>
         <CreateSayongjaPanel
@@ -60,6 +60,22 @@ export function SayongjaSettingsSection({
           employmentCategoryOptions={employmentCategoryOptions}
           workTypeOptions={workTypeOptions}
         />
+      </aside>
+    );
+  }
+
+  if (selectedSayongjas.length === 0) {
+    return (
+      <aside css={sayongjaListViewCss.settingsPanel}>
+        <div css={sayongjaListViewCss.panelHeader}>
+          <h2 css={sayongjaListViewCss.panelTitle}>사용자를 선택해 주세요</h2>
+          <p css={sayongjaListViewCss.panelSubtitle}>
+            목록에서 사용자를 선택하거나 상단의 추가 버튼으로 새 사용자를 생성하세요.
+          </p>
+        </div>
+        <div css={sayongjaListViewCss.panelBody}>
+          <p css={sayongjaListViewCss.helperText}>선택된 사용자가 없어서 상세 정보를 표시할 수 없습니다.</p>
+        </div>
       </aside>
     );
   }
