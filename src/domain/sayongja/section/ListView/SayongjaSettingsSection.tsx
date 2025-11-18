@@ -14,7 +14,7 @@ import {
   useGetSayongjaPermissionsQuery,
   useUpdateSayongjaMutation,
 } from '@/domain/sayongja/api';
-import type { SayongjaDetail, UpdateSayongjaRequest } from '@/domain/sayongja/api';
+import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/api';
 
 import { sayongjaListViewCss } from './styles';
 import type { SayongjaSettingsSectionProps } from './useSayongjaListViewSections';
@@ -595,7 +595,7 @@ function SingleSelectionPanelContent({
 }
 
 type MultiSelectionPanelProps = {
-  sayongjas: SayongjaDetail[];
+  sayongjas: SayongjaListItem[];
 };
 
 function MultiSelectionPanel({ sayongjas }: MultiSelectionPanelProps) {

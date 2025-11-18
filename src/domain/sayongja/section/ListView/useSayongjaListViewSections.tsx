@@ -6,7 +6,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 
 import { ListViewState, useListViewState } from '@/common/list-view';
 import { useGetMyJojiksQuery, useGetSayongjasQuery } from '@/domain/sayongja/api';
-import type { GetSayongjasRequest, SayongjaDetail } from '@/domain/sayongja/api';
+import type { GetSayongjasRequest, SayongjaListItem } from '@/domain/sayongja/api';
 import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/domain/gigwan/api';
 
 import {
@@ -25,7 +25,7 @@ export type SayongjaListViewHookParams = {
   isAuthenticated: boolean;
 };
 
-export type ListSectionState = ListViewState<SayongjaDetail>;
+export type ListSectionState = ListViewState<SayongjaListItem>;
 
 export type SayongjaFilters = {
   jojikNanoId: string;
@@ -42,14 +42,14 @@ export type SayongjaListSectionHandlers = {
   onWorkTypeFilterChange: (value: string) => void;
   onIsHwalseongFilterChange: (value: string) => void;
   onPageSizeChange: (size: number) => void;
-  onSelectedSayongjasChange: (sayongjas: SayongjaDetail[]) => void;
+  onSelectedSayongjasChange: (sayongjas: SayongjaListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
 };
 
 export type SayongjaListSectionProps = {
-  data: SayongjaDetail[];
-  columns: ColumnDef<SayongjaDetail, unknown>[];
+  data: SayongjaListItem[];
+  columns: ColumnDef<SayongjaListItem, unknown>[];
   state: ListSectionState;
   isListLoading: boolean;
   pagination: ListSectionState['pagination'];
@@ -64,7 +64,7 @@ export type SayongjaListSectionProps = {
 
 export type SayongjaSettingsSectionProps = {
   gigwanNanoId: string;
-  selectedSayongjas: SayongjaDetail[];
+  selectedSayongjas: SayongjaListItem[];
   isCreating: boolean;
   onStartCreate: () => void;
   onExitCreate: () => void;
@@ -89,7 +89,7 @@ export function useSayongjaListViewSections({
   isAuthenticated,
 }: SayongjaListViewHookParams): UseSayongjaListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
-  const baseState = useListViewState<SayongjaDetail>({
+  const baseState = useListViewState<SayongjaListItem>({
     initialSorting: [{ id: 'employedAt', desc: true }],
     initialPagination: { pageIndex: 0, pageSize: 10 },
   });
@@ -129,12 +129,14 @@ export function useSayongjaListViewSections({
   const employmentCategoryOptions = useMemo(
     () => [
       { label: '전체 재직 상태', value: 'all' },
-      ...(employmentCategoriesData?.sangtaes.map((item) => ({
-        label: item.name,
-        value: item.nanoId,
-      })) ?? []),
+      ...(employmentCategoriesData?.categories.flatMap((category) =>
+        category.sangtaes.map((item) => ({
+          label: item.name,
+          value: item.nanoId,
+        })),
+      ) ?? []),
     ],
-    [employmentCategoriesData?.sangtaes],
+    [employmentCategoriesData?.categories],
   );
 
   const { data: workTypeData } = useWorkTypeCustomSangtaesQuery(gigwanNanoId, {
@@ -186,10 +188,10 @@ export function useSayongjaListViewSections({
       }),
     ],
     [],
-  ) as ColumnDef<SayongjaDetail, unknown>[];
+  ) as ColumnDef<SayongjaListItem, unknown>[];
 
   const [isCreating, setIsCreating] = useState(false);
-  const [selectedSayongjas, setSelectedSayongjas] = useState<SayongjaDetail[]>([]);
+  const [selectedSayongjas, setSelectedSayongjas] = useState<SayongjaListItem[]>([]);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);

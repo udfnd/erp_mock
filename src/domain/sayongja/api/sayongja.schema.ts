@@ -31,6 +31,8 @@ export const SayongjaListItemSchema = z.object({
   employedAt: z.string(),
   isHwalseong: z.boolean(),
 });
+export type SayongjaListItem = z.infer<typeof SayongjaListItemSchema>;
+
 export const PaginationDataSchema = z
   .object({
     hasNextPage: z.boolean(),
