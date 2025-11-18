@@ -2,7 +2,7 @@
 
 import { type FormEvent, useMemo, useState } from 'react';
 
-import { Button, Modal, Textfield } from '@/common/components';
+import { Button, Textfield } from '@/common/components';
 import {
   useCreateOebuLinkMutation,
   useDeleteOebuLinkMutation,
@@ -181,7 +181,6 @@ function SingleSelectionPanel({
   const [titleNameInput, setTitleNameInput] = useState<string | null>(null);
   const [linkUrlInput, setLinkUrlInput] = useState<string | null>(null);
   const [linkIconInput, setLinkIconInput] = useState<string | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const originalName = detailData?.name ?? '';
   const originalTitleName = detailData?.titleName ?? '';
@@ -224,7 +223,6 @@ function SingleSelectionPanel({
 
   const handleDelete = async () => {
     await deleteMutation.mutateAsync();
-    setIsDeleteModalOpen(false);
     onAfterMutation();
   };
 
@@ -279,22 +277,13 @@ function SingleSelectionPanel({
           <Button
             type="button"
             css={oebuLinkListViewCss.destructiveButton}
-            onClick={() => setIsDeleteModalOpen(true)}
+            onClick={handleDelete}
             disabled={isDeleting}
           >
             삭제
           </Button>
         </div>
       </form>
-      <Modal
-        isOpen={isDeleteModalOpen}
-        title="외부 링크 삭제"
-        description="선택한 외부 링크를 삭제하시겠습니까?"
-        onConfirm={handleDelete}
-        onClose={() => setIsDeleteModalOpen(false)}
-        confirmButtonText="삭제"
-        isConfirming={isDeleting}
-      />
     </>
   );
 }

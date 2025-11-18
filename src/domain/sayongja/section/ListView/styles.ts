@@ -281,4 +281,28 @@ export const sayongjaListViewCss = {
     font-size: 14px;
     color: ${color.cgrey700};
   `,
+  permissionActionContainer: css`
+    position: relative;
+    align-items: center;
+  `,
+  permissionTooltip: css`
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 0;
+    width: 280px;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey100};
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 5;
+  `,
+  permissionTooltipActions: css`
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  `,
 };

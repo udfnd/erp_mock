@@ -76,8 +76,8 @@ export const permissionListViewCss = {
   `,
   addUserPopup: css`
     position: absolute;
-    right: 0;
-    top: 44px;
+    right: calc(100% + 12px);
+    top: 0;
     width: 320px;
     background: #fff;
     border: 1px solid #e5e7eb;
