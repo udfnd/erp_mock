@@ -196,18 +196,36 @@ function SinglePermissionPanel({
                 <div css={permissionListViewCss.listBox}>
                   {availableSayongjas.map((sayongja) => {
                     const isChecked = addUserSelection.has(sayongja.nanoId);
+                    const toggle = () => toggleSayongjaSelection(sayongja.nanoId);
+
                     return (
-                      <label key={sayongja.nanoId} css={permissionListViewCss.listRow}>
+                      <div
+                        key={sayongja.nanoId}
+                        css={permissionListViewCss.listRow}
+                        role="button"
+                        tabIndex={0}
+                        onClick={toggle}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            toggle();
+                          }
+                        }}
+                      >
                         <Checkbox
                           checked={isChecked}
-                          onChange={() => toggleSayongjaSelection(sayongja.nanoId)}
+                          onChange={(event) => {
+                            event.stopPropagation();
+                            toggle();
+                          }}
+                          onClick={(event) => event.stopPropagation()}
                           ariaLabel={`${sayongja.name} 선택`}
                         />
                         <span>
                           {sayongja.name}
                           {sayongja.employedAt ? ` · ${sayongja.employedAt}` : ''}
                         </span>
-                      </label>
+                      </div>
                     );
                   })}
                   {availableSayongjas.length === 0 ? (

@@ -67,6 +67,10 @@ export const permissionListViewCss = {
   listRow: css`
     padding: 6px 8px;
     border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
     &:hover {
       background: #f9fafb;
     }
