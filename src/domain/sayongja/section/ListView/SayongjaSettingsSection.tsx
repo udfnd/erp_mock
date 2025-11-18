@@ -553,7 +553,7 @@ function SingleSelectionPanelContent({
                   )}
                   <div css={sayongjaListViewCss.permissionTooltipActions}>
                     <Button
-                      styleType="ghost"
+                      styleType="solid"
                       variant="secondary"
                       size="small"
                       onClick={() => {
