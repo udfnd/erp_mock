@@ -60,7 +60,7 @@ export const getGigwan = async (nanoId: string): Promise<GigwanGet> => {
 };
 
 export const useGigwanQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useAuthedQuery<GigwanGet, unknown, GigwanGet, ReturnType<typeof gigwanQueryKeys.detail>>({
+  useAuthedQuery<GigwanGet, unknown, ReturnType<typeof gigwanQueryKeys.detail>>({
     queryKey: gigwanQueryKeys.detail(nanoId),
     queryFn: () => getGigwan(nanoId),
     enabled: options?.enabled ?? true,

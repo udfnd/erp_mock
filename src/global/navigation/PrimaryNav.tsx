@@ -118,7 +118,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     enabled: Boolean(accessToken),
   });
 
-  const gigwanDisplayName = gigwanNameData?.name ?? authState.gigwanName ?? '기관';
+  const gigwanDisplayName = gigwanNameData?.name ?? '기관';
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 960px) and (max-width: 1279px)');
