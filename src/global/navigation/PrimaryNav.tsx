@@ -13,6 +13,7 @@ import { useAuth, useAuthStore, switchUser } from '@/global/auth';
 
 import * as styles from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
+import MyProfileModal from './MyProfileModal';
 
 import type { AuthHistoryEntry } from '@/global/auth';
 
@@ -77,6 +78,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const [isOpen, setIsOpen] = useState(true);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const storedProfileKeyRef = useRef<string | null>(null);
 
   const { state: authState, accessToken, setAuthState, clearAll } = useAuth();
@@ -399,13 +401,9 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   );
 
   const handleAddUser = useCallback(() => {
-    if (!gigwanNanoId) {
-      window.alert('기관 정보가 없어 사용자를 추가할 수 없습니다.');
-      return;
-    }
-    router.push(`/td/np/gis/${gigwanNanoId}/sayongjas/home/lv`);
+    setIsProfileModalOpen(true);
     setIsProfileMenuOpen(false);
-  }, [gigwanNanoId, router]);
+  }, []);
 
   const handleLogout = useCallback(() => {
     try {
@@ -541,6 +539,13 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
           )}
         </div>
       </div>
+      <MyProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        sayongjaNanoId={myProfileData?.nanoId ?? null}
+        gigwanNanoId={gigwanNanoId}
+        userName={myProfileData?.name ?? ''}
+      />
     </aside>
   );
 };
