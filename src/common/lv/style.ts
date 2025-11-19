@@ -105,13 +105,6 @@ export const cssObj = {
     ${typography.bodySmallR};
   `,
 
-  filterRow: css`
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  `,
-
   selectLabel: css`
     display: inline-flex;
     flex-direction: column;
@@ -162,6 +155,25 @@ export const cssObj = {
     background: ${color.white};
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 10;
+  `,
+
+  filterGroup: (hasDivider: boolean) => css`
+    padding: 8px 0;
+    ${hasDivider ? `border-top: 1px solid ${color.cgrey100};` : ''};
+  `,
+
+  filterGroupHeader: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px 4px;
+    color: ${color.cgrey500};
+    ${typography.captionB};
+  `,
+
+  filterGroupValue: css`
+    color: ${color.cgrey600};
+    ${typography.captionB};
   `,
 
   filterOption: css`

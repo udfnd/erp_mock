@@ -144,7 +144,7 @@ export function Template<TData>({
 
   const [paginationViewMode, setPaginationViewMode] = useState<'segment' | 'centered'>('segment');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
-  const [openFilterKey, setOpenFilterKey] = useState<string | null>(null);
+  const [isFiltersDropdownOpen, setIsFiltersDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(search?.value ?? '');
   const [hasSearched, setHasSearched] = useState(Boolean(search?.value?.trim()));
@@ -153,7 +153,7 @@ export function Template<TData>({
   const searchOnChange = search?.onChange;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const sortDropdownRef = useRef<HTMLDivElement | null>(null);
-  const filterDropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const filtersDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setSearchInputValue(searchValue);
@@ -330,13 +330,13 @@ export function Template<TData>({
   };
 
   useEffect(() => {
-    if (openFilterKey && !filters.some((filter) => filter.key === openFilterKey)) {
-      setOpenFilterKey(null);
+    if (!filters.length && isFiltersDropdownOpen) {
+      setIsFiltersDropdownOpen(false);
     }
-  }, [filters, openFilterKey]);
+  }, [filters, isFiltersDropdownOpen]);
 
   useEffect(() => {
-    if (!isSortDropdownOpen && !openFilterKey) {
+    if (!isSortDropdownOpen && !isFiltersDropdownOpen) {
       return undefined;
     }
 
@@ -352,11 +352,12 @@ export function Template<TData>({
         setIsSortDropdownOpen(false);
       }
 
-      if (openFilterKey) {
-        const filterDropdown = filterDropdownRefs.current[openFilterKey];
-        if (filterDropdown && !filterDropdown.contains(target)) {
-          setOpenFilterKey(null);
-        }
+      if (
+        isFiltersDropdownOpen &&
+        filtersDropdownRef.current &&
+        !filtersDropdownRef.current.contains(target)
+      ) {
+        setIsFiltersDropdownOpen(false);
       }
     };
 
@@ -365,7 +366,7 @@ export function Template<TData>({
     return () => {
       document.removeEventListener('mousedown', handleDocumentClick);
     };
-  }, [isSortDropdownOpen, openFilterKey]);
+  }, [isSortDropdownOpen, isFiltersDropdownOpen]);
 
   const totalCount = totalCountProp ?? table.getPrePaginationRowModel().rows.length;
   const pageIndex = table.getState().pagination.pageIndex;
@@ -376,6 +377,9 @@ export function Template<TData>({
   const visibleColumnsLength = table.getVisibleFlatColumns().length || 1;
 
   const hasToolbar = Boolean(search || filters.length > 0 || sort || toolbarActionsNode);
+  const activeFiltersCount = filters.filter((filter) => filter.value !== '').length;
+  const filtersDisplayLabel =
+    activeFiltersCount > 0 ? `필터 (${activeFiltersCount})` : '필터 선택';
 
   const shouldIgnoreRowClick =
     rowEventHandlers?.shouldIgnoreRowClick ??
@@ -565,6 +569,79 @@ export function Template<TData>({
                   )}
                 </div>
               )}
+              {filters.length > 0 && (
+                <div css={cssObj.filterDropdown} ref={filtersDropdownRef}>
+                  <button
+                    type="button"
+                    css={cssObj.filterTrigger(isFiltersDropdownOpen)}
+                    onClick={() => setIsFiltersDropdownOpen((prev) => !prev)}
+                  >
+                    <span>{filtersDisplayLabel}</span>
+                    <ArrowLgDown />
+                  </button>
+
+                  {isFiltersDropdownOpen && (
+                    <div css={cssObj.filterMenu}>
+                      {filters.map((filter, index) => {
+                        const selectedOption = filter.options.find(
+                          (option) => option.value === filter.value,
+                        );
+                        const groupLabel = filter.label ?? filter.placeholder ?? '필터';
+                        const groupValue =
+                          selectedOption?.label ?? (filter.value === '' ? filter.placeholder : '');
+
+                        return (
+                          <div key={filter.key} css={cssObj.filterGroup(index > 0)}>
+                            <div css={cssObj.filterGroupHeader}>
+                              <span>{groupLabel}</span>
+                              {groupValue && <span css={cssObj.filterGroupValue}>{groupValue}</span>}
+                            </div>
+
+                            {filter.placeholder && (
+                              <button
+                                type="button"
+                                css={[
+                                  cssObj.filterOption,
+                                  filter.value === '' && cssObj.filterOptionActive,
+                                ]}
+                                onClick={() => {
+                                  filter.onChange('');
+                                  setIsFiltersDropdownOpen(false);
+                                }}
+                              >
+                                <span css={cssObj.filterOptionContent}>
+                                  {getFilterOptionIcon(filter, '')}
+                                  <span>{filter.placeholder}</span>
+                                </span>
+                              </button>
+                            )}
+
+                            {filter.options.map((option) => {
+                              const isActive = option.value === filter.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
+                                  onClick={() => {
+                                    filter.onChange(option.value);
+                                    setIsFiltersDropdownOpen(false);
+                                  }}
+                                >
+                                  <span css={cssObj.filterOptionContent}>
+                                    {getFilterOptionIcon(filter, option.value)}
+                                    <span>{option.label}</span>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
               {toolbarActionsNode}
               <button type="button" css={cssObj.viewChangeButton}>
                 <TableChart />
@@ -573,88 +650,6 @@ export function Template<TData>({
             </div>
           </div>
 
-          {filters.length > 0 && (
-            <div css={cssObj.filterRow}>
-              {filters.map((filter) => {
-                const selectedOption = filter.options.find(
-                  (option) => option.value === filter.value,
-                );
-                const filterDisplayLabel =
-                  selectedOption?.label ??
-                  filter.placeholder ??
-                  filter.label ??
-                  '필터';
-                const isDropdownOpen = openFilterKey === filter.key;
-                return (
-                  <div
-                    key={filter.key}
-                    css={cssObj.filterDropdown}
-                    ref={(element) => {
-                      if (element) {
-                        filterDropdownRefs.current[filter.key] = element;
-                      } else {
-                        delete filterDropdownRefs.current[filter.key];
-                      }
-                    }}
-                  >
-                    <button
-                      type="button"
-                      css={cssObj.filterTrigger(isDropdownOpen)}
-                      onClick={() =>
-                        setOpenFilterKey((prev) => (prev === filter.key ? null : filter.key))
-                      }
-                    >
-                      <span>{filterDisplayLabel}</span>
-                      <ArrowLgDown />
-                    </button>
-
-                    {isDropdownOpen && (
-                      <div css={cssObj.filterMenu}>
-                        {filter.placeholder && (
-                          <button
-                            type="button"
-                            css={[
-                              cssObj.filterOption,
-                              filter.value === '' && cssObj.filterOptionActive,
-                            ]}
-                            onClick={() => {
-                              filter.onChange('');
-                              setOpenFilterKey(null);
-                            }}
-                          >
-                            <span css={cssObj.filterOptionContent}>
-                              {getFilterOptionIcon(filter, '')}
-                              <span>{filter.placeholder}</span>
-                            </span>
-                          </button>
-                        )}
-
-                        {filter.options.map((option) => {
-                          const isActive = option.value === filter.value;
-                          return (
-                            <button
-                              key={option.value}
-                              type="button"
-                              css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
-                              onClick={() => {
-                                filter.onChange(option.value);
-                                setOpenFilterKey(null);
-                              }}
-                            >
-                              <span css={cssObj.filterOptionContent}>
-                                {getFilterOptionIcon(filter, option.value)}
-                                <span>{option.label}</span>
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       )}
 
