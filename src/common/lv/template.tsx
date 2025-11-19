@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   type ColumnDef,
   type OnChangeFn,
@@ -18,7 +18,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import type { MouseEvent, ReactNode } from 'react';
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { Checkbox, type ButtonProps } from '@/common/components';
 import {
@@ -28,6 +28,7 @@ import {
   ArrowMdRightSingle,
   Plus,
   Search,
+  Close,
   RadioCheckedActive,
   RadioCheckedDisabled,
   RadioUncheckedActive,
@@ -143,25 +144,53 @@ export function Template<TData>({
 
   const [paginationViewMode, setPaginationViewMode] = useState<'segment' | 'centered'>('segment');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(search?.value ?? '');
+  const [hasSearched, setHasSearched] = useState(Boolean(search?.value?.trim()));
+  const [lastSearchedValue, setLastSearchedValue] = useState(search?.value ?? '');
   const searchValue = search?.value ?? '';
   const searchOnChange = search?.onChange;
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setSearchInputValue(searchValue);
+    setHasSearched(Boolean(searchValue.trim()));
+    setLastSearchedValue(searchValue);
   }, [searchValue]);
 
-  useEffect(() => {
-    if (!searchOnChange) return;
+  const blurSearchInput = () => {
+    setIsSearchFocused(false);
+    searchInputRef.current?.blur();
+  };
 
-    const handler = setTimeout(() => {
-      if (searchInputValue !== searchValue) {
-        searchOnChange(searchInputValue);
-      }
-    }, 400);
+  const handleSearchSubmit = () => {
+    const trimmed = searchInputValue.trim();
+    if (!trimmed || !searchOnChange) return;
 
-    return () => clearTimeout(handler);
-  }, [searchInputValue, searchOnChange, searchValue]);
+    searchOnChange(trimmed);
+    setHasSearched(true);
+    setLastSearchedValue(trimmed);
+    blurSearchInput();
+  };
+
+  const handleClearSearch = () => {
+    setSearchInputValue('');
+    setLastSearchedValue('');
+    setHasSearched(false);
+    searchOnChange?.('');
+    blurSearchInput();
+  };
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSearchSubmit();
+    }
+  };
+
+  const handleDimClick = () => {
+    blurSearchInput();
+  };
 
   let primaryActionLabel: ReactNode | undefined;
   let primaryActionProps: Omit<ListViewTemplatePrimaryAction, 'label'> | undefined;
@@ -371,20 +400,61 @@ export function Template<TData>({
     handleGoToPage(targetPage, 'centered');
   };
 
+  const hasRows = table.getRowModel().rows.length > 0;
+  const hasAppliedSearch = hasSearched && Boolean(lastSearchedValue.trim());
+  const shouldShowSearchAction = isSearchFocused;
+  const isSearchButtonDisabled = searchInputValue.trim() === '';
+  const searchResultCount = totalCount;
+
   return (
     <section css={cssObj.container}>
       {hasToolbar && (
         <div css={cssObj.toolbar}>
           <div css={cssObj.toolbarTopRow}>
             {search && (
-              <div css={cssObj.searchBox}>
-                <Search css={cssObj.searchIcon} />
+              <div
+                css={cssObj.searchBox(isSearchFocused, shouldShowSearchAction)}
+                onFocusCapture={() => setIsSearchFocused(true)}
+                onBlurCapture={(event) => {
+                  const relatedTarget = event.relatedTarget as Node | null;
+                  if (!relatedTarget || !event.currentTarget.contains(relatedTarget)) {
+                    setIsSearchFocused(false);
+                  }
+                }}
+              >
+                {!isSearchFocused &&
+                  (hasAppliedSearch ? (
+                    <button
+                      type="button"
+                      css={cssObj.searchClearButton}
+                      onClick={handleClearSearch}
+                      aria-label="검색어 지우기"
+                    >
+                      <Close />
+                    </button>
+                  ) : (
+                    <Search css={cssObj.searchIcon} />
+                  ))}
                 <input
-                  css={cssObj.searchInput}
+                  ref={searchInputRef}
+                  css={cssObj.searchInput(!isSearchFocused)}
                   value={searchInputValue}
                   placeholder={search.placeholder ?? '검색어를 입력하세요'}
                   onChange={(event) => setSearchInputValue(event.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                 />
+                {shouldShowSearchAction && (
+                  <button
+                    type="button"
+                    css={cssObj.searchActionButton(isSearchButtonDisabled)}
+                    disabled={isSearchButtonDisabled}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={handleSearchSubmit}
+                    aria-label="검색"
+                  >
+                    <Search />
+                  </button>
+                )}
               </div>
             )}
             <div css={cssObj.toolbarControls}>
@@ -474,125 +544,144 @@ export function Template<TData>({
         </div>
       )}
 
+      {hasAppliedSearch && (
+        <div css={cssObj.searchResultSummary}>
+          ‘{lastSearchedValue}’ 검색 결과입니다 ({searchResultCount}개)
+        </div>
+      )}
+
       <div css={cssObj.tableContainer}>
-        <div css={cssObj.tableWrapper}>
-          <table css={cssObj.table}>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
-                  {headerGroup.headers.map((header) => (
-                    <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
-                    {loadingMessage}
-                  </td>
-                </tr>
-              ) : table.getRowModel().rows.length > 0 ? (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
-                    onClick={(event) => {
-                      if (shouldIgnoreRowClick(event)) {
-                        return;
-                      }
-
-                      if (rowEventHandlers?.selectOnClick) {
-                        row.toggleSelected();
-                      }
-
-                      rowEventHandlers?.onClick?.({ row, event, table });
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} css={cssObj.tableCell}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
+        <div css={cssObj.tableWrapperContainer}>
+          <div css={cssObj.tableWrapper}>
+            <table css={cssObj.table}>
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
+                    {headerGroup.headers.map((header) => (
+                      <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
                     ))}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
-                    {emptyMessage}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
+                      {loadingMessage}
+                    </td>
+                  </tr>
+                ) : hasRows ? (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
+                      onClick={(event) => {
+                        if (shouldIgnoreRowClick(event)) {
+                          return;
+                        }
+
+                        if (rowEventHandlers?.selectOnClick) {
+                          row.toggleSelected();
+                        }
+
+                        rowEventHandlers?.onClick?.({ row, event, table });
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} css={cssObj.tableCell}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
+                      {emptyMessage}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {isSearchFocused && (
+            <button
+              type="button"
+              css={cssObj.tableDimmer}
+              aria-label="검색창 닫기"
+              onClick={handleDimClick}
+            />
+          )}
         </div>
 
-        <footer css={cssObj.footer}>
-          <div css={cssObj.paginationControls}>
-            <button
-              type="button"
-              css={cssObj.paginationArrowButton}
-              disabled={!canUseDoubleArrows || !canGoPrev}
-              onClick={() => handleGoToPage(1, 'segment')}
-            >
-              <ArrowMdLeftDouble />
-            </button>
-            <button
-              type="button"
-              css={cssObj.paginationArrowButton}
-              disabled={!canGoPrev}
-              onClick={() => handleGoToPage(currentPage - 1, 'segment')}
-            >
-              <ArrowMdLeftSingle />
-            </button>
+        {hasRows && (
+          <footer css={cssObj.footer}>
+            <div css={cssObj.paginationControls}>
+              <button
+                type="button"
+                css={cssObj.paginationArrowButton}
+                disabled={!canUseDoubleArrows || !canGoPrev}
+                onClick={() => handleGoToPage(1, 'segment')}
+              >
+                <ArrowMdLeftDouble />
+              </button>
+              <button
+                type="button"
+                css={cssObj.paginationArrowButton}
+                disabled={!canGoPrev}
+                onClick={() => handleGoToPage(currentPage - 1, 'segment')}
+              >
+                <ArrowMdLeftSingle />
+              </button>
 
-            <div css={cssObj.paginationPageList}>
-              {pageNumbers.map((page) => {
-                const isActive = page === currentPage;
-                return (
-                  <button
-                    key={page}
-                    type="button"
-                    css={[
-                      cssObj.paginationPageButton,
-                      isActive && cssObj.paginationPageButtonActive,
-                    ]}
-                    onClick={() => handleGoToPage(page, 'segment')}
-                  >
-                    {page}
+              <div css={cssObj.paginationPageList}>
+                {pageNumbers.map((page) => {
+                  const isActive = page === currentPage;
+                  return (
+                    <button
+                      key={page}
+                      type="button"
+                      css={[
+                        cssObj.paginationPageButton,
+                        isActive && cssObj.paginationPageButtonActive,
+                      ]}
+                      onClick={() => handleGoToPage(page, 'segment')}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+
+                {hasRightMore && (
+                  <button type="button" css={cssObj.paginationMoreButton} onClick={handleClickMore}>
+                    …
                   </button>
-                );
-              })}
-
-              {hasRightMore && (
-                <button type="button" css={cssObj.paginationMoreButton} onClick={handleClickMore}>
-                  …
-                </button>
-              )}
+                )}
+              </div>
+              <button
+                type="button"
+                css={cssObj.paginationArrowButton}
+                disabled={!canGoNext}
+                onClick={() => handleGoToPage(currentPage + 1, 'segment')}
+              >
+                <ArrowMdRightSingle />
+              </button>
+              <button
+                type="button"
+                css={cssObj.paginationArrowButton}
+                disabled={!canUseDoubleArrows || !canGoNext}
+                onClick={() => handleGoToPage(totalPages, 'segment')}
+              >
+                <ArrowMdRightDouble />
+              </button>
             </div>
-            <button
-              type="button"
-              css={cssObj.paginationArrowButton}
-              disabled={!canGoNext}
-              onClick={() => handleGoToPage(currentPage + 1, 'segment')}
-            >
-              <ArrowMdRightSingle />
-            </button>
-            <button
-              type="button"
-              css={cssObj.paginationArrowButton}
-              disabled={!canUseDoubleArrows || !canGoNext}
-              onClick={() => handleGoToPage(totalPages, 'segment')}
-            >
-              <ArrowMdRightDouble />
-            </button>
-          </div>
-        </footer>
+          </footer>
+        )}
       </div>
     </section>
   );

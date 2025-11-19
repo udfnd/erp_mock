@@ -32,32 +32,68 @@ export const cssObj = {
     align-items: center;
     gap: 12px;
   `,
-  searchBox: css`
+  searchBox: (isFocused: boolean, hasAction: boolean) => css`
     flex: 1 1 auto;
     min-width: 240px;
     display: flex;
     align-items: center;
     position: relative;
+    padding-right: ${hasAction ? 38 : 0}px;
     ${typography.bodySmallR};
+    ${isFocused ? `outline: 1px solid ${color.blue};` : ''};
+    border-radius: 10px;
   `,
   searchIcon: css`
     position: absolute;
     left: 12px;
     color: ${color.cgrey400};
   `,
-  searchInput: css`
+  searchClearButton: css`
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: ${color.cgrey400};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  `,
+  searchInput: (hasLeftIcon: boolean) => css`
     width: 100%;
     height: 32px;
-    padding: 0 12px 0 30px;
+    padding: 0 12px 0 ${hasLeftIcon ? 30 : 12}px;
     border-radius: 10px;
     border: 1px solid ${color.cgrey200};
     background: ${color.white};
     font-size: 14px;
     color: ${color.cgrey700};
     &:focus {
-      outline: 1px solid ${color.blue};
-      border-color: transparent;
+      outline: none;
+      border-color: ${color.blue};
+      box-shadow: 0 0 0 1px ${color.blue};
     }
+  `,
+  searchActionButton: (isDisabled: boolean) => css`
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid ${color.blue};
+    background: ${color.blue};
+    color: ${color.white};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+    opacity: ${isDisabled ? 0.5 : 1};
   `,
   toolbarControls: css`
     display: flex;
@@ -65,6 +101,12 @@ export const cssObj = {
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
+  `,
+
+  searchResultSummary: css`
+    margin: 4px 0 8px;
+    color: ${color.cgrey600};
+    ${typography.bodySmallR};
   `,
 
   filterRow: css`
@@ -174,8 +216,14 @@ export const cssObj = {
     max-height: 100%;
     background: ${color.white};
   `,
-  tableWrapper: css`
+  tableWrapperContainer: css`
+    position: relative;
     flex: 1;
+    min-height: 0;
+    background: ${color.white};
+  `,
+  tableWrapper: css`
+    height: 100%;
     min-height: 0;
     overflow: auto;
     background: ${color.white};
@@ -185,6 +233,14 @@ export const cssObj = {
     border-collapse: separate;
     border-spacing: 0;
     background: ${color.white};
+  `,
+  tableDimmer: css`
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    padding: 0;
+    cursor: pointer;
   `,
   tableHeadRow: css`
     background: ${color.white};
