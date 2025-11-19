@@ -124,7 +124,9 @@ export function OebuLinkListSection({
       pageSizeOptions={pageSizeOptions}
       onPageSizeChange={handlers.onPageSizeChange}
       onSelectedRowsChange={(rows: Row<OebuLinkListItem>[]) => {
-        handlers.onStopCreate();
+        if (rows.length > 0) {
+          handlers.onStopCreate();
+        }
         handlers.onSelectedLinksChange(rows.map((row) => row.original));
       }}
       rowEventHandlers={rowEventHandlers}

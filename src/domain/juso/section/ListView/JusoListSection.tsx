@@ -73,7 +73,9 @@ export function JusoListSection({
       pageSizeOptions={pageSizeOptions}
       onPageSizeChange={handlers.onPageSizeChange}
       onSelectedRowsChange={(rows: Row<JusoListItem>[]) => {
-        handlers.onStopCreate();
+        if (rows.length > 0) {
+          handlers.onStopCreate();
+        }
         handlers.onSelectedJusosChange(rows.map((row) => row.original));
       }}
       rowEventHandlers={rowEventHandlers}

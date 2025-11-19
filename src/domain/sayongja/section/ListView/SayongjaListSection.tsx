@@ -123,7 +123,9 @@ export function SayongjaListSection({
       pageSizeOptions={pageSizeOptions}
       onPageSizeChange={handlers.onPageSizeChange}
       onSelectedRowsChange={(rows: Row<SayongjaListItem>[]) => {
-        handlers.onStopCreate();
+        if (rows.length > 0) {
+          handlers.onStopCreate();
+        }
         handlers.onSelectedSayongjasChange(rows.map((row) => row.original));
       }}
       rowEventHandlers={rowEventHandlers}

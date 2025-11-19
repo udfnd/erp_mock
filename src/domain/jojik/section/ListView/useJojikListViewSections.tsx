@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
@@ -8,7 +8,6 @@ import { ListViewState, useListViewState } from '@/common/lv';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
 import {
-  CREATED_AT_FILTER_OPTIONS,
   CREATED_AT_FILTER_NOW,
   PAGE_SIZE_OPTIONS,
   SORT_OPTIONS,
@@ -57,7 +56,6 @@ export type JojikListSectionProps = {
 export type JojikSettingsSectionProps = {
   gigwanNanoId: string;
   selectedJojiks: JojikListItem[];
-  setIsCreating: Dispatch<SetStateAction<boolean>>;
   isCreating: boolean;
   onStartCreate: () => void;
   onExitCreate: () => void;
@@ -68,7 +66,6 @@ export type JojikSettingsSectionProps = {
 export type UseJojikListViewSectionsResult = {
   listSectionProps: JojikListSectionProps;
   settingsSectionProps: JojikSettingsSectionProps;
-  createdAtFilterOptions: typeof CREATED_AT_FILTER_OPTIONS;
   sortOptions: typeof SORT_OPTIONS;
   pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
 };
@@ -240,7 +237,6 @@ export function useJojikListViewSections({
     gigwanNanoId,
     selectedJojiks,
     isCreating,
-    setIsCreating,
     onStartCreate: startCreate,
     onExitCreate: stopCreate,
     onAfterMutation: handleAfterMutation,
@@ -250,7 +246,6 @@ export function useJojikListViewSections({
   return {
     listSectionProps,
     settingsSectionProps,
-    createdAtFilterOptions: CREATED_AT_FILTER_OPTIONS,
     sortOptions: SORT_OPTIONS,
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   };

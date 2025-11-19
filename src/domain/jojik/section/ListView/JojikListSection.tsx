@@ -7,10 +7,7 @@ import { Template, type ListViewTemplateRowEventHandlers } from '@/common/lv';
 import type { JojikListItem } from '@/domain/jojik/api';
 import type { JojikListSectionProps } from '@/domain/jojik/section';
 
-import type { CreatedAtFilterValue } from './constants';
-
 export type JojikListSectionComponentProps = JojikListSectionProps & {
-  createdAtFilterOptions: { label: string; value: CreatedAtFilterValue }[];
   sortOptions: { label: string; value: string }[];
   pageSizeOptions: number[];
 };
@@ -35,10 +32,8 @@ export function JojikListSection({
   totalPages,
   searchTerm,
   sortByOption,
-  currentCreatedFilter,
   handlers,
   sortOptions,
-  createdAtFilterOptions,
   pageSizeOptions,
 }: JojikListSectionComponentProps) {
   const rowEventHandlers = useMemo(() => createRowEventHandlers(handlers), [handlers]);
@@ -65,15 +60,6 @@ export function JojikListSection({
         onChange: handlers.onSearchChange,
         placeholder: '조직 이름을 검색해주세요.',
       }}
-      filters={[
-        {
-          key: 'createdAt',
-          label: '생성일 필터',
-          value: currentCreatedFilter,
-          options: createdAtFilterOptions,
-          onChange: (value) => handlers.onCreatedFilterChange(value as CreatedAtFilterValue),
-        },
-      ]}
       sort={{
         label: '정렬 기준',
         value: sortValue,
@@ -87,7 +73,9 @@ export function JojikListSection({
       pageSizeOptions={pageSizeOptions}
       onPageSizeChange={handlers.onPageSizeChange}
       onSelectedRowsChange={(rows: Row<JojikListItem>[]) => {
-        handlers.onStopCreate();
+        if (rows.length > 0) {
+          handlers.onStopCreate();
+        }
         handlers.onSelectedJojiksChange(rows.map((row) => row.original));
       }}
       rowEventHandlers={rowEventHandlers}

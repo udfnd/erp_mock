@@ -99,7 +99,6 @@ export const cssObj = {
     align-items: center;
     justify-content: space-between;
     gap: 4px;
-    min-width: 120px;
     height: 32px;
     padding: 0 12px;
     border-radius: 8px;
@@ -150,6 +149,21 @@ export const cssObj = {
     display: flex;
     align-items: center;
     gap: 4px;
+  `,
+
+  viewChangeButton: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid ${color.cgrey50};
+    background: ${color.cgrey50};
+    color: ${color.cgrey500};
+    ${typography.captionB};
+    cursor: pointer;
   `,
 
   tableContainer: css`

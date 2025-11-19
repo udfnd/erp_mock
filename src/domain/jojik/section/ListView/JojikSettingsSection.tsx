@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -16,8 +16,8 @@ import type { JojikSettingsSectionProps } from './useJojikListViewSections';
 export function JojikSettingsSection({
   gigwanNanoId,
   selectedJojiks,
-  setIsCreating,
   isCreating,
+  onStartCreate,
   onExitCreate,
   onAfterMutation,
   isAuthenticated,
@@ -57,14 +57,7 @@ export function JojikSettingsSection({
         <div css={cssObj.panelBody}>
           <span css={cssObj.panelSubtitle}>빠른 액션</span>
           <div>
-            <Button
-              variant="secondary"
-              size="medium"
-              iconLeft={<Magic />}
-              onClick={() => {
-                setIsCreating(true);
-              }}
-            >
+            <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
               조직 생성 마법사
             </Button>
           </div>
@@ -128,7 +121,6 @@ function CreateJojikPanel({ gigwanNanoId, onExit, onAfterMutation }: CreateJojik
         <div css={cssObj.panelSection}>
           <Textfield
             singleLine
-            required
             label="조직명"
             placeholder="조직명을 입력하세요"
             value={name}
@@ -279,7 +271,6 @@ function SingleSelectionPanelContent({
         <form css={cssObj.panelSection} onSubmit={handleSubmitName}>
           <Textfield
             singleLine
-            required
             label="조직명"
             value={name}
             onValueChange={setName}
@@ -352,8 +343,6 @@ type MultiSelectionPanelProps = {
 };
 
 function MultiSelectionPanel({ jojiks }: MultiSelectionPanelProps) {
-  const displayList = useMemo(() => jojiks.slice(0, 6), [jojiks]);
-
   return (
     <>
       <div css={cssObj.panelHeader}>

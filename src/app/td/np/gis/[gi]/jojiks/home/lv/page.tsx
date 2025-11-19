@@ -19,17 +19,11 @@ export default function NpGigwanJojikListViewPage() {
   const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
   const { isAuthenticated } = useAuth();
 
-  const {
-    listSectionProps,
-    settingsSectionProps,
-    createdAtFilterOptions,
-    sortOptions,
-    pageSizeOptions,
-  } = useJojikListViewSections({ gigwanNanoId, isAuthenticated });
+  const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions } =
+    useJojikListViewSections({ gigwanNanoId, isAuthenticated });
 
   const listSectionAllProps = {
     ...listSectionProps,
-    createdAtFilterOptions,
     sortOptions,
     pageSizeOptions,
   };

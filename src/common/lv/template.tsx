@@ -32,6 +32,8 @@ import {
   RadioCheckedDisabled,
   RadioUncheckedActive,
   RadioUncheckedDisabled,
+  TableChart,
+  ArrowLgDown,
 } from '@/common/icons';
 
 import { cssObj } from './style';
@@ -394,7 +396,7 @@ export function Template<TData>({
                     onClick={() => setIsSortDropdownOpen((prev) => !prev)}
                   >
                     <span>{sortDisplayLabel}</span>
-                    <span css={cssObj.filterTriggerCaret}>▾</span>
+                    <ArrowLgDown />
                   </button>
 
                   {isSortDropdownOpen && (
@@ -442,6 +444,10 @@ export function Template<TData>({
                 </div>
               )}
               {toolbarActionsNode}
+              <button type="button" css={cssObj.viewChangeButton}>
+                <TableChart />
+                리스트뷰
+              </button>
             </div>
           </div>
 
