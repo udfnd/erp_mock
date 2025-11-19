@@ -48,6 +48,21 @@ export const cssObj = {
     left: 12px;
     color: ${color.cgrey400};
   `,
+  searchClearButton: css`
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: ${color.cgrey400};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  `,
   searchInput: (hasLeftIcon: boolean) => css`
     width: 100%;
     height: 32px;
@@ -63,7 +78,7 @@ export const cssObj = {
       box-shadow: 0 0 0 1px ${color.blue};
     }
   `,
-  searchActionButton: (isDisabled: boolean, isClear: boolean) => css`
+  searchActionButton: (isDisabled: boolean) => css`
     position: absolute;
     right: 6px;
     top: 50%;
@@ -71,9 +86,9 @@ export const cssObj = {
     width: 28px;
     height: 28px;
     border-radius: 6px;
-    border: 1px solid ${isClear ? color.cgrey200 : color.blue};
-    background: ${isClear ? color.white : color.blue};
-    color: ${isClear ? color.cgrey400 : color.white};
+    border: 1px solid ${color.blue};
+    background: ${color.blue};
+    color: ${color.white};
     display: inline-flex;
     align-items: center;
     justify-content: center;

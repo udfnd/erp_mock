@@ -158,6 +158,11 @@ export function Template<TData>({
     setLastSearchedValue(searchValue);
   }, [searchValue]);
 
+  const blurSearchInput = () => {
+    setIsSearchFocused(false);
+    searchInputRef.current?.blur();
+  };
+
   const handleSearchSubmit = () => {
     const trimmed = searchInputValue.trim();
     if (!trimmed || !searchOnChange) return;
@@ -165,6 +170,7 @@ export function Template<TData>({
     searchOnChange(trimmed);
     setHasSearched(true);
     setLastSearchedValue(trimmed);
+    blurSearchInput();
   };
 
   const handleClearSearch = () => {
@@ -172,6 +178,7 @@ export function Template<TData>({
     setLastSearchedValue('');
     setHasSearched(false);
     searchOnChange?.('');
+    blurSearchInput();
   };
 
   const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -182,8 +189,7 @@ export function Template<TData>({
   };
 
   const handleDimClick = () => {
-    setIsSearchFocused(false);
-    searchInputRef.current?.blur();
+    blurSearchInput();
   };
 
   let primaryActionLabel: ReactNode | undefined;
@@ -396,8 +402,8 @@ export function Template<TData>({
 
   const hasRows = table.getRowModel().rows.length > 0;
   const hasAppliedSearch = hasSearched && Boolean(lastSearchedValue.trim());
-  const shouldShowSearchAction = isSearchFocused || hasAppliedSearch;
-  const isSearchButtonDisabled = !hasAppliedSearch && searchInputValue.trim() === '';
+  const shouldShowSearchAction = isSearchFocused;
+  const isSearchButtonDisabled = searchInputValue.trim() === '';
   const searchResultCount = totalCount;
 
   return (
@@ -416,7 +422,19 @@ export function Template<TData>({
                   }
                 }}
               >
-                {!isSearchFocused && <Search css={cssObj.searchIcon} />}
+                {!isSearchFocused &&
+                  (hasAppliedSearch ? (
+                    <button
+                      type="button"
+                      css={cssObj.searchClearButton}
+                      onClick={handleClearSearch}
+                      aria-label="검색어 지우기"
+                    >
+                      <Close />
+                    </button>
+                  ) : (
+                    <Search css={cssObj.searchIcon} />
+                  ))}
                 <input
                   ref={searchInputRef}
                   css={cssObj.searchInput(!isSearchFocused)}
@@ -428,19 +446,13 @@ export function Template<TData>({
                 {shouldShowSearchAction && (
                   <button
                     type="button"
-                    css={cssObj.searchActionButton(isSearchButtonDisabled, hasAppliedSearch)}
+                    css={cssObj.searchActionButton(isSearchButtonDisabled)}
                     disabled={isSearchButtonDisabled}
                     onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                      if (hasAppliedSearch) {
-                        handleClearSearch();
-                        return;
-                      }
-                      handleSearchSubmit();
-                    }}
-                    aria-label={hasAppliedSearch ? '검색어 지우기' : '검색'}
+                    onClick={handleSearchSubmit}
+                    aria-label="검색"
                   >
-                    {hasAppliedSearch ? <Close /> : <Search />}
+                    <Search />
                   </button>
                 )}
               </div>
