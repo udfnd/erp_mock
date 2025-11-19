@@ -144,6 +144,7 @@ export function Template<TData>({
 
   const [paginationViewMode, setPaginationViewMode] = useState<'segment' | 'centered'>('segment');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [isFiltersDropdownOpen, setIsFiltersDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchInputValue, setSearchInputValue] = useState(search?.value ?? '');
   const [hasSearched, setHasSearched] = useState(Boolean(search?.value?.trim()));
@@ -151,6 +152,8 @@ export function Template<TData>({
   const searchValue = search?.value ?? '';
   const searchOnChange = search?.onChange;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const sortDropdownRef = useRef<HTMLDivElement | null>(null);
+  const filtersDropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setSearchInputValue(searchValue);
@@ -314,6 +317,57 @@ export function Template<TData>({
     return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
   };
 
+  const getFilterOptionIcon = (
+    filter: ListViewTemplateToolbarFilter,
+    optionValue: string,
+  ) => {
+    const isActive = optionValue === filter.value;
+    if (!filter.options.some((option) => option.value === optionValue)) {
+      return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
+    }
+
+    return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
+  };
+
+  useEffect(() => {
+    if (!filters.length && isFiltersDropdownOpen) {
+      setIsFiltersDropdownOpen(false);
+    }
+  }, [filters, isFiltersDropdownOpen]);
+
+  useEffect(() => {
+    if (!isSortDropdownOpen && !isFiltersDropdownOpen) {
+      return undefined;
+    }
+
+    const handleDocumentClick = (event: globalThis.MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      if (
+        isSortDropdownOpen &&
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(target)
+      ) {
+        setIsSortDropdownOpen(false);
+      }
+
+      if (
+        isFiltersDropdownOpen &&
+        filtersDropdownRef.current &&
+        !filtersDropdownRef.current.contains(target)
+      ) {
+        setIsFiltersDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleDocumentClick);
+    };
+  }, [isSortDropdownOpen, isFiltersDropdownOpen]);
+
   const totalCount = totalCountProp ?? table.getPrePaginationRowModel().rows.length;
   const pageIndex = table.getState().pagination.pageIndex;
   const isManualPagination = Boolean(manualPagination);
@@ -323,6 +377,9 @@ export function Template<TData>({
   const visibleColumnsLength = table.getVisibleFlatColumns().length || 1;
 
   const hasToolbar = Boolean(search || filters.length > 0 || sort || toolbarActionsNode);
+  const activeFiltersCount = filters.filter((filter) => filter.value !== '').length;
+  const filtersDisplayLabel =
+    activeFiltersCount > 0 ? `필터 (${activeFiltersCount})` : '필터 선택';
 
   const shouldIgnoreRowClick =
     rowEventHandlers?.shouldIgnoreRowClick ??
@@ -458,7 +515,7 @@ export function Template<TData>({
             )}
             <div css={cssObj.toolbarControls}>
               {sort && (
-                <div css={cssObj.filterDropdown}>
+                <div css={cssObj.filterDropdown} ref={sortDropdownRef}>
                   <button
                     type="button"
                     css={cssObj.filterTrigger(isSortDropdownOpen)}
@@ -512,6 +569,79 @@ export function Template<TData>({
                   )}
                 </div>
               )}
+              {filters.length > 0 && (
+                <div css={cssObj.filterDropdown} ref={filtersDropdownRef}>
+                  <button
+                    type="button"
+                    css={cssObj.filterTrigger(isFiltersDropdownOpen)}
+                    onClick={() => setIsFiltersDropdownOpen((prev) => !prev)}
+                  >
+                    <span>{filtersDisplayLabel}</span>
+                    <ArrowLgDown />
+                  </button>
+
+                  {isFiltersDropdownOpen && (
+                    <div css={cssObj.filterMenu}>
+                      {filters.map((filter, index) => {
+                        const selectedOption = filter.options.find(
+                          (option) => option.value === filter.value,
+                        );
+                        const groupLabel = filter.label ?? filter.placeholder ?? '필터';
+                        const groupValue =
+                          selectedOption?.label ?? (filter.value === '' ? filter.placeholder : '');
+
+                        return (
+                          <div key={filter.key} css={cssObj.filterGroup(index > 0)}>
+                            <div css={cssObj.filterGroupHeader}>
+                              <span>{groupLabel}</span>
+                              {groupValue && <span css={cssObj.filterGroupValue}>{groupValue}</span>}
+                            </div>
+
+                            {filter.placeholder && (
+                              <button
+                                type="button"
+                                css={[
+                                  cssObj.filterOption,
+                                  filter.value === '' && cssObj.filterOptionActive,
+                                ]}
+                                onClick={() => {
+                                  filter.onChange('');
+                                  setIsFiltersDropdownOpen(false);
+                                }}
+                              >
+                                <span css={cssObj.filterOptionContent}>
+                                  {getFilterOptionIcon(filter, '')}
+                                  <span>{filter.placeholder}</span>
+                                </span>
+                              </button>
+                            )}
+
+                            {filter.options.map((option) => {
+                              const isActive = option.value === filter.value;
+                              return (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
+                                  onClick={() => {
+                                    filter.onChange(option.value);
+                                    setIsFiltersDropdownOpen(false);
+                                  }}
+                                >
+                                  <span css={cssObj.filterOptionContent}>
+                                    {getFilterOptionIcon(filter, option.value)}
+                                    <span>{option.label}</span>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
               {toolbarActionsNode}
               <button type="button" css={cssObj.viewChangeButton}>
                 <TableChart />
@@ -520,26 +650,6 @@ export function Template<TData>({
             </div>
           </div>
 
-          {filters.length > 0 && (
-            <div css={cssObj.filterRow}>
-              {filters.map((filter) => (
-                <label key={filter.key} css={cssObj.selectLabel}>
-                  <select
-                    css={cssObj.select}
-                    value={filter.value}
-                    onChange={(event) => filter.onChange(event.target.value)}
-                  >
-                    {filter.placeholder && <option value="">{filter.placeholder}</option>}
-                    {filter.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
