@@ -1,7 +1,7 @@
 'use client';
 
-import type {KeyboardEvent, MouseEvent, ReactNode} from 'react';
-import {useEffect, useRef, useState} from 'react';
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -20,7 +20,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
-import {type ButtonProps, Checkbox} from '@/common/components';
+import { type ButtonProps, Checkbox } from '@/common/components';
 import {
   ArrowLgDown,
   ArrowMdLeftDouble,
@@ -37,9 +37,9 @@ import {
   TableChart,
 } from '@/common/icons';
 
-import {cssObj} from './style';
-import type {ListViewState} from './useListViewState';
-import {color} from '@/style';
+import { cssObj } from './style';
+import type { ListViewState } from './useListViewState';
+import { color } from '@/style';
 
 const DEFAULT_ROW_CLICK_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 

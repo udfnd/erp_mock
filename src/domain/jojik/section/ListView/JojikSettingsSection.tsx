@@ -12,8 +12,9 @@ import type {
   JojikListItem,
   UpdateJojikRequest,
   JojikPermission,
+  HomepageLink,
 } from '@/domain/jojik/api/jojik.schema';
-import { Magic, Plus } from '@/common/icons';
+import { License, Magic, Plus } from '@/common/icons';
 
 import { cssObj } from './styles';
 import type { JojikSettingsSectionProps } from './useJojikListViewSections';
@@ -173,7 +174,7 @@ type SingleSelectionPanelContentProps = {
   jaewonsaengLinkRequestUrl?: string;
   openSangtae?: boolean;
   openFiles?: { nanoId: string; name: string }[];
-  homepageUrl?: string | null;
+  homepageUrl?: HomepageLink | null;
   permissions?: JojikPermission[];
   onAfterMutation: () => Promise<unknown> | void;
   updateMutation: UpdateJojikMutationResult;
@@ -273,13 +274,8 @@ function SingleSelectionPanelContent({
         <h2 css={cssObj.panelTitle}>{jojikName} 설정</h2>
       </div>
       <div css={cssObj.panelBody}>
-        <h3 css={cssObj.panelSubtitle}>조직 위젯</h3>
-        <div css={cssObj.salesDiv}>
-          <span>매출 관련 텍스트</span>
-        </div>
-
-        <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
         <form css={cssObj.panelSection} onSubmit={handleSubmitName}>
+          <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
           <Textfield
             singleLine
             label="조직명"
@@ -298,10 +294,23 @@ function SingleSelectionPanelContent({
             </Button>
           </div>
         </form>
-
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
-          <span css={cssObj.panelText}>{homepageUrl}</span>
+          {homepageUrl ? (
+            <div css={cssObj.homepageInfo}>
+              <span css={cssObj.panelText}>{homepageUrl.titleName}</span>
+              <a
+                css={cssObj.homepageLink}
+                href={homepageUrl.linkUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {homepageUrl.linkUrl}
+              </a>
+            </div>
+          ) : (
+            <span css={cssObj.panelText}>등록된 홈페이지 정보가 없습니다.</span>
+          )}
         </div>
 
         <div css={cssObj.panelSection}>
@@ -312,8 +321,12 @@ function SingleSelectionPanelContent({
             <span css={cssObj.panelText}>설정된 권한이 없습니다.</span>
           ) : (
             permissions.map((permission) => (
-              <div key={permission.nanoId} css={cssObj.panelText}>
-                {permission.name} ({permission.sysPermissionType})
+              <div key={permission.nanoId} css={cssObj.permissionItem}>
+                <div>
+                  <License />
+                  {permission.name}
+                </div>
+                <span>{permission.sysPermissionType}</span>
               </div>
             ))
           )}

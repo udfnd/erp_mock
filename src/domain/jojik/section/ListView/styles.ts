@@ -227,7 +227,10 @@ export const cssObj = {
   panelSection: css`
     display: flex;
     flex-direction: column;
+    border-bottom: 1px solid ${color.cgrey50};
     gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
   `,
 
   sectionActions: css`
@@ -245,6 +248,40 @@ export const cssObj = {
   panelText: css`
     font-size: 14px;
     color: ${color.cgrey700};
+  `,
+
+  homepageInfo: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
+  homepageLink: css`
+    font-size: 14px;
+    color: ${color.blue50};
+    text-decoration: underline;
+    word-break: break-all;
+  `,
+
+  permissionItem: css`
+    display: flex;
+    height: 40px;
+    padding: 6px 12px;
+    align-items: center;
+    align-content: center;
+    gap: 0 8px;
+    border-radius: 8px;
+    border: 1px solid ${color.cgrey200};
+    background-color: ${color.cgrey10};
+    ${typography.bodySmallR};
+    color: ${color.cgrey500};
+
+    > div {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
   `,
 
   panelFooter: css`

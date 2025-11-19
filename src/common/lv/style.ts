@@ -73,8 +73,8 @@ export const cssObj = {
     font-size: 14px;
     color: ${color.cgrey700};
     &:focus {
-        outline: none;
-        border: none;
+      outline: none;
+      border: none;
     }
   `,
   searchActionButton: (isDisabled: boolean) => css`
@@ -82,8 +82,8 @@ export const cssObj = {
     right: 6px;
     top: 50%;
     transform: translateY(-50%);
-      border: none;
-      background-color: ${color.white};
+    border: none;
+    background-color: ${color.white};
     color: ${color.white};
     display: inline-flex;
     align-items: center;
@@ -233,10 +233,11 @@ export const cssObj = {
   tableDimmer: css`
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.7);
     border: none;
     padding: 0;
     cursor: pointer;
+    z-index: 2;
   `,
   tableHeadRow: css`
     background: ${color.white};
