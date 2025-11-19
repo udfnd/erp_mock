@@ -73,9 +73,8 @@ export const cssObj = {
     font-size: 14px;
     color: ${color.cgrey700};
     &:focus {
-      outline: none;
-      border-color: ${color.blue};
-      box-shadow: 0 0 0 1px ${color.blue};
+        outline: none;
+        border: none;
     }
   `,
   searchActionButton: (isDisabled: boolean) => css`
@@ -83,18 +82,15 @@ export const cssObj = {
     right: 6px;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: 1px solid ${color.blue};
-    background: ${color.blue};
+      border: none;
+      background-color: ${color.white};
     color: ${color.white};
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
-    opacity: ${isDisabled ? 0.5 : 1};
   `,
+
   toolbarControls: css`
     display: flex;
     flex: 0 0 auto;

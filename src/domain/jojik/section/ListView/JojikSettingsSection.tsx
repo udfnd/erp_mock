@@ -6,8 +6,13 @@ import {
   useDeleteJojikMutation,
   useJojikQuery,
   useUpdateJojikMutation,
+  useJojikPermissionsQuery,
 } from '@/domain/jojik/api';
-import type { JojikListItem, UpdateJojikRequest } from '@/domain/jojik/api/jojik.schema';
+import type {
+  JojikListItem,
+  UpdateJojikRequest,
+  JojikPermission,
+} from '@/domain/jojik/api/jojik.schema';
 import { Magic, Plus } from '@/common/icons';
 
 import { cssObj } from './styles';
@@ -168,6 +173,8 @@ type SingleSelectionPanelContentProps = {
   jaewonsaengLinkRequestUrl?: string;
   openSangtae?: boolean;
   openFiles?: { nanoId: string; name: string }[];
+  homepageUrl?: string | null;
+  permissions?: JojikPermission[];
   onAfterMutation: () => Promise<unknown> | void;
   updateMutation: UpdateJojikMutationResult;
   deleteMutation: DeleteJojikMutationResult;
@@ -182,6 +189,11 @@ function SingleSelectionPanel({
   const { data: jojikDetail, isLoading } = useJojikQuery(jojikNanoId, {
     enabled: isAuthenticated && Boolean(jojikNanoId),
   });
+
+  const { data: jojikPermissionsDetail } = useJojikPermissionsQuery(jojikNanoId, {
+    enabled: isAuthenticated && Boolean(jojikNanoId),
+  });
+
   const updateMutation = useUpdateJojikMutation(jojikNanoId);
   const deleteMutation = useDeleteJojikMutation(jojikNanoId);
 
@@ -200,17 +212,18 @@ function SingleSelectionPanel({
   }
 
   const effectiveName = jojikDetail?.name ?? jojikName ?? '';
-  const effectiveIntro = jojikDetail?.intro ?? '';
 
   return (
     <SingleSelectionPanelContent
-      key={`${jojikNanoId}:${effectiveName}:${effectiveIntro}`}
+      key={`${jojikNanoId}:${effectiveName}`}
       jojikNanoId={jojikNanoId}
       jojikName={effectiveName}
       jojikDetailNanoId={jojikDetail?.nanoId ?? jojikNanoId}
       jaewonsaengLinkRequestUrl={jojikDetail?.jaewonsaengLinkRequestUrl}
       openSangtae={jojikDetail?.openSangtae}
       openFiles={jojikDetail?.openFiles}
+      homepageUrl={jojikDetail?.homepageUrl}
+      permissions={jojikPermissionsDetail?.permissions}
       onAfterMutation={onAfterMutation}
       updateMutation={updateMutation}
       deleteMutation={deleteMutation}
@@ -219,12 +232,9 @@ function SingleSelectionPanel({
 }
 
 function SingleSelectionPanelContent({
-  jojikNanoId,
   jojikName,
-  jojikDetailNanoId,
-  jaewonsaengLinkRequestUrl,
-  openSangtae,
-  openFiles,
+  homepageUrl,
+  permissions,
   onAfterMutation,
   updateMutation,
   deleteMutation,
@@ -267,6 +277,7 @@ function SingleSelectionPanelContent({
         <div css={cssObj.salesDiv}>
           <span>매출 관련 텍스트</span>
         </div>
+
         <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
         <form css={cssObj.panelSection} onSubmit={handleSubmitName}>
           <Textfield
@@ -287,34 +298,27 @@ function SingleSelectionPanelContent({
             </Button>
           </div>
         </form>
+
         <div css={cssObj.panelSection}>
-          <span css={cssObj.panelLabel}>조직 식별자</span>
-          <span css={cssObj.panelText}>{jojikDetailNanoId ?? jojikNanoId}</span>
+          <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
+          <span css={cssObj.panelText}>{homepageUrl}</span>
         </div>
-        {typeof openSangtae === 'boolean' && (
-          <div css={cssObj.panelSection}>
-            <span css={cssObj.panelLabel}>공개 여부</span>
-            <span css={cssObj.panelText}>{openSangtae ? '공개' : '비공개'}</span>
-          </div>
-        )}
-        {jaewonsaengLinkRequestUrl ? (
-          <div css={cssObj.panelSection}>
-            <span css={cssObj.panelLabel}>재원생 신청 링크</span>
-            <span css={cssObj.panelText}>{jaewonsaengLinkRequestUrl}</span>
-          </div>
-        ) : null}
-        {openFiles?.length ? (
-          <div css={cssObj.panelSection}>
-            <span css={cssObj.panelLabel}>공유 파일</span>
-            <div css={cssObj.chipList}>
-              {openFiles.map((file) => (
-                <span key={file.nanoId} css={cssObj.chip}>
-                  {file.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : null}
+
+        <div css={cssObj.panelSection}>
+          <h3 css={cssObj.panelSubtitle}>조직 권한</h3>
+          {permissions === undefined ? (
+            <span css={cssObj.panelText}>조직 권한 정보를 불러오는 중입니다...</span>
+          ) : permissions.length === 0 ? (
+            <span css={cssObj.panelText}>설정된 권한이 없습니다.</span>
+          ) : (
+            permissions.map((permission) => (
+              <div key={permission.nanoId} css={cssObj.panelText}>
+                {permission.name} ({permission.sysPermissionType})
+              </div>
+            ))
+          )}
+        </div>
+
         {updateMutation.isError && (
           <p css={cssObj.helperText}>조직 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
         )}
@@ -331,7 +335,7 @@ function SingleSelectionPanelContent({
           onClick={handleDelete}
           disabled={isDeleting}
         >
-          삭제
+          조직 삭제
         </Button>
       </div>
     </>

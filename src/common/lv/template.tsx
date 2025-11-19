@@ -1,45 +1,45 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import type {KeyboardEvent, MouseEvent, ReactNode} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
   type ColumnDef,
-  type OnChangeFn,
-  type Row,
-  type Table,
-  type TableOptions,
-  type SortingState,
   type ColumnFiltersState,
-  type RowSelectionState,
-  type PaginationState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type OnChangeFn,
+  type PaginationState,
+  type Row,
+  type RowSelectionState,
+  type SortingState,
+  type Table,
+  type TableOptions,
   useReactTable,
 } from '@tanstack/react-table';
-import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
-import { Checkbox, type ButtonProps } from '@/common/components';
+import {type ButtonProps, Checkbox} from '@/common/components';
 import {
+  ArrowLgDown,
   ArrowMdLeftDouble,
   ArrowMdLeftSingle,
   ArrowMdRightDouble,
   ArrowMdRightSingle,
-  Plus,
-  Search,
   Close,
+  Plus,
   RadioCheckedActive,
   RadioCheckedDisabled,
   RadioUncheckedActive,
   RadioUncheckedDisabled,
+  Search,
   TableChart,
-  ArrowLgDown,
 } from '@/common/icons';
 
-import { cssObj } from './style';
-import type { ListViewState } from './useListViewState';
-import { color } from '@/style';
+import {cssObj} from './style';
+import type {ListViewState} from './useListViewState';
+import {color} from '@/style';
 
 const DEFAULT_ROW_CLICK_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
@@ -404,8 +404,6 @@ export function Template<TData>({
   const hasAppliedSearch = hasSearched && Boolean(lastSearchedValue.trim());
   const shouldShowSearchAction = isSearchFocused;
   const isSearchButtonDisabled = searchInputValue.trim() === '';
-  const searchResultCount = totalCount;
-
   return (
     <section css={cssObj.container}>
       {hasToolbar && (
@@ -427,6 +425,7 @@ export function Template<TData>({
                     <button
                       type="button"
                       css={cssObj.searchClearButton}
+                      onMouseDown={(event) => event.preventDefault()}
                       onClick={handleClearSearch}
                       aria-label="검색어 지우기"
                     >
@@ -546,7 +545,7 @@ export function Template<TData>({
 
       {hasAppliedSearch && (
         <div css={cssObj.searchResultSummary}>
-          ‘{lastSearchedValue}’ 검색 결과입니다 ({searchResultCount}개)
+          ‘{lastSearchedValue}’ 검색 결과입니다 ({totalCount}개)
         </div>
       )}
 
