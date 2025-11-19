@@ -195,8 +195,8 @@ export function useJojikListViewSections({
   };
 
   const startCreate = () => {
-    setIsCreating(true);
     clearSelection();
+    setIsCreating(true);
   };
 
   const stopCreate = () => {
