@@ -136,6 +136,7 @@ export function ListViewTemplate<TData>({
     tableOptions;
 
   const [paginationViewMode, setPaginationViewMode] = useState<'segment' | 'centered'>('segment');
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
   let primaryActionLabel: ReactNode | undefined;
   let primaryActionProps: Omit<ListViewTemplatePrimaryAction, 'label'> | undefined;
@@ -149,9 +150,6 @@ export function ListViewTemplate<TData>({
     (tableOptions.enableRowSelection ?? false)
       ? {
           id: '__row_selection__',
-          size: 52,
-          minSize: 52,
-          maxSize: 52,
           header: ({ table }) => (
             <div css={cssObj.selectionCell}>
               <Checkbox
@@ -244,6 +242,12 @@ export function ListViewTemplate<TData>({
 
   const toolbarActionsNode =
     typeof toolbarActions === 'function' ? toolbarActions({ table, selectedRows }) : toolbarActions;
+
+  const sortSelectedOption = sort
+    ? sort.options.find((option) => option.value === sort.value)
+    : undefined;
+
+  const sortDisplayLabel = sortSelectedOption?.label ?? sort?.placeholder ?? '정렬 기준';
 
   const totalCount = totalCountProp ?? table.getPrePaginationRowModel().rows.length;
   const pageIndex = table.getState().pagination.pageIndex;
@@ -349,20 +353,54 @@ export function ListViewTemplate<TData>({
             )}
             <div css={cssObj.toolbarControls}>
               {sort && (
-                <label css={cssObj.selectLabel}>
-                  <select
-                    css={cssObj.select}
-                    value={sort.value}
-                    onChange={(event) => sort.onChange(event.target.value)}
+                <div css={cssObj.filterDropdown}>
+                  {/* 드롭다운 트리거 버튼 */}
+                  <button
+                    type="button"
+                    css={cssObj.filterTrigger}
+                    onClick={() => setIsSortDropdownOpen((prev) => !prev)}
                   >
-                    {sort.placeholder && <option value="">{sort.placeholder}</option>}
-                    {sort.options.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    <span>{sortDisplayLabel}</span>
+                    <span css={cssObj.filterTriggerCaret}>▾</span>
+                  </button>
+
+                  {isSortDropdownOpen && (
+                    <div css={cssObj.filterMenu}>
+                      {sort.placeholder && (
+                        <button
+                          type="button"
+                          css={[
+                            cssObj.filterOption,
+                            sort.value === '' && cssObj.filterOptionActive,
+                          ]}
+                          onClick={() => {
+                            sort.onChange('');
+                            setIsSortDropdownOpen(false);
+                          }}
+                        >
+                          {sort.placeholder}
+                        </button>
+                      )}
+
+                      {sort.options.map((option) => {
+                        const isActive = option.value === sort.value;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
+                            onClick={() => {
+                              sort.onChange(option.value);
+                              setIsSortDropdownOpen(false);
+                            }}
+                          >
+                            {option.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               )}
               {toolbarActionsNode}
             </div>

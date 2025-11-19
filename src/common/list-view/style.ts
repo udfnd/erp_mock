@@ -25,7 +25,6 @@ export const cssObj = {
     flex-direction: column;
     gap: 8px;
     padding-bottom: 12px;
-    border-bottom: 1px solid ${color.cgrey100};
     background: ${color.white};
   `,
   toolbarTopRow: css`
@@ -48,7 +47,7 @@ export const cssObj = {
   `,
   searchInput: css`
     width: 100%;
-    height: 36px;
+    height: 32px;
     padding: 0 12px 0 30px;
     border-radius: 10px;
     border: 1px solid ${color.cgrey200};
@@ -67,27 +66,85 @@ export const cssObj = {
     justify-content: flex-end;
     gap: 8px;
   `,
+
   filterRow: css`
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
   `,
+
   selectLabel: css`
     display: inline-flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 12px;
     color: ${color.cgrey500};
   `,
   select: css`
-    height: 36px;
+    height: 32px;
     padding: 0 12px;
-    border-radius: 10px;
-    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
+    border: none;
+    background: ${color.cgrey50};
+    color: ${color.cgrey500};
+    ${typography.captionB};
+  `,
+
+  filterDropdown: css`
+    position: relative;
+    display: inline-flex;
+  `,
+
+  filterTrigger: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-width: 120px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: none;
+    background: ${color.cgrey50};
+    color: ${color.cgrey500};
+    ${typography.captionB};
+    cursor: pointer;
+  `,
+
+  filterTriggerCaret: css`
+    font-size: 10px;
+    line-height: 1;
+  `,
+
+  filterMenu: css`
+    position: absolute;
+    top: 36px;
+    left: 0;
+    min-width: 100%;
+    padding: 4px 0;
+    border-radius: 8px;
     background: ${color.white};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+  `,
+
+  filterOption: css`
+    width: 100%;
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    ${typography.bodySmallR};
     color: ${color.cgrey700};
-    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+      background: ${color.cgrey50};
+    }
+  `,
+
+  filterOptionActive: css`
+    background: ${color.cgrey100};
+    font-weight: 600;
   `,
 
   tableContainer: css`
@@ -119,23 +176,24 @@ export const cssObj = {
     z-index: 1;
     padding: 8px;
     text-align: left;
-    ${typography.bodySB};
+    ${typography.bodySmallSB};
     color: ${color.cgrey500};
     border-bottom: 1px solid ${color.cgrey100};
     background: ${color.white};
     &:first-of-type {
-      padding-right: 4px;
+      width: 24px;
+      padding-left: 0;
+      padding-right: 8px;
     }
     &:nth-of-type(2) {
-      padding-left: 4px;
+      padding-left: 0;
     }
   `,
   selectionCell: css`
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    min-width: 52px;
+    width: 24px;
   `,
   headerActionCell: css`
     display: flex;
@@ -161,10 +219,12 @@ export const cssObj = {
     color: ${color.black};
     background: ${color.white};
     &:first-of-type {
-      padding-right: 4px;
+      width: 24px;
+      padding-left: 0;
+      padding-right: 8px;
     }
     &:nth-of-type(2) {
-      padding-left: 4px;
+      padding-left: 0;
     }
   `,
   tableRow: css`

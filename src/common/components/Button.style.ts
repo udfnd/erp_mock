@@ -2,7 +2,6 @@ import { css, type Interpolation, type Theme } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const buttonBaseStyles = css({
-  ...typography.bodyB,
   border: '1px solid transparent',
   borderRadius: '8px',
   display: 'inline-flex',
@@ -15,6 +14,12 @@ export const buttonBaseStyles = css({
   whiteSpace: 'nowrap',
   '&:disabled': { cursor: 'not-allowed' },
 });
+
+const sizeTypographyStyles = {
+  large: css({ ...typography.bodyB }),
+  medium: css({ ...typography.bodySmallSB }),
+  small: css({ ...typography.captionB }),
+} as const;
 
 const styleTypeStyles = {
   solid: css({}),
@@ -65,6 +70,15 @@ const solidVariantStyles = {
       boxShadow: 'inset 0 0 100px 100px rgba(0,0,0,.1)',
     },
   }),
+  red: css({
+    background: color.red10,
+    color: color.red,
+    '&:not(:disabled):hover': { background: color.red10 },
+    '&:not(:disabled):active': {
+      background: color.red,
+      boxShadow: 'inset 0 0 100px 100px rgba(0,0,0,.2)',
+    },
+  }),
 } as const;
 
 const outlinedVariantStyles = {
@@ -86,6 +100,13 @@ const outlinedVariantStyles = {
     '&:not(:disabled):hover': { background: color.cgrey50 },
     '&:not(:disabled):active': { background: color.cgrey100 },
   }),
+  // ✅ red variant (outlined)
+  red: css({
+    color: color.red,
+    borderColor: color.red,
+    '&:not(:disabled):hover': { background: color.red10 },
+    '&:not(:disabled):active': { background: color.red10 },
+  }),
 } as const;
 
 const textVariantStyles = {
@@ -104,6 +125,12 @@ const textVariantStyles = {
     '&:not(:disabled):hover': { background: color.cgrey50 },
     '&:not(:disabled):active': { background: color.cgrey100 },
   }),
+  // ✅ red variant (text)
+  red: css({
+    color: color.red,
+    '&:not(:disabled):hover': { background: color.red10 },
+    '&:not(:disabled):active': { background: color.red10 },
+  }),
 } as const;
 
 const disabledStyles = {
@@ -120,7 +147,7 @@ const variantStyles = {
 
 export type ButtonRecipeOptions = {
   styleType?: keyof typeof styleTypeStyles;
-  variant?: keyof typeof solidVariantStyles;
+  variant?: keyof typeof solidVariantStyles; // 'red' 포함
   size?: keyof typeof sizeStyles;
   iconOnly?: boolean;
   disabled?: boolean;
@@ -136,7 +163,7 @@ export const buttonRecipe = ({
   isFull = false,
 }: ButtonRecipeOptions = {}): Interpolation<Theme>[] => {
   return [
-    buttonBaseStyles,
+    sizeTypographyStyles[size],
     styleTypeStyles[styleType],
     sizeStyles[size],
     !isFull && iconOnly && iconOnlyBase,

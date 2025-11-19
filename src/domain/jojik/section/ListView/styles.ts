@@ -2,7 +2,7 @@
 
 import { css } from '@emotion/react';
 
-import { color } from '@/style';
+import { color, typography } from '@/style';
 
 export const jojikListViewCss = {
   listSection: css`
@@ -176,7 +176,8 @@ export const jojikListViewCss = {
   `,
 
   settingsPanel: css`
-    width: 340px;
+    width: 400px;
+    min-width: 400px;
     flex: 0 0 340px;
     background: ${color.white};
     display: flex;
@@ -187,28 +188,37 @@ export const jojikListViewCss = {
   `,
 
   panelHeader: css`
-    padding: 24px;
-    border-bottom: 1px solid ${color.cgrey100};
+    padding: 16px;
   `,
 
   panelTitle: css`
     font-size: 18px;
     font-weight: 600;
     color: ${color.black};
+    ${typography.bodySB};
   `,
 
   panelSubtitle: css`
-    margin-top: 4px;
-    font-size: 13px;
-    color: ${color.cgrey500};
+    ${typography.bodySmallSB};
+    color: ${color.black};
+  `,
+
+  salesDiv: css`
+    height: 160px;
+    padding: 8px;
+    background-color: ${color.cgrey10};
+    > span {
+      ${typography.captionB};
+      color: ${color.cgrey500};
+    }
   `,
 
   panelBody: css`
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 24px;
+    gap: 16px;
+    padding: 16px;
   `,
 
   panelSection: css`
@@ -235,11 +245,8 @@ export const jojikListViewCss = {
   `,
 
   panelFooter: css`
-    padding: 16px 24px;
-    border-top: 1px solid ${color.cgrey100};
+    padding: 16px;
     display: flex;
-    gap: 12px;
-    justify-content: flex-end;
   `,
 
   helperText: css`

@@ -9,6 +9,13 @@ import {
   useRef,
 } from 'react';
 
+import {
+  CheckboxCheckedActive,
+  CheckboxCheckedDisabled,
+  CheckboxUncheckedActive,
+  CheckboxUncheckedDisabled,
+} from '@/common/icons';
+
 import * as styles from './Checkbox.style';
 
 export type CheckboxProps = {
@@ -35,6 +42,14 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       }
     }, [indeterminate, ref]);
 
+    const icon = (() => {
+      const isOn = checked || indeterminate;
+      if (disabled) {
+        return isOn ? <CheckboxCheckedDisabled /> : <CheckboxUncheckedDisabled />;
+      }
+      return isOn ? <CheckboxCheckedActive /> : <CheckboxUncheckedActive />;
+    })();
+
     return (
       <label css={styles.container}>
         <input
@@ -53,8 +68,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           onChange={onChange}
           onClick={onClick}
           aria-label={ariaLabel}
+          aria-checked={indeterminate ? 'mixed' : checked}
         />
-        <span css={styles.box} />
+        <span css={styles.box}>{icon}</span>
       </label>
     );
   },

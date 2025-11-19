@@ -11,7 +11,6 @@ export const cssObj = {
     max-width: 100%;
     min-width: 0;
     height: 100%;
-    min-height: 100vh;
     align-items: stretch;
     overflow: hidden;
   `,

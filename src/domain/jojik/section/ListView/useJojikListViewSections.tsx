@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
@@ -57,6 +57,7 @@ export type JojikListSectionProps = {
 export type JojikSettingsSectionProps = {
   gigwanNanoId: string;
   selectedJojiks: JojikListItem[];
+  setIsCreating: Dispatch<SetStateAction<boolean>>;
   isCreating: boolean;
   onStartCreate: () => void;
   onExitCreate: () => void;
@@ -131,7 +132,7 @@ export function useJojikListViewSections({
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        header: createSortableHeader('조직 이름'),
+        header: createSortableHeader('전체 조직'),
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor('createdAt', {
@@ -239,6 +240,7 @@ export function useJojikListViewSections({
     gigwanNanoId,
     selectedJojiks,
     isCreating,
+    setIsCreating,
     onStartCreate: startCreate,
     onExitCreate: stopCreate,
     onAfterMutation: handleAfterMutation,

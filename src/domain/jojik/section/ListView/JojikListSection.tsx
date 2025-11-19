@@ -81,7 +81,7 @@ export function JojikListSection({
         onChange: handlers.onSortChange,
       }}
       primaryAction={{
-        label: '새 조직 추가',
+        label: '조직 추가',
         onClick: handlers.onAddClick,
       }}
       pageSizeOptions={pageSizeOptions}
