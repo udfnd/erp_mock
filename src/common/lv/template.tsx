@@ -118,7 +118,7 @@ export type ListViewTemplateProps<TData> = {
   rowEventHandlers?: ListViewTemplateRowEventHandlers<TData>;
 } & ListViewTableOptions<TData>;
 
-export function ListViewTemplate<TData>({
+export function Template<TData>({
   data,
   columns,
   state,
@@ -212,7 +212,7 @@ export function ListViewTemplate<TData>({
             header: () =>
               primaryActionProps ? (
                 <div css={cssObj.headerActionCell}>
-                  <button css={cssObj.addElementButton} {...primaryActionProps}>
+                  <button type="button" css={cssObj.addElementButton} {...primaryActionProps}>
                     <>
                       {primaryActionLabel}
                       <Plus width={16} height={16} color={`${color.white}`} />
@@ -388,10 +388,9 @@ export function ListViewTemplate<TData>({
             <div css={cssObj.toolbarControls}>
               {sort && (
                 <div css={cssObj.filterDropdown}>
-                  {/* 드롭다운 트리거 버튼 */}
                   <button
                     type="button"
-                    css={cssObj.filterTrigger}
+                    css={cssObj.filterTrigger(isSortDropdownOpen)}
                     onClick={() => setIsSortDropdownOpen((prev) => !prev)}
                   >
                     <span>{sortDisplayLabel}</span>

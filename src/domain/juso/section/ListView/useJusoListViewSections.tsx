@@ -4,10 +4,17 @@ import { useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { ListViewState, useListViewState } from '@/common/list-view';
+import { ListViewState, useListViewState } from '@/common/lv';
 import { type JusoListItem, useGetJusosQuery } from '@/domain/juso/api';
 
-import { PAGE_SIZE_OPTIONS, SORT_OPTIONS, columnHelper, formatDate, getSortOptionFromState, getSortStateFromOption } from './constants';
+import {
+  PAGE_SIZE_OPTIONS,
+  SORT_OPTIONS,
+  columnHelper,
+  formatDate,
+  getSortOptionFromState,
+  getSortStateFromOption,
+} from './constants';
 
 export type JusoListViewHookParams = {
   jojikNanoId: string;
@@ -85,7 +92,11 @@ export function useJusoListViewSections({
 
   const sortByOption = getSortOptionFromState(sorting);
 
-  const { data: jusosData, isLoading: isListLoading, refetch } = useGetJusosQuery(
+  const {
+    data: jusosData,
+    isLoading: isListLoading,
+    refetch,
+  } = useGetJusosQuery(
     {
       jojikNanoId,
       jusoNameSearch: searchTerm ? searchTerm : undefined,
@@ -100,7 +111,9 @@ export function useJusoListViewSections({
   const totalCount = jusosData?.paginationData?.totalItemCount ?? data.length;
   const totalPages = Math.max(
     1,
-    Math.ceil((jusosData?.paginationData?.totalItemCount ?? data.length) / Math.max(pagination.pageSize, 1)),
+    Math.ceil(
+      (jusosData?.paginationData?.totalItemCount ?? data.length) / Math.max(pagination.pageSize, 1),
+    ),
   );
 
   const columns = useMemo(

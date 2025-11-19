@@ -94,7 +94,7 @@ export const cssObj = {
     display: inline-flex;
   `,
 
-  filterTrigger: css`
+  filterTrigger: (isOpen: boolean) => css`
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
@@ -103,9 +103,9 @@ export const cssObj = {
     height: 32px;
     padding: 0 12px;
     border-radius: 8px;
-    border: none;
-    background: ${color.cgrey50};
-    color: ${color.cgrey500};
+    border: ${isOpen ? `1px solid ${color.blue}` : `1px solid ${color.cgrey50}`};
+    background: ${isOpen ? color.blue50 : color.cgrey50};
+    color: ${isOpen ? color.blue : color.cgrey500};
     ${typography.captionB};
     cursor: pointer;
   `,
@@ -118,8 +118,8 @@ export const cssObj = {
   filterMenu: css`
     position: absolute;
     top: 36px;
-    left: 0;
-    min-width: 100%;
+    right: 0;
+    width: 360px;
     padding: 4px 0;
     border-radius: 8px;
     background: ${color.white};
@@ -143,14 +143,13 @@ export const cssObj = {
   `,
 
   filterOptionActive: css`
-    background: ${color.cgrey100};
-    font-weight: 600;
+    color: ${color.blue};
   `,
 
   filterOptionContent: css`
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
   `,
 
   tableContainer: css`
@@ -217,6 +216,7 @@ export const cssObj = {
     border-radius: 6px;
     background-color: ${color.cgrey300};
     ${typography.captionB};
+    cursor: pointer;
   `,
   tableCell: css`
     padding: 8px;

@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 
 import { color, typography } from '@/style';
 
-export const jojikListViewCss = {
+export const cssObj = {
   listSection: css`
     flex: 1 1 auto;
     display: flex;
@@ -204,6 +204,9 @@ export const jojikListViewCss = {
   `,
 
   salesDiv: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 160px;
     padding: 8px;
     background-color: ${color.cgrey10};
@@ -217,7 +220,7 @@ export const jojikListViewCss = {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     padding: 16px;
   `,
 

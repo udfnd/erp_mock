@@ -6,4 +6,4 @@ export type {
   JojikSettingsSectionProps,
   UseJojikListViewSectionsResult,
 } from './useJojikListViewSections';
-export { jojikListViewCss } from './styles';
+export { cssObj } from './styles';

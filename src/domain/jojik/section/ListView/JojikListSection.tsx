@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { Row } from '@tanstack/react-table';
 
-import { ListViewTemplate, type ListViewTemplateRowEventHandlers } from '@/common/list-view';
+import { Template, type ListViewTemplateRowEventHandlers } from '@/common/lv';
 import type { JojikListItem } from '@/domain/jojik/api';
 import type { JojikListSectionProps } from '@/domain/jojik/section';
 
@@ -46,7 +46,7 @@ export function JojikListSection({
   const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
 
   return (
-    <ListViewTemplate
+    <Template
       data={data}
       columns={columns}
       state={state}

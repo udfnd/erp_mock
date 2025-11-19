@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { ListViewState, useListViewState } from '@/common/list-view';
+import { ListViewState, useListViewState } from '@/common/lv';
 import { useGetMyJojiksQuery, useGetSayongjasQuery } from '@/domain/sayongja/api';
 import type { GetSayongjasRequest, SayongjaListItem } from '@/domain/sayongja/api';
 import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/domain/gigwan/api';
@@ -164,12 +164,17 @@ export function useSayongjaListViewSections({
     sortByOption,
   };
 
-  const { data: sayongjasData, isLoading: isListLoading, refetch } = useGetSayongjasQuery(queryParams, {
+  const {
+    data: sayongjasData,
+    isLoading: isListLoading,
+    refetch,
+  } = useGetSayongjasQuery(queryParams, {
     enabled: isAuthenticated && Boolean(gigwanNanoId),
   });
 
   const data = sayongjasData?.sayongjas ?? [];
-  const totalCount = (sayongjasData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
+  const totalCount =
+    (sayongjasData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
   const columns = useMemo(

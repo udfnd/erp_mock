@@ -4,12 +4,19 @@ import { useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { ListViewState, useListViewState } from '@/common/list-view';
+import { ListViewState, useListViewState } from '@/common/lv';
 import { useGetLinkIconsQuery } from '@/domain/system/api';
 import { useGetOebuLinksQuery } from '@/domain/oebu-link/api';
 import type { GetOebuLinksRequest, OebuLinkListItem } from '@/domain/oebu-link/api';
 
-import { PAGE_SIZE_OPTIONS, SORT_OPTIONS, columnHelper, formatDate, getSortOptionFromState, getSortStateFromOption } from './constants';
+import {
+  PAGE_SIZE_OPTIONS,
+  SORT_OPTIONS,
+  columnHelper,
+  formatDate,
+  getSortOptionFromState,
+  getSortStateFromOption,
+} from './constants';
 
 export type OebuLinkListViewHookParams = {
   jojikNanoId: string;
@@ -104,12 +111,17 @@ export function useOebuLinkListViewSections({
     iconFilters: iconFilters.length > 0 ? iconFilters.join(',') : undefined,
   };
 
-  const { data: oebuLinksData, isLoading: isListLoading, refetch } = useGetOebuLinksQuery(queryParams, {
+  const {
+    data: oebuLinksData,
+    isLoading: isListLoading,
+    refetch,
+  } = useGetOebuLinksQuery(queryParams, {
     enabled: isAuthenticated && Boolean(jojikNanoId),
   });
 
   const data = oebuLinksData?.oebuLinks ?? [];
-  const totalCount = (oebuLinksData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
+  const totalCount =
+    (oebuLinksData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
   const columns = useMemo(

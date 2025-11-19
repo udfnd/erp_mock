@@ -8,10 +8,10 @@ import {
   useUpdateJojikMutation,
 } from '@/domain/jojik/api';
 import type { JojikListItem, UpdateJojikRequest } from '@/domain/jojik/api/jojik.schema';
+import { Magic, Plus } from '@/common/icons';
 
-import { jojikListViewCss } from './styles';
+import { cssObj } from './styles';
 import type { JojikSettingsSectionProps } from './useJojikListViewSections';
-import { Plus } from '@/common/icons';
 
 export function JojikSettingsSection({
   gigwanNanoId,
@@ -24,15 +24,13 @@ export function JojikSettingsSection({
 }: JojikSettingsSectionProps) {
   if (!gigwanNanoId) {
     return (
-      <aside css={jojikListViewCss.settingsPanel}>
-        <div css={jojikListViewCss.panelHeader}>
-          <h2 css={jojikListViewCss.panelTitle}>기관이 선택되지 않았습니다</h2>
-          <p css={jojikListViewCss.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
+      <aside css={cssObj.settingsPanel}>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>기관이 선택되지 않았습니다</h2>
+          <p css={cssObj.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
         </div>
-        <div css={jojikListViewCss.panelBody}>
-          <p css={jojikListViewCss.helperText}>
-            기관 ID가 없으면 조직 데이터를 불러올 수 없습니다.
-          </p>
+        <div css={cssObj.panelBody}>
+          <p css={cssObj.helperText}>기관 ID가 없으면 조직 데이터를 불러올 수 없습니다.</p>
         </div>
       </aside>
     );
@@ -40,7 +38,7 @@ export function JojikSettingsSection({
 
   if (isCreating) {
     return (
-      <aside css={jojikListViewCss.settingsPanel}>
+      <aside css={cssObj.settingsPanel}>
         <CreateJojikPanel
           gigwanNanoId={gigwanNanoId}
           onExit={isCreating ? onExitCreate : undefined}
@@ -52,23 +50,24 @@ export function JojikSettingsSection({
 
   if (selectedJojiks.length === 0) {
     return (
-      <aside css={jojikListViewCss.settingsPanel}>
-        <div css={jojikListViewCss.panelHeader}>
-          <h2 css={jojikListViewCss.panelTitle}>조직들 설정</h2>
+      <aside css={cssObj.settingsPanel}>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>조직들 설정</h2>
         </div>
-        <div css={jojikListViewCss.panelBody}>
-          <span css={jojikListViewCss.panelSubtitle}>빠른 액션</span>
-          <Button
-            variant="secondary"
-            size="medium"
-            isFull={false}
-            iconLeft={<Plus />}
-            onClick={() => {
-              setIsCreating(true);
-            }}
-          >
-            조직 생성 마법사
-          </Button>
+        <div css={cssObj.panelBody}>
+          <span css={cssObj.panelSubtitle}>빠른 액션</span>
+          <div>
+            <Button
+              variant="secondary"
+              size="medium"
+              iconLeft={<Magic />}
+              onClick={() => {
+                setIsCreating(true);
+              }}
+            >
+              조직 생성 마법사
+            </Button>
+          </div>
         </div>
       </aside>
     );
@@ -76,7 +75,7 @@ export function JojikSettingsSection({
 
   if (selectedJojiks.length === 1) {
     return (
-      <aside css={jojikListViewCss.settingsPanel}>
+      <aside css={cssObj.settingsPanel}>
         <SingleSelectionPanel
           jojikNanoId={selectedJojiks[0].nanoId}
           jojikName={selectedJojiks[0].name}
@@ -88,7 +87,7 @@ export function JojikSettingsSection({
   }
 
   return (
-    <aside css={jojikListViewCss.settingsPanel}>
+    <aside css={cssObj.settingsPanel}>
       <MultiSelectionPanel jojiks={selectedJojiks} />
     </aside>
   );
@@ -122,29 +121,29 @@ function CreateJojikPanel({ gigwanNanoId, onExit, onAfterMutation }: CreateJojik
 
   return (
     <>
-      <div css={jojikListViewCss.panelHeader}>
-        <h2 css={jojikListViewCss.panelTitle}>새 조직 추가</h2>
-        <p css={jojikListViewCss.panelSubtitle}>선택된 기관에 새로운 조직을 생성합니다.</p>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>조직 생성</h2>
       </div>
-      <form id={formId} css={jojikListViewCss.panelBody} onSubmit={handleSubmit}>
-        <div css={jojikListViewCss.panelSection}>
+      <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
+        <div css={cssObj.panelSection}>
           <Textfield
             singleLine
             required
-            label="조직 이름"
-            placeholder="조직 이름을 입력하세요"
+            label="조직명"
+            placeholder="조직명을 입력하세요"
             value={name}
             onValueChange={setName}
-            maxLength={60}
+            helperText="30자 이내의 이름을 입력해 주세요."
+            maxLength={30}
           />
         </div>
         {createMutation.isError && (
-          <p css={jojikListViewCss.helperText}>
+          <p css={cssObj.helperText}>
             조직 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
           </p>
         )}
       </form>
-      <div css={jojikListViewCss.panelFooter}>
+      <div css={cssObj.panelFooter}>
         <Button
           type="submit"
           size="small"
@@ -153,7 +152,7 @@ function CreateJojikPanel({ gigwanNanoId, onExit, onAfterMutation }: CreateJojik
           disabled={!name.trim() || isSaving}
           iconRight={<Plus />}
         >
-          조직 생성
+          조직 생성하기
         </Button>
       </div>
     </>
@@ -173,7 +172,6 @@ type DeleteJojikMutationResult = ReturnType<typeof useDeleteJojikMutation>;
 type SingleSelectionPanelContentProps = {
   jojikNanoId: string;
   jojikName: string;
-  jojikIntro: string;
   jojikDetailNanoId?: string;
   jaewonsaengLinkRequestUrl?: string;
   openSangtae?: boolean;
@@ -198,12 +196,12 @@ function SingleSelectionPanel({
   if (isLoading && !jojikDetail) {
     return (
       <>
-        <div css={jojikListViewCss.panelHeader}>
-          <h2 css={jojikListViewCss.panelTitle}>{jojikName}</h2>
-          <p css={jojikListViewCss.panelSubtitle}>선택한 조직 정보를 불러오는 중입니다...</p>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>{jojikName}</h2>
+          <p css={cssObj.panelSubtitle}>선택한 조직 정보를 불러오는 중입니다...</p>
         </div>
-        <div css={jojikListViewCss.panelBody}>
-          <p css={jojikListViewCss.helperText}>선택한 조직 정보를 불러오는 중입니다...</p>
+        <div css={cssObj.panelBody}>
+          <p css={cssObj.helperText}>선택한 조직 정보를 불러오는 중입니다...</p>
         </div>
       </>
     );
@@ -217,7 +215,6 @@ function SingleSelectionPanel({
       key={`${jojikNanoId}:${effectiveName}:${effectiveIntro}`}
       jojikNanoId={jojikNanoId}
       jojikName={effectiveName}
-      jojikIntro={effectiveIntro}
       jojikDetailNanoId={jojikDetail?.nanoId ?? jojikNanoId}
       jaewonsaengLinkRequestUrl={jojikDetail?.jaewonsaengLinkRequestUrl}
       openSangtae={jojikDetail?.openSangtae}
@@ -232,7 +229,6 @@ function SingleSelectionPanel({
 function SingleSelectionPanelContent({
   jojikNanoId,
   jojikName,
-  jojikIntro,
   jojikDetailNanoId,
   jaewonsaengLinkRequestUrl,
   openSangtae,
@@ -271,16 +267,16 @@ function SingleSelectionPanelContent({
 
   return (
     <>
-      <div css={jojikListViewCss.panelHeader}>
-        <h2 css={jojikListViewCss.panelTitle}>{jojikName} 설정</h2>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>{jojikName} 설정</h2>
       </div>
-      <div css={jojikListViewCss.panelBody}>
-        <h3 css={jojikListViewCss.panelSubtitle}>조직 위젯</h3>
-        <div css={jojikListViewCss.salesDiv}>
+      <div css={cssObj.panelBody}>
+        <h3 css={cssObj.panelSubtitle}>조직 위젯</h3>
+        <div css={cssObj.salesDiv}>
           <span>매출 관련 텍스트</span>
         </div>
-        <h3 css={jojikListViewCss.panelSubtitle}>조직 속성</h3>
-        <form css={jojikListViewCss.panelSection} onSubmit={handleSubmitName}>
+        <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
+        <form css={cssObj.panelSection} onSubmit={handleSubmitName}>
           <Textfield
             singleLine
             required
@@ -290,7 +286,7 @@ function SingleSelectionPanelContent({
             helperText="30자 이내의 이름을 입력해 주세요."
             maxLength={30}
           />
-          <div css={jojikListViewCss.sectionActions}>
+          <div css={cssObj.sectionActions}>
             <Button
               type="submit"
               size="small"
@@ -300,28 +296,28 @@ function SingleSelectionPanelContent({
             </Button>
           </div>
         </form>
-        <div css={jojikListViewCss.panelSection}>
-          <span css={jojikListViewCss.panelLabel}>조직 식별자</span>
-          <span css={jojikListViewCss.panelText}>{jojikDetailNanoId ?? jojikNanoId}</span>
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelLabel}>조직 식별자</span>
+          <span css={cssObj.panelText}>{jojikDetailNanoId ?? jojikNanoId}</span>
         </div>
         {typeof openSangtae === 'boolean' && (
-          <div css={jojikListViewCss.panelSection}>
-            <span css={jojikListViewCss.panelLabel}>공개 여부</span>
-            <span css={jojikListViewCss.panelText}>{openSangtae ? '공개' : '비공개'}</span>
+          <div css={cssObj.panelSection}>
+            <span css={cssObj.panelLabel}>공개 여부</span>
+            <span css={cssObj.panelText}>{openSangtae ? '공개' : '비공개'}</span>
           </div>
         )}
         {jaewonsaengLinkRequestUrl ? (
-          <div css={jojikListViewCss.panelSection}>
-            <span css={jojikListViewCss.panelLabel}>재원생 신청 링크</span>
-            <span css={jojikListViewCss.panelText}>{jaewonsaengLinkRequestUrl}</span>
+          <div css={cssObj.panelSection}>
+            <span css={cssObj.panelLabel}>재원생 신청 링크</span>
+            <span css={cssObj.panelText}>{jaewonsaengLinkRequestUrl}</span>
           </div>
         ) : null}
         {openFiles?.length ? (
-          <div css={jojikListViewCss.panelSection}>
-            <span css={jojikListViewCss.panelLabel}>공유 파일</span>
-            <div css={jojikListViewCss.chipList}>
+          <div css={cssObj.panelSection}>
+            <span css={cssObj.panelLabel}>공유 파일</span>
+            <div css={cssObj.chipList}>
               {openFiles.map((file) => (
-                <span key={file.nanoId} css={jojikListViewCss.chip}>
+                <span key={file.nanoId} css={cssObj.chip}>
                   {file.name}
                 </span>
               ))}
@@ -329,17 +325,13 @@ function SingleSelectionPanelContent({
           </div>
         ) : null}
         {updateMutation.isError && (
-          <p css={jojikListViewCss.helperText}>
-            조직 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.
-          </p>
+          <p css={cssObj.helperText}>조직 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
         )}
         {deleteMutation.isError && (
-          <p css={jojikListViewCss.helperText}>
-            조직 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.
-          </p>
+          <p css={cssObj.helperText}>조직 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
         )}
       </div>
-      <div css={jojikListViewCss.panelFooter}>
+      <div css={cssObj.panelFooter}>
         <Button
           styleType="solid"
           variant="red"
@@ -361,33 +353,17 @@ type MultiSelectionPanelProps = {
 
 function MultiSelectionPanel({ jojiks }: MultiSelectionPanelProps) {
   const displayList = useMemo(() => jojiks.slice(0, 6), [jojiks]);
-  const overflowCount = Math.max(jojiks.length - displayList.length, 0);
 
   return (
     <>
-      <div css={jojikListViewCss.panelHeader}>
-        <h2 css={jojikListViewCss.panelTitle}>{jojiks.length}개의 조직이 선택되었습니다</h2>
-        <p css={jojikListViewCss.panelSubtitle}>여러 조직 기능은 준비 중입니다.</p>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>
+          {jojiks[0].name} 외 {jojiks.length}개 설정
+        </h2>
       </div>
-      <div css={jojikListViewCss.panelBody}>
-        <div css={jojikListViewCss.panelSection}>
-          <span css={jojikListViewCss.panelLabel}>선택된 조직</span>
-          <div css={jojikListViewCss.chipList}>
-            {displayList.map((jojik) => (
-              <span key={jojik.nanoId} css={jojikListViewCss.chip}>
-                {jojik.name}
-              </span>
-            ))}
-          </div>
-          {overflowCount > 0 && (
-            <p css={jojikListViewCss.helperText}>
-              외 {overflowCount}개의 조직이 더 선택되어 있습니다.
-            </p>
-          )}
-        </div>
-        <div css={jojikListViewCss.panelSection}>
-          <span css={jojikListViewCss.panelLabel}>다중 선택 기능</span>
-          <p css={jojikListViewCss.panelText}>여러 조직 선택 시 기능을 준비 중입니다.</p>
+      <div css={cssObj.panelBody}>
+        <div css={cssObj.salesDiv}>
+          <span>준비중입니다.</span>
         </div>
       </div>
     </>

@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { ListViewState, useListViewState } from '@/common/list-view';
+import { ListViewState, useListViewState } from '@/common/lv';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
 import {

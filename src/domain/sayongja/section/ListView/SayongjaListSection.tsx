@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { Row } from '@tanstack/react-table';
 
-import { ListViewTemplate, type ListViewTemplateRowEventHandlers } from '@/common/list-view';
+import { Template, type ListViewTemplateRowEventHandlers } from '@/common/lv';
 import type { SayongjaListSectionProps } from './useSayongjaListViewSections';
 import type { SayongjaFilters } from './useSayongjaListViewSections';
 import type { SayongjaListItem } from '@/domain/sayongja/api';
@@ -61,7 +61,7 @@ export function SayongjaListSection({
   const effectiveFilters = filters ?? DEFAULT_FILTERS;
 
   return (
-    <ListViewTemplate
+    <Template
       data={data}
       columns={columns}
       state={state}

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { ListViewState, useListViewState } from '@/common/list-view';
+import { ListViewState, useListViewState } from '@/common/lv';
 import { useGetPermissionTypesQuery } from '@/domain/system/api';
 import {
   useBatchlinkPermissionSayongjaMutation,
@@ -15,7 +15,13 @@ import { useGetSayongjasQuery } from '@/domain/sayongja/api';
 import type { GetPermissionsRequest, Permission } from '@/domain/permission/api';
 import type { SayongjaListItem } from '@/domain/sayongja/api';
 
-import { PAGE_SIZE_OPTIONS, SORT_OPTIONS, columnHelper, getSortOptionFromState, getSortStateFromOption } from './constants';
+import {
+  PAGE_SIZE_OPTIONS,
+  SORT_OPTIONS,
+  columnHelper,
+  getSortOptionFromState,
+  getSortStateFromOption,
+} from './constants';
 
 export type PermissionListViewHookParams = {
   gigwanNanoId: string;
@@ -114,18 +120,24 @@ export function usePermissionListViewSections({
   const queryParams: GetPermissionsRequest = {
     gigwanNanoId,
     permissionNameSearch: searchTerm ? searchTerm : undefined,
-    permissionTypeFilters: filters.permissionTypeNanoId !== 'all' ? [filters.permissionTypeNanoId] : undefined,
+    permissionTypeFilters:
+      filters.permissionTypeNanoId !== 'all' ? [filters.permissionTypeNanoId] : undefined,
     pageNumber: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortByOption,
   };
 
-  const { data: permissionsData, isLoading: isListLoading, refetch } = useGetPermissionsQuery(queryParams, {
+  const {
+    data: permissionsData,
+    isLoading: isListLoading,
+    refetch,
+  } = useGetPermissionsQuery(queryParams, {
     enabled: isAuthenticated && Boolean(gigwanNanoId),
   });
 
   const data = permissionsData?.permissions ?? [];
-  const totalCount = (permissionsData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
+  const totalCount =
+    (permissionsData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
   const columns = useMemo(
@@ -202,10 +214,14 @@ export function usePermissionListViewSections({
   );
   const availableSayongjas = sayongjasData?.sayongjas ?? [];
 
-  const selectedPermissionNanoId = selectedPermissions.length === 1 ? selectedPermissions[0].nanoId : '';
-  const { refetch: refetchPermissionSayongjas } = useGetPermissionSayongjasQuery(selectedPermissionNanoId, {
-    enabled: false,
-  });
+  const selectedPermissionNanoId =
+    selectedPermissions.length === 1 ? selectedPermissions[0].nanoId : '';
+  const { refetch: refetchPermissionSayongjas } = useGetPermissionSayongjasQuery(
+    selectedPermissionNanoId,
+    {
+      enabled: false,
+    },
+  );
 
   const batchlinkMutation = useBatchlinkPermissionSayongjaMutation(selectedPermissionNanoId);
   const handleApplyAddUsers = async () => {
