@@ -147,6 +147,12 @@ export const cssObj = {
     font-weight: 600;
   `,
 
+  filterOptionContent: css`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  `,
+
   tableContainer: css`
     flex: 1;
     display: flex;

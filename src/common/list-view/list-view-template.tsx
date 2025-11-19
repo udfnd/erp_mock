@@ -28,6 +28,10 @@ import {
   ArrowMdRightSingle,
   Plus,
   Search,
+  RadioCheckedActive,
+  RadioCheckedDisabled,
+  RadioUncheckedActive,
+  RadioUncheckedDisabled,
 } from '@/common/icons';
 
 import { cssObj } from './style';
@@ -137,6 +141,25 @@ export function ListViewTemplate<TData>({
 
   const [paginationViewMode, setPaginationViewMode] = useState<'segment' | 'centered'>('segment');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [searchInputValue, setSearchInputValue] = useState(search?.value ?? '');
+  const searchValue = search?.value ?? '';
+  const searchOnChange = search?.onChange;
+
+  useEffect(() => {
+    setSearchInputValue(searchValue);
+  }, [searchValue]);
+
+  useEffect(() => {
+    if (!searchOnChange) return;
+
+    const handler = setTimeout(() => {
+      if (searchInputValue !== searchValue) {
+        searchOnChange(searchInputValue);
+      }
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchInputValue, searchOnChange, searchValue]);
 
   let primaryActionLabel: ReactNode | undefined;
   let primaryActionProps: Omit<ListViewTemplatePrimaryAction, 'label'> | undefined;
@@ -249,6 +272,17 @@ export function ListViewTemplate<TData>({
 
   const sortDisplayLabel = sortSelectedOption?.label ?? sort?.placeholder ?? '정렬 기준';
 
+  const getSortOptionIcon = (optionValue: string) => {
+    if (!sort) return null;
+
+    const isActive = optionValue === sort.value;
+    if (!sort.options.some((option) => option.value === optionValue)) {
+      return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
+    }
+
+    return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
+  };
+
   const totalCount = totalCountProp ?? table.getPrePaginationRowModel().rows.length;
   const pageIndex = table.getState().pagination.pageIndex;
   const isManualPagination = Boolean(manualPagination);
@@ -345,9 +379,9 @@ export function ListViewTemplate<TData>({
                 <Search css={cssObj.searchIcon} />
                 <input
                   css={cssObj.searchInput}
-                  value={search.value}
+                  value={searchInputValue}
                   placeholder={search.placeholder ?? '검색어를 입력하세요'}
-                  onChange={(event) => search.onChange(event.target.value)}
+                  onChange={(event) => setSearchInputValue(event.target.value)}
                 />
               </div>
             )}
@@ -378,7 +412,10 @@ export function ListViewTemplate<TData>({
                             setIsSortDropdownOpen(false);
                           }}
                         >
-                          {sort.placeholder}
+                          <span css={cssObj.filterOptionContent}>
+                            {getSortOptionIcon('')}
+                            <span>{sort.placeholder}</span>
+                          </span>
                         </button>
                       )}
 
@@ -394,7 +431,10 @@ export function ListViewTemplate<TData>({
                               setIsSortDropdownOpen(false);
                             }}
                           >
-                            {option.label}
+                            <span css={cssObj.filterOptionContent}>
+                              {getSortOptionIcon(option.value)}
+                              <span>{option.label}</span>
+                            </span>
                           </button>
                         );
                       })}
