@@ -124,7 +124,10 @@ export const cssObj = {
     position: relative;
   `,
 
-  filterTrigger: (isOpen: boolean) => css`
+  filterTrigger: (isOpen: boolean, isActive: boolean) => {
+    const isHighlighted = isOpen || isActive;
+
+    return css`
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
@@ -132,12 +135,13 @@ export const cssObj = {
     height: 32px;
     padding: 0 12px;
     border-radius: 8px;
-    border: ${isOpen ? `1px solid ${color.blue}` : `1px solid ${color.cgrey50}`};
-    background: ${isOpen ? color.blue50 : color.cgrey50};
-    color: ${isOpen ? color.blue : color.cgrey500};
+    border: ${isHighlighted ? `1px solid ${color.blue}` : `1px solid ${color.cgrey50}`};
+    background: ${isHighlighted ? color.blue50 : color.cgrey50};
+    color: ${isHighlighted ? color.blue : color.cgrey500};
     ${typography.captionB};
     cursor: pointer;
-  `,
+  `;
+  },
 
   filterTriggerCaret: css`
     font-size: 10px;

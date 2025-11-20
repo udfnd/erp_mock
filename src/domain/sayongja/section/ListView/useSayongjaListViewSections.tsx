@@ -5,9 +5,10 @@ import { useMemo, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
 import { ListViewState, useListViewState } from '@/common/lv';
-import { useGetMyJojiksQuery, useGetSayongjasQuery } from '@/domain/sayongja/api';
+import { useGetSayongjasQuery } from '@/domain/sayongja/api';
 import type { GetSayongjasRequest, SayongjaListItem } from '@/domain/sayongja/api';
 import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/domain/gigwan/api';
+import { useJojiksQuery } from '@/domain/jojik/api';
 
 import {
   IS_HWALSEONG_FILTER_OPTIONS,
@@ -114,13 +115,16 @@ export function useSayongjaListViewSections({
     isHwalseong: 'all',
   });
 
-  const { data: myJojiksData } = useGetMyJojiksQuery({ enabled: isAuthenticated });
+  const { data: jojikListData } = useJojiksQuery(
+    { gigwanNanoId, pageNumber: 1, pageSize: 100 },
+    { enabled: isAuthenticated && Boolean(gigwanNanoId) },
+  );
   const jojikFilterOptions = useMemo(
     () => [
       { label: '전체 조직', value: 'all' },
-      ...(myJojiksData?.jojiks.map((jojik) => ({ label: jojik.name, value: jojik.nanoId })) ?? []),
+      ...(jojikListData?.jojiks.map((jojik) => ({ label: jojik.name, value: jojik.nanoId })) ?? []),
     ],
-    [myJojiksData?.jojiks],
+    [jojikListData?.jojiks],
   );
 
   const { data: employmentCategoriesData } = useEmploymentCategoriesQuery(gigwanNanoId, {
