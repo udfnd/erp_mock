@@ -7,7 +7,7 @@ import { getGigwanName } from '@/domain/gigwan/api';
 import { ArrowLgRight, Progress } from '@/common/icons';
 import { Button, Textfield } from '@/common/components';
 
-import * as styles from './style';
+import { cssObj } from './style';
 import { color } from '@/style';
 
 export default function EnterCodePage() {
@@ -20,23 +20,20 @@ export default function EnterCodePage() {
 
   const { code, errorMessage, isLoading } = state;
 
-  const handleChange = useCallback(
-    (value: string) => {
-      const sanitized = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8);
-      setState((prev) => {
-        if (prev.code === sanitized && !prev.errorMessage) {
-          return prev;
-        }
+  const handleChange = useCallback((value: string) => {
+    const sanitized = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8);
+    setState((prev) => {
+      if (prev.code === sanitized && !prev.errorMessage) {
+        return prev;
+      }
 
-        return {
-          ...prev,
-          code: sanitized,
-          errorMessage: prev.errorMessage ? '' : prev.errorMessage,
-        };
-      });
-    },
-    [],
-  );
+      return {
+        ...prev,
+        code: sanitized,
+        errorMessage: prev.errorMessage ? '' : prev.errorMessage,
+      };
+    });
+  }, []);
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -75,13 +72,13 @@ export default function EnterCodePage() {
   }, [errorMessage, isLoading]);
 
   return (
-    <div css={styles.page}>
-      <div css={styles.card}>
-        <header css={styles.header}>
-          <h1 css={styles.title}>기관 코드를 입력해 주세요.</h1>
-          <p css={styles.description}>소속된 기관의 코드를 입력하여 티키타를 이용해 보세요.</p>
+    <div css={cssObj.page}>
+      <div css={cssObj.card}>
+        <header css={cssObj.header}>
+          <h1 css={cssObj.title}>기관 코드를 입력해 주세요.</h1>
+          <p css={cssObj.description}>소속된 기관의 코드를 입력하여 티키타를 이용해 보세요.</p>
         </header>
-        <form css={styles.form} onSubmit={handleSubmit}>
+        <form css={cssObj.form} onSubmit={handleSubmit}>
           <Textfield
             singleLine
             placeholder="코드를 입력해 주세요."
@@ -92,7 +89,7 @@ export default function EnterCodePage() {
             helperText={helperText}
             disabled={isLoading}
           />
-          <div css={styles.buttonWrapper}>
+          <div css={cssObj.buttonWrapper}>
             <Button
               isFull
               type="submit"
@@ -101,7 +98,7 @@ export default function EnterCodePage() {
               variant="primary"
               iconRight={<ArrowLgRight width={16} height={16} color={`${color.cgrey300}`} />}
             >
-              {isLoading ? <Progress css={styles.spinner} /> : '확인'}
+              {isLoading ? <Progress css={cssObj.spinner} /> : '확인'}
             </Button>
           </div>
         </form>

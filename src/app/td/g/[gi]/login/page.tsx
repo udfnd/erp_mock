@@ -9,7 +9,7 @@ import { ArrowLgRight, Progress } from '@/common/icons';
 import { Button, Textfield } from '@/common/components';
 import { useAuth } from '@/global/auth';
 
-import * as styles from './style';
+import { cssObj } from './style';
 import { color } from '@/style';
 
 export default function SignInPage() {
@@ -59,37 +59,31 @@ export default function SignInPage() {
   const isBusy = isGigwanLoading || isSubmitting;
   const isButtonDisabled = !isFormValid || isBusy || Boolean(errorText);
 
-  const handleIdChange = useCallback(
-    (value: string) => {
-      setFormState((prev) => {
-        if (prev.id === value && !prev.errorText) {
-          return prev;
-        }
-        return {
-          ...prev,
-          id: value,
-          errorText: prev.errorText ? '' : prev.errorText,
-        };
-      });
-    },
-    [],
-  );
+  const handleIdChange = useCallback((value: string) => {
+    setFormState((prev) => {
+      if (prev.id === value && !prev.errorText) {
+        return prev;
+      }
+      return {
+        ...prev,
+        id: value,
+        errorText: prev.errorText ? '' : prev.errorText,
+      };
+    });
+  }, []);
 
-  const handlePasswordChange = useCallback(
-    (value: string) => {
-      setFormState((prev) => {
-        if (prev.password === value && !prev.errorText) {
-          return prev;
-        }
-        return {
-          ...prev,
-          password: value,
-          errorText: prev.errorText ? '' : prev.errorText,
-        };
-      });
-    },
-    [],
-  );
+  const handlePasswordChange = useCallback((value: string) => {
+    setFormState((prev) => {
+      if (prev.password === value && !prev.errorText) {
+        return prev;
+      }
+      return {
+        ...prev,
+        password: value,
+        errorText: prev.errorText ? '' : prev.errorText,
+      };
+    });
+  }, []);
 
   const setErrorText = useCallback((message: string) => {
     setFormState((prev) => {
@@ -170,14 +164,14 @@ export default function SignInPage() {
   if (isRedirecting) return null;
 
   return (
-    <div css={styles.page}>
-      <div css={styles.card}>
-        <header css={styles.header}>
-          <h1 css={styles.title}>{title}</h1>
-          <p css={styles.subtitle}>{subtitle}</p>
+    <div css={cssObj.page}>
+      <div css={cssObj.card}>
+        <header css={cssObj.header}>
+          <h1 css={cssObj.title}>{title}</h1>
+          <p css={cssObj.subtitle}>{subtitle}</p>
         </header>
-        <form css={styles.form} onSubmit={handleSubmit}>
-          <div css={styles.inputWrapper}>
+        <form css={cssObj.form} onSubmit={handleSubmit}>
+          <div css={cssObj.inputWrapper}>
             <p>아이디</p>
             <Textfield
               placeholder="아이디를 입력하세요"
@@ -189,7 +183,7 @@ export default function SignInPage() {
               singleLine
             />
           </div>
-          <div css={styles.inputWrapper}>
+          <div css={cssObj.inputWrapper}>
             <p>패스워드</p>
             <Textfield
               placeholder="패스워드를 입력하세요"
@@ -202,8 +196,8 @@ export default function SignInPage() {
               singleLine
             />
           </div>
-          {errorText && <p css={styles.errorText}>{errorText}</p>}
-          <div css={styles.buttonWrapper}>
+          {errorText && <p css={cssObj.errorText}>{errorText}</p>}
+          <div css={cssObj.buttonWrapper}>
             <Button
               isFull
               type="submit"
@@ -212,7 +206,7 @@ export default function SignInPage() {
               variant="primary"
               iconRight={<ArrowLgRight width={16} height={16} color={`${color.cgrey300}`} />}
             >
-              {isBusy ? <Progress css={styles.spinner} /> : '로그인'}
+              {isBusy ? <Progress css={cssObj.spinner} /> : '로그인'}
             </Button>
           </div>
         </form>

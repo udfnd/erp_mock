@@ -227,7 +227,10 @@ export const cssObj = {
   panelSection: css`
     display: flex;
     flex-direction: column;
+    border-bottom: 1px solid ${color.cgrey50};
     gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
   `,
 
   sectionActions: css`
@@ -253,11 +256,8 @@ export const cssObj = {
   `,
 
   panelFooter: css`
-    padding: 16px 24px;
-    border-top: 1px solid ${color.cgrey100};
+    padding: 16px;
     display: flex;
-    gap: 12px;
-    justify-content: flex-end;
   `,
 
   helperText: css`
@@ -279,12 +279,6 @@ export const cssObj = {
     background: ${color.blue10};
     color: ${color.blue600};
     font-size: 13px;
-  `,
-
-  fieldRow: css`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
   `,
 
   permissionList: css`

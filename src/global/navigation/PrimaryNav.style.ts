@@ -9,7 +9,8 @@ type IT = Interpolation<Theme>;
 const collapsedRange = '(min-width: 960px) and (max-width: 1279px)';
 
 const navContainerBase = css({
-  position: 'relative',
+  position: 'sticky',
+  top: 0,
   display: 'flex',
   flexDirection: 'column',
   width: '200px',
@@ -21,6 +22,8 @@ const navContainerBase = css({
   color: color.black,
   gap: spacing.xl,
   height: '100vh',
+  overflowY: 'auto',
+  overflowX: 'hidden',
   boxSizing: 'border-box',
   flexShrink: 0,
   transition: 'max-width 0.2s ease-in-out, padding 0.2s ease-in-out',
@@ -35,12 +38,10 @@ export const navContainerOpen: IT[] = [
     maxWidth: '200px',
     padding: '10px 12px 24px',
     alignItems: 'initial',
-    overflow: 'visible',
     [`@media ${collapsedRange}`]: {
       maxWidth: '200px',
       padding: '10px 12px 24px',
       alignItems: 'initial',
-      overflow: 'visible',
     },
   }),
 ];
@@ -51,12 +52,12 @@ export const navContainerClosed: IT[] = [
     maxWidth: '40px',
     padding: '8px',
     alignItems: 'center',
-    overflow: 'hidden',
+    overflowX: 'hidden',
     [`@media ${collapsedRange}`]: {
       maxWidth: '40px',
       padding: '8px',
       alignItems: 'center',
-      overflow: 'hidden',
+      overflowX: 'hidden',
     },
   }),
 ];

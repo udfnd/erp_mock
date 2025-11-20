@@ -69,13 +69,11 @@ const inputWrapperDisabledStyles = {
   }),
 } as const;
 
-/** ★ singleLine일 때 wrapper를 48px 높이로 만드는 보조 스타일 */
 const inputWrapperSingleLineBase = css({
-  // 한 줄 필드: 내부 gap 제거, 수직 가운데 정렬, 고정 높이 48px
   gap: 0,
   padding: `0 ${spacing.base}`,
-  minHeight: 48,
-  height: 48,
+  minHeight: 44,
+  height: 44,
   flexDirection: 'row',
   alignItems: 'center',
 });

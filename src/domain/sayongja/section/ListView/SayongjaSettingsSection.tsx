@@ -18,7 +18,7 @@ import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/
 
 import { cssObj } from './styles';
 import type { SayongjaSettingsSectionProps } from './useSayongjaListViewSections';
-import { Magic } from '@/common/icons';
+import { Magic, Plus } from '@/common/icons';
 
 const HWALSEONG_OPTIONS = [
   { label: '활성', value: 'true' },
@@ -193,61 +193,78 @@ function CreateSayongjaPanel({
   return (
     <>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>새 사용자 추가</h2>
+        <h2 css={cssObj.panelTitle}>사용자 생성</h2>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
-        <h3 css={cssObj.panelSubtitle}>사용자 속성</h3>
-        <Textfield
-          singleLine
-          label="이름"
-          placeholder="이름을 입력해 주세요"
-          value={name}
-          onValueChange={setName}
-          maxLength={60}
-        />
-        <Textfield
-          singleLine
-          label="아이디"
-          placeholder="아이디를 입력해 주세요"
-          value={loginId}
-          onValueChange={setLoginId}
-        />
-        <Textfield
-          singleLine
-          type="date"
-          label="입사일"
-          value={employedAt}
-          onValueChange={setEmployedAt}
-        />
-        <div css={cssObj.panelLabelSection}>
-          <label css={cssObj.panelLabel}>재직 상태</label>
-          <select
-            css={cssObj.toolbarSelect}
-            value={employmentNanoId}
-            onChange={(e) => setEmploymentNanoId(e.target.value)}
-          >
-            {employmentCategoryOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+        <div css={cssObj.panelSection}>
+          <h3 css={cssObj.panelSubtitle}>사용자 속성</h3>
+          <Textfield
+            singleLine
+            label="이름"
+            placeholder="이름을 입력해 주세요"
+            value={name}
+            onValueChange={setName}
+            maxLength={60}
+          />
+          <Textfield
+            singleLine
+            label="아이디"
+            placeholder="아이디를 입력해 주세요"
+            value={loginId}
+            onValueChange={setLoginId}
+          />
+          <Textfield
+            singleLine
+            type="date"
+            label="입사일"
+            value={employedAt}
+            onValueChange={setEmployedAt}
+          />
+          <div css={cssObj.panelLabelSection}>
+            <label css={cssObj.panelLabel}>재직 상태</label>
+            <select
+              css={cssObj.toolbarSelect}
+              value={employmentNanoId}
+              onChange={(e) => setEmploymentNanoId(e.target.value)}
+            >
+              {employmentCategoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div css={cssObj.panelLabelSection}>
+            <label css={cssObj.panelLabel}>근무 형태</label>
+            <select
+              css={cssObj.toolbarSelect}
+              value={workTypeNanoId}
+              onChange={(e) => setWorkTypeNanoId(e.target.value)}
+            >
+              {workTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div css={cssObj.panelLabelSection}>
+            <label css={cssObj.panelLabel}>활성 상태</label>
+            <select
+              css={cssObj.toolbarSelect}
+              value={isHwalseongValue}
+              onChange={(e) => setIsHwalseongValue(e.target.value)}
+            >
+              {HWALSEONG_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div css={cssObj.panelLabelSection}>
-          <label css={cssObj.panelLabel}>근무 형태</label>
-          <select
-            css={cssObj.toolbarSelect}
-            value={workTypeNanoId}
-            onChange={(e) => setWorkTypeNanoId(e.target.value)}
-          >
-            {workTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
+          <h3 css={cssObj.panelSubtitle}>초기 비밀번호</h3>
           <Textfield
             singleLine
             type="password"
@@ -263,28 +280,11 @@ function CreateSayongjaPanel({
             onValueChange={setPasswordConfirm}
           />
         </div>
-        <div css={cssObj.sectionActions}>
-          <Button styleType="outlined" variant="secondary" size="small" onClick={handleGeneratePassword}>
-            비밀번호 무작위 생성
-          </Button>
-        </div>
-        {isPasswordMismatch && (
-          <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>
-        )}
-        <div css={cssObj.panelLabelSection}>
-          <label css={cssObj.panelLabel}>활성 상태</label>
-          <select
-            css={cssObj.toolbarSelect}
-            value={isHwalseongValue}
-            onChange={(e) => setIsHwalseongValue(e.target.value)}
-          >
-            {HWALSEONG_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Button variant="assistive" size="small" onClick={handleGeneratePassword}>
+          비밀번호 무작위 생성
+        </Button>
+        {isPasswordMismatch && <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>}
+
         {createMutation.isError && (
           <p css={cssObj.helperText}>
             사용자 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
@@ -292,14 +292,12 @@ function CreateSayongjaPanel({
         )}
       </form>
       <div css={cssObj.panelFooter}>
-        {onExit ? (
-          <Button styleType="text" variant="secondary" onClick={onExit} disabled={isSaving}>
-            취소
-          </Button>
-        ) : null}
         <Button
           type="submit"
+          size="small"
+          isFull
           form={formId}
+          iconRight={<Plus />}
           disabled={isCreateDisabled}
         >
           사용자 생성
@@ -437,7 +435,6 @@ function SingleSelectionPanelContent({
     selectedPermissionNanoId || '',
   );
 
-  const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
   const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
 
@@ -493,16 +490,14 @@ function SingleSelectionPanelContent({
     setPasswordConfirm(generated);
   };
 
-  const isSaveDisabled = isUpdating || isPasswordMismatch;
-
   return (
     <>
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>{sayongjaName}</h2>
-        <p css={cssObj.panelSubtitle}>사용자 정보를 수정하거나 삭제할 수 있습니다.</p>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
         <div css={cssObj.panelSection}>
+          <h3 css={cssObj.panelSubtitle}>사용자 속성</h3>
           <Textfield
             singleLine
             required
@@ -513,8 +508,7 @@ function SingleSelectionPanelContent({
           />
           <Textfield
             singleLine
-            required
-            label="로그인 ID"
+            label="아이디"
             value={loginIdValue}
             onValueChange={setLoginIdValue}
           />
@@ -526,40 +520,55 @@ function SingleSelectionPanelContent({
             value={employedAtValue}
             onValueChange={setEmployedAtValue}
           />
+          <div css={cssObj.panelLabelSection}>
+            <label css={cssObj.panelLabel}>재직 상태</label>
+            <select
+              css={cssObj.toolbarSelect}
+              value={employmentValue}
+              onChange={(e) => setEmploymentValue(e.target.value)}
+            >
+              {employmentCategoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div css={cssObj.panelLabelSection}>
+            <label css={cssObj.panelLabel}>근무 형태</label>
+            <select
+              css={cssObj.toolbarSelect}
+              value={workTypeValue}
+              onChange={(e) => setWorkTypeValue(e.target.value)}
+            >
+              {workTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div css={cssObj.panelLabelSection}>
+            <label css={cssObj.panelLabel}>활성 상태</label>
+            <select
+              css={cssObj.toolbarSelect}
+              value={isHwalseongValue}
+              onChange={(e) => setIsHwalseongValue(e.target.value)}
+            >
+              {HWALSEONG_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div css={cssObj.panelLabelSection}>
-          <label css={cssObj.panelLabel}>재직 상태</label>
-          <select
-            css={cssObj.toolbarSelect}
-            value={employmentValue}
-            onChange={(e) => setEmploymentValue(e.target.value)}
-          >
-            {employmentCategoryOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div css={cssObj.panelLabelSection}>
-          <label css={cssObj.panelLabel}>근무 형태</label>
-          <select
-            css={cssObj.toolbarSelect}
-            value={workTypeValue}
-            onChange={(e) => setWorkTypeValue(e.target.value)}
-          >
-            {workTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
+        <div css={cssObj.panelSection}>
+          <h3 css={cssObj.panelSubtitle}>비밀번호 변경</h3>
           <Textfield
             singleLine
             type="password"
-            label="비밀번호 변경"
+            label="비밀번호"
             placeholder="변경 시에만 입력"
             value={password}
             onValueChange={setPassword}
@@ -572,39 +581,20 @@ function SingleSelectionPanelContent({
             value={passwordConfirm}
             onValueChange={setPasswordConfirm}
           />
+          <div css={cssObj.sectionActions}>
+            <Button
+              styleType="outlined"
+              variant="secondary"
+              size="small"
+              onClick={handleGeneratePassword}
+            >
+              비밀번호 무작위 생성
+            </Button>
+          </div>
+          {isPasswordMismatch && <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>}
         </div>
-        <div css={cssObj.sectionActions}>
-          <Button
-            styleType="outlined"
-            variant="secondary"
-            size="small"
-            onClick={handleGeneratePassword}
-          >
-            비밀번호 무작위 생성
-          </Button>
-        </div>
-        {isPasswordMismatch && (
-          <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>
-        )}
-        <div css={cssObj.panelLabelSection}>
-          <label css={cssObj.panelLabel}>활성 상태</label>
-          <select
-            css={cssObj.toolbarSelect}
-            value={isHwalseongValue}
-            onChange={(e) => setIsHwalseongValue(e.target.value)}
-          >
-            {HWALSEONG_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        {updateMutation.isError && (
-          <p css={cssObj.helperText}>사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
-        )}
         <div css={cssObj.panelSection}>
-          <span css={cssObj.panelLabel}>연결 객체들</span>
+          <h3 css={cssObj.panelSubtitle}>연결 객체들</h3>
           <div css={cssObj.panelSection}>
             <div css={cssObj.panelLabel}>권한들</div>
             <div css={cssObj.permissionList}>
@@ -616,15 +606,19 @@ function SingleSelectionPanelContent({
               ))}
               {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
             </div>
+
             <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
               <Button
                 styleType="outlined"
-                variant="secondary"
+                variant="assistive"
+                isFull
                 onClick={() => setIsPermissionTooltipOpen((prev) => !prev)}
                 aria-expanded={isPermissionTooltipOpen}
+                iconRight={<Plus />}
               >
                 권한 추가
               </Button>
+
               {isPermissionTooltipOpen ? (
                 <div css={cssObj.permissionTooltip}>
                   <label css={cssObj.panelLabel}>추가할 권한 선택</label>
@@ -640,9 +634,11 @@ function SingleSelectionPanelContent({
                       </option>
                     ))}
                   </select>
+
                   {permissionsQuery.isError && (
                     <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
                   )}
+
                   <div css={cssObj.permissionTooltipActions}>
                     <Button
                       styleType="solid"
@@ -668,18 +664,14 @@ function SingleSelectionPanelContent({
             </div>
           </div>
         </div>
+
+        {updateMutation.isError && (
+          <p css={cssObj.helperText}>사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
+        )}
       </form>
       <div css={cssObj.panelFooter}>
-        <Button
-          styleType="outlined"
-          variant="secondary"
-          onClick={handleDelete}
-          disabled={isDeleting}
-        >
+        <Button variant="red" size="small" isFull onClick={handleDelete} disabled={isDeleting}>
           사용자 삭제
-        </Button>
-        <Button type="submit" form={formId} disabled={isSaveDisabled}>
-          저장
         </Button>
       </div>
     </>

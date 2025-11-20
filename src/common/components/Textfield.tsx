@@ -36,6 +36,7 @@ type BaseProps = {
   className?: string;
   placeholder?: string;
   id?: string;
+  width?: React.CSSProperties['width'];
 };
 
 type InputRest = Omit<
@@ -75,6 +76,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
         className,
         placeholder,
         id,
+        width,
         singleLine,
         ...inputDomProps
       } = props as SingleLineProps;
@@ -84,7 +86,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
       const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
 
       return (
-        <div css={[container]} className={className}>
+        <div css={[container]} className={className} style={width ? { width } : undefined}>
           {label &&
             (id ? (
               <label htmlFor={id} css={labelWrapper}>
@@ -131,6 +133,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
       className,
       placeholder,
       id,
+      width,
       singleLine,
       ...textareaDomProps
     } = props as MultiLineProps;
@@ -140,7 +143,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
     const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
 
     return (
-      <div css={[container]} className={className}>
+      <div css={[container]} className={className} style={width ? { width } : undefined}>
         {label &&
           (id ? (
             <label htmlFor={id} css={labelWrapper}>
