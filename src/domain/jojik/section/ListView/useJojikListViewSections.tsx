@@ -123,8 +123,11 @@ export function useJojikListViewSections({
   );
 
   const data = jojiksData?.jojiks ?? [];
-  const totalCount = (jojiksData?.totalCount as number | undefined) ?? data.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
+  const totalCount =
+    (jojiksData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
+  const totalPages =
+    (jojiksData?.paginationData?.totalPageCount as number | undefined) ??
+    Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
   const columns = useMemo(
     () => [

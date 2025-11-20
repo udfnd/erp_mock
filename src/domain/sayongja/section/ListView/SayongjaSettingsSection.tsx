@@ -25,10 +25,41 @@ const HWALSEONG_OPTIONS = [
   { label: '비활성', value: 'false' },
 ];
 
-const PASSWORD_GUIDE_TEXT =
-  '비밀번호는 최소 8자 이상 입력해 주세요. (15자 권장)\n비밀번호는 100자 내로 설정할 수 있어요.';
-
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 100;
+const PASSWORD_MIN_MESSAGE = '비밀번호는 최소 8자 이상 입력해 주세요. (15자 권장)';
+const PASSWORD_MAX_MESSAGE = '비밀번호는 100자 내로 설정할 수 있어요.';
 const PASSWORD_MISMATCH_HELPER_TEXT = '비밀번호가 일치하지 않습니다. 다시 한 번 확인해 주세요.';
+
+const getPasswordLengthMessages = (value: string) => {
+  const length = value.length;
+  const messages: string[] = [];
+
+  if (length > 0 && length < PASSWORD_MIN_LENGTH) {
+    messages.push(PASSWORD_MIN_MESSAGE);
+  }
+
+  if (length > PASSWORD_MAX_LENGTH) {
+    messages.push(PASSWORD_MAX_MESSAGE);
+  }
+
+  return messages;
+};
+
+const getPasswordHelperText = (value: string) => {
+  const messages = getPasswordLengthMessages(value);
+  return messages.length ? messages.join('\n') : '';
+};
+
+const getPasswordConfirmHelperText = (password: string, confirm: string) => {
+  const messages = getPasswordLengthMessages(confirm);
+
+  if (password && confirm && password !== confirm) {
+    messages.push(PASSWORD_MISMATCH_HELPER_TEXT);
+  }
+
+  return messages.length ? messages.join('\n') : '';
+};
 
 const generateRandomPassword = (length = 12) => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*';
@@ -148,10 +179,10 @@ function CreateSayongjaPanel({
 
   const isSaving = createMutation.isPending;
   const formId = 'sayongja-create-form';
-  const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
-  const passwordConfirmHelperText = isPasswordMismatch
-    ? `${PASSWORD_GUIDE_TEXT}\n${PASSWORD_MISMATCH_HELPER_TEXT}`
-    : PASSWORD_GUIDE_TEXT;
+  const passwordHelperText = getPasswordHelperText(password);
+  const passwordConfirmHelperText = getPasswordConfirmHelperText(password, passwordConfirm);
+  const hasPasswordError = Boolean(passwordHelperText);
+  const hasPasswordConfirmError = Boolean(passwordConfirmHelperText);
 
   const handleGeneratePassword = () => {
     const generated = generateRandomPassword();
@@ -196,7 +227,8 @@ function CreateSayongjaPanel({
     !loginId ||
     !password ||
     !passwordConfirm ||
-    isPasswordMismatch;
+    hasPasswordError ||
+    hasPasswordConfirmError;
 
   return (
     <>
@@ -279,7 +311,8 @@ function CreateSayongjaPanel({
             label="비밀번호"
             value={password}
             onValueChange={setPassword}
-            helperText={PASSWORD_GUIDE_TEXT}
+            helperText={passwordHelperText}
+            status={hasPasswordError ? 'negative' : 'normal'}
           />
           <Textfield
             singleLine
@@ -288,7 +321,7 @@ function CreateSayongjaPanel({
             value={passwordConfirm}
             onValueChange={setPasswordConfirm}
             helperText={passwordConfirmHelperText}
-            status={isPasswordMismatch ? 'negative' : 'normal'}
+            status={hasPasswordConfirmError ? 'negative' : 'normal'}
           />
         </div>
         <Button variant="assistive" size="small" onClick={handleGeneratePassword}>
@@ -445,10 +478,10 @@ function SingleSelectionPanelContent({
   );
 
   const isDeleting = deleteMutation.isPending;
-  const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
-  const passwordConfirmHelperText = isPasswordMismatch
-    ? `${PASSWORD_GUIDE_TEXT}\n${PASSWORD_MISMATCH_HELPER_TEXT}`
-    : PASSWORD_GUIDE_TEXT;
+  const passwordHelperText = getPasswordHelperText(password);
+  const passwordConfirmHelperText = getPasswordConfirmHelperText(password, passwordConfirm);
+  const hasPasswordError = Boolean(passwordHelperText);
+  const hasPasswordConfirmError = Boolean(passwordConfirmHelperText);
   const hasAttributeChanges =
     name.trim() !== sayongjaName.trim() ||
     employedAtValue !== employedAt ||
@@ -459,7 +492,11 @@ function SingleSelectionPanelContent({
   const isUpdating = updateMutation.isPending;
   const isAttributeSaveDisabled = isUpdating || !hasAttributeChanges;
   const isPasswordSaveDisabled =
-    isUpdating || !password.trim() || !passwordConfirm.trim() || isPasswordMismatch;
+    isUpdating ||
+    !password.trim() ||
+    !passwordConfirm.trim() ||
+    hasPasswordError ||
+    hasPasswordConfirmError;
 
   const handleAttributeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -604,7 +641,8 @@ function SingleSelectionPanelContent({
             placeholder="변경 시에만 입력"
             value={password}
             onValueChange={setPassword}
-            helperText={PASSWORD_GUIDE_TEXT}
+            helperText={passwordHelperText}
+            status={hasPasswordError ? 'negative' : 'normal'}
           />
           <Textfield
             singleLine
@@ -614,7 +652,7 @@ function SingleSelectionPanelContent({
             value={passwordConfirm}
             onValueChange={setPasswordConfirm}
             helperText={passwordConfirmHelperText}
-            status={isPasswordMismatch ? 'negative' : 'normal'}
+            status={hasPasswordConfirmError ? 'negative' : 'normal'}
           />
           <div css={cssObj.sectionActions}>
             <Button
