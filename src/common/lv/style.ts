@@ -124,20 +124,24 @@ export const cssObj = {
     position: relative;
   `,
 
-  filterTrigger: (isOpen: boolean) => css`
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
-    height: 32px;
-    padding: 0 12px;
-    border-radius: 8px;
-    border: ${isOpen ? `1px solid ${color.blue}` : `1px solid ${color.cgrey50}`};
-    background: ${isOpen ? color.blue50 : color.cgrey50};
-    color: ${isOpen ? color.blue : color.cgrey500};
-    ${typography.captionB};
-    cursor: pointer;
-  `,
+  filterTrigger: (isOpen: boolean, isActive: boolean) => {
+    const isHighlighted = isOpen || isActive;
+
+    return css`
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: ${isHighlighted ? `1px solid ${color.blue}` : `1px solid ${color.cgrey50}`};
+      background: ${isHighlighted ? color.blue50 : color.cgrey50};
+      color: ${isHighlighted ? color.blue : color.cgrey500};
+      ${typography.captionB};
+      cursor: pointer;
+    `;
+  },
 
   filterTriggerCaret: css`
     font-size: 10px;
@@ -147,8 +151,10 @@ export const cssObj = {
   filterMenu: css`
     position: absolute;
     top: 36px;
-    right: 0;
+    left: 0;
     width: 360px;
+    max-height: 540px;
+    overflow-y: auto;
     padding: 4px 0;
     border-radius: 8px;
     background: ${color.white};

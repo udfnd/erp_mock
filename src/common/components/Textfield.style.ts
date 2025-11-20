@@ -7,7 +7,6 @@ export const container = css({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
-  width: '343px',
 });
 
 export const labelWrapper = css({

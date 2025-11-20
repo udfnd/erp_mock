@@ -2,9 +2,9 @@
 
 import { css } from '@emotion/react';
 
-import { color } from '@/style';
+import { color, typography } from '@/style';
 
-export const sayongjaListViewCss = {
+export const cssObj = {
   listSection: css`
     flex: 1 1 auto;
     display: flex;
@@ -176,8 +176,9 @@ export const sayongjaListViewCss = {
   `,
 
   settingsPanel: css`
-    width: 360px;
-    flex: 0 0 360px;
+    width: 400px;
+    min-width: 400px;
+    flex: 0 0 340px;
     background: ${color.white};
     display: flex;
     flex-direction: column;
@@ -187,28 +188,40 @@ export const sayongjaListViewCss = {
   `,
 
   panelHeader: css`
-    padding: 24px;
-    border-bottom: 1px solid ${color.cgrey100};
+    padding: 16px;
   `,
 
   panelTitle: css`
     font-size: 18px;
     font-weight: 600;
     color: ${color.black};
+    ${typography.bodySB};
   `,
 
   panelSubtitle: css`
-    margin-top: 4px;
-    font-size: 13px;
-    color: ${color.cgrey500};
+    ${typography.bodySmallSB};
+    color: ${color.black};
   `,
 
   panelBody: css`
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 24px;
+    gap: 8px;
+    padding: 16px;
+  `,
+
+  salesDiv: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    padding: 8px;
+    background-color: ${color.cgrey10};
+    > span {
+      ${typography.captionB};
+      color: ${color.cgrey500};
+    }
   `,
 
   panelSection: css`
@@ -223,9 +236,14 @@ export const sayongjaListViewCss = {
     gap: 8px;
   `,
 
+  panelLabelSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
   panelLabel: css`
-    font-size: 13px;
-    font-weight: 600;
+    ${typography.bodySmallM};
     color: ${color.cgrey500};
   `,
 

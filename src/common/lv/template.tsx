@@ -62,6 +62,7 @@ export type ListViewTemplateToolbarFilter = {
   key: string;
   label?: string;
   value: string;
+  defaultValue?: string;
   placeholder?: string;
   options: { label: string; value: string }[];
   onChange: (value: string) => void;
@@ -385,8 +386,24 @@ export function Template<TData>({
   const visibleColumnsLength = table.getVisibleFlatColumns().length || 1;
 
   const hasToolbar = Boolean(search || filters.length > 0 || sort || toolbarActionsNode);
-  const activeFiltersCount = filters.filter((filter) => filter.value !== '').length;
-  const filtersDisplayLabel = activeFiltersCount > 0 ? `필터 (${activeFiltersCount})` : '필터 선택';
+  const getFilterDefaultValue = (filter: ListViewTemplateToolbarFilter) =>
+    filter.defaultValue ?? filter.options[0]?.value ?? '';
+
+  const activeFilters = filters
+    .map((filter) => {
+      const defaultValue = getFilterDefaultValue(filter);
+      const isActive = filter.value !== '' && filter.value !== defaultValue;
+      const selectedLabel =
+        filter.options.find((option) => option.value === filter.value)?.label ?? filter.value;
+
+      return { isActive, selectedLabel };
+    })
+    .filter(({ isActive }) => isActive);
+
+  const hasActiveFilters = activeFilters.length > 0;
+  const filtersDisplayLabel = hasActiveFilters
+    ? activeFilters.map((filter) => filter.selectedLabel).join(' | ')
+    : '필터 선택';
 
   const shouldIgnoreRowClick =
     rowEventHandlers?.shouldIgnoreRowClick ??
@@ -525,7 +542,7 @@ export function Template<TData>({
                 <div css={cssObj.filterDropdown} ref={sortDropdownRef}>
                   <button
                     type="button"
-                    css={cssObj.filterTrigger(isSortDropdownOpen)}
+                    css={cssObj.filterTrigger(isSortDropdownOpen, false)}
                     onClick={() => setIsSortDropdownOpen((prev) => !prev)}
                   >
                     <span>{sortDisplayLabel}</span>
@@ -576,7 +593,6 @@ export function Template<TData>({
                   )}
                 </div>
               )}
-
               {toolbarActionsNode}
               <button type="button" css={cssObj.viewChangeButton}>
                 <TableChart />
@@ -590,7 +606,7 @@ export function Template<TData>({
         <div css={cssObj.filterDropdown} ref={filtersDropdownRef}>
           <button
             type="button"
-            css={cssObj.filterTrigger(isFiltersDropdownOpen)}
+            css={cssObj.filterTrigger(isFiltersDropdownOpen || hasActiveFilters, hasActiveFilters)}
             onClick={() => setIsFiltersDropdownOpen((prev) => !prev)}
           >
             <span>{filtersDisplayLabel}</span>
@@ -603,14 +619,12 @@ export function Template<TData>({
                 const selectedOption = filter.options.find(
                   (option) => option.value === filter.value,
                 );
-                const groupLabel = filter.label ?? filter.placeholder ?? '필터';
                 const groupValue =
                   selectedOption?.label ?? (filter.value === '' ? filter.placeholder : '');
 
                 return (
                   <div key={filter.key} css={cssObj.filterGroup(index > 0)}>
                     <div css={cssObj.filterGroupHeader}>
-                      <span>{groupLabel}</span>
                       {groupValue && <span css={cssObj.filterGroupValue}>{groupValue}</span>}
                     </div>
 

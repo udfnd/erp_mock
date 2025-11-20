@@ -16,8 +16,9 @@ import {
 } from '@/domain/sayongja/api';
 import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/api';
 
-import { sayongjaListViewCss } from './styles';
+import { cssObj } from './styles';
 import type { SayongjaSettingsSectionProps } from './useSayongjaListViewSections';
+import { Magic } from '@/common/icons';
 
 export type SayongjaSettingsSectionComponentProps = SayongjaSettingsSectionProps & {
   employmentCategoryOptions: { label: string; value: string }[];
@@ -28,6 +29,7 @@ export function SayongjaSettingsSection({
   gigwanNanoId,
   selectedSayongjas,
   isCreating,
+  onStartCreate,
   onExitCreate,
   onAfterMutation,
   isAuthenticated,
@@ -36,15 +38,13 @@ export function SayongjaSettingsSection({
 }: SayongjaSettingsSectionComponentProps) {
   if (!gigwanNanoId) {
     return (
-      <aside css={sayongjaListViewCss.settingsPanel}>
-        <div css={sayongjaListViewCss.panelHeader}>
-          <h2 css={sayongjaListViewCss.panelTitle}>기관이 선택되지 않았습니다</h2>
-          <p css={sayongjaListViewCss.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
+      <aside css={cssObj.settingsPanel}>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>기관이 선택되지 않았습니다</h2>
+          <p css={cssObj.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
         </div>
-        <div css={sayongjaListViewCss.panelBody}>
-          <p css={sayongjaListViewCss.helperText}>
-            기관 ID가 없으면 사용자 데이터를 불러올 수 없습니다.
-          </p>
+        <div css={cssObj.panelBody}>
+          <p css={cssObj.helperText}>기관 ID가 없으면 사용자 데이터를 불러올 수 없습니다.</p>
         </div>
       </aside>
     );
@@ -52,7 +52,7 @@ export function SayongjaSettingsSection({
 
   if (isCreating) {
     return (
-      <aside css={sayongjaListViewCss.settingsPanel}>
+      <aside css={cssObj.settingsPanel}>
         <CreateSayongjaPanel
           gigwanNanoId={gigwanNanoId}
           onExit={isCreating ? onExitCreate : undefined}
@@ -66,15 +66,17 @@ export function SayongjaSettingsSection({
 
   if (selectedSayongjas.length === 0) {
     return (
-      <aside css={sayongjaListViewCss.settingsPanel}>
-        <div css={sayongjaListViewCss.panelHeader}>
-          <h2 css={sayongjaListViewCss.panelTitle}>사용자를 선택해 주세요</h2>
-          <p css={sayongjaListViewCss.panelSubtitle}>
-            목록에서 사용자를 선택하거나 상단의 추가 버튼으로 새 사용자를 생성하세요.
-          </p>
+      <aside css={cssObj.settingsPanel}>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>사용자들 설정</h2>
         </div>
-        <div css={sayongjaListViewCss.panelBody}>
-          <p css={sayongjaListViewCss.helperText}>선택된 사용자가 없어서 상세 정보를 표시할 수 없습니다.</p>
+        <div css={cssObj.panelBody}>
+          <span css={cssObj.panelSubtitle}>빠른 액션</span>
+          <div>
+            <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
+              사용자 생성 마법사
+            </Button>
+          </div>
         </div>
       </aside>
     );
@@ -82,7 +84,7 @@ export function SayongjaSettingsSection({
 
   if (selectedSayongjas.length === 1) {
     return (
-      <aside css={sayongjaListViewCss.settingsPanel}>
+      <aside css={cssObj.settingsPanel}>
         <SingleSelectionPanel
           sayongjaNanoId={selectedSayongjas[0].nanoId}
           sayongjaName={selectedSayongjas[0].name}
@@ -97,7 +99,7 @@ export function SayongjaSettingsSection({
   }
 
   return (
-    <aside css={sayongjaListViewCss.settingsPanel}>
+    <aside css={cssObj.settingsPanel}>
       <MultiSelectionPanel sayongjas={selectedSayongjas} />
     </aside>
   );
@@ -161,90 +163,81 @@ function CreateSayongjaPanel({
 
   return (
     <>
-      <div css={sayongjaListViewCss.panelHeader}>
-        <h2 css={sayongjaListViewCss.panelTitle}>새 사용자 추가</h2>
-        <p css={sayongjaListViewCss.panelSubtitle}>선택된 기관에 새로운 사용자를 생성합니다.</p>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>새 사용자 추가</h2>
       </div>
-      <form id={formId} css={sayongjaListViewCss.panelBody} onSubmit={handleSubmit}>
-        <div css={sayongjaListViewCss.panelSection}>
+      <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
+        <h3 css={cssObj.panelSubtitle}>사용자 속성</h3>
+        <Textfield
+          singleLine
+          label="이름"
+          placeholder="이름을 입력해 주세요"
+          value={name}
+          onValueChange={setName}
+          maxLength={60}
+        />
+        <Textfield
+          singleLine
+          label="아이디"
+          placeholder="아이디를 입력해 주세요"
+          value={loginId}
+          onValueChange={setLoginId}
+        />
+        <div css={cssObj.panelSection}>
           <Textfield
             singleLine
-            required
-            label="이름"
-            placeholder="사용자 이름"
-            value={name}
-            onValueChange={setName}
-            maxLength={60}
-          />
-        </div>
-        <div css={sayongjaListViewCss.panelSection}>
-          <Textfield
-            singleLine
-            required
             type="date"
             label="입사일"
             value={employedAt}
             onValueChange={setEmployedAt}
           />
         </div>
-        <div css={[sayongjaListViewCss.panelSection, sayongjaListViewCss.fieldRow]}>
-          <div>
-            <label css={sayongjaListViewCss.panelLabel}>재직 상태</label>
-            <select
-              css={sayongjaListViewCss.toolbarSelect}
-              value={employmentNanoId}
-              onChange={(e) => setEmploymentNanoId(e.target.value)}
-            >
-              {employmentCategoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label css={sayongjaListViewCss.panelLabel}>근무 형태</label>
-            <select
-              css={sayongjaListViewCss.toolbarSelect}
-              value={workTypeNanoId}
-              onChange={(e) => setWorkTypeNanoId(e.target.value)}
-            >
-              {workTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div css={cssObj.panelLabelSection}>
+          <label css={cssObj.panelLabel}>재직 상태</label>
+          <select
+            css={cssObj.toolbarSelect}
+            value={employmentNanoId}
+            onChange={(e) => setEmploymentNanoId(e.target.value)}
+          >
+            {employmentCategoryOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <div css={[sayongjaListViewCss.panelSection, sayongjaListViewCss.fieldRow]}>
-          <Textfield
-            singleLine
-            required
-            label="로그인 ID"
-            value={loginId}
-            onValueChange={setLoginId}
-          />
-          <Textfield
-            singleLine
-            required
-            type="password"
-            label="비밀번호"
-            value={password}
-            onValueChange={setPassword}
-          />
+        <div css={cssObj.panelLabelSection}>
+          <label css={cssObj.panelLabel}>근무 형태</label>
+          <select
+            css={cssObj.toolbarSelect}
+            value={workTypeNanoId}
+            onChange={(e) => setWorkTypeNanoId(e.target.value)}
+          >
+            {workTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <div css={sayongjaListViewCss.panelSection}>
-          <label css={sayongjaListViewCss.panelLabel}>활성화 여부</label>
+        <Textfield
+          singleLine
+          type="password"
+          label="비밀번호"
+          value={password}
+          onValueChange={setPassword}
+        />
+        <div css={cssObj.panelSection}>
+          <label css={cssObj.panelLabel}>활성화 여부</label>
           <Checkbox checked={isHwalseong} onChange={(e) => setIsHwalseong(e.target.checked)} />
         </div>
         {createMutation.isError && (
-          <p css={sayongjaListViewCss.helperText}>
+          <p css={cssObj.helperText}>
             사용자 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
           </p>
         )}
       </form>
-      <div css={sayongjaListViewCss.panelFooter}>
+      <div css={cssObj.panelFooter}>
         {onExit ? (
           <Button styleType="text" variant="secondary" onClick={onExit} disabled={isSaving}>
             취소
@@ -313,12 +306,12 @@ function SingleSelectionPanel({
   if (isLoading && !sayongjaDetail) {
     return (
       <>
-        <div css={sayongjaListViewCss.panelHeader}>
-          <h2 css={sayongjaListViewCss.panelTitle}>{sayongjaName}</h2>
-          <p css={sayongjaListViewCss.panelSubtitle}>선택한 사용자 정보를 불러오는 중입니다...</p>
+        <div css={cssObj.panelHeader}>
+          <h2 css={cssObj.panelTitle}>{sayongjaName}</h2>
+          <p css={cssObj.panelSubtitle}>선택한 사용자 정보를 불러오는 중입니다...</p>
         </div>
-        <div css={sayongjaListViewCss.panelBody}>
-          <p css={sayongjaListViewCss.helperText}>선택한 사용자 정보를 불러오는 중입니다...</p>
+        <div css={cssObj.panelBody}>
+          <p css={cssObj.helperText}>선택한 사용자 정보를 불러오는 중입니다...</p>
         </div>
       </>
     );
@@ -370,7 +363,6 @@ function SingleSelectionPanelContent({
   employmentCategoryOptions,
   workTypeOptions,
 }: SingleSelectionPanelContentProps) {
-  // 초기 값은 props에서 한 번만 가져오고, 이후엔 입력 이벤트를 통해서만 변경된다.
   const [name, setName] = useState(sayongjaName);
   const [employedAtValue, setEmployedAtValue] = useState(employedAt);
   const [loginIdValue, setLoginIdValue] = useState(loginId);
@@ -436,12 +428,12 @@ function SingleSelectionPanelContent({
 
   return (
     <>
-      <div css={sayongjaListViewCss.panelHeader}>
-        <h2 css={sayongjaListViewCss.panelTitle}>{sayongjaName}</h2>
-        <p css={sayongjaListViewCss.panelSubtitle}>사용자 정보를 수정하거나 삭제할 수 있습니다.</p>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>{sayongjaName}</h2>
+        <p css={cssObj.panelSubtitle}>사용자 정보를 수정하거나 삭제할 수 있습니다.</p>
       </div>
-      <form id={formId} css={sayongjaListViewCss.panelBody} onSubmit={handleSubmit}>
-        <div css={sayongjaListViewCss.panelSection}>
+      <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
+        <div css={cssObj.panelSection}>
           <Textfield
             singleLine
             required
@@ -451,7 +443,7 @@ function SingleSelectionPanelContent({
             maxLength={60}
           />
         </div>
-        <div css={[sayongjaListViewCss.panelSection, sayongjaListViewCss.fieldRow]}>
+        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
           <Textfield
             singleLine
             required
@@ -468,11 +460,11 @@ function SingleSelectionPanelContent({
             onValueChange={setLoginIdValue}
           />
         </div>
-        <div css={[sayongjaListViewCss.panelSection, sayongjaListViewCss.fieldRow]}>
+        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
           <div>
-            <label css={sayongjaListViewCss.panelLabel}>재직 상태</label>
+            <label css={cssObj.panelLabel}>재직 상태</label>
             <select
-              css={sayongjaListViewCss.toolbarSelect}
+              css={cssObj.toolbarSelect}
               value={employmentValue}
               onChange={(e) => setEmploymentValue(e.target.value)}
             >
@@ -484,9 +476,9 @@ function SingleSelectionPanelContent({
             </select>
           </div>
           <div>
-            <label css={sayongjaListViewCss.panelLabel}>근무 형태</label>
+            <label css={cssObj.panelLabel}>근무 형태</label>
             <select
-              css={sayongjaListViewCss.toolbarSelect}
+              css={cssObj.toolbarSelect}
               value={workTypeValue}
               onChange={(e) => setWorkTypeValue(e.target.value)}
             >
@@ -498,7 +490,7 @@ function SingleSelectionPanelContent({
             </select>
           </div>
         </div>
-        <div css={[sayongjaListViewCss.panelSection, sayongjaListViewCss.fieldRow]}>
+        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
           <Textfield
             singleLine
             type="password"
@@ -508,7 +500,7 @@ function SingleSelectionPanelContent({
             onValueChange={setPassword}
           />
           <div>
-            <label css={sayongjaListViewCss.panelLabel}>활성화 여부</label>
+            <label css={cssObj.panelLabel}>활성화 여부</label>
             <div>
               <Checkbox
                 checked={isHwalseongValue}
@@ -519,28 +511,22 @@ function SingleSelectionPanelContent({
           </div>
         </div>
         {updateMutation.isError && (
-          <p css={sayongjaListViewCss.helperText}>
-            사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.
-          </p>
+          <p css={cssObj.helperText}>사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
         )}
-        <div css={sayongjaListViewCss.panelSection}>
-          <span css={sayongjaListViewCss.panelLabel}>연결 객체들</span>
-          <div css={sayongjaListViewCss.panelSection}>
-            <div css={sayongjaListViewCss.panelLabel}>권한들</div>
-            <div css={sayongjaListViewCss.permissionList}>
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelLabel}>연결 객체들</span>
+          <div css={cssObj.panelSection}>
+            <div css={cssObj.panelLabel}>권한들</div>
+            <div css={cssObj.permissionList}>
               {permissions.map((permission) => (
-                <div key={permission.nanoId} css={sayongjaListViewCss.permissionItem}>
-                  <span css={sayongjaListViewCss.permissionName}>{permission.name}</span>
-                  <span css={sayongjaListViewCss.panelText}>{permission.role}</span>
+                <div key={permission.nanoId} css={cssObj.permissionItem}>
+                  <span css={cssObj.permissionName}>{permission.name}</span>
+                  <span css={cssObj.panelText}>{permission.role}</span>
                 </div>
               ))}
-              {!permissions.length && (
-                <p css={sayongjaListViewCss.helperText}>아직 연결된 권한이 없습니다.</p>
-              )}
+              {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
             </div>
-            <div
-              css={[sayongjaListViewCss.sectionActions, sayongjaListViewCss.permissionActionContainer]}
-            >
+            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
               <Button
                 styleType="outlined"
                 variant="secondary"
@@ -550,10 +536,10 @@ function SingleSelectionPanelContent({
                 권한 추가
               </Button>
               {isPermissionTooltipOpen ? (
-                <div css={sayongjaListViewCss.permissionTooltip}>
-                  <label css={sayongjaListViewCss.panelLabel}>추가할 권한 선택</label>
+                <div css={cssObj.permissionTooltip}>
+                  <label css={cssObj.panelLabel}>추가할 권한 선택</label>
                   <select
-                    css={sayongjaListViewCss.toolbarSelect}
+                    css={cssObj.toolbarSelect}
                     value={selectedPermissionNanoId}
                     onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
                   >
@@ -565,9 +551,9 @@ function SingleSelectionPanelContent({
                     ))}
                   </select>
                   {permissionsQuery.isError && (
-                    <p css={sayongjaListViewCss.helperText}>권한 목록을 불러오지 못했습니다.</p>
+                    <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
                   )}
-                  <div css={sayongjaListViewCss.permissionTooltipActions}>
+                  <div css={cssObj.permissionTooltipActions}>
                     <Button
                       styleType="solid"
                       variant="secondary"
@@ -593,7 +579,7 @@ function SingleSelectionPanelContent({
           </div>
         </div>
       </form>
-      <div css={sayongjaListViewCss.panelFooter}>
+      <div css={cssObj.panelFooter}>
         <Button
           styleType="outlined"
           variant="secondary"
@@ -615,34 +601,14 @@ type MultiSelectionPanelProps = {
 };
 
 function MultiSelectionPanel({ sayongjas }: MultiSelectionPanelProps) {
-  const displayList = sayongjas.slice(0, 6);
-  const overflowCount = Math.max(sayongjas.length - displayList.length, 0);
-
   return (
     <>
-      <div css={sayongjaListViewCss.panelHeader}>
-        <h2 css={sayongjaListViewCss.panelTitle}>{sayongjas.length}명의 사용자가 선택되었습니다</h2>
-        <p css={sayongjaListViewCss.panelSubtitle}>여러 사용자 기능은 준비 중입니다.</p>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>사용자 {sayongjas.length}개 설정</h2>
       </div>
-      <div css={sayongjaListViewCss.panelBody}>
-        <div css={sayongjaListViewCss.panelSection}>
-          <span css={sayongjaListViewCss.panelLabel}>선택된 사용자</span>
-          <div css={sayongjaListViewCss.chipList}>
-            {displayList.map((user) => (
-              <span key={user.nanoId} css={sayongjaListViewCss.chip}>
-                {user.name}
-              </span>
-            ))}
-          </div>
-          {overflowCount > 0 && (
-            <p css={sayongjaListViewCss.helperText}>
-              외 {overflowCount}명의 사용자가 더 선택되어 있습니다.
-            </p>
-          )}
-        </div>
-        <div css={sayongjaListViewCss.panelSection}>
-          <span css={sayongjaListViewCss.panelLabel}>다중 선택 기능</span>
-          <p css={sayongjaListViewCss.panelText}>여러 사용자 선택 시 기능을 준비 중입니다.</p>
+      <div css={cssObj.panelBody}>
+        <div css={cssObj.salesDiv}>
+          <span>준비중입니다.</span>
         </div>
       </div>
     </>
