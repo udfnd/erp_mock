@@ -184,7 +184,8 @@ export const cssObj = {
     flex-direction: column;
     min-height: 100%;
     max-height: 100%;
-    overflow: auto;
+    height: 100%;
+    overflow-y: auto;
   `,
 
   panelHeader: css`

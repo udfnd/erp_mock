@@ -25,6 +25,11 @@ const HWALSEONG_OPTIONS = [
   { label: '비활성', value: 'false' },
 ];
 
+const PASSWORD_GUIDE_TEXT =
+  '비밀번호는 최소 8자 이상 입력해 주세요. (15자 권장)\n비밀번호는 100자 내로 설정할 수 있어요.';
+
+const PASSWORD_MISMATCH_HELPER_TEXT = '비밀번호가 일치하지 않습니다. 다시 한 번 확인해 주세요.';
+
 const generateRandomPassword = (length = 12) => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*';
   const charactersLength = chars.length;
@@ -144,6 +149,9 @@ function CreateSayongjaPanel({
   const isSaving = createMutation.isPending;
   const formId = 'sayongja-create-form';
   const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
+  const passwordConfirmHelperText = isPasswordMismatch
+    ? `${PASSWORD_GUIDE_TEXT}\n${PASSWORD_MISMATCH_HELPER_TEXT}`
+    : PASSWORD_GUIDE_TEXT;
 
   const handleGeneratePassword = () => {
     const generated = generateRandomPassword();
@@ -271,6 +279,7 @@ function CreateSayongjaPanel({
             label="비밀번호"
             value={password}
             onValueChange={setPassword}
+            helperText={PASSWORD_GUIDE_TEXT}
           />
           <Textfield
             singleLine
@@ -278,12 +287,13 @@ function CreateSayongjaPanel({
             label="비밀번호 확인"
             value={passwordConfirm}
             onValueChange={setPasswordConfirm}
+            helperText={passwordConfirmHelperText}
+            status={isPasswordMismatch ? 'negative' : 'normal'}
           />
         </div>
         <Button variant="assistive" size="small" onClick={handleGeneratePassword}>
           비밀번호 무작위 생성
         </Button>
-        {isPasswordMismatch && <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>}
 
         {createMutation.isError && (
           <p css={cssObj.helperText}>
@@ -425,7 +435,6 @@ function SingleSelectionPanelContent({
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isPermissionTooltipOpen, setIsPermissionTooltipOpen] = useState(false);
   const [selectedPermissionNanoId, setSelectedPermissionNanoId] = useState<string>('');
-  const formId = 'sayongja-update-form';
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
@@ -437,8 +446,22 @@ function SingleSelectionPanelContent({
 
   const isDeleting = deleteMutation.isPending;
   const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
+  const passwordConfirmHelperText = isPasswordMismatch
+    ? `${PASSWORD_GUIDE_TEXT}\n${PASSWORD_MISMATCH_HELPER_TEXT}`
+    : PASSWORD_GUIDE_TEXT;
+  const hasAttributeChanges =
+    name.trim() !== sayongjaName.trim() ||
+    employedAtValue !== employedAt ||
+    loginIdValue.trim() !== loginId.trim() ||
+    employmentValue !== employmentNanoId ||
+    workTypeValue !== workTypeNanoId ||
+    (isHwalseongValue === 'true') !== isHwalseong;
+  const isUpdating = updateMutation.isPending;
+  const isAttributeSaveDisabled = isUpdating || !hasAttributeChanges;
+  const isPasswordSaveDisabled =
+    isUpdating || !password.trim() || !passwordConfirm.trim() || isPasswordMismatch;
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleAttributeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const payload: UpdateSayongjaRequest = {};
 
@@ -451,20 +474,24 @@ function SingleSelectionPanelContent({
     if (workTypeValue !== workTypeNanoId) {
       payload.workTypeSangtaeNanoId = workTypeValue === 'all' ? null : workTypeValue;
     }
-    if (password.trim()) {
-      if (isPasswordMismatch) return;
-      payload.password = password.trim();
-    }
     const isHwalseongSelected = isHwalseongValue === 'true';
     if (isHwalseongSelected !== isHwalseong) payload.isHwalseong = isHwalseongSelected;
 
     if (Object.keys(payload).length === 0) return;
 
     await updateMutation.mutateAsync(payload);
+    await onAfterMutation();
+    await onRefreshPermissions();
+  };
+
+  const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isPasswordSaveDisabled) return;
+
+    await updateMutation.mutateAsync({ password: password.trim() });
     setPassword('');
     setPasswordConfirm('');
     await onAfterMutation();
-    await onRefreshPermissions();
   };
 
   const handleDelete = async () => {
@@ -495,8 +522,8 @@ function SingleSelectionPanelContent({
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>{sayongjaName}</h2>
       </div>
-      <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
-        <div css={cssObj.panelSection}>
+      <div css={cssObj.panelBody}>
+        <form css={cssObj.panelSection} onSubmit={handleAttributeSubmit}>
           <h3 css={cssObj.panelSubtitle}>사용자 속성</h3>
           <Textfield
             singleLine
@@ -562,8 +589,13 @@ function SingleSelectionPanelContent({
               ))}
             </select>
           </div>
-        </div>
-        <div css={cssObj.panelSection}>
+          <div css={cssObj.sectionActions}>
+            <Button type="submit" size="small" disabled={isAttributeSaveDisabled}>
+              사용자 속성 저장
+            </Button>
+          </div>
+        </form>
+        <form css={cssObj.panelSection} onSubmit={handlePasswordSubmit}>
           <h3 css={cssObj.panelSubtitle}>비밀번호 변경</h3>
           <Textfield
             singleLine
@@ -572,6 +604,7 @@ function SingleSelectionPanelContent({
             placeholder="변경 시에만 입력"
             value={password}
             onValueChange={setPassword}
+            helperText={PASSWORD_GUIDE_TEXT}
           />
           <Textfield
             singleLine
@@ -580,9 +613,12 @@ function SingleSelectionPanelContent({
             placeholder="변경 시에만 입력"
             value={passwordConfirm}
             onValueChange={setPasswordConfirm}
+            helperText={passwordConfirmHelperText}
+            status={isPasswordMismatch ? 'negative' : 'normal'}
           />
           <div css={cssObj.sectionActions}>
             <Button
+              type="button"
               styleType="outlined"
               variant="secondary"
               size="small"
@@ -590,9 +626,11 @@ function SingleSelectionPanelContent({
             >
               비밀번호 무작위 생성
             </Button>
+            <Button type="submit" size="small" disabled={isPasswordSaveDisabled}>
+              비밀번호 저장
+            </Button>
           </div>
-          {isPasswordMismatch && <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>}
-        </div>
+        </form>
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>연결 객체들</h3>
           <div css={cssObj.panelSection}>
@@ -668,7 +706,7 @@ function SingleSelectionPanelContent({
         {updateMutation.isError && (
           <p css={cssObj.helperText}>사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
         )}
-      </form>
+      </div>
       <div css={cssObj.panelFooter}>
         <Button variant="red" size="small" isFull onClick={handleDelete} disabled={isDeleting}>
           사용자 삭제
