@@ -47,7 +47,7 @@ export function PermissionListSection({
 }) {
   const rowEventHandlers = useMemo(() => createRowEventHandlers(handlers), [handlers]);
 
-  const effectiveFilters = filters ?? { permissionTypeNanoId: 'all' };
+  const effectiveFilters = filters ?? { permissionTypeNanoIds: ['all'] };
   const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
 
   return (
@@ -74,7 +74,7 @@ export function PermissionListSection({
         {
           key: 'permissionType',
           label: '권한 시스템',
-          value: effectiveFilters.permissionTypeNanoId,
+          value: effectiveFilters.permissionTypeNanoIds,
           options: permissionTypeOptions,
           onChange: handlers.onPermissionTypeFilterChange,
         },

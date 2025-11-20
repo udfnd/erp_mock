@@ -31,13 +31,13 @@ export type PermissionListViewHookParams = {
 export type ListSectionState = ListViewState<Permission>;
 
 export type PermissionFilters = {
-  permissionTypeNanoId: string;
+  permissionTypeNanoIds: string[];
 };
 
 export type PermissionListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
-  onPermissionTypeFilterChange: (value: string) => void;
+  onPermissionTypeFilterChange: (value: string[]) => void;
   onPageSizeChange: (size: number) => void;
   onSelectedPermissionsChange: (permissions: Permission[]) => void;
   onAddUsersClick: () => void;
@@ -102,7 +102,7 @@ export function usePermissionListViewSections({
   const sortByOption = getSortOptionFromState(sorting);
 
   const [filters, setFilters] = useState<PermissionFilters>({
-    permissionTypeNanoId: 'all',
+    permissionTypeNanoIds: ['all'],
   });
 
   const { data: permissionTypesData } = useGetPermissionTypesQuery({ enabled: isAuthenticated });
@@ -117,11 +117,14 @@ export function usePermissionListViewSections({
     [permissionTypesData?.permissionTypes],
   );
 
+  const permissionTypeFilters = filters.permissionTypeNanoIds.filter(
+    (value) => value !== 'all' && value !== '',
+  );
+
   const queryParams: GetPermissionsRequest = {
     gigwanNanoId,
     permissionNameSearch: searchTerm ? searchTerm : undefined,
-    permissionTypeFilters:
-      filters.permissionTypeNanoId !== 'all' ? [filters.permissionTypeNanoId] : undefined,
+    permissionTypeFilters: permissionTypeFilters.length ? permissionTypeFilters : undefined,
     pageNumber: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortByOption,
@@ -173,8 +176,8 @@ export function usePermissionListViewSections({
     setSorting(getSortStateFromOption(value));
   };
 
-  const handlePermissionTypeFilterChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, permissionTypeNanoId: value }));
+  const handlePermissionTypeFilterChange = (value: string[]) => {
+    setFilters((prev) => ({ ...prev, permissionTypeNanoIds: value.length ? value : ['all'] }));
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 

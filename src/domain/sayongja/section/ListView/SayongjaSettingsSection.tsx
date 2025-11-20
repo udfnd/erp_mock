@@ -2,7 +2,7 @@
 
 import { type FormEvent, useState } from 'react';
 
-import { Button, Checkbox, Textfield } from '@/common/components';
+import { Button, Textfield } from '@/common/components';
 import {
   useBatchlinkPermissionSayongjaMutation,
   useGetPermissionsQuery,
@@ -19,6 +19,17 @@ import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/
 import { cssObj } from './styles';
 import type { SayongjaSettingsSectionProps } from './useSayongjaListViewSections';
 import { Magic } from '@/common/icons';
+
+const HWALSEONG_OPTIONS = [
+  { label: '활성', value: 'true' },
+  { label: '비활성', value: 'false' },
+];
+
+const generateRandomPassword = (length = 12) => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789!@#$%^&*';
+  const charactersLength = chars.length;
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * charactersLength)]).join('');
+};
 
 export type SayongjaSettingsSectionComponentProps = SayongjaSettingsSectionProps & {
   employmentCategoryOptions: { label: string; value: string }[];
@@ -125,17 +136,25 @@ function CreateSayongjaPanel({
   const [employedAt, setEmployedAt] = useState('');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [employmentNanoId, setEmploymentNanoId] = useState('all');
   const [workTypeNanoId, setWorkTypeNanoId] = useState('all');
-  const [isHwalseong, setIsHwalseong] = useState(true);
+  const [isHwalseongValue, setIsHwalseongValue] = useState('true');
 
   const isSaving = createMutation.isPending;
   const formId = 'sayongja-create-form';
+  const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
+
+  const handleGeneratePassword = () => {
+    const generated = generateRandomPassword();
+    setPassword(generated);
+    setPasswordConfirm(generated);
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedName = name.trim();
-    if (!trimmedName || !employedAt || !loginId || !password) {
+    if (!trimmedName || !employedAt || !loginId || !password || password !== passwordConfirm) {
       return;
     }
 
@@ -147,19 +166,29 @@ function CreateSayongjaPanel({
       password,
       employmentSangtaeNanoId: employmentNanoId === 'all' ? null : employmentNanoId,
       workTypeSangtaeNanoId: workTypeNanoId === 'all' ? null : workTypeNanoId,
-      isHwalseong,
+      isHwalseong: isHwalseongValue === 'true',
     });
 
     setName('');
     setEmployedAt('');
     setLoginId('');
     setPassword('');
+    setPasswordConfirm('');
     setEmploymentNanoId('all');
     setWorkTypeNanoId('all');
-    setIsHwalseong(true);
+    setIsHwalseongValue('true');
     onAfterMutation();
     onExit?.();
   };
+
+  const isCreateDisabled =
+    isSaving ||
+    !name.trim() ||
+    !employedAt ||
+    !loginId ||
+    !password ||
+    !passwordConfirm ||
+    isPasswordMismatch;
 
   return (
     <>
@@ -183,15 +212,13 @@ function CreateSayongjaPanel({
           value={loginId}
           onValueChange={setLoginId}
         />
-        <div css={cssObj.panelSection}>
-          <Textfield
-            singleLine
-            type="date"
-            label="입사일"
-            value={employedAt}
-            onValueChange={setEmployedAt}
-          />
-        </div>
+        <Textfield
+          singleLine
+          type="date"
+          label="입사일"
+          value={employedAt}
+          onValueChange={setEmployedAt}
+        />
         <div css={cssObj.panelLabelSection}>
           <label css={cssObj.panelLabel}>재직 상태</label>
           <select
@@ -220,16 +247,43 @@ function CreateSayongjaPanel({
             ))}
           </select>
         </div>
-        <Textfield
-          singleLine
-          type="password"
-          label="비밀번호"
-          value={password}
-          onValueChange={setPassword}
-        />
-        <div css={cssObj.panelSection}>
-          <label css={cssObj.panelLabel}>활성화 여부</label>
-          <Checkbox checked={isHwalseong} onChange={(e) => setIsHwalseong(e.target.checked)} />
+        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
+          <Textfield
+            singleLine
+            type="password"
+            label="비밀번호"
+            value={password}
+            onValueChange={setPassword}
+          />
+          <Textfield
+            singleLine
+            type="password"
+            label="비밀번호 확인"
+            value={passwordConfirm}
+            onValueChange={setPasswordConfirm}
+          />
+        </div>
+        <div css={cssObj.sectionActions}>
+          <Button styleType="outlined" variant="secondary" size="small" onClick={handleGeneratePassword}>
+            비밀번호 무작위 생성
+          </Button>
+        </div>
+        {isPasswordMismatch && (
+          <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>
+        )}
+        <div css={cssObj.panelLabelSection}>
+          <label css={cssObj.panelLabel}>활성 상태</label>
+          <select
+            css={cssObj.toolbarSelect}
+            value={isHwalseongValue}
+            onChange={(e) => setIsHwalseongValue(e.target.value)}
+          >
+            {HWALSEONG_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
         {createMutation.isError && (
           <p css={cssObj.helperText}>
@@ -246,7 +300,7 @@ function CreateSayongjaPanel({
         <Button
           type="submit"
           form={formId}
-          disabled={isSaving || !name.trim() || !employedAt || !loginId || !password}
+          disabled={isCreateDisabled}
         >
           사용자 생성
         </Button>
@@ -368,8 +422,9 @@ function SingleSelectionPanelContent({
   const [loginIdValue, setLoginIdValue] = useState(loginId);
   const [employmentValue, setEmploymentValue] = useState(employmentNanoId);
   const [workTypeValue, setWorkTypeValue] = useState(workTypeNanoId);
-  const [isHwalseongValue, setIsHwalseongValue] = useState(isHwalseong);
+  const [isHwalseongValue, setIsHwalseongValue] = useState(isHwalseong ? 'true' : 'false');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isPermissionTooltipOpen, setIsPermissionTooltipOpen] = useState(false);
   const [selectedPermissionNanoId, setSelectedPermissionNanoId] = useState<string>('');
   const formId = 'sayongja-update-form';
@@ -384,6 +439,7 @@ function SingleSelectionPanelContent({
 
   const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
+  const isPasswordMismatch = Boolean(password && passwordConfirm && password !== passwordConfirm);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -398,13 +454,18 @@ function SingleSelectionPanelContent({
     if (workTypeValue !== workTypeNanoId) {
       payload.workTypeSangtaeNanoId = workTypeValue === 'all' ? null : workTypeValue;
     }
-    if (password.trim()) payload.password = password.trim();
-    if (isHwalseongValue !== isHwalseong) payload.isHwalseong = isHwalseongValue;
+    if (password.trim()) {
+      if (isPasswordMismatch) return;
+      payload.password = password.trim();
+    }
+    const isHwalseongSelected = isHwalseongValue === 'true';
+    if (isHwalseongSelected !== isHwalseong) payload.isHwalseong = isHwalseongSelected;
 
     if (Object.keys(payload).length === 0) return;
 
     await updateMutation.mutateAsync(payload);
     setPassword('');
+    setPasswordConfirm('');
     await onAfterMutation();
     await onRefreshPermissions();
   };
@@ -426,6 +487,14 @@ function SingleSelectionPanelContent({
     await onRefreshPermissions();
   };
 
+  const handleGeneratePassword = () => {
+    const generated = generateRandomPassword();
+    setPassword(generated);
+    setPasswordConfirm(generated);
+  };
+
+  const isSaveDisabled = isUpdating || isPasswordMismatch;
+
   return (
     <>
       <div css={cssObj.panelHeader}>
@@ -442,8 +511,13 @@ function SingleSelectionPanelContent({
             onValueChange={setName}
             maxLength={60}
           />
-        </div>
-        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
+          <Textfield
+            singleLine
+            required
+            label="로그인 ID"
+            value={loginIdValue}
+            onValueChange={setLoginIdValue}
+          />
           <Textfield
             singleLine
             required
@@ -452,43 +526,34 @@ function SingleSelectionPanelContent({
             value={employedAtValue}
             onValueChange={setEmployedAtValue}
           />
-          <Textfield
-            singleLine
-            required
-            label="로그인 ID"
-            value={loginIdValue}
-            onValueChange={setLoginIdValue}
-          />
         </div>
-        <div css={[cssObj.panelSection, cssObj.fieldRow]}>
-          <div>
-            <label css={cssObj.panelLabel}>재직 상태</label>
-            <select
-              css={cssObj.toolbarSelect}
-              value={employmentValue}
-              onChange={(e) => setEmploymentValue(e.target.value)}
-            >
-              {employmentCategoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label css={cssObj.panelLabel}>근무 형태</label>
-            <select
-              css={cssObj.toolbarSelect}
-              value={workTypeValue}
-              onChange={(e) => setWorkTypeValue(e.target.value)}
-            >
-              {workTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div css={cssObj.panelLabelSection}>
+          <label css={cssObj.panelLabel}>재직 상태</label>
+          <select
+            css={cssObj.toolbarSelect}
+            value={employmentValue}
+            onChange={(e) => setEmploymentValue(e.target.value)}
+          >
+            {employmentCategoryOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div css={cssObj.panelLabelSection}>
+          <label css={cssObj.panelLabel}>근무 형태</label>
+          <select
+            css={cssObj.toolbarSelect}
+            value={workTypeValue}
+            onChange={(e) => setWorkTypeValue(e.target.value)}
+          >
+            {workTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
         <div css={[cssObj.panelSection, cssObj.fieldRow]}>
           <Textfield
@@ -499,16 +564,41 @@ function SingleSelectionPanelContent({
             value={password}
             onValueChange={setPassword}
           />
-          <div>
-            <label css={cssObj.panelLabel}>활성화 여부</label>
-            <div>
-              <Checkbox
-                checked={isHwalseongValue}
-                onChange={(e) => setIsHwalseongValue(e.target.checked)}
-                ariaLabel="활성화"
-              />
-            </div>
-          </div>
+          <Textfield
+            singleLine
+            type="password"
+            label="비밀번호 확인"
+            placeholder="변경 시에만 입력"
+            value={passwordConfirm}
+            onValueChange={setPasswordConfirm}
+          />
+        </div>
+        <div css={cssObj.sectionActions}>
+          <Button
+            styleType="outlined"
+            variant="secondary"
+            size="small"
+            onClick={handleGeneratePassword}
+          >
+            비밀번호 무작위 생성
+          </Button>
+        </div>
+        {isPasswordMismatch && (
+          <p css={cssObj.helperText}>비밀번호가 일치하지 않습니다.</p>
+        )}
+        <div css={cssObj.panelLabelSection}>
+          <label css={cssObj.panelLabel}>활성 상태</label>
+          <select
+            css={cssObj.toolbarSelect}
+            value={isHwalseongValue}
+            onChange={(e) => setIsHwalseongValue(e.target.value)}
+          >
+            {HWALSEONG_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
         {updateMutation.isError && (
           <p css={cssObj.helperText}>사용자 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요.</p>
@@ -588,7 +678,7 @@ function SingleSelectionPanelContent({
         >
           사용자 삭제
         </Button>
-        <Button type="submit" form={formId} disabled={isUpdating}>
+        <Button type="submit" form={formId} disabled={isSaveDisabled}>
           저장
         </Button>
       </div>

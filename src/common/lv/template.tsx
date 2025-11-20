@@ -61,11 +61,11 @@ export type ListViewTableOptions<TData> = Omit<
 export type ListViewTemplateToolbarFilter = {
   key: string;
   label?: string;
-  value: string;
-  defaultValue?: string;
+  value: string[];
+  defaultValue?: string[];
   placeholder?: string;
   options: { label: string; value: string }[];
-  onChange: (value: string) => void;
+  onChange: (value: string[]) => void;
 };
 
 export type ListViewTemplateToolbarSort = {
@@ -330,7 +330,7 @@ export function Template<TData>({
   };
 
   const getFilterOptionIcon = (filter: ListViewTemplateToolbarFilter, optionValue: string) => {
-    const isActive = optionValue === filter.value;
+    const isActive = filter.value.includes(optionValue);
     if (!filter.options.some((option) => option.value === optionValue)) {
       return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
     }
@@ -387,14 +387,29 @@ export function Template<TData>({
 
   const hasToolbar = Boolean(search || filters.length > 0 || sort || toolbarActionsNode);
   const getFilterDefaultValue = (filter: ListViewTemplateToolbarFilter) =>
-    filter.defaultValue ?? filter.options[0]?.value ?? '';
+    filter.defaultValue ?? (filter.options[0]?.value ? [filter.options[0].value] : []);
+
+  const areArraysEqual = (a: string[], b: string[]) => {
+    if (a.length !== b.length) return false;
+    const sortedA = [...a].sort();
+    const sortedB = [...b].sort();
+    return sortedA.every((value, index) => value === sortedB[index]);
+  };
+
+  const getSelectedLabels = (filter: ListViewTemplateToolbarFilter) => {
+    if (!filter.options?.length) return filter.value;
+    return filter.value
+      .map((value) => filter.options.find((option) => option.value === value)?.label ?? value)
+      .filter(Boolean);
+  };
 
   const activeFilters = filters
     .map((filter) => {
       const defaultValue = getFilterDefaultValue(filter);
-      const isActive = filter.value !== '' && filter.value !== defaultValue;
-      const selectedLabel =
-        filter.options.find((option) => option.value === filter.value)?.label ?? filter.value;
+      const currentValue = filter.value.length ? filter.value : defaultValue;
+      const isActive = !areArraysEqual(currentValue, defaultValue);
+      const selectedLabels = getSelectedLabels({ ...filter, value: currentValue });
+      const selectedLabel = selectedLabels.join(', ');
 
       return { isActive, selectedLabel };
     })
@@ -616,11 +631,38 @@ export function Template<TData>({
           {isFiltersDropdownOpen && (
             <div css={cssObj.filterMenu}>
               {filters.map((filter, index) => {
-                const selectedOption = filter.options.find(
-                  (option) => option.value === filter.value,
-                );
-                const groupValue =
-                  selectedOption?.label ?? (filter.value === '' ? filter.placeholder : '');
+                const defaultValue = getFilterDefaultValue(filter);
+                const currentValue = filter.value.length ? filter.value : defaultValue;
+                const groupSelectedLabels = getSelectedLabels({ ...filter, value: currentValue });
+                const groupValue = groupSelectedLabels.join(', ') || filter.placeholder || '';
+
+                const handleToggleOption = (optionValue: string) => {
+                  const hasDefaultValue = defaultValue.includes(optionValue);
+                  const hasOption = filter.value.includes(optionValue);
+                  let nextValues = hasOption
+                    ? filter.value.filter((value) => value !== optionValue)
+                    : [...filter.value, optionValue];
+
+                  if (hasDefaultValue) {
+                    nextValues = [optionValue];
+                  }
+
+                  if (nextValues.length === 0) {
+                    nextValues = defaultValue;
+                  }
+
+                  const hasNonDefaultSelection = nextValues.some(
+                    (value) => !defaultValue.includes(value),
+                  );
+
+                  if (hasNonDefaultSelection) {
+                    nextValues = nextValues.filter((value) => !defaultValue.includes(value));
+                  }
+
+                  filter.onChange(nextValues);
+                };
+
+                const filterForIcon = { ...filter, value: currentValue };
 
                 return (
                   <div key={filter.key} css={cssObj.filterGroup(index > 0)}>
@@ -633,34 +675,36 @@ export function Template<TData>({
                         type="button"
                         css={[
                           cssObj.filterOption,
-                          filter.value === '' && cssObj.filterOptionActive,
+                          areArraysEqual(filter.value, defaultValue) && cssObj.filterOptionActive,
                         ]}
                         onClick={() => {
-                          filter.onChange('');
-                          setIsFiltersDropdownOpen(false);
+                          filter.onChange(defaultValue);
                         }}
                       >
                         <span css={cssObj.filterOptionContent}>
-                          {getFilterOptionIcon(filter, '')}
+                          {areArraysEqual(filter.value, defaultValue) ? (
+                            <RadioCheckedActive />
+                          ) : (
+                            <RadioUncheckedActive />
+                          )}
                           <span>{filter.placeholder}</span>
                         </span>
                       </button>
                     )}
 
                     {filter.options.map((option) => {
-                      const isActive = option.value === filter.value;
+                      const isActive = currentValue.includes(option.value);
                       return (
                         <button
                           key={option.value}
                           type="button"
                           css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
                           onClick={() => {
-                            filter.onChange(option.value);
-                            setIsFiltersDropdownOpen(false);
+                            handleToggleOption(option.value);
                           }}
                         >
                           <span css={cssObj.filterOptionContent}>
-                            {getFilterOptionIcon(filter, option.value)}
+                            {getFilterOptionIcon(filterForIcon, option.value)}
                             <span>{option.label}</span>
                           </span>
                         </button>

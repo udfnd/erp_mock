@@ -29,10 +29,10 @@ function createRowEventHandlers(
 }
 
 const DEFAULT_FILTERS: SayongjaFilters = {
-  jojikNanoId: 'all',
-  employmentCategoryNanoId: 'all',
-  workTypeNanoId: 'all',
-  isHwalseong: 'all',
+  jojikNanoIds: ['all'],
+  employmentCategoryNanoIds: ['all'],
+  workTypeNanoIds: ['all'],
+  isHwalseong: ['all'],
 };
 
 export function SayongjaListSection({
@@ -84,24 +84,24 @@ export function SayongjaListSection({
         {
           key: 'jojik',
           label: '권한을 가지는 조직',
-          value: effectiveFilters.jojikNanoId,
-          defaultValue: DEFAULT_FILTERS.jojikNanoId,
+          value: effectiveFilters.jojikNanoIds,
+          defaultValue: DEFAULT_FILTERS.jojikNanoIds,
           options: jojikFilterOptions,
           onChange: handlers.onJojikFilterChange,
         },
         {
           key: 'employment',
           label: '재직 상태',
-          value: effectiveFilters.employmentCategoryNanoId,
-          defaultValue: DEFAULT_FILTERS.employmentCategoryNanoId,
+          value: effectiveFilters.employmentCategoryNanoIds,
+          defaultValue: DEFAULT_FILTERS.employmentCategoryNanoIds,
           options: employmentCategoryOptions,
           onChange: handlers.onEmploymentCategoryFilterChange,
         },
         {
           key: 'workType',
           label: '근무 형태',
-          value: effectiveFilters.workTypeNanoId,
-          defaultValue: DEFAULT_FILTERS.workTypeNanoId,
+          value: effectiveFilters.workTypeNanoIds,
+          defaultValue: DEFAULT_FILTERS.workTypeNanoIds,
           options: workTypeOptions,
           onChange: handlers.onWorkTypeFilterChange,
         },
