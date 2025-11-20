@@ -29,19 +29,19 @@ export type SayongjaListViewHookParams = {
 export type ListSectionState = ListViewState<SayongjaListItem>;
 
 export type SayongjaFilters = {
-  jojikNanoId: string;
-  employmentCategoryNanoId: string;
-  workTypeNanoId: string;
-  isHwalseong: string;
+  jojikNanoIds: string[];
+  employmentCategoryNanoIds: string[];
+  workTypeNanoIds: string[];
+  isHwalseong: string[];
 };
 
 export type SayongjaListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
-  onJojikFilterChange: (value: string) => void;
-  onEmploymentCategoryFilterChange: (value: string) => void;
-  onWorkTypeFilterChange: (value: string) => void;
-  onIsHwalseongFilterChange: (value: string) => void;
+  onJojikFilterChange: (value: string[]) => void;
+  onEmploymentCategoryFilterChange: (value: string[]) => void;
+  onWorkTypeFilterChange: (value: string[]) => void;
+  onIsHwalseongFilterChange: (value: string[]) => void;
   onPageSizeChange: (size: number) => void;
   onSelectedSayongjasChange: (sayongjas: SayongjaListItem[]) => void;
   onAddClick: () => void;
@@ -109,10 +109,10 @@ export function useSayongjaListViewSections({
   const sortByOption = getSortOptionFromState(sorting);
 
   const [filters, setFilters] = useState<SayongjaFilters>({
-    jojikNanoId: 'all',
-    employmentCategoryNanoId: 'all',
-    workTypeNanoId: 'all',
-    isHwalseong: 'all',
+    jojikNanoIds: ['all'],
+    employmentCategoryNanoIds: ['all'],
+    workTypeNanoIds: ['all'],
+    isHwalseong: ['all'],
   });
 
   const { data: jojikListData } = useJojiksQuery(
@@ -154,15 +154,24 @@ export function useSayongjaListViewSections({
     [workTypeData?.sangtaes],
   );
 
+  const normalizeFilterValues = (values: string[]) => (values.length ? values : ['all']);
+
+  const toFilterArray = (values: string[]) => {
+    const filtered = values.filter((value) => value !== 'all' && value !== '');
+    return filtered.length ? filtered : undefined;
+  };
+
+  const isHwalseongSelection = filters.isHwalseong.filter((value) => value !== 'all' && value !== '');
+  const isHwalseongFilter =
+    isHwalseongSelection.length === 1 ? isHwalseongSelection[0] === 'true' : undefined;
+
   const queryParams: GetSayongjasRequest = {
     gigwanNanoId,
     sayongjaNameSearch: searchTerm ? searchTerm : undefined,
-    jojikFilters: filters.jojikNanoId !== 'all' ? [filters.jojikNanoId] : undefined,
-    employmentCategorySangtaeFilters:
-      filters.employmentCategoryNanoId !== 'all' ? [filters.employmentCategoryNanoId] : undefined,
-    workTypeCustomSangtaeFilters:
-      filters.workTypeNanoId !== 'all' ? [filters.workTypeNanoId] : undefined,
-    isHwalseongFilter: filters.isHwalseong === 'all' ? undefined : filters.isHwalseong === 'true',
+    jojikFilters: toFilterArray(filters.jojikNanoIds),
+    employmentCategorySangtaeFilters: toFilterArray(filters.employmentCategoryNanoIds),
+    workTypeCustomSangtaeFilters: toFilterArray(filters.workTypeNanoIds),
+    isHwalseongFilter,
     pageNumber: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortByOption,
@@ -211,23 +220,26 @@ export function useSayongjaListViewSections({
     setSorting(getSortStateFromOption(value));
   };
 
-  const handleJojikFilterChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, jojikNanoId: value }));
+  const handleJojikFilterChange = (value: string[]) => {
+    setFilters((prev) => ({ ...prev, jojikNanoIds: normalizeFilterValues(value) }));
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handleEmploymentCategoryFilterChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, employmentCategoryNanoId: value }));
+  const handleEmploymentCategoryFilterChange = (value: string[]) => {
+    setFilters((prev) => ({
+      ...prev,
+      employmentCategoryNanoIds: normalizeFilterValues(value),
+    }));
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handleWorkTypeFilterChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, workTypeNanoId: value }));
+  const handleWorkTypeFilterChange = (value: string[]) => {
+    setFilters((prev) => ({ ...prev, workTypeNanoIds: normalizeFilterValues(value) }));
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handleIsHwalseongFilterChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, isHwalseong: value }));
+  const handleIsHwalseongFilterChange = (value: string[]) => {
+    setFilters((prev) => ({ ...prev, isHwalseong: normalizeFilterValues(value) }));
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
