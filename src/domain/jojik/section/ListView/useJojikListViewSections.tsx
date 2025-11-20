@@ -131,6 +131,7 @@ export function useJojikListViewSections({
       columnHelper.accessor('name', {
         header: createSortableHeader('전체 조직'),
         cell: (info) => info.getValue(),
+        meta: { maxWidth: 120 },
       }),
       columnHelper.accessor('createdAt', {
         header: createSortableHeader('생성일'),

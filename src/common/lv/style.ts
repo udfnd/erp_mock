@@ -122,7 +122,6 @@ export const cssObj = {
 
   filterDropdown: css`
     position: relative;
-    display: inline-flex;
   `,
 
   filterTrigger: (isOpen: boolean) => css`
@@ -273,6 +272,14 @@ export const cssObj = {
       padding-left: 0;
     }
   `,
+  columnMaxWidth: (maxWidth: number) => css`
+    max-width: ${maxWidth}px;
+    width: ${maxWidth}px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `,
+
   selectionCell: css`
     display: flex;
     align-items: center;

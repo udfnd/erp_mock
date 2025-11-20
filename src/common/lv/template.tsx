@@ -121,6 +121,17 @@ export type ListViewTemplateProps<TData> = {
   rowEventHandlers?: ListViewTemplateRowEventHandlers<TData>;
 } & ListViewTableOptions<TData>;
 
+type ListViewColumnMeta = {
+  maxWidth?: number;
+};
+
+const getColumnMaxWidth = (meta: unknown): number | undefined => {
+  if (!meta || typeof meta !== 'object') return undefined;
+
+  const m = meta as ListViewColumnMeta;
+  return typeof m.maxWidth === 'number' ? m.maxWidth : undefined;
+};
+
 export function Template<TData>({
   data,
   columns,
@@ -317,10 +328,7 @@ export function Template<TData>({
     return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
   };
 
-  const getFilterOptionIcon = (
-    filter: ListViewTemplateToolbarFilter,
-    optionValue: string,
-  ) => {
+  const getFilterOptionIcon = (filter: ListViewTemplateToolbarFilter, optionValue: string) => {
     const isActive = optionValue === filter.value;
     if (!filter.options.some((option) => option.value === optionValue)) {
       return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
@@ -378,8 +386,7 @@ export function Template<TData>({
 
   const hasToolbar = Boolean(search || filters.length > 0 || sort || toolbarActionsNode);
   const activeFiltersCount = filters.filter((filter) => filter.value !== '').length;
-  const filtersDisplayLabel =
-    activeFiltersCount > 0 ? `필터 (${activeFiltersCount})` : '필터 선택';
+  const filtersDisplayLabel = activeFiltersCount > 0 ? `필터 (${activeFiltersCount})` : '필터 선택';
 
   const shouldIgnoreRowClick =
     rowEventHandlers?.shouldIgnoreRowClick ??
@@ -569,79 +576,7 @@ export function Template<TData>({
                   )}
                 </div>
               )}
-              {filters.length > 0 && (
-                <div css={cssObj.filterDropdown} ref={filtersDropdownRef}>
-                  <button
-                    type="button"
-                    css={cssObj.filterTrigger(isFiltersDropdownOpen)}
-                    onClick={() => setIsFiltersDropdownOpen((prev) => !prev)}
-                  >
-                    <span>{filtersDisplayLabel}</span>
-                    <ArrowLgDown />
-                  </button>
 
-                  {isFiltersDropdownOpen && (
-                    <div css={cssObj.filterMenu}>
-                      {filters.map((filter, index) => {
-                        const selectedOption = filter.options.find(
-                          (option) => option.value === filter.value,
-                        );
-                        const groupLabel = filter.label ?? filter.placeholder ?? '필터';
-                        const groupValue =
-                          selectedOption?.label ?? (filter.value === '' ? filter.placeholder : '');
-
-                        return (
-                          <div key={filter.key} css={cssObj.filterGroup(index > 0)}>
-                            <div css={cssObj.filterGroupHeader}>
-                              <span>{groupLabel}</span>
-                              {groupValue && <span css={cssObj.filterGroupValue}>{groupValue}</span>}
-                            </div>
-
-                            {filter.placeholder && (
-                              <button
-                                type="button"
-                                css={[
-                                  cssObj.filterOption,
-                                  filter.value === '' && cssObj.filterOptionActive,
-                                ]}
-                                onClick={() => {
-                                  filter.onChange('');
-                                  setIsFiltersDropdownOpen(false);
-                                }}
-                              >
-                                <span css={cssObj.filterOptionContent}>
-                                  {getFilterOptionIcon(filter, '')}
-                                  <span>{filter.placeholder}</span>
-                                </span>
-                              </button>
-                            )}
-
-                            {filter.options.map((option) => {
-                              const isActive = option.value === filter.value;
-                              return (
-                                <button
-                                  key={option.value}
-                                  type="button"
-                                  css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
-                                  onClick={() => {
-                                    filter.onChange(option.value);
-                                    setIsFiltersDropdownOpen(false);
-                                  }}
-                                >
-                                  <span css={cssObj.filterOptionContent}>
-                                    {getFilterOptionIcon(filter, option.value)}
-                                    <span>{option.label}</span>
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
               {toolbarActionsNode}
               <button type="button" css={cssObj.viewChangeButton}>
                 <TableChart />
@@ -649,16 +584,86 @@ export function Template<TData>({
               </button>
             </div>
           </div>
-
         </div>
       )}
+      {filters.length > 0 && (
+        <div css={cssObj.filterDropdown} ref={filtersDropdownRef}>
+          <button
+            type="button"
+            css={cssObj.filterTrigger(isFiltersDropdownOpen)}
+            onClick={() => setIsFiltersDropdownOpen((prev) => !prev)}
+          >
+            <span>{filtersDisplayLabel}</span>
+            <ArrowLgDown />
+          </button>
 
+          {isFiltersDropdownOpen && (
+            <div css={cssObj.filterMenu}>
+              {filters.map((filter, index) => {
+                const selectedOption = filter.options.find(
+                  (option) => option.value === filter.value,
+                );
+                const groupLabel = filter.label ?? filter.placeholder ?? '필터';
+                const groupValue =
+                  selectedOption?.label ?? (filter.value === '' ? filter.placeholder : '');
+
+                return (
+                  <div key={filter.key} css={cssObj.filterGroup(index > 0)}>
+                    <div css={cssObj.filterGroupHeader}>
+                      <span>{groupLabel}</span>
+                      {groupValue && <span css={cssObj.filterGroupValue}>{groupValue}</span>}
+                    </div>
+
+                    {filter.placeholder && (
+                      <button
+                        type="button"
+                        css={[
+                          cssObj.filterOption,
+                          filter.value === '' && cssObj.filterOptionActive,
+                        ]}
+                        onClick={() => {
+                          filter.onChange('');
+                          setIsFiltersDropdownOpen(false);
+                        }}
+                      >
+                        <span css={cssObj.filterOptionContent}>
+                          {getFilterOptionIcon(filter, '')}
+                          <span>{filter.placeholder}</span>
+                        </span>
+                      </button>
+                    )}
+
+                    {filter.options.map((option) => {
+                      const isActive = option.value === filter.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          css={[cssObj.filterOption, isActive && cssObj.filterOptionActive]}
+                          onClick={() => {
+                            filter.onChange(option.value);
+                            setIsFiltersDropdownOpen(false);
+                          }}
+                        >
+                          <span css={cssObj.filterOptionContent}>
+                            {getFilterOptionIcon(filter, option.value)}
+                            <span>{option.label}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
       {hasAppliedSearch && (
         <div css={cssObj.searchResultSummary}>
           ‘{lastSearchedValue}’ 검색 결과입니다 ({totalCount}개)
         </div>
       )}
-
       <div css={cssObj.tableContainer}>
         <div css={cssObj.tableWrapperContainer}>
           <div css={cssObj.tableWrapper}>
@@ -666,13 +671,24 @@ export function Template<TData>({
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
-                    {headerGroup.headers.map((header) => (
-                      <th key={header.id} colSpan={header.colSpan} css={cssObj.tableHeaderCell}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
-                    ))}
+                    {headerGroup.headers.map((header) => {
+                      const maxWidth = getColumnMaxWidth(header.column.columnDef.meta);
+
+                      return (
+                        <th
+                          key={header.id}
+                          colSpan={header.colSpan}
+                          css={[
+                            cssObj.tableHeaderCell,
+                            typeof maxWidth === 'number' && cssObj.columnMaxWidth(maxWidth),
+                          ]}
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </th>
+                      );
+                    })}
                   </tr>
                 ))}
               </thead>
@@ -700,11 +716,21 @@ export function Template<TData>({
                         rowEventHandlers?.onClick?.({ row, event, table });
                       }}
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} css={cssObj.tableCell}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const maxWidth = getColumnMaxWidth(cell.column.columnDef.meta);
+
+                        return (
+                          <td
+                            key={cell.id}
+                            css={[
+                              cssObj.tableCell,
+                              typeof maxWidth === 'number' && cssObj.columnMaxWidth(maxWidth),
+                            ]}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))
                 ) : (
