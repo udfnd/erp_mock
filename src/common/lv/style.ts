@@ -381,8 +381,8 @@ export const cssObj = {
     }
   `,
   paginationPageButtonActive: css`
-    background: ${color.white};
-    border-radius: 0;
+    background: ${color.cgrey50};
+    border-radius: 8px;
     border: none;
     color: ${color.blue600};
     font-weight: 600;

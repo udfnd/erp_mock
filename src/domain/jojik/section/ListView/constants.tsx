@@ -13,7 +13,7 @@ export const SORT_OPTIONS = [
   { label: '이름 내림차순', value: 'nameDesc' },
 ];
 
-export const PAGE_SIZE_OPTIONS = [10, 20, 50];
+export const PAGE_SIZE_OPTIONS = [20];
 
 export const CREATED_AT_FILTER_NOW = Date.now();
 

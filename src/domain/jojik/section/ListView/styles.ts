@@ -182,9 +182,9 @@ export const cssObj = {
     background: ${color.white};
     display: flex;
     flex-direction: column;
-    min-height: 100%;
-    max-height: 100%;
-    overflow: auto;
+    min-height: 0;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
   `,
 
   panelHeader: css`

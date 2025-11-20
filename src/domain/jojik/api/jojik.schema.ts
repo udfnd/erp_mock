@@ -1,5 +1,17 @@
 import { z } from 'zod';
 
+export const PaginationDataSchema = z
+  .object({
+    hasNextPage: z.boolean(),
+    pageItemCount: z.number(),
+    pageNumber: z.number(),
+    pageSize: z.number(),
+    totalItemCount: z.number(),
+    totalPageCount: z.number(),
+  })
+  .passthrough();
+export type PaginationData = z.infer<typeof PaginationDataSchema>;
+
 export const IconSchema = z.object({
   name: z.string(),
   nanoId: z.string(),
@@ -39,6 +51,7 @@ export type GetJojiksRequest = z.infer<typeof GetJojiksRequestSchema>;
 
 export const GetJojiksResponseSchema = z
   .object({
+    paginationData: PaginationDataSchema.optional(),
     jojiks: z.array(JojikListItemSchema),
   })
   .passthrough();

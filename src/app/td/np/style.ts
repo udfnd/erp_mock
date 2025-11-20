@@ -16,7 +16,8 @@ export const cssObj = {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    min-height: 0;
     background-color: ${color.white};
   `,
 
@@ -24,6 +25,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     flex: 1;
+    min-height: 0;
   `,
 
   tertiaryNavStyle: css`

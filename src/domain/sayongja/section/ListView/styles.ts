@@ -178,13 +178,11 @@ export const cssObj = {
   settingsPanel: css`
     width: 400px;
     min-width: 400px;
-    flex: 0 0 340px;
     background: ${color.white};
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
+    min-height: 0;
     max-height: 100%;
-    overflow: auto;
+    height: 100%;
+    overflow-y: auto;
   `,
 
   panelHeader: css`
@@ -318,7 +316,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 5;
+    z-index: 100;
   `,
   permissionTooltipActions: css`
     display: flex;
