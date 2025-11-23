@@ -143,6 +143,12 @@ export const cssObj = {
     `;
   },
 
+  filterTriggerPlaceholder: css`
+    color: ${color.cgrey400};
+    border-color: ${color.cgrey100};
+    background: ${color.white};
+  `,
+
   filterTriggerCaret: css`
     font-size: 10px;
     line-height: 1;

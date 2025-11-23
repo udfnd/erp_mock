@@ -72,7 +72,7 @@ export function useJusoListViewSections({
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<JusoListItem>({
     initialSorting: [{ id: 'createdAt', desc: true }],
-    initialPagination: { pageIndex: 0, pageSize: 10 },
+    initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
   const setSortingWithReset: typeof baseState.setSorting = (updater) => {

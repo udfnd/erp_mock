@@ -88,8 +88,8 @@ export function useSayongjaListViewSections({
 }: SayongjaListViewHookParams): UseSayongjaListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<SayongjaListItem>({
-    initialSorting: [{ id: 'employedAt', desc: true }],
-    initialPagination: { pageIndex: 0, pageSize: 10 },
+    initialSorting: [],
+    initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
   const setSortingWithReset: typeof baseState.setSorting = (updater) => {

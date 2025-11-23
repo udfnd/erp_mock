@@ -8,8 +8,8 @@ import { ListViewState, useListViewState } from '@/common/lv';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
 import {
+  CREATED_AT_FILTER_OPTIONS,
   CREATED_AT_FILTER_NOW,
-  PAGE_SIZE_OPTIONS,
   SORT_OPTIONS,
   columnHelper,
   createSortableHeader,
@@ -32,7 +32,6 @@ export type JojikListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
   onCreatedFilterChange: (value: CreatedAtFilterValue) => void;
-  onPageSizeChange: (size: number) => void;
   onSelectedJojiksChange: (jojiks: JojikListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
@@ -67,7 +66,7 @@ export type UseJojikListViewSectionsResult = {
   listSectionProps: JojikListSectionProps;
   settingsSectionProps: JojikSettingsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
-  pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
+  createdAtFilterOptions: typeof CREATED_AT_FILTER_OPTIONS;
 };
 
 export function useJojikListViewSections({
@@ -76,7 +75,7 @@ export function useJojikListViewSections({
 }: JojikListViewHookParams): UseJojikListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<JojikListItem>({
-    initialSorting: [{ id: 'createdAt', desc: true }],
+    initialSorting: [],
     initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
@@ -187,10 +186,6 @@ export function useJojikListViewSections({
     setSorting(getSortStateFromOption(value));
   };
 
-  const handlePageSizeChange = (size: number) => {
-    setPagination({ pageIndex: 0, pageSize: size });
-  };
-
   const clearSelection = () => {
     setRowSelection({});
   };
@@ -230,7 +225,6 @@ export function useJojikListViewSections({
       onSearchChange: handleSearchChange,
       onSortChange: handleSortChange,
       onCreatedFilterChange: handleCreatedFilterChange,
-      onPageSizeChange: handlePageSizeChange,
       onSelectedJojiksChange: setSelectedJojiks,
       onAddClick: handleAddClick,
       onStopCreate: stopCreate,
@@ -251,6 +245,6 @@ export function useJojikListViewSections({
     listSectionProps,
     settingsSectionProps,
     sortOptions: SORT_OPTIONS,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
+    createdAtFilterOptions: CREATED_AT_FILTER_OPTIONS,
   };
 }

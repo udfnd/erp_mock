@@ -299,7 +299,7 @@ export function Template<TData>({
     ...restTableOptions,
   });
 
-  const pageSize = table.getState().pagination.pageSize || 10;
+  const pageSize = table.getState().pagination.pageSize || 20;
 
   const selectedRows = table.getSelectedRowModel().flatRows;
 

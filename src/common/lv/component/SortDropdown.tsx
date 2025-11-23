@@ -12,6 +12,7 @@ export function SortDropdown({ sort }: { sort: ListViewSortProps }) {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const selectedOption = sort.options.find((option) => option.value === sort.value);
   const displayLabel = selectedOption?.label ?? sort.placeholder ?? '정렬 기준';
+  const hasSelection = Boolean(selectedOption);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -40,7 +41,7 @@ export function SortDropdown({ sort }: { sort: ListViewSortProps }) {
     <div css={lvCss.filterDropdown} ref={dropdownRef}>
       <button
         type="button"
-        css={lvCss.filterTrigger(isOpen, Boolean(sort.value))}
+        css={[lvCss.filterTrigger(isOpen, hasSelection), !hasSelection && !isOpen && lvCss.filterTriggerPlaceholder]}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <span>{displayLabel}</span>

@@ -5,6 +5,35 @@ import { css } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const cssObj = {
+  page: css`
+    display: flex;
+    box-sizing: border-box;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-height: 100%;
+    align-items: stretch;
+    overflow: hidden;
+  `,
+
+  leftPane: css`
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+  `,
+
+  rightPane: css`
+    width: 400px;
+    min-width: 400px;
+    max-width: 400px;
+    min-height: 0;
+    max-height: 100%;
+    display: flex;
+  `,
+
   listSection: css`
     flex: 1 1 auto;
     display: flex;
@@ -178,12 +207,10 @@ export const cssObj = {
   settingsPanel: css`
     width: 400px;
     min-width: 400px;
-    flex: 0 0 340px;
     background: ${color.white};
-    display: flex;
-    flex-direction: column;
     min-height: 0;
-    max-height: calc(100vh - 32px);
+    max-height: 100%;
+    height: 100%;
     overflow-y: auto;
   `,
 
@@ -203,6 +230,71 @@ export const cssObj = {
     color: ${color.black};
   `,
 
+  panelBody: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+  `,
+
+  helperText: css`
+    font-size: 13px;
+    color: ${color.cgrey400};
+  `,
+
+  panelSection: css`
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid ${color.cgrey50};
+    gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+  `,
+
+  panelFooter: css`
+    padding: 16px;
+    display: flex;
+    gap: 8px;
+  `,
+
+  sectionActions: css`
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  `,
+
+  panelText: css`
+    font-size: 14px;
+    color: ${color.cgrey700};
+  `,
+
+  linkTag: css`
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: ${color.cgrey50};
+    font-size: 13px;
+    color: ${color.cgrey700};
+    text-decoration: none;
+    &:hover {
+      background: ${color.cgrey100};
+    }
+  `,
+
+  badge: css`
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: ${color.blue50};
+    color: ${color.blue700};
+    font-size: 13px;
+    font-weight: 600;
+  `,
+
   salesDiv: css`
     display: flex;
     align-items: center;
@@ -216,40 +308,6 @@ export const cssObj = {
     }
   `,
 
-  panelBody: css`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 16px;
-  `,
-
-  panelSection: css`
-    display: flex;
-    flex-direction: column;
-    border-bottom: 1px solid ${color.cgrey50};
-    gap: 8px;
-    padding-bottom: 16px;
-    margin-bottom: 8px;
-  `,
-
-  sectionActions: css`
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  `,
-
-  panelLabel: css`
-    font-size: 13px;
-    font-weight: 600;
-    color: ${color.cgrey500};
-  `,
-
-  panelText: css`
-    font-size: 14px;
-    color: ${color.cgrey700};
-  `,
-
   homepageInfo: css`
     display: flex;
     flex-direction: column;
@@ -257,56 +315,18 @@ export const cssObj = {
   `,
 
   homepageLink: css`
-    font-size: 14px;
-    color: ${color.blue50};
+    color: ${color.blue500};
     text-decoration: underline;
     word-break: break-all;
   `,
 
   permissionItem: css`
     display: flex;
-    height: 40px;
-    padding: 6px 12px;
+    justify-content: space-between;
     align-items: center;
-    align-content: center;
-    gap: 0 8px;
+    padding: 10px 12px;
+    border: 1px solid ${color.cgrey100};
     border-radius: 8px;
-    border: 1px solid ${color.cgrey200};
-    background-color: ${color.cgrey10};
-    ${typography.bodySmallR};
-    color: ${color.cgrey500};
-
-    > div {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-  `,
-
-  panelFooter: css`
-    padding: 16px;
-    display: flex;
-  `,
-
-  helperText: css`
-    font-size: 13px;
-    color: ${color.cgrey400};
-  `,
-
-  chipList: css`
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  `,
-
-  chip: css`
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    border-radius: 999px;
     background: ${color.blue10};
-    color: ${color.blue600};
-    font-size: 13px;
   `,
 };

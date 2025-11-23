@@ -85,7 +85,7 @@ export function usePermissionListViewSections({
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<Permission>({
     initialSorting: getSortStateFromOption('nameAsc'),
-    initialPagination: { pageIndex: 0, pageSize: 10 },
+    initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
   const setSortingWithReset: typeof baseState.setSorting = (updater) => {
