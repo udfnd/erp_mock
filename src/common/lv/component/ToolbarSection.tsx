@@ -12,9 +12,6 @@ export function ToolbarSection({
   search,
   filters,
   sort,
-  pageSizeOptions,
-  pageSize,
-  onPageSizeChange,
   totalCount,
   primaryAction,
   onSearchFocusChange,
@@ -57,16 +54,6 @@ export function ToolbarSection({
           ) : null}
           <SortDropdown sort={sort} />
           <FiltersDropdown filters={filters} />
-          <label css={lvCss.selectLabel}>
-            페이지 크기
-            <select css={lvCss.select} value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>
-              {pageSizeOptions.map((size) => (
-                <option key={size} value={size}>
-                  {size}개씩 보기
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
       </div>
       <div css={lvCss.searchResultSummary}>총 {totalCount}명</div>

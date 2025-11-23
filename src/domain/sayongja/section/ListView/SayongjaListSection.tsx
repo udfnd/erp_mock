@@ -15,7 +15,6 @@ import { cssObj } from './styles';
 
 export type SayongjaListSectionComponentProps = SayongjaListSectionProps & {
   sortOptions: { label: string; value: string }[];
-  pageSizeOptions: number[];
   jojikFilterOptions: { label: string; value: string }[];
   employmentCategoryOptions: { label: string; value: string }[];
   workTypeOptions: { label: string; value: string }[];
@@ -43,7 +42,6 @@ export function SayongjaListSection({
   isCreating,
   handlers,
   sortOptions,
-  pageSizeOptions,
   jojikFilterOptions,
   employmentCategoryOptions,
   workTypeOptions,
@@ -144,9 +142,6 @@ export function SayongjaListSection({
         search={{ value: searchTerm, onChange: handlers.onSearchChange, placeholder: '사용자 이름으로 검색' }}
         filters={toolbarFilters}
         sort={sortProps}
-        pageSizeOptions={pageSizeOptions}
-        pageSize={pagination.pageSize}
-        onPageSizeChange={handlers.onPageSizeChange}
         totalCount={totalCount}
         primaryAction={{ label: '새 사용자 추가', onClick: handlers.onAddClick, disabled: isCreating }}
         onSearchFocusChange={setIsSearchFocused}

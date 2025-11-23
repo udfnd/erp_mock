@@ -3,12 +3,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 
-import { ArrowLgDown, RadioCheckedActive, RadioCheckedDisabled, RadioUncheckedActive, RadioUncheckedDisabled } from '@/common/icons';
+import {
+  ArrowLgDown,
+  CheckboxCheckedActive,
+  CheckboxCheckedDisabled,
+  CheckboxUncheckedActive,
+  CheckboxUncheckedDisabled,
+} from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import type { ListViewFilter } from './types';
-
-const DEFAULT_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
 export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,12 +58,6 @@ export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
     filter.onChange(resolvedValue);
   };
 
-  const shouldIgnoreRowClick = (event: React.MouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement | null;
-    if (!target) return false;
-    return Boolean(target.closest(DEFAULT_IGNORE_SELECTOR));
-  };
-
   return (
     <div css={lvCss.filterDropdown} ref={dropdownRef}>
       <button
@@ -86,21 +84,18 @@ export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
                   const isDisabled = !filter.options.some((opt) => opt.value === option.value);
                   const icon = isDisabled
                     ? isOptionActive
-                      ? <RadioCheckedDisabled />
-                      : <RadioUncheckedDisabled />
+                      ? <CheckboxCheckedDisabled />
+                      : <CheckboxUncheckedDisabled />
                     : isOptionActive
-                      ? <RadioCheckedActive />
-                      : <RadioUncheckedActive />;
+                      ? <CheckboxCheckedActive />
+                      : <CheckboxUncheckedActive />;
 
                   return (
                     <button
                       key={option.value}
                       type="button"
                       css={[lvCss.filterOption, isOptionActive && lvCss.filterOptionActive]}
-                      onClick={(event) => {
-                        if (shouldIgnoreRowClick(event)) return;
-                        handleToggleOption(filter, option.value);
-                      }}
+                      onClick={() => handleToggleOption(filter, option.value)}
                     >
                       <span css={lvCss.filterOptionContent}>
                         {icon}

@@ -23,7 +23,6 @@ export function SayongjasLv({ gigwanNanoId }: SayongjasLvProps) {
     listSectionProps,
     settingsSectionProps,
     sortOptions,
-    pageSizeOptions,
     isHwalseongFilterOptions,
     jojikFilterOptions,
     employmentCategoryOptions,
@@ -34,7 +33,6 @@ export function SayongjasLv({ gigwanNanoId }: SayongjasLvProps) {
     () => ({
       ...listSectionProps,
       sortOptions,
-      pageSizeOptions,
       jojikFilterOptions,
       employmentCategoryOptions,
       workTypeOptions,
@@ -45,7 +43,6 @@ export function SayongjasLv({ gigwanNanoId }: SayongjasLvProps) {
       isHwalseongFilterOptions,
       jojikFilterOptions,
       listSectionProps,
-      pageSizeOptions,
       sortOptions,
       workTypeOptions,
     ],

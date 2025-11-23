@@ -2,9 +2,17 @@
 
 import { useEffect, useMemo } from 'react';
 import type React from 'react';
-import { flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 
 import { cssObj as lvCss } from '@/common/lv/style';
+import { Checkbox } from '@/common/components';
 
 import type { ListViewTableProps } from './types';
 import { PaginationSection } from './PaginationSection';
@@ -26,7 +34,38 @@ export function ListSection<TData>({
   onSelectedRowsChange,
   onDimmerClick,
 }: ListViewTableProps<TData>) {
-  const effectiveColumns = useMemo(() => columns, [columns]);
+  const selectionColumn: ColumnDef<TData> = useMemo(
+    () => ({
+      id: '__row_selection__',
+      header: ({ table }) => (
+        <div css={lvCss.selectionCell}>
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected()}
+            indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            ariaLabel="전체 행 선택"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div css={lvCss.selectionCell}>
+          <Checkbox
+            checked={row.getIsSelected()}
+            indeterminate={row.getIsSomeSelected()}
+            disabled={!row.getCanSelect()}
+            onChange={row.getToggleSelectedHandler()}
+            ariaLabel="행 선택"
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableColumnFilter: false,
+      enableHiding: false,
+    }),
+    [],
+  );
+
+  const effectiveColumns = useMemo(() => [selectionColumn, ...columns], [columns, selectionColumn]);
   const table = useReactTable({
     data,
     columns: effectiveColumns,
@@ -44,6 +83,7 @@ export function ListSection<TData>({
     onSortingChange: state.setSorting,
     onPaginationChange: state.setPagination,
     onRowSelectionChange: state.setRowSelection,
+    enableRowSelection: true,
   });
 
   const selectedRows = table.getSelectedRowModel().flatRows;

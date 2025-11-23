@@ -39,9 +39,6 @@ export type ListViewToolbarProps = {
   search: ListViewSearchProps;
   filters: ListViewFilter[];
   sort: ListViewSortProps;
-  pageSizeOptions: number[];
-  pageSize: number;
-  onPageSizeChange: (size: number) => void;
   totalCount: number;
   primaryAction?: ListViewPrimaryActionProps;
   onSearchFocusChange?: (focused: boolean) => void;

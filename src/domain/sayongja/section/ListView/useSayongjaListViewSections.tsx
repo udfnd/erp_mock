@@ -12,7 +12,6 @@ import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/
 
 import {
   IS_HWALSEONG_FILTER_OPTIONS,
-  PAGE_SIZE_OPTIONS,
   SORT_OPTIONS,
   columnHelper,
   createSortableHeader,
@@ -42,7 +41,6 @@ export type SayongjaListSectionHandlers = {
   onEmploymentCategoryFilterChange: (value: string[]) => void;
   onWorkTypeFilterChange: (value: string[]) => void;
   onIsHwalseongFilterChange: (value: string[]) => void;
-  onPageSizeChange: (size: number) => void;
   onSelectedSayongjasChange: (sayongjas: SayongjaListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
@@ -78,7 +76,6 @@ export type UseSayongjaListViewSectionsResult = {
   listSectionProps: SayongjaListSectionProps;
   settingsSectionProps: SayongjaSettingsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
-  pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
   isHwalseongFilterOptions: typeof IS_HWALSEONG_FILTER_OPTIONS;
   jojikFilterOptions: { label: string; value: string }[];
   employmentCategoryOptions: { label: string; value: string }[];
@@ -243,10 +240,6 @@ export function useSayongjaListViewSections({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handlePageSizeChange = (size: number) => {
-    setPagination({ pageIndex: 0, pageSize: size });
-  };
-
   const clearSelection = () => {
     setRowSelection({});
   };
@@ -289,7 +282,6 @@ export function useSayongjaListViewSections({
       onEmploymentCategoryFilterChange: handleEmploymentCategoryFilterChange,
       onWorkTypeFilterChange: handleWorkTypeFilterChange,
       onIsHwalseongFilterChange: handleIsHwalseongFilterChange,
-      onPageSizeChange: handlePageSizeChange,
       onSelectedSayongjasChange: setSelectedSayongjas,
       onAddClick: handleAddClick,
       onStopCreate: stopCreate,
@@ -311,7 +303,6 @@ export function useSayongjaListViewSections({
     listSectionProps,
     settingsSectionProps,
     sortOptions: SORT_OPTIONS,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
     isHwalseongFilterOptions: IS_HWALSEONG_FILTER_OPTIONS,
     jojikFilterOptions,
     employmentCategoryOptions,
