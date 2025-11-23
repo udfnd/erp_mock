@@ -12,7 +12,7 @@ type Props<T> = {
   MultipleSelectedComponent: React.ReactNode;
 };
 
-export default function ListViewLayout<T>({
+export function ListViewLayout<T>({
   children,
   selectedItems,
   NoneSelectedComponent,

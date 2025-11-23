@@ -8,7 +8,7 @@ import {
   ToolbarSection,
   type ListViewFilter,
   type ListViewSortProps,
-} from './components';
+} from '@/common/lv/component';
 import type { SayongjaListSectionProps, SayongjaFilters } from './useSayongjaListViewSections';
 import type { SayongjaListItem } from '@/domain/sayongja/api';
 import { cssObj } from './styles';
