@@ -35,6 +35,13 @@ export const box = css`
   position: relative;
   transition: all 0.15s ease;
 
+  & > svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    flex-shrink: 0;
+  }
+
   .${inputClassName}:disabled + & {
     cursor: not-allowed;
     opacity: 0.6;
