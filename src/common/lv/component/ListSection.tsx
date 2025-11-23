@@ -13,6 +13,8 @@ import {
 
 import { cssObj as lvCss } from '@/common/lv/style';
 import { Checkbox } from '@/common/components';
+import { Plus } from '@/common/icons';
+import { color } from '@/style';
 
 import type { ListViewTableProps } from './types';
 import { PaginationSection } from './PaginationSection';
@@ -23,6 +25,7 @@ export function ListSection<TData>({
   data,
   columns,
   state,
+  primaryAction,
   manualPagination,
   manualSorting,
   pageCount,
@@ -39,12 +42,20 @@ export function ListSection<TData>({
       id: '__row_selection__',
       header: ({ table }) => (
         <div css={lvCss.selectionCell}>
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
-            onChange={table.getToggleAllPageRowsSelectedHandler()}
-            ariaLabel="전체 행 선택"
-          />
+          {(() => {
+            const isAllRowsSelected = table.getIsAllRowsSelected();
+            const isSomeRowsSelected =
+              (table.getIsSomeRowsSelected?.() ?? table.getIsSomePageRowsSelected?.()) && !isAllRowsSelected;
+
+            return (
+              <Checkbox
+                checked={isAllRowsSelected}
+                indeterminate={Boolean(isSomeRowsSelected)}
+                onChange={table.getToggleAllRowsSelectedHandler()}
+                ariaLabel="전체 행 선택"
+              />
+            );
+          })()}
         </div>
       ),
       cell: ({ row }) => (
@@ -65,7 +76,39 @@ export function ListSection<TData>({
     [],
   );
 
-  const effectiveColumns = useMemo(() => [selectionColumn, ...columns], [columns, selectionColumn]);
+  const primaryActionColumn: ColumnDef<TData> | null = useMemo(
+    () =>
+      primaryAction
+        ? {
+            id: '__primary_action__',
+            header: () => (
+              <div css={lvCss.headerActionCell}>
+                <button
+                  type="button"
+                  css={lvCss.addElementButton}
+                  onClick={primaryAction.onClick}
+                  disabled={primaryAction.disabled}
+                >
+                  <>
+                    {primaryAction.label}
+                    <Plus width={16} height={16} color={`${color.white}`} />
+                  </>
+                </button>
+              </div>
+            ),
+            cell: () => null,
+            enableSorting: false,
+            enableColumnFilter: false,
+            enableHiding: false,
+          }
+        : null,
+    [primaryAction],
+  );
+
+  const effectiveColumns = useMemo(
+    () => [selectionColumn, ...columns, ...(primaryActionColumn ? [primaryActionColumn] : [])],
+    [columns, primaryActionColumn, selectionColumn],
+  );
   const table = useReactTable({
     data,
     columns: effectiveColumns,
@@ -106,7 +149,9 @@ export function ListSection<TData>({
   return (
     <div css={lvCss.tableContainer}>
       <div css={lvCss.tableWrapperContainer}>
-        {isDimmed ? <button type="button" css={lvCss.tableDimmer} onClick={onDimmerClick} aria-label="검색창 포커스 해제" /> : null}
+        {isDimmed ? (
+          <button type="button" css={lvCss.tableDimmer} onClick={onDimmerClick} aria-label="검색창 포커스 해제" />
+        ) : null}
         <div css={lvCss.tableWrapper}>
           <table css={lvCss.table}>
             <thead>

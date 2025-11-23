@@ -1,7 +1,6 @@
 'use client';
 
-import { Button } from '@/common/components';
-import { Close, Search, Plus } from '@/common/icons';
+import { Close, Search } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import { FiltersDropdown } from './FiltersDropdown';
@@ -13,7 +12,6 @@ export function ToolbarSection({
   filters,
   sort,
   totalCount,
-  primaryAction,
   onSearchFocusChange,
 }: ListViewToolbarProps) {
   return (
@@ -47,15 +45,10 @@ export function ToolbarSection({
           />
         </div>
         <div css={lvCss.toolbarControls}>
-          {primaryAction ? (
-            <Button size="small" iconLeft={<Plus />} disabled={primaryAction.disabled} onClick={primaryAction.onClick}>
-              {primaryAction.label}
-            </Button>
-          ) : null}
           <SortDropdown sort={sort} />
-          <FiltersDropdown filters={filters} />
         </div>
       </div>
+      <FiltersDropdown filters={filters} />
       <div css={lvCss.searchResultSummary}>총 {totalCount}명</div>
     </div>
   );

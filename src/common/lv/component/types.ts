@@ -40,7 +40,6 @@ export type ListViewToolbarProps = {
   filters: ListViewFilter[];
   sort: ListViewSortProps;
   totalCount: number;
-  primaryAction?: ListViewPrimaryActionProps;
   onSearchFocusChange?: (focused: boolean) => void;
 };
 
@@ -48,6 +47,7 @@ export type ListViewTableProps<TData> = {
   data: TData[];
   columns: ColumnDef<TData>[];
   state: ListViewState<TData>;
+  primaryAction?: ListViewPrimaryActionProps;
   manualPagination?: boolean;
   manualSorting?: boolean;
   pageCount: number;

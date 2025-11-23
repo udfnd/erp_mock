@@ -143,13 +143,13 @@ export function SayongjaListSection({
         filters={toolbarFilters}
         sort={sortProps}
         totalCount={totalCount}
-        primaryAction={{ label: '새 사용자 추가', onClick: handlers.onAddClick, disabled: isCreating }}
         onSearchFocusChange={setIsSearchFocused}
       />
       <ListSection
         data={data}
         columns={columns}
         state={state}
+        primaryAction={{ label: '새 사용자 추가', onClick: handlers.onAddClick, disabled: isCreating }}
         manualPagination
         manualSorting
         pageCount={totalPages}

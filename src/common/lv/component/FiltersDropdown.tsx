@@ -50,12 +50,24 @@ export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
   };
 
   const handleToggleOption = (filter: ListViewFilter, value: string) => {
-    const nextValue = filter.value.includes(value)
-      ? filter.value.filter((item) => item !== value)
-      : [...filter.value, value];
+    const hasAllOption = filter.options.some((option) => option.value === 'all');
+    const withoutAll = filter.value.filter((item) => item !== 'all');
 
-    const resolvedValue = nextValue.length > 0 ? nextValue : filter.defaultValue ?? [];
-    filter.onChange(resolvedValue);
+    if (value === 'all') {
+      filter.onChange(['all']);
+      return;
+    }
+
+    const toggledValue = withoutAll.includes(value)
+      ? withoutAll.filter((item) => item !== value)
+      : [...withoutAll, value];
+
+    if (!toggledValue.length) {
+      filter.onChange(filter.defaultValue ?? (hasAllOption ? ['all'] : []));
+      return;
+    }
+
+    filter.onChange(toggledValue);
   };
 
   return (
