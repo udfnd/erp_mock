@@ -76,7 +76,7 @@ export function useJojikListViewSections({
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<JojikListItem>({
     initialSorting: [],
-    initialPagination: { pageIndex: 0, pageSize: 10 },
+    initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
   const setSortingWithReset: typeof baseState.setSorting = (updater) => {

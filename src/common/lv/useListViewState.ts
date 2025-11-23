@@ -10,7 +10,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 
-const DEFAULT_PAGINATION: PaginationState = { pageIndex: 0, pageSize: 10 };
+const DEFAULT_PAGINATION: PaginationState = { pageIndex: 0, pageSize: 20 };
 
 export type ListViewState<TData> = {
   sorting: SortingState;

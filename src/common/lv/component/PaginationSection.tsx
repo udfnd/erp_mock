@@ -8,6 +8,7 @@ import { cssObj as lvCss } from '@/common/lv/style';
 import type { ListViewPaginationProps } from './types';
 
 export function PaginationSection({ table }: ListViewPaginationProps) {
+  const MAX_PAGE_BUTTONS = 10;
   const pagination = table.getState().pagination;
   const pageCount = table.getPageCount();
   const totalPages = Math.max(pageCount, 1);
@@ -15,8 +16,11 @@ export function PaginationSection({ table }: ListViewPaginationProps) {
 
   const pageNumbers = useMemo(() => {
     const pages: number[] = [];
-    const start = Math.max(1, currentPage - 2);
-    const end = Math.min(totalPages, currentPage + 2);
+    const start = Math.max(
+      1,
+      Math.min(currentPage - Math.floor(MAX_PAGE_BUTTONS / 2), totalPages - (MAX_PAGE_BUTTONS - 1)),
+    );
+    const end = Math.min(totalPages, start + MAX_PAGE_BUTTONS - 1);
 
     for (let page = start; page <= end; page += 1) {
       pages.push(page);
@@ -33,7 +37,7 @@ export function PaginationSection({ table }: ListViewPaginationProps) {
   const hasRightMore = pageNumbers[pageNumbers.length - 1] < totalPages;
   const canGoPrev = currentPage > 1;
   const canGoNext = currentPage < totalPages;
-  const canUseDoubleArrows = totalPages > 5;
+  const canUseDoubleArrows = totalPages > MAX_PAGE_BUTTONS;
 
   return (
     <footer css={lvCss.footer}>
@@ -74,7 +78,7 @@ export function PaginationSection({ table }: ListViewPaginationProps) {
             <button
               type="button"
               css={lvCss.paginationMoreButton}
-              onClick={() => handleGoToPage(currentPage + pageNumbers.length)}
+              onClick={() => handleGoToPage(pageNumbers[pageNumbers.length - 1] + 1)}
             >
               …
             </button>

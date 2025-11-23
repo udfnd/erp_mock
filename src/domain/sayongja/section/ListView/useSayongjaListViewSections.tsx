@@ -89,7 +89,7 @@ export function useSayongjaListViewSections({
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<SayongjaListItem>({
     initialSorting: [],
-    initialPagination: { pageIndex: 0, pageSize: 10 },
+    initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
   const setSortingWithReset: typeof baseState.setSorting = (updater) => {
