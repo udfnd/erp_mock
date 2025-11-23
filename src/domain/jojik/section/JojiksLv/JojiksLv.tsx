@@ -2,8 +2,12 @@
 
 import { useMemo } from 'react';
 
-import { ListViewLayout } from '@/domain/sayongja/section';
-import { JojikListSection, JojikSettingsSection, useJojikListViewSections } from '@/domain/jojik/section/ListView';
+import {
+  ListViewLayout,
+  JojikListSection,
+  JojikSettingsSection,
+  useJojikListViewSections,
+} from '@/domain/jojik/section/ListView';
 import { useAuth } from '@/global/auth';
 
 import { cssObj } from './styles';
@@ -15,16 +19,16 @@ type JojiksLvProps = {
 export function JojiksLv({ gigwanNanoId }: JojiksLvProps) {
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions } =
+  const { listSectionProps, settingsSectionProps, sortOptions, createdAtFilterOptions } =
     useJojikListViewSections({ gigwanNanoId, isAuthenticated });
 
   const listSectionAllProps = useMemo(
     () => ({
       ...listSectionProps,
       sortOptions,
-      pageSizeOptions,
+      createdAtFilterOptions,
     }),
-    [listSectionProps, pageSizeOptions, sortOptions],
+    [createdAtFilterOptions, listSectionProps, sortOptions],
   );
 
   const pageKey = gigwanNanoId || 'no-gi';
