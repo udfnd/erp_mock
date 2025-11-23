@@ -1,6 +1,6 @@
 'use client';
 
-import { Close, Search } from '@/common/icons';
+import { Close, Search, TableChart } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import { FiltersDropdown } from './FiltersDropdown';
@@ -46,6 +46,10 @@ export function ToolbarSection({
         </div>
         <div css={lvCss.toolbarControls}>
           <SortDropdown sort={sort} />
+          <button type="button" css={lvCss.viewChangeButton}>
+            <TableChart />
+            리스트뷰
+          </button>
         </div>
       </div>
       <FiltersDropdown filters={filters} />

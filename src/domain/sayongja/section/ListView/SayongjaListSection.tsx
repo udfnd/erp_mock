@@ -47,7 +47,7 @@ export function SayongjaListSection({
   workTypeOptions,
   isHwalseongFilterOptions,
 }: SayongjaListSectionComponentProps) {
-  const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
+  const sortValue = sortByOption ?? '';
   const effectiveFilters = filters ?? DEFAULT_FILTERS;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -106,6 +106,7 @@ export function SayongjaListSection({
     () => ({
       label: '정렬 기준',
       value: sortValue,
+      placeholder: '정렬 기준',
       options: sortOptions,
       onChange: handlers.onSortChange,
     }),

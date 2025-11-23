@@ -36,7 +36,7 @@ export function JojikListSection({
   sortOptions,
   createdAtFilterOptions,
 }: JojikListSectionComponentProps) {
-  const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
+  const sortValue = sortByOption ?? '';
   const createdFilterValue = currentCreatedFilter ?? 'all';
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -58,6 +58,7 @@ export function JojikListSection({
     () => ({
       label: '정렬 기준',
       value: sortValue,
+      placeholder: '정렬 기준',
       options: sortOptions,
       onChange: handlers.onSortChange,
     }),

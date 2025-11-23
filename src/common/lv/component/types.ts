@@ -23,7 +23,7 @@ export type ListViewFilter = {
 
 export type ListViewSortProps = {
   label?: string;
-  value: string;
+  value?: string;
   placeholder?: string;
   options: { label: string; value: string }[];
   onChange: (value: string) => void;

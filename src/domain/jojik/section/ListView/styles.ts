@@ -207,12 +207,10 @@ export const cssObj = {
   settingsPanel: css`
     width: 400px;
     min-width: 400px;
-    flex: 0 0 340px;
     background: ${color.white};
-    display: flex;
-    flex-direction: column;
     min-height: 0;
-    max-height: calc(100vh - 32px);
+    max-height: 100%;
+    height: 100%;
     overflow-y: auto;
   `,
 
@@ -228,37 +226,46 @@ export const cssObj = {
   `,
 
   panelSubtitle: css`
-    margin-top: 4px;
-    font-size: 14px;
-    color: ${color.cgrey500};
+    ${typography.bodySmallSB};
+    color: ${color.black};
   `,
 
   panelBody: css`
-    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    border-top: 1px solid ${color.cgrey50};
-    border-bottom: 1px solid ${color.cgrey50};
+    gap: 8px;
+    padding: 16px;
   `,
 
   helperText: css`
-    font-size: 12px;
-    color: ${color.cgrey500};
+    font-size: 13px;
+    color: ${color.cgrey400};
   `,
 
   panelSection: css`
     display: flex;
     flex-direction: column;
+    border-bottom: 1px solid ${color.cgrey50};
     gap: 8px;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
   `,
 
   panelFooter: css`
     padding: 16px;
-    border-top: 1px solid ${color.cgrey50};
     display: flex;
-    flex-direction: column;
     gap: 8px;
+  `,
+
+  sectionActions: css`
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  `,
+
+  panelText: css`
+    font-size: 14px;
+    color: ${color.cgrey700};
   `,
 
   linkTag: css`
@@ -286,5 +293,40 @@ export const cssObj = {
     color: ${color.blue700};
     font-size: 13px;
     font-weight: 600;
+  `,
+
+  salesDiv: css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    padding: 8px;
+    background-color: ${color.cgrey10};
+    > span {
+      ${typography.captionB};
+      color: ${color.cgrey500};
+    }
+  `,
+
+  homepageInfo: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
+  homepageLink: css`
+    color: ${color.blue500};
+    text-decoration: underline;
+    word-break: break-all;
+  `,
+
+  permissionItem: css`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    background: ${color.blue10};
   `,
 };
