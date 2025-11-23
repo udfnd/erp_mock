@@ -9,6 +9,7 @@ import {
   useSayongjaListViewSections,
 } from '@/domain/sayongja/section/ListView';
 
+import ListViewLayout from '../ListView/ListViewLayout';
 import { cssObj } from './styles';
 
 type SayongjasLvProps = {
@@ -50,7 +51,7 @@ export function SayongjasLv({ gigwanNanoId }: SayongjasLvProps) {
     ],
   );
 
-  const settingsSectionAllProps = useMemo(
+  const baseSettingsProps = useMemo(
     () => ({
       ...settingsSectionProps,
       employmentCategoryOptions,
@@ -63,8 +64,19 @@ export function SayongjasLv({ gigwanNanoId }: SayongjasLvProps) {
 
   return (
     <div css={cssObj.page} key={pageKey}>
-      <SayongjaListSection {...listSectionAllProps} />
-      <SayongjaSettingsSection {...settingsSectionAllProps} />
+      <ListViewLayout
+        selectedItems={settingsSectionProps.selectedSayongjas}
+        NoneSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} selectedSayongjas={[]} />}
+        OneSelectedComponent={
+          <SayongjaSettingsSection
+            {...baseSettingsProps}
+            selectedSayongjas={settingsSectionProps.selectedSayongjas.slice(0, 1)}
+          />
+        }
+        MultipleSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} />}
+      >
+        <SayongjaListSection {...listSectionAllProps} />
+      </ListViewLayout>
     </div>
   );
 }
