@@ -8,7 +8,7 @@ import {
   ToolbarSection,
   type ListViewFilter,
   type ListViewSortProps,
-} from './components';
+} from '@/common/lv/component';
 import { cssObj } from './styles';
 import type { JojikListSectionProps } from './useJojikListViewSections';
 import type { CreatedAtFilterValue } from './constants';

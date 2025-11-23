@@ -8,9 +8,7 @@ import {
   SayongjaSettingsSection,
   useSayongjaListViewSections,
 } from '@/domain/sayongja/section/ListView';
-
-import ListViewLayout from '../ListView/ListViewLayout';
-import { cssObj } from './styles';
+import { ListViewLayout } from '@/common/lv/layout';
 
 type SayongjasLvProps = {
   gigwanNanoId: string;
@@ -60,20 +58,19 @@ export function SayongjasLv({ gigwanNanoId }: SayongjasLvProps) {
   const pageKey = gigwanNanoId || 'no-gi';
 
   return (
-    <div css={cssObj.page} key={pageKey}>
-      <ListViewLayout
-        selectedItems={settingsSectionProps.selectedSayongjas}
-        NoneSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} selectedSayongjas={[]} />}
-        OneSelectedComponent={
-          <SayongjaSettingsSection
-            {...baseSettingsProps}
-            selectedSayongjas={settingsSectionProps.selectedSayongjas.slice(0, 1)}
-          />
-        }
-        MultipleSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} />}
-      >
-        <SayongjaListSection {...listSectionAllProps} />
-      </ListViewLayout>
-    </div>
+    <ListViewLayout
+      key={pageKey}
+      selectedItems={settingsSectionProps.selectedSayongjas}
+      NoneSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} selectedSayongjas={[]} />}
+      OneSelectedComponent={
+        <SayongjaSettingsSection
+          {...baseSettingsProps}
+          selectedSayongjas={settingsSectionProps.selectedSayongjas.slice(0, 1)}
+        />
+      }
+      MultipleSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} />}
+    >
+      <SayongjaListSection {...listSectionAllProps} />
+    </ListViewLayout>
   );
 }

@@ -15,4 +15,20 @@ export const cssObj = {
     align-items: stretch;
     overflow: hidden;
   `,
+
+  leftPane: css`
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+  `,
+
+  rightPane: css`
+    width: 400px;
+    min-width: 400px;
+    max-width: 400px;
+    min-height: 0;
+    max-height: 100%;
+    display: flex;
+  `,
 };

@@ -1,1 +1,0 @@
-export { JojiksLv } from './JojiksLv';
