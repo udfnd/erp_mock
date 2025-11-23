@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Row } from '@tanstack/react-table';
 
 import {
@@ -51,6 +51,7 @@ export function SayongjaListSection({
 }: SayongjaListSectionComponentProps) {
   const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
   const effectiveFilters = filters ?? DEFAULT_FILTERS;
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const toolbarFilters: ListViewFilter[] = useMemo(
     () => [
@@ -130,6 +131,13 @@ export function SayongjaListSection({
     handlers.onSelectedSayongjasChange(rows.map((row) => row.original));
   };
 
+  const handleDimmerClick = () => {
+    setIsSearchFocused(false);
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
   return (
     <section css={cssObj.listSection}>
       <ToolbarSection
@@ -141,6 +149,7 @@ export function SayongjaListSection({
         onPageSizeChange={handlers.onPageSizeChange}
         totalCount={totalCount}
         primaryAction={{ label: '새 사용자 추가', onClick: handlers.onAddClick, disabled: isCreating }}
+        onSearchFocusChange={setIsSearchFocused}
       />
       <ListSection
         data={data}
@@ -152,8 +161,10 @@ export function SayongjaListSection({
         isLoading={isListLoading}
         loadingMessage="사용자 데이터를 불러오는 중입니다..."
         emptyMessage="조건에 맞는 사용자가 없습니다. 검색어나 필터를 조정해 보세요."
+        isDimmed={isSearchFocused}
         rowEventHandlers={rowEventHandlers}
         onSelectedRowsChange={handleSelectedRowsChange}
+        onDimmerClick={handleDimmerClick}
       />
     </section>
   );
