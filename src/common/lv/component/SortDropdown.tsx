@@ -50,19 +50,6 @@ export function SortDropdown({ sort }: { sort: ListViewSortProps }) {
       {isOpen && (
         <div css={lvCss.filterMenu}>
           <div css={lvCss.filterGroup(false)}>
-            <button
-              type="button"
-              css={[lvCss.filterOption, !hasSelection && lvCss.filterOptionActive]}
-              onClick={() => {
-                sort.onChange('');
-                setIsOpen(false);
-              }}
-            >
-              <span css={lvCss.filterOptionContent}>
-                {getSortOptionIcon('')}
-                <span>{sort.placeholder ?? '정렬 기준'}</span>
-              </span>
-            </button>
             {sort.options.map((option) => (
               <button
                 key={option.value}

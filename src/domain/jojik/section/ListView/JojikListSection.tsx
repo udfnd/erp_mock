@@ -36,7 +36,7 @@ export function JojikListSection({
   sortOptions,
   createdAtFilterOptions,
 }: JojikListSectionComponentProps) {
-  const sortValue = sortByOption ?? '';
+  const sortValue = sortByOption;
   const createdFilterValue = currentCreatedFilter ?? 'all';
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 

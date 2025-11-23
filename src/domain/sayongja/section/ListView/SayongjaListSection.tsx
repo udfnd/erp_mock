@@ -47,7 +47,7 @@ export function SayongjaListSection({
   workTypeOptions,
   isHwalseongFilterOptions,
 }: SayongjaListSectionComponentProps) {
-  const sortValue = sortByOption ?? '';
+  const sortValue = sortByOption;
   const effectiveFilters = filters ?? DEFAULT_FILTERS;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
