@@ -1,17 +1,14 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
+import type { Row } from '@tanstack/react-table';
+
 import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
-
-import { Button, Checkbox, IconButton, Textfield } from '@/common/components';
-import { ArrowMdLeftSingle, ArrowMdRightSingle, Plus, Search } from '@/common/icons';
-
+  ListSection,
+  ToolbarSection,
+  type ListViewFilter,
+  type ListViewSortProps,
+} from './components';
 import type { SayongjaListSectionProps, SayongjaFilters } from './useSayongjaListViewSections';
 import type { SayongjaListItem } from '@/domain/sayongja/api';
 import { cssObj } from './styles';
@@ -52,251 +49,112 @@ export function SayongjaListSection({
   workTypeOptions,
   isHwalseongFilterOptions,
 }: SayongjaListSectionComponentProps) {
-  const table = useReactTable<SayongjaListItem>({
-    data,
-    columns,
-    state: {
-      sorting: state.sorting,
-      pagination: state.pagination,
-      rowSelection: state.rowSelection,
-    },
-    manualPagination: true,
-    manualSorting: true,
-    pageCount: totalPages,
-    enableRowSelection: true,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: state.setSorting,
-    onPaginationChange: state.setPagination,
-    onRowSelectionChange: state.setRowSelection,
-  });
-
-  const currentPage = pagination.pageIndex + 1;
   const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
   const effectiveFilters = filters ?? DEFAULT_FILTERS;
 
-  useEffect(() => {
-    const selectedRows = table.getSelectedRowModel().flatRows;
-    if (selectedRows.length > 0) {
-      handlers.onStopCreate();
-    }
-    handlers.onSelectedSayongjasChange(selectedRows.map((row) => row.original));
-  }, [handlers, state.rowSelection, table]);
-
-  const allSelected = useMemo(() => table.getIsAllRowsSelected(), [table, state.rowSelection]);
-  const someSelected = useMemo(
-    () => table.getIsSomeRowsSelected() && !allSelected,
-    [allSelected, table, state.rowSelection],
+  const toolbarFilters: ListViewFilter[] = useMemo(
+    () => [
+      {
+        key: 'jojik',
+        label: '권한을 가지는 조직',
+        value: effectiveFilters.jojikNanoIds,
+        defaultValue: DEFAULT_FILTERS.jojikNanoIds,
+        options: jojikFilterOptions,
+        onChange: handlers.onJojikFilterChange,
+      },
+      {
+        key: 'employment',
+        label: '재직 상태',
+        value: effectiveFilters.employmentCategoryNanoIds,
+        defaultValue: DEFAULT_FILTERS.employmentCategoryNanoIds,
+        options: employmentCategoryOptions,
+        onChange: handlers.onEmploymentCategoryFilterChange,
+      },
+      {
+        key: 'workType',
+        label: '근무 형태',
+        value: effectiveFilters.workTypeNanoIds,
+        defaultValue: DEFAULT_FILTERS.workTypeNanoIds,
+        options: workTypeOptions,
+        onChange: handlers.onWorkTypeFilterChange,
+      },
+      {
+        key: 'isHwalseong',
+        label: '활성 여부',
+        value: effectiveFilters.isHwalseong,
+        defaultValue: DEFAULT_FILTERS.isHwalseong,
+        options: isHwalseongFilterOptions,
+        onChange: handlers.onIsHwalseongFilterChange,
+      },
+    ],
+    [
+      effectiveFilters.employmentCategoryNanoIds,
+      effectiveFilters.isHwalseong,
+      effectiveFilters.jojikNanoIds,
+      effectiveFilters.workTypeNanoIds,
+      employmentCategoryOptions,
+      handlers.onEmploymentCategoryFilterChange,
+      handlers.onIsHwalseongFilterChange,
+      handlers.onJojikFilterChange,
+      handlers.onWorkTypeFilterChange,
+      isHwalseongFilterOptions,
+      jojikFilterOptions,
+      workTypeOptions,
+    ],
   );
 
-  const handleMultiSelectChange = (values: string[], onChange: (value: string[]) => void) => {
-    onChange(values.length > 0 ? values : ['all']);
+  const sortProps: ListViewSortProps = useMemo(
+    () => ({
+      label: '정렬 기준',
+      value: sortValue,
+      options: sortOptions,
+      onChange: handlers.onSortChange,
+    }),
+    [handlers.onSortChange, sortOptions, sortValue],
+  );
+
+  const rowEventHandlers = useMemo(
+    () => ({
+      selectOnClick: true,
+      onClick: () => {
+        handlers.onStopCreate();
+      },
+    }),
+    [handlers],
+  );
+
+  const handleSelectedRowsChange = (rows: Row<SayongjaListItem>[]) => {
+    if (rows.length > 0) {
+      handlers.onStopCreate();
+    }
+    handlers.onSelectedSayongjasChange(rows.map((row) => row.original));
   };
 
   return (
     <section css={cssObj.listSection}>
-      <div css={cssObj.listHeader}>
-        <div css={cssObj.searchContainer}>
-          <Search css={cssObj.searchIcon} />
-          <Textfield
-            css={cssObj.searchTextfield}
-            placeholder="사용자 이름으로 검색"
-            value={searchTerm}
-            onChange={(event) => handlers.onSearchChange(event.target.value)}
-          />
-        </div>
-        <div css={cssObj.toolbarGroup}>
-          <select
-            css={cssObj.toolbarSelect}
-            value={sortValue}
-            onChange={(event) => handlers.onSortChange(event.target.value)}
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <select
-            css={cssObj.toolbarSelect}
-            value={pagination.pageSize}
-            onChange={(event) => handlers.onPageSizeChange(Number(event.target.value))}
-          >
-            {pageSizeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}개씩 보기
-              </option>
-            ))}
-          </select>
-          <Button size="small" iconLeft={<Plus />} onClick={handlers.onAddClick} disabled={isCreating}>
-            새 사용자 추가
-          </Button>
-        </div>
-      </div>
-
-      <div css={cssObj.toolbarGroup}>
-        <select
-          multiple
-          css={cssObj.toolbarSelect}
-          value={effectiveFilters.jojikNanoIds}
-          onChange={(event) =>
-            handleMultiSelectChange(
-              Array.from(event.target.selectedOptions, (option) => option.value),
-              handlers.onJojikFilterChange,
-            )
-          }
-        >
-          {jojikFilterOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          multiple
-          css={cssObj.toolbarSelect}
-          value={effectiveFilters.employmentCategoryNanoIds}
-          onChange={(event) =>
-            handleMultiSelectChange(
-              Array.from(event.target.selectedOptions, (option) => option.value),
-              handlers.onEmploymentCategoryFilterChange,
-            )
-          }
-        >
-          {employmentCategoryOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          multiple
-          css={cssObj.toolbarSelect}
-          value={effectiveFilters.workTypeNanoIds}
-          onChange={(event) =>
-            handleMultiSelectChange(
-              Array.from(event.target.selectedOptions, (option) => option.value),
-              handlers.onWorkTypeFilterChange,
-            )
-          }
-        >
-          {workTypeOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <select
-          multiple
-          css={cssObj.toolbarSelect}
-          value={effectiveFilters.isHwalseong}
-          onChange={(event) =>
-            handleMultiSelectChange(
-              Array.from(event.target.selectedOptions, (option) => option.value),
-              handlers.onIsHwalseongFilterChange,
-            )
-          }
-        >
-          {isHwalseongFilterOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div css={cssObj.tableContainer}>
-        <div css={cssObj.tableWrapper}>
-          <table css={cssObj.table}>
-            <thead>
-              <tr css={cssObj.tableHeadRow}>
-                <th css={[cssObj.tableHeaderCell, cssObj.checkboxCell]}>
-                  <Checkbox
-                    checked={allSelected}
-                    indeterminate={someSelected}
-                    onChange={(event) => table.toggleAllRowsSelected(event.target.checked)}
-                  />
-                </th>
-                {table.getFlatHeaders().map((header) => (
-                  <th key={header.id} css={cssObj.tableHeaderCell}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {isListLoading ? (
-                <tr>
-                  <td colSpan={columns.length + 1} css={cssObj.loadingState}>
-                    사용자 데이터를 불러오는 중입니다...
-                  </td>
-                </tr>
-              ) : table.getRowModel().rows.length === 0 ? (
-                <tr>
-                  <td colSpan={columns.length + 1} css={cssObj.emptyState}>
-                    조건에 맞는 사용자가 없습니다. 검색어나 필터를 조정해 보세요.
-                  </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
-                    onClick={() => {
-                      handlers.onStopCreate();
-                      row.toggleSelected();
-                    }}
-                  >
-                    <td css={[cssObj.tableCell, cssObj.checkboxCell]}>
-                      <Checkbox
-                        checked={row.getIsSelected()}
-                        onChange={(event) => {
-                          event.stopPropagation();
-                          row.toggleSelected();
-                        }}
-                      />
-                    </td>
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} css={cssObj.tableCell}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div css={cssObj.tableFooter}>
-          <span css={cssObj.paginationInfo}>
-            총 {totalCount}명 · {currentPage}/{totalPages} 페이지
-          </span>
-          <div css={cssObj.paginationButtons}>
-            <IconButton
-              aria-label="이전 페이지"
-              size="small"
-              disabled={currentPage <= 1}
-              onClick={() =>
-                state.setPagination({ ...pagination, pageIndex: Math.max(0, pagination.pageIndex - 1) })
-              }
-            >
-              <ArrowMdLeftSingle />
-            </IconButton>
-            <IconButton
-              aria-label="다음 페이지"
-              size="small"
-              disabled={currentPage >= totalPages}
-              onClick={() =>
-                state.setPagination({ ...pagination, pageIndex: Math.min(totalPages - 1, pagination.pageIndex + 1) })
-              }
-            >
-              <ArrowMdRightSingle />
-            </IconButton>
-          </div>
-        </div>
-      </div>
+      <ToolbarSection
+        search={{ value: searchTerm, onChange: handlers.onSearchChange, placeholder: '사용자 이름으로 검색' }}
+        filters={toolbarFilters}
+        sort={sortProps}
+        pageSizeOptions={pageSizeOptions}
+        pageSize={pagination.pageSize}
+        onPageSizeChange={handlers.onPageSizeChange}
+        totalCount={totalCount}
+        primaryAction={{ label: '새 사용자 추가', onClick: handlers.onAddClick, disabled: isCreating }}
+      />
+      <ListSection
+        data={data}
+        columns={columns}
+        state={state}
+        manualPagination
+        manualSorting
+        pageCount={totalPages}
+        isLoading={isListLoading}
+        loadingMessage="사용자 데이터를 불러오는 중입니다..."
+        emptyMessage="조건에 맞는 사용자가 없습니다. 검색어나 필터를 조정해 보세요."
+        rowEventHandlers={rowEventHandlers}
+        onSelectedRowsChange={handleSelectedRowsChange}
+      />
     </section>
   );
 }
