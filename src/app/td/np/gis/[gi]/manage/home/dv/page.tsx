@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 
+import { extractGigwanNanoId } from '@/common/utils';
 import { useGigwanNameQuery } from '@/domain/gigwan/api';
 import { useAuth } from '@/global/auth';
 import { cssObj } from './style';
@@ -14,7 +15,7 @@ type PageParams = {
 const PLACEHOLDER = 'https://placehold.co/160x160.png';
 export default function GigwanHomePage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
+  const gigwanNanoId = extractGigwanNanoId(params?.gi);
 
   const { isAuthenticated } = useAuth();
 

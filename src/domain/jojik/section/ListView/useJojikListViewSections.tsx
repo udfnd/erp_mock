@@ -1,19 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-
-import { type ColumnDef } from '@tanstack/react-table';
+import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { ListViewState, useListViewState } from '@/common/lv';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
 import {
   CREATED_AT_FILTER_OPTIONS,
-  CREATED_AT_FILTER_NOW,
   SORT_OPTIONS,
-  columnHelper,
-  createSortableHeader,
-  formatDate,
   getSortOptionFromState,
   getSortStateFromOption,
   type CreatedAtFilterValue,
@@ -26,8 +21,6 @@ export type JojikListViewHookParams = {
 
 export type ListSectionState = ListViewState<JojikListItem>;
 
-type JojikColumnDef = ColumnDef<JojikListItem, unknown>;
-
 export type JojikListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
@@ -39,7 +32,6 @@ export type JojikListSectionHandlers = {
 
 export type JojikListSectionProps = {
   data: JojikListItem[];
-  columns: JojikColumnDef[];
   state: ListSectionState;
   isListLoading: boolean;
   totalCount: number;
@@ -60,6 +52,12 @@ export type JojikSettingsSectionProps = {
   onExitCreate: () => void;
   onAfterMutation: () => Promise<unknown> | void;
   isAuthenticated: boolean;
+};
+
+export type JojikSettingsPanels = {
+  noneSelected: ReactNode;
+  oneSelected: ReactNode;
+  multipleSelected: ReactNode;
 };
 
 export type UseJojikListViewSectionsResult = {
@@ -128,41 +126,6 @@ export function useJojikListViewSections({
     (jojiksData?.paginationData?.totalPageCount as number | undefined) ??
     Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  // TODO: [상] columns는 리스트뷰 렌더링 하는 쪽에 있는 것이 낫지 않은지?
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('name', {
-        header: createSortableHeader('전체 조직'),
-        cell: (info) => info.getValue(),
-        meta: { maxWidth: 120 },
-      }),
-      columnHelper.accessor('createdAt', {
-        header: createSortableHeader('생성일'),
-        cell: (info) => formatDate(info.getValue()),
-        filterFn: (row, columnId, filterValue) => {
-          const value = filterValue as CreatedAtFilterValue | undefined;
-
-          if (!value || value === 'all') {
-            return true;
-          }
-
-          const days = Number(value);
-          const rawValue = row.getValue<string>(columnId);
-          const parsed = new Date(rawValue);
-          if (Number.isNaN(parsed.getTime())) {
-            return true;
-          }
-
-          const diff = CREATED_AT_FILTER_NOW - parsed.getTime();
-          const threshold = days * 24 * 60 * 60 * 1000;
-
-          return diff <= threshold;
-        },
-      }),
-    ],
-    [],
-  ) as JojikColumnDef[];
-
   const currentCreatedFilter =
     (columnFilters.find((filter) => filter.id === 'createdAt')?.value as
       | CreatedAtFilterValue
@@ -212,7 +175,6 @@ export function useJojikListViewSections({
 
   const listSectionProps: JojikListSectionProps = {
     data,
-    columns,
     state: listViewState,
     isListLoading,
     totalCount,

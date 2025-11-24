@@ -4,9 +4,10 @@ import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 
 import { ListViewLayout } from '@/common/lv/layout';
+import { extractGigwanNanoId } from '@/common/utils';
 import {
   JojiksListSection,
-  JojikSettingsSection,
+  createJojikSettingsPanels,
   useJojikListViewSections,
 } from '@/domain/jojik/section/ListView';
 import { useAuth } from '@/global/auth';
@@ -17,7 +18,7 @@ type PageParams = {
 
 export default function NpGigwanJojikListViewPage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? ''); // TODO: [하] util 로 리팩토링
+  const gigwanNanoId = extractGigwanNanoId(params?.gi);
   const { isAuthenticated } = useAuth();
 
   const { listSectionProps, settingsSectionProps, sortOptions, createdAtFilterOptions } =
@@ -33,19 +34,18 @@ export default function NpGigwanJojikListViewPage() {
   );
 
   const pageKey = gigwanNanoId || 'no-gi';
+  const settingsPanels = useMemo(
+    () => createJojikSettingsPanels(settingsSectionProps),
+    [settingsSectionProps],
+  );
 
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedJojiks}
-      NoneSelectedComponent={<JojikSettingsSection {...settingsSectionProps} selectedJojiks={[]} />}
-      OneSelectedComponent={
-        <JojikSettingsSection
-          {...settingsSectionProps}
-          selectedJojiks={settingsSectionProps.selectedJojiks.slice(0, 1)}
-        />
-      }
-      MultipleSelectedComponent={<JojikSettingsSection {...settingsSectionProps} />}
+      NoneSelectedComponent={settingsPanels.noneSelected}
+      OneSelectedComponent={settingsPanels.oneSelected}
+      MultipleSelectedComponent={settingsPanels.multipleSelected}
     >
       <JojiksListSection {...listSectionAllProps} />
     </ListViewLayout>

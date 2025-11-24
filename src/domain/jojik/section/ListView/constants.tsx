@@ -1,10 +1,8 @@
-import { createColumnHelper, type HeaderContext, type SortingState } from '@tanstack/react-table';
+import { type HeaderContext, type SortingState } from '@tanstack/react-table';
 
 import type { JojikListItem } from '@/domain/jojik/api/jojik.schema';
 
 export type CreatedAtFilterValue = 'all' | '7' | '30';
-
-export const columnHelper = createColumnHelper<JojikListItem>();
 
 export const SORT_OPTIONS = [
   { label: '최근 생성 순', value: 'createdAtDesc' },
