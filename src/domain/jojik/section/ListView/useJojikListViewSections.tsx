@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
@@ -60,6 +61,12 @@ export type JojikSettingsSectionProps = {
   onExitCreate: () => void;
   onAfterMutation: () => Promise<unknown> | void;
   isAuthenticated: boolean;
+};
+
+export type JojikSettingsPanels = {
+  noneSelected: ReactNode;
+  oneSelected: ReactNode;
+  multipleSelected: ReactNode;
 };
 
 export type UseJojikListViewSectionsResult = {

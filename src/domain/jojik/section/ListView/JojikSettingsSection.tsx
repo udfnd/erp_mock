@@ -1,4 +1,5 @@
-import { type FormEvent, useState } from 'react';
+import type { ReactNode, FormEvent } from 'react';
+import { useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -17,10 +18,9 @@ import type {
 import { License, Magic, Plus } from '@/common/icons'; // TODO: [하] 뒤에 LicenseIcon 붙이는 것을 추천
 
 import { cssObj } from './styles';
-import type { JojikSettingsSectionProps } from './useJojikListViewSections';
+import type { JojikSettingsPanels, JojikSettingsSectionProps } from './useJojikListViewSections';
 
-// TODO: [상] 컴포넌트 이름들 통일시키기
-export function JojikSettingsSection({
+export function createJojikSettingsPanels({
   gigwanNanoId,
   selectedJojiks,
   isCreating,
@@ -28,68 +28,84 @@ export function JojikSettingsSection({
   onExitCreate,
   onAfterMutation,
   isAuthenticated,
-}: JojikSettingsSectionProps) {
+}: JojikSettingsSectionProps): JojikSettingsPanels {
   if (!gigwanNanoId) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <div css={cssObj.panelHeader}>
-          <h2 css={cssObj.panelTitle}>기관이 선택되지 않았습니다</h2>
-          <p css={cssObj.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
-        </div>
-        <div css={cssObj.panelBody}>
-          <p css={cssObj.helperText}>기관 ID가 없으면 조직 데이터를 불러올 수 없습니다.</p>
-        </div>
-      </aside>
+    const panel = (
+      <SettingsPanelContainer>
+        <MissingGigwanPanel />
+      </SettingsPanelContainer>
     );
+
+    return { noneSelected: panel, oneSelected: panel, multipleSelected: panel };
   }
 
   if (isCreating) {
-    return (
-      <aside css={cssObj.settingsPanel}>
+    const creatingPanel = (
+      <SettingsPanelContainer>
         <CreateJojikPanel
           gigwanNanoId={gigwanNanoId}
-          onExit={isCreating ? onExitCreate : undefined}
+          onExit={onExitCreate}
           onAfterMutation={onAfterMutation}
         />
-      </aside>
+      </SettingsPanelContainer>
     );
+
+    return {
+      noneSelected: creatingPanel,
+      oneSelected: creatingPanel,
+      multipleSelected: creatingPanel,
+    };
   }
 
-  if (selectedJojiks.length === 0) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <div css={cssObj.panelHeader}>
-          <h2 css={cssObj.panelTitle}>조직들 설정</h2>
-        </div>
-        <div css={cssObj.panelBody}>
-          <span css={cssObj.panelSubtitle}>빠른 액션</span>
-          <div>
-            <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
-              조직 생성 마법사
-            </Button>
-          </div>
-        </div>
-      </aside>
-    );
-  }
+  const noneSelectedPanel = (
+    <SettingsPanelContainer>
+      <QuickActionsPanel onStartCreate={onStartCreate} />
+    </SettingsPanelContainer>
+  );
 
-  if (selectedJojiks.length === 1) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <SingleSelectionPanel
-          jojikNanoId={selectedJojiks[0].nanoId}
-          jojikName={selectedJojiks[0].name}
-          onAfterMutation={onAfterMutation}
-          isAuthenticated={isAuthenticated}
-        />
-      </aside>
-    );
-  }
+  const [primarySelectedJojik] = selectedJojiks;
 
-  return (
-    <aside css={cssObj.settingsPanel}>
+  const singleSelectedPanel = primarySelectedJojik ? (
+    <SettingsPanelContainer>
+      <SingleSelectionPanel
+        jojikNanoId={primarySelectedJojik.nanoId}
+        jojikName={primarySelectedJojik.name}
+        onAfterMutation={onAfterMutation}
+        isAuthenticated={isAuthenticated}
+      />
+    </SettingsPanelContainer>
+  ) : (
+    noneSelectedPanel
+  );
+
+  const multipleSelectedPanel = (
+    <SettingsPanelContainer>
       <MultiSelectionPanel jojiks={selectedJojiks} />
-    </aside>
+    </SettingsPanelContainer>
+  );
+
+  return {
+    noneSelected: noneSelectedPanel,
+    oneSelected: singleSelectedPanel,
+    multipleSelected: multipleSelectedPanel,
+  };
+}
+
+function SettingsPanelContainer({ children }: { children: ReactNode }) {
+  return <aside css={cssObj.settingsPanel}>{children}</aside>;
+}
+
+function MissingGigwanPanel() {
+  return (
+    <>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>기관이 선택되지 않았습니다</h2>
+        <p css={cssObj.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
+      </div>
+      <div css={cssObj.panelBody}>
+        <p css={cssObj.helperText}>기관 ID가 없으면 조직 데이터를 불러올 수 없습니다.</p>
+      </div>
+    </>
   );
 }
 
@@ -158,6 +174,28 @@ function CreateJojikPanel({ gigwanNanoId, onExit, onAfterMutation }: CreateJojik
   );
 }
 
+type QuickActionsPanelProps = {
+  onStartCreate: () => void;
+};
+
+function QuickActionsPanel({ onStartCreate }: QuickActionsPanelProps) {
+  return (
+    <>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>조직들 설정</h2>
+      </div>
+      <div css={cssObj.panelBody}>
+        <span css={cssObj.panelSubtitle}>빠른 액션</span>
+        <div>
+          <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
+            조직 생성 마법사
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 type SingleSelectionPanelProps = {
   jojikNanoId: string;
   jojikName: string;
@@ -166,6 +204,7 @@ type SingleSelectionPanelProps = {
 };
 
 type UpdateJojikMutationResult = ReturnType<typeof useUpdateJojikMutation>;
+
 type DeleteJojikMutationResult = ReturnType<typeof useDeleteJojikMutation>;
 
 type SingleSelectionPanelContentProps = {

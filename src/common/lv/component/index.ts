@@ -3,5 +3,7 @@ export * from './ListSection';
 export * from './PaginationSection';
 export * from './SearchSection';
 export * from './SortDropdown';
-export * from './ToolbarSection';
+export * from './ToolbarFilters';
+export * from './ToolbarSearch';
+export * from './ToolbarSort';
 export * from './types';

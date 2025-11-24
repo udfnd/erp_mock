@@ -3,12 +3,8 @@
 import { useMemo, useState } from 'react';
 import type { Row } from '@tanstack/react-table';
 
-import {
-  ListSection,
-  ToolbarSection,
-  type ListViewFilter,
-  type ListViewSortProps,
-} from '@/common/lv/component';
+import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
+import { ToolbarLayout } from '@/common/lv/layout';
 import type { SayongjaListSectionProps, SayongjaFilters } from './useSayongjaListViewSections';
 import type { SayongjaListItem } from '@/domain/sayongja/api';
 import { cssObj } from './styles';
@@ -139,7 +135,7 @@ export function SayongjaListSection({
 
   return (
     <section css={cssObj.listSection}>
-      <ToolbarSection
+      <ToolbarLayout
         search={{ value: searchTerm, onChange: handlers.onSearchChange, placeholder: '사용자 이름으로 검색' }}
         filters={toolbarFilters}
         sort={sortProps}

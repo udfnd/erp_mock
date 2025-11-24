@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { ListViewLayout } from '@/common/lv/layout';
 import {
   JojiksListSection,
-  JojikSettingsSection,
+  createJojikSettingsPanels,
   useJojikListViewSections,
 } from '@/domain/jojik/section/ListView';
 import { useAuth } from '@/global/auth';
@@ -33,19 +33,18 @@ export default function NpGigwanJojikListViewPage() {
   );
 
   const pageKey = gigwanNanoId || 'no-gi';
+  const settingsPanels = useMemo(
+    () => createJojikSettingsPanels(settingsSectionProps),
+    [settingsSectionProps],
+  );
 
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedJojiks}
-      NoneSelectedComponent={<JojikSettingsSection {...settingsSectionProps} selectedJojiks={[]} />}
-      OneSelectedComponent={
-        <JojikSettingsSection
-          {...settingsSectionProps}
-          selectedJojiks={settingsSectionProps.selectedJojiks.slice(0, 1)}
-        />
-      }
-      MultipleSelectedComponent={<JojikSettingsSection {...settingsSectionProps} />}
+      NoneSelectedComponent={settingsPanels.noneSelected}
+      OneSelectedComponent={settingsPanels.oneSelected}
+      MultipleSelectedComponent={settingsPanels.multipleSelected}
     >
       <JojiksListSection {...listSectionAllProps} />
     </ListViewLayout>

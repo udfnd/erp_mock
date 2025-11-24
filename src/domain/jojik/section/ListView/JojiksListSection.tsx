@@ -3,12 +3,8 @@
 import { useMemo, useState } from 'react';
 import type { Row } from '@tanstack/react-table';
 
-import {
-  ListSection,
-  ToolbarSection,
-  type ListViewFilter,
-  type ListViewSortProps,
-} from '@/common/lv/component';
+import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
+import { ToolbarLayout } from '@/common/lv/layout';
 import { cssObj } from './styles';
 import type { JojikListSectionProps } from './useJojikListViewSections';
 import type { CreatedAtFilterValue } from './constants';
@@ -92,7 +88,7 @@ export function JojiksListSection({
 
   return (
     <section css={cssObj.listSection}>
-      <ToolbarSection
+      <ToolbarLayout
         search={{
           value: searchTerm,
           onChange: handlers.onSearchChange,
