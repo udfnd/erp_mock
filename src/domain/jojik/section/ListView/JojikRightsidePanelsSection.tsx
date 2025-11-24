@@ -1,13 +1,12 @@
 import type { JojikListItem } from '@/domain/jojik/api';
 
 import {
-  CreateJojikPanel,
-  MissingGigwanPanel,
-  MultiSelectionPanel,
-  QuickActionsPanel,
-  RightsidePanelsContainer,
-  SingleSelectionPanel,
-} from '@/domain/jojik/section/ListView/JojikRightsidePanels/components';
+  JojikCreatingPanels,
+  JojikMissingGigwanPanels,
+  JojikMultipleSelectedPanels,
+  JojikNoneSelectedPanels,
+  JojikSingleSelectedPanels,
+} from '@/domain/jojik/section/ListView/JojikRightsidePanels/statePanels';
 import type {
   JojikRightsidePanels,
   JojikRightsidePanelsSectionProps,
@@ -23,24 +22,22 @@ export function createJojiksRightsidePanels({
   isAuthenticated,
 }: JojikRightsidePanelsSectionProps): JojikRightsidePanels {
   if (!gigwanNanoId) {
-    const panel = (
-      <RightsidePanelsContainer>
-        <MissingGigwanPanel />
-      </RightsidePanelsContainer>
-    );
+    const panel = <JojikMissingGigwanPanels />;
 
-    return { noneSelected: panel, oneSelected: panel, multipleSelected: panel };
+    return {
+      noneSelected: panel,
+      oneSelected: panel,
+      multipleSelected: panel,
+    };
   }
 
   if (isCreating) {
     const creatingPanel = (
-      <RightsidePanelsContainer>
-        <CreateJojikPanel
-          gigwanNanoId={gigwanNanoId}
-          onExit={onExitCreate}
-          onAfterMutation={onAfterMutation}
-        />
-      </RightsidePanelsContainer>
+      <JojikCreatingPanels
+        gigwanNanoId={gigwanNanoId}
+        onExitCreate={onExitCreate}
+        onAfterMutation={onAfterMutation}
+      />
     );
 
     return {
@@ -50,31 +47,23 @@ export function createJojiksRightsidePanels({
     };
   }
 
-  const noneSelectedPanel = (
-    <RightsidePanelsContainer>
-      <QuickActionsPanel onStartCreate={onStartCreate} />
-    </RightsidePanelsContainer>
-  );
+  const noneSelectedPanel = <JojikNoneSelectedPanels onStartCreate={onStartCreate} />;
 
   const [primarySelectedJojik] = selectedJojiks;
 
   const singleSelectedPanel = primarySelectedJojik ? (
-    <RightsidePanelsContainer>
-      <SingleSelectionPanel
-        jojikNanoId={primarySelectedJojik.nanoId}
-        jojikName={primarySelectedJojik.name}
-        onAfterMutation={onAfterMutation}
-        isAuthenticated={isAuthenticated}
-      />
-    </RightsidePanelsContainer>
+    <JojikSingleSelectedPanels
+      jojikNanoId={primarySelectedJojik.nanoId}
+      jojikName={primarySelectedJojik.name}
+      onAfterMutation={onAfterMutation}
+      isAuthenticated={isAuthenticated}
+    />
   ) : (
     noneSelectedPanel
   );
 
   const multipleSelectedPanel = (
-    <RightsidePanelsContainer>
-      <MultiSelectionPanel jojiks={selectedJojiks as JojikListItem[]} />
-    </RightsidePanelsContainer>
+    <JojikMultipleSelectedPanels jojiks={selectedJojiks as JojikListItem[]} />
   );
 
   return {
