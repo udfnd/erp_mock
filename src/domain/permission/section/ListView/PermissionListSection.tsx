@@ -40,7 +40,7 @@ export function PermissionListSection({
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const effectiveFilters = filters ?? DEFAULT_FILTERS;
-  const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
+  const sortValue = sortByOption;
 
   const toolbarFilters: ListViewFilter[] = useMemo(
     () => [
