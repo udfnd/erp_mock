@@ -106,7 +106,7 @@ export function SingleSelectionPanel({
       onAfterMutation={onAfterMutation}
       updateMutation={updateMutation}
       deleteMutation={deleteMutation}
-      permissions={permissionData?.permissionResults ?? []}
+      permissions={permissionData?.permissions ?? []}
       onRefreshPermissions={refetchPermissions}
       gigwanNanoId={gigwanNanoId}
       employmentCategoryOptions={employmentCategoryOptions}

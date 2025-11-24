@@ -8,7 +8,11 @@ import { extractGigwanNanoId } from '@/common/utils';
 import { useAuth } from '@/global/auth';
 import {
   SayongjaListSection,
-  createSayongjaRightsidePanels,
+  CreatingPanels,
+  MissingGigwanPanels,
+  MultipleSelectedPanels,
+  NoneSelectedPanels,
+  OneSelectedPanels,
   useSayongjaListViewSections,
 } from '@/domain/sayongja/section/ListView';
 
@@ -50,25 +54,84 @@ export default function NpGigwanSayongjaListViewPage() {
     ],
   );
 
-  const rightsidePanels = useMemo(
-    () =>
-      createSayongjaRightsidePanels({
-        ...settingsSectionProps,
-        employmentCategoryOptions,
-        workTypeOptions,
-      }),
-    [employmentCategoryOptions, settingsSectionProps, workTypeOptions],
-  );
-
   const pageKey = gigwanNanoId || 'no-gi';
+
+  const {
+    gigwanNanoId: settingsGigwanNanoId,
+    selectedSayongjas,
+    isCreating,
+    onStartCreate,
+    onExitCreate,
+    onAfterMutation,
+    isAuthenticated,
+  } = settingsSectionProps;
+
+  const noneSelectedPanel =
+    !settingsGigwanNanoId ? (
+      <MissingGigwanPanels />
+    ) : isCreating ? (
+      <CreatingPanels
+        gigwanNanoId={settingsGigwanNanoId}
+        employmentCategoryOptions={employmentCategoryOptions}
+        workTypeOptions={workTypeOptions}
+        onExit={onExitCreate}
+        onAfterMutation={onAfterMutation}
+      />
+    ) : (
+      <NoneSelectedPanels onStartCreate={onStartCreate} />
+    );
+
+  const oneSelectedPanel = (() => {
+    if (!settingsGigwanNanoId) return <MissingGigwanPanels />;
+    if (isCreating)
+      return (
+        <CreatingPanels
+          gigwanNanoId={settingsGigwanNanoId}
+          employmentCategoryOptions={employmentCategoryOptions}
+          workTypeOptions={workTypeOptions}
+          onExit={onExitCreate}
+          onAfterMutation={onAfterMutation}
+        />
+      );
+
+    const [primarySelected] = selectedSayongjas;
+
+    return primarySelected ? (
+      <OneSelectedPanels
+        sayongjaNanoId={primarySelected.nanoId}
+        sayongjaName={primarySelected.name}
+        gigwanNanoId={settingsGigwanNanoId}
+        onAfterMutation={onAfterMutation}
+        isAuthenticated={isAuthenticated}
+        employmentCategoryOptions={employmentCategoryOptions}
+        workTypeOptions={workTypeOptions}
+      />
+    ) : (
+      noneSelectedPanel
+    );
+  })();
+
+  const multipleSelectedPanel = !settingsGigwanNanoId ? (
+    <MissingGigwanPanels />
+  ) : isCreating ? (
+    <CreatingPanels
+      gigwanNanoId={settingsGigwanNanoId}
+      employmentCategoryOptions={employmentCategoryOptions}
+      workTypeOptions={workTypeOptions}
+      onExit={onExitCreate}
+      onAfterMutation={onAfterMutation}
+    />
+  ) : (
+    <MultipleSelectedPanels sayongjas={selectedSayongjas} />
+  );
 
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedSayongjas}
-      NoneSelectedComponent={rightsidePanels.noneSelected}
-      OneSelectedComponent={rightsidePanels.oneSelected}
-      MultipleSelectedComponent={rightsidePanels.multipleSelected}
+      NoneSelectedComponent={noneSelectedPanel}
+      OneSelectedComponent={oneSelectedPanel}
+      MultipleSelectedComponent={multipleSelectedPanel}
     >
       <SayongjaListSection {...listSectionAllProps} />
     </ListViewLayout>

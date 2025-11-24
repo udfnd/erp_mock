@@ -1,13 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 
 import { ListViewLayout } from '@/common/lv/layout';
 import { extractGigwanNanoId } from '@/common/utils';
 import {
   JojiksListSection,
-  createJojiksRightsidePanels,
+  JojikCreatingPanels,
+  JojikMissingGigwanPanels,
+  JojikMultipleSelectedPanels,
+  JojikNoneSelectedPanels,
+  JojikSingleSelectedPanels,
   useJojikListViewSections,
 } from '@/domain/jojik/section/ListView';
 import { useAuth } from '@/global/auth';
@@ -26,27 +29,78 @@ export default function NpGigwanJojikListViewPage() {
     isAuthenticated,
   });
 
-  const listSectionAllProps = useMemo(
-    () => ({
-      ...listSectionProps,
-      sortOptions,
-    }),
-    [listSectionProps, sortOptions],
-  );
-
   const pageKey = gigwanNanoId || 'no-gi';
-  const rightsidePanels = useMemo(
-    () => createJojiksRightsidePanels(settingsSectionProps),
-    [settingsSectionProps],
+  const {
+    gigwanNanoId: settingsGigwanNanoId,
+    selectedJojiks,
+    isCreating,
+    onStartCreate,
+    onExitCreate,
+    onAfterMutation,
+  } = settingsSectionProps;
+
+  const listSectionAllProps = {
+    ...listSectionProps,
+    sortOptions,
+  };
+
+  const noneSelectedPanel =
+    !settingsGigwanNanoId ? (
+      <JojikMissingGigwanPanels />
+    ) : isCreating ? (
+      <JojikCreatingPanels
+        gigwanNanoId={settingsGigwanNanoId}
+        onExitCreate={onExitCreate}
+        onAfterMutation={onAfterMutation}
+      />
+    ) : (
+      <JojikNoneSelectedPanels onStartCreate={onStartCreate} />
+    );
+
+  const oneSelectedPanel = (() => {
+    if (!settingsGigwanNanoId) return <JojikMissingGigwanPanels />;
+    if (isCreating)
+      return (
+        <JojikCreatingPanels
+          gigwanNanoId={settingsGigwanNanoId}
+          onExitCreate={onExitCreate}
+          onAfterMutation={onAfterMutation}
+        />
+      );
+
+    const [primarySelectedJojik] = selectedJojiks;
+
+    return primarySelectedJojik ? (
+      <JojikSingleSelectedPanels
+        jojikNanoId={primarySelectedJojik.nanoId}
+        jojikName={primarySelectedJojik.name}
+        onAfterMutation={onAfterMutation}
+        isAuthenticated={settingsSectionProps.isAuthenticated}
+      />
+    ) : (
+      noneSelectedPanel
+    );
+  })();
+
+  const multipleSelectedPanel = !settingsGigwanNanoId ? (
+    <JojikMissingGigwanPanels />
+  ) : isCreating ? (
+    <JojikCreatingPanels
+      gigwanNanoId={settingsGigwanNanoId}
+      onExitCreate={onExitCreate}
+      onAfterMutation={onAfterMutation}
+    />
+  ) : (
+    <JojikMultipleSelectedPanels jojiks={selectedJojiks} />
   );
 
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedJojiks}
-      NoneSelectedComponent={rightsidePanels.noneSelected}
-      OneSelectedComponent={rightsidePanels.oneSelected}
-      MultipleSelectedComponent={rightsidePanels.multipleSelected}
+      NoneSelectedComponent={noneSelectedPanel}
+      OneSelectedComponent={oneSelectedPanel}
+      MultipleSelectedComponent={multipleSelectedPanel}
     >
       <JojiksListSection {...listSectionAllProps} />
     </ListViewLayout>
