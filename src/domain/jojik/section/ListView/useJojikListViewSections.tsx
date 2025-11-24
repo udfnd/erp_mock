@@ -36,7 +36,7 @@ export type JojikListSectionProps = {
   handlers: JojikListSectionHandlers;
 };
 
-export type JojikSettingsSectionProps = {
+export type JojikRightsidePanelsSectionProps = {
   gigwanNanoId: string;
   selectedJojiks: JojikListItem[];
   isCreating: boolean;
@@ -46,7 +46,7 @@ export type JojikSettingsSectionProps = {
   isAuthenticated: boolean;
 };
 
-export type JojikSettingsPanels = {
+export type JojikRightsidePanels = {
   noneSelected: ReactNode;
   oneSelected: ReactNode;
   multipleSelected: ReactNode;
@@ -54,7 +54,7 @@ export type JojikSettingsPanels = {
 
 export type UseJojikListViewSectionsResult = {
   listSectionProps: JojikListSectionProps;
-  settingsSectionProps: JojikSettingsSectionProps;
+  settingsSectionProps: JojikRightsidePanelsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
 };
 
@@ -78,13 +78,7 @@ export function useJojikListViewSections({
     setSorting: setSortingWithReset,
   };
 
-  const {
-    sorting,
-    pagination,
-    setSorting,
-    setPagination,
-    setRowSelection,
-  } = listViewState;
+  const { sorting, pagination, setSorting, setPagination, setRowSelection } = listViewState;
 
   const [isCreating, setIsCreating] = useState(false);
   const [selectedJojiks, setSelectedJojiks] = useState<JojikListItem[]>([]);
@@ -166,7 +160,7 @@ export function useJojikListViewSections({
     },
   };
 
-  const settingsSectionProps: JojikSettingsSectionProps = {
+  const settingsSectionProps: JojikRightsidePanelsSectionProps = {
     gigwanNanoId,
     selectedJojiks,
     isCreating,

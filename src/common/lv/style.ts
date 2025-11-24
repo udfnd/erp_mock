@@ -357,7 +357,6 @@ export const cssObj = {
     align-items: center;
     justify-content: center;
     padding: 12px 24px;
-    border-top: 1px solid ${color.cgrey100};
     background: ${color.white};
   `,
 

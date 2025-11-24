@@ -1,10 +1,10 @@
 export { JojiksListSection } from './JojiksListSection';
-export { createJojikSettingsPanels } from './JojikSettingsSection';
+export { createJojiksRightsidePanels } from './JojikRightsidePanelsSection';
 export { useJojikListViewSections } from './useJojikListViewSections';
 export type {
   JojikListSectionProps,
-  JojikSettingsSectionProps,
-  JojikSettingsPanels,
+  JojikRightsidePanelsSectionProps,
+  JojikRightsidePanels,
   UseJojikListViewSectionsResult,
 } from './useJojikListViewSections';
 export { cssObj } from './styles';
