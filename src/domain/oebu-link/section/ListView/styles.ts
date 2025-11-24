@@ -2,50 +2,71 @@
 
 import { css } from '@emotion/react';
 
-import { color } from '@/style';
+import { color, typography } from '@/style';
 
-export const oebuLinkListViewCss = {
-  settingsPanel: css`
-    width: 360px;
-    flex: 0 0 360px;
-    background: ${color.white};
+export const cssObj = {
+  listSection: css`
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    min-height: 100%;
-    max-height: 100%;
-    overflow: auto;
+    padding: 16px;
+    border-right: 1px solid ${color.cgrey100};
+    gap: 16px;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
   `,
+
+  settingsPanel: css`
+    width: 400px;
+    min-width: 400px;
+    background: ${color.white};
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+    overflow-y: auto;
+  `,
+
   panelHeader: css`
-    padding: 24px;
+    padding: 16px;
     border-bottom: 1px solid ${color.cgrey100};
   `,
+
   panelTitle: css`
     font-size: 18px;
     font-weight: 600;
     color: ${color.black};
+    ${typography.bodySB};
   `,
+
   panelSubtitle: css`
     margin-top: 4px;
-    font-size: 13px;
+    ${typography.bodySmallSB};
     color: ${color.cgrey500};
   `,
+
   panelBody: css`
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 24px;
+    padding: 16px;
   `,
+
   panelSection: css`
     display: flex;
     flex-direction: column;
     gap: 8px;
   `,
+
   panelLabel: css`
     font-size: 13px;
     font-weight: 600;
     color: ${color.cgrey600};
   `,
+
   toolbarSelect: css`
     width: 100%;
     height: 40px;
@@ -56,35 +77,27 @@ export const oebuLinkListViewCss = {
     color: ${color.cgrey700};
     font-size: 14px;
   `,
+
   helperText: css`
     font-size: 14px;
     color: ${color.cgrey500};
   `,
+
   buttonRow: css`
     display: flex;
     gap: 8px;
   `,
+
   destructiveButton: css`
     background: ${color.red500};
     color: ${color.white};
   `,
-  iconFilterRow: css`
+
+  panelList: css`
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
-    align-items: center;
-  `,
-  chip: css`
-    padding: 6px 10px;
-    border-radius: 16px;
-    border: 1px solid ${color.cgrey200};
-    background: ${color.white};
-    cursor: pointer;
-    font-size: 13px;
-    color: ${color.cgrey700};
-    &.active {
-      background: ${color.blue50};
-      border-color: ${color.blue100};
-    }
+    padding-left: 16px;
+    list-style: disc;
   `,
 };

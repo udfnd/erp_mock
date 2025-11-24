@@ -50,10 +50,11 @@ export type OebuLinkListSectionProps = {
   handlers: OebuLinkListSectionHandlers;
 };
 
-export type OebuLinkSettingsSectionProps = {
+export type OebuLinkRightsidePanelsSectionProps = {
   jojikNanoId: string;
   selectedLinks: OebuLinkListItem[];
   isCreating: boolean;
+  onStartCreate: () => void;
   onExitCreate: () => void;
   onAfterMutation: () => Promise<unknown> | void;
   isAuthenticated: boolean;
@@ -62,7 +63,7 @@ export type OebuLinkSettingsSectionProps = {
 
 export type UseOebuLinkListViewSectionsResult = {
   listSectionProps: OebuLinkListSectionProps;
-  settingsSectionProps: OebuLinkSettingsSectionProps;
+  settingsSectionProps: OebuLinkRightsidePanelsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
   pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
   iconFilterOptions: { label: string; value: string }[];
@@ -213,10 +214,11 @@ export function useOebuLinkListViewSections({
     },
   };
 
-  const settingsSectionProps: OebuLinkSettingsSectionProps = {
+  const settingsSectionProps: OebuLinkRightsidePanelsSectionProps = {
     jojikNanoId,
     selectedLinks,
     isCreating,
+    onStartCreate: startCreate,
     onExitCreate: stopCreate,
     onAfterMutation: handleAfterMutation,
     isAuthenticated,
