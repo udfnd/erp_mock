@@ -133,7 +133,7 @@ export function SayongjaListSection({
     }
   };
 
-  const columns = useMemo<ColumnDef<SayongjaListItem, unknown>[]>(
+  const columns = useMemo<ColumnDef<SayongjaListItem>[]>(
     () => [
       columnHelper.accessor('name', {
         header: createSortableHeader('이름'),
