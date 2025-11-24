@@ -63,7 +63,7 @@ export default function NpGigwanSayongjaListViewPage() {
     onStartCreate,
     onExitCreate,
     onAfterMutation,
-    isAuthenticated,
+    isAuthenticated: settingsIsAuthenticated,
   } = settingsSectionProps;
 
   const noneSelectedPanel =
@@ -102,7 +102,7 @@ export default function NpGigwanSayongjaListViewPage() {
         sayongjaName={primarySelected.name}
         gigwanNanoId={settingsGigwanNanoId}
         onAfterMutation={onAfterMutation}
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={settingsIsAuthenticated}
         employmentCategoryOptions={employmentCategoryOptions}
         workTypeOptions={workTypeOptions}
       />
