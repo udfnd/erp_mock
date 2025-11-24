@@ -48,7 +48,7 @@ export type JusoListSectionProps = {
   handlers: JusoListSectionHandlers;
 };
 
-export type JusoSettingsSectionProps = {
+export type JusoRightsidePanelsProps = {
   jojikNanoId: string;
   selectedJusos: JusoListItem[];
   isCreating: boolean;
@@ -60,7 +60,7 @@ export type JusoSettingsSectionProps = {
 
 export type UseJusoListViewSectionsResult = {
   listSectionProps: JusoListSectionProps;
-  settingsSectionProps: JusoSettingsSectionProps;
+  settingsSectionProps: JusoRightsidePanelsProps;
   sortOptions: typeof SORT_OPTIONS;
   pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
 };
@@ -191,7 +191,7 @@ export function useJusoListViewSections({
     },
   };
 
-  const settingsSectionProps: JusoSettingsSectionProps = {
+  const settingsSectionProps: JusoRightsidePanelsProps = {
     jojikNanoId,
     selectedJusos,
     isCreating,
