@@ -2,8 +2,6 @@
 
 import { useMemo, useState } from 'react';
 
-import { type ColumnDef } from '@tanstack/react-table';
-
 import { ListViewState, useListViewState } from '@/common/lv';
 import { useGetSayongjasQuery } from '@/domain/sayongja/api';
 import type { GetSayongjasRequest, SayongjaListItem } from '@/domain/sayongja/api';
@@ -13,9 +11,6 @@ import { useEmploymentCategoriesQuery, useWorkTypeCustomSangtaesQuery } from '@/
 import {
   IS_HWALSEONG_FILTER_OPTIONS,
   SORT_OPTIONS,
-  columnHelper,
-  createSortableHeader,
-  formatDate,
   getSortOptionFromState,
   getSortStateFromOption,
 } from './constants';
@@ -48,7 +43,6 @@ export type SayongjaListSectionHandlers = {
 
 export type SayongjaListSectionProps = {
   data: SayongjaListItem[];
-  columns: ColumnDef<SayongjaListItem, unknown>[];
   state: ListSectionState;
   isListLoading: boolean;
   pagination: ListSectionState['pagination'];
@@ -187,24 +181,6 @@ export function useSayongjaListViewSections({
     (sayongjasData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('name', {
-        header: createSortableHeader('이름'),
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('employedAt', {
-        header: createSortableHeader('입사일'),
-        cell: (info) => formatDate(info.getValue()),
-      }),
-      columnHelper.accessor('isHwalseong', {
-        header: '활성 여부',
-        cell: (info) => (info.getValue() ? '활성' : '비활성'),
-      }),
-    ],
-    [],
-  ) as ColumnDef<SayongjaListItem, unknown>[];
-
   const [isCreating, setIsCreating] = useState(false);
   const [selectedSayongjas, setSelectedSayongjas] = useState<SayongjaListItem[]>([]);
 
@@ -265,7 +241,6 @@ export function useSayongjaListViewSections({
 
   const listSectionProps: SayongjaListSectionProps = {
     data,
-    columns,
     state: listViewState,
     isListLoading,
     pagination: listViewState.pagination,

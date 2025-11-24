@@ -69,7 +69,7 @@ export function JojiksListSection({
       {
         id: 'name',
         accessorKey: 'name',
-        header: createSortableHeader('전체 조직'),
+        header: createSortableHeader(`전체 조직 (${totalCount}개)`),
         cell: (info) => info.getValue<string>(),
         meta: { maxWidth: 120 },
       },
@@ -80,7 +80,7 @@ export function JojiksListSection({
         cell: (info) => formatDate(info.getValue<string>()),
       },
     ],
-    [],
+    [totalCount],
   );
 
   return (
