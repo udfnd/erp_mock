@@ -64,7 +64,7 @@ export function JojiksListSection({
     }
   };
 
-  const columns = useMemo<ColumnDef<JojikListItem, any>[]>(
+  const columns = useMemo<ColumnDef<JojikListItem>[]>(
     () => [
       {
         id: 'name',

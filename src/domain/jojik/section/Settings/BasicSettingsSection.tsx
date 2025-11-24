@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button, Chip, Textfield } from '@/common/components';
 import { useJojikQuery, useUpdateJojikMutation } from '@/domain/jojik/api';
@@ -15,20 +15,20 @@ type BasicSettingsSectionProps = {
 export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps) {
   const queryClient = useQueryClient();
   const updateJojikMutation = useUpdateJojikMutation(jojikNanoId);
-  const jojikQuery = useJojikQuery(jojikNanoId, { enabled: Boolean(jojikNanoId) });
+  const jojikQuery = useJojikQuery(jojikNanoId, {
+    enabled: Boolean(jojikNanoId),
+    onSuccess: (jojikData) => {
+      setName(jojikData.name ?? '');
+      setIntro(jojikData.intro ?? '');
+      setFeedback(null);
+    },
+  });
 
   const [name, setName] = useState('');
   const [intro, setIntro] = useState('');
   const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(null);
 
   const { data: jojik, isLoading, isFetching, error } = jojikQuery;
-
-  useEffect(() => {
-    if (!jojik) return;
-    setName(jojik.name ?? '');
-    setIntro(jojik.intro ?? '');
-    setFeedback(null);
-  }, [jojik]);
 
   const trimmedName = name.trim();
   const trimmedIntro = intro.trim();

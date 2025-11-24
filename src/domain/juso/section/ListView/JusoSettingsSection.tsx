@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -320,10 +320,6 @@ function SingleSelectionPanelContent({
     jusoDetail,
     juso,
   });
-
-  useEffect(() => {
-    setFormState({ jusoName, jusoDetail, juso });
-  }, [juso, jusoDetail, jusoName]);
 
   const isSaving = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
