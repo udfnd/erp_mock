@@ -33,7 +33,6 @@ export function ToolbarLayout({
         </div>
       </div>
       <ToolbarFilters filters={filters} />
-      <div css={lvCss.searchResultSummary}>총 {totalCount}명</div>
     </div>
   );
 }
