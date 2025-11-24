@@ -1,13 +1,14 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { Row } from '@tanstack/react-table';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 
 import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
 import { ToolbarLayout } from '@/common/lv/layout';
 import type { SayongjaListSectionProps, SayongjaFilters } from './useSayongjaListViewSections';
 import type { SayongjaListItem } from '@/domain/sayongja/api';
 import { cssObj } from './styles';
+import { columnHelper, createSortableHeader, formatDate } from './constants';
 
 export type SayongjaListSectionComponentProps = SayongjaListSectionProps & {
   sortOptions: { label: string; value: string }[];
@@ -26,7 +27,6 @@ const DEFAULT_FILTERS: SayongjaFilters = {
 
 export function SayongjaListSection({
   data,
-  columns,
   state,
   isListLoading,
   pagination,
@@ -132,6 +132,24 @@ export function SayongjaListSection({
       document.activeElement.blur();
     }
   };
+
+  const columns = useMemo<ColumnDef<SayongjaListItem, unknown>[]>(
+    () => [
+      columnHelper.accessor('name', {
+        header: createSortableHeader('이름'),
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('employedAt', {
+        header: createSortableHeader('입사일'),
+        cell: (info) => formatDate(info.getValue()),
+      }),
+      columnHelper.accessor('isHwalseong', {
+        header: '활성 여부',
+        cell: (info) => (info.getValue() ? '활성' : '비활성'),
+      }),
+    ],
+    [],
+  );
 
   return (
     <section css={cssObj.listSection}>

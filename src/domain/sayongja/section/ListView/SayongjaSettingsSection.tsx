@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -76,6 +77,120 @@ export type SayongjaSettingsSectionComponentProps = SayongjaSettingsSectionProps
   workTypeOptions: { label: string; value: string }[];
 };
 
+export type SayongjaSettingsPanels = {
+  noneSelected: ReactNode;
+  oneSelected: ReactNode;
+  multipleSelected: ReactNode;
+};
+
+const SettingsPanelContainer = ({ children }: { children: ReactNode }) => (
+  <aside css={cssObj.settingsPanel}>{children}</aside>
+);
+
+const MissingGigwanPanel = () => (
+  <>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>기관이 선택되지 않았습니다</h2>
+      <p css={cssObj.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
+    </div>
+    <div css={cssObj.panelBody}>
+      <p css={cssObj.helperText}>기관 ID가 없으면 사용자 데이터를 불러올 수 없습니다.</p>
+    </div>
+  </>
+);
+
+type QuickActionsPanelProps = {
+  onStartCreate: () => void;
+};
+
+const QuickActionsPanel = ({ onStartCreate }: QuickActionsPanelProps) => (
+  <>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>사용자들 설정</h2>
+    </div>
+    <div css={cssObj.panelBody}>
+      <span css={cssObj.panelSubtitle}>빠른 액션</span>
+      <div>
+        <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
+          사용자 생성 마법사
+        </Button>
+      </div>
+    </div>
+  </>
+);
+
+export function createSayongjaSettingsPanels({
+  employmentCategoryOptions,
+  workTypeOptions,
+  ...settingsSectionProps
+}: SayongjaSettingsSectionComponentProps): SayongjaSettingsPanels {
+  const sharedProps = { employmentCategoryOptions, workTypeOptions, ...settingsSectionProps };
+  const { gigwanNanoId, isCreating, onExitCreate, onAfterMutation, onStartCreate, selectedSayongjas } =
+    sharedProps;
+
+  if (!gigwanNanoId) {
+    const panel = (
+      <SettingsPanelContainer>
+        <MissingGigwanPanel />
+      </SettingsPanelContainer>
+    );
+
+    return { noneSelected: panel, oneSelected: panel, multipleSelected: panel };
+  }
+
+  if (isCreating) {
+    const creatingPanel = (
+      <SettingsPanelContainer>
+        <CreateSayongjaPanel
+          gigwanNanoId={gigwanNanoId}
+          onExit={isCreating ? onExitCreate : undefined}
+          onAfterMutation={onAfterMutation}
+          employmentCategoryOptions={employmentCategoryOptions}
+          workTypeOptions={workTypeOptions}
+        />
+      </SettingsPanelContainer>
+    );
+
+    return { noneSelected: creatingPanel, oneSelected: creatingPanel, multipleSelected: creatingPanel };
+  }
+
+  const noneSelectedPanel = (
+    <SettingsPanelContainer>
+      <QuickActionsPanel onStartCreate={onStartCreate} />
+    </SettingsPanelContainer>
+  );
+
+  const [primarySelected] = selectedSayongjas;
+
+  const singleSelectedPanel = primarySelected ? (
+    <SettingsPanelContainer>
+      <SingleSelectionPanel
+        sayongjaNanoId={primarySelected.nanoId}
+        sayongjaName={primarySelected.name}
+        gigwanNanoId={gigwanNanoId}
+        onAfterMutation={onAfterMutation}
+        isAuthenticated={sharedProps.isAuthenticated}
+        employmentCategoryOptions={employmentCategoryOptions}
+        workTypeOptions={workTypeOptions}
+      />
+    </SettingsPanelContainer>
+  ) : (
+    noneSelectedPanel
+  );
+
+  const multipleSelectedPanel = (
+    <SettingsPanelContainer>
+      <MultiSelectionPanel sayongjas={selectedSayongjas} />
+    </SettingsPanelContainer>
+  );
+
+  return {
+    noneSelected: noneSelectedPanel,
+    oneSelected: singleSelectedPanel,
+    multipleSelected: multipleSelectedPanel,
+  };
+}
+
 export function SayongjaSettingsSection({
   gigwanNanoId,
   selectedSayongjas,
@@ -87,73 +202,27 @@ export function SayongjaSettingsSection({
   employmentCategoryOptions,
   workTypeOptions,
 }: SayongjaSettingsSectionComponentProps) {
-  if (!gigwanNanoId) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <div css={cssObj.panelHeader}>
-          <h2 css={cssObj.panelTitle}>기관이 선택되지 않았습니다</h2>
-          <p css={cssObj.panelSubtitle}>URL의 기관 식별자를 확인해 주세요.</p>
-        </div>
-        <div css={cssObj.panelBody}>
-          <p css={cssObj.helperText}>기관 ID가 없으면 사용자 데이터를 불러올 수 없습니다.</p>
-        </div>
-      </aside>
-    );
-  }
-
-  if (isCreating) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <CreateSayongjaPanel
-          gigwanNanoId={gigwanNanoId}
-          onExit={isCreating ? onExitCreate : undefined}
-          onAfterMutation={onAfterMutation}
-          employmentCategoryOptions={employmentCategoryOptions}
-          workTypeOptions={workTypeOptions}
-        />
-      </aside>
-    );
-  }
+  const panels = createSayongjaSettingsPanels({
+    gigwanNanoId,
+    selectedSayongjas,
+    isCreating,
+    onStartCreate,
+    onExitCreate,
+    onAfterMutation,
+    isAuthenticated,
+    employmentCategoryOptions,
+    workTypeOptions,
+  });
 
   if (selectedSayongjas.length === 0) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <div css={cssObj.panelHeader}>
-          <h2 css={cssObj.panelTitle}>사용자들 설정</h2>
-        </div>
-        <div css={cssObj.panelBody}>
-          <span css={cssObj.panelSubtitle}>빠른 액션</span>
-          <div>
-            <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
-              사용자 생성 마법사
-            </Button>
-          </div>
-        </div>
-      </aside>
-    );
+    return panels.noneSelected;
   }
 
   if (selectedSayongjas.length === 1) {
-    return (
-      <aside css={cssObj.settingsPanel}>
-        <SingleSelectionPanel
-          sayongjaNanoId={selectedSayongjas[0].nanoId}
-          sayongjaName={selectedSayongjas[0].name}
-          gigwanNanoId={gigwanNanoId}
-          onAfterMutation={onAfterMutation}
-          isAuthenticated={isAuthenticated}
-          employmentCategoryOptions={employmentCategoryOptions}
-          workTypeOptions={workTypeOptions}
-        />
-      </aside>
-    );
+    return panels.oneSelected;
   }
 
-  return (
-    <aside css={cssObj.settingsPanel}>
-      <MultiSelectionPanel sayongjas={selectedSayongjas} />
-    </aside>
-  );
+  return panels.multipleSelected;
 }
 
 type CreateSayongjaPanelProps = {

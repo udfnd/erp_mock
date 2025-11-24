@@ -21,16 +21,17 @@ export default function NpGigwanJojikListViewPage() {
   const gigwanNanoId = extractGigwanNanoId(params?.gi);
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, sortOptions, createdAtFilterOptions } =
-    useJojikListViewSections({ gigwanNanoId, isAuthenticated });
+  const { listSectionProps, settingsSectionProps, sortOptions } = useJojikListViewSections({
+    gigwanNanoId,
+    isAuthenticated,
+  });
 
   const listSectionAllProps = useMemo(
     () => ({
       ...listSectionProps,
       sortOptions,
-      createdAtFilterOptions,
     }),
-    [createdAtFilterOptions, listSectionProps, sortOptions],
+    [listSectionProps, sortOptions],
   );
 
   const pageKey = gigwanNanoId || 'no-gi';
