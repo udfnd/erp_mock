@@ -5,7 +5,7 @@ import { useForm, useStore } from '@tanstack/react-form';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { Button, IconButton, LabeledInput } from '@/common/components';
-import { Delete, Plus } from '@/common/icons';
+import { DeleteIcon, PlusIcon } from '@/common/icons';
 import {
   gigwanQueryKeys,
   useUpsertWorkTypeCustomSangtaesMutation,
@@ -159,7 +159,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                             }}
                             aria-label={`${value || '상태'} 삭제`}
                           >
-                            <Delete width={16} height={16} />
+                            <DeleteIcon width={16} height={16} />
                           </IconButton>
                         </div>
                       );
@@ -172,7 +172,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                 size="medium"
                 styleType="outlined"
                 variant="secondary"
-                iconRight={<Plus width={16} height={16} />}
+                iconRight={<PlusIcon width={16} height={16} />}
                 onClick={() => {
                   statusesField.pushValue({
                     nanoId: null,

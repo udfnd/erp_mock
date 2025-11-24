@@ -4,11 +4,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 
 import {
-  ArrowLgDown,
-  CheckboxCheckedActive,
-  CheckboxCheckedDisabled,
-  CheckboxUncheckedActive,
-  CheckboxUncheckedDisabled,
+  ArrowLgDownIcon,
+  CheckboxCheckedActiveIcon,
+  CheckboxCheckedDisabledIcon,
+  CheckboxUncheckedActiveIcon,
+  CheckboxUncheckedDisabledIcon,
 } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
@@ -86,7 +86,7 @@ export function FiltersDropdown({ filters }: Props) {
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <span>필터</span>
-        <ArrowLgDown css={lvCss.filterTriggerCaret} />
+        <ArrowLgDownIcon css={lvCss.filterTriggerCaret} />
       </button>
       {isOpen && (
         <div css={lvCss.filterMenu}>
@@ -104,11 +104,11 @@ export function FiltersDropdown({ filters }: Props) {
                   const isDisabled = !filter.options.some((opt) => opt.value === option.value);
                   const icon = isDisabled
                     ? isOptionActive
-                      ? <CheckboxCheckedDisabled />
-                      : <CheckboxUncheckedDisabled />
+                      ? <CheckboxCheckedDisabledIcon />
+                      : <CheckboxUncheckedDisabledIcon />
                     : isOptionActive
-                      ? <CheckboxCheckedActive />
-                      : <CheckboxUncheckedActive />;
+                      ? <CheckboxCheckedActiveIcon />
+                      : <CheckboxUncheckedActiveIcon />;
 
                   return (
                     <button

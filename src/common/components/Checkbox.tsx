@@ -10,10 +10,10 @@ import {
 } from 'react';
 
 import {
-  CheckboxCheckedActive,
-  CheckboxCheckedDisabled,
-  CheckboxUncheckedActive,
-  CheckboxUncheckedDisabled,
+  CheckboxCheckedActiveIcon,
+  CheckboxCheckedDisabledIcon,
+  CheckboxUncheckedActiveIcon,
+  CheckboxUncheckedDisabledIcon,
 } from '@/common/icons';
 
 import * as styles from './Checkbox.style';
@@ -45,9 +45,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const icon = (() => {
       const isOn = checked || indeterminate;
       if (disabled) {
-        return isOn ? <CheckboxCheckedDisabled /> : <CheckboxUncheckedDisabled />;
+        return isOn ? <CheckboxCheckedDisabledIcon /> : <CheckboxUncheckedDisabledIcon />;
       }
-      return isOn ? <CheckboxCheckedActive /> : <CheckboxUncheckedActive />;
+      return isOn ? <CheckboxCheckedActiveIcon /> : <CheckboxUncheckedActiveIcon />;
     })();
 
     return (

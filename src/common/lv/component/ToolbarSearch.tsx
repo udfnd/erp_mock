@@ -1,6 +1,6 @@
 'use client';
 
-import { Close, Search } from '@/common/icons';
+import { CloseIcon, SearchIcon } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import type { ListViewSearchProps } from './types';
@@ -25,10 +25,10 @@ export function ToolbarSearch({ search, onFocusChange }: Props) {
           aria-label="검색어 지우기"
           onClick={() => search.onChange('')}
         >
-          <Close width={16} height={16} />
+          <CloseIcon width={16} height={16} />
         </button>
       )}
-      <Search css={lvCss.searchIcon} />
+      <SearchIcon css={lvCss.searchIcon} />
       <input
         css={lvCss.searchInput(true)}
         value={search.value}

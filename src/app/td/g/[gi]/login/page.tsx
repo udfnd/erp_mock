@@ -5,7 +5,7 @@ import { FormEvent, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { useSignInMutation } from '@/domain/auth/api';
 import { useGigwanNameQuery } from '@/domain/gigwan/api';
-import { ArrowLgRight, Progress } from '@/common/icons';
+import { ArrowLgRightIcon, ProgressIcon } from '@/common/icons';
 import { Button, Textfield } from '@/common/components';
 import { useAuth } from '@/global/auth';
 
@@ -204,9 +204,9 @@ export default function SignInPage() {
               disabled={isButtonDisabled}
               styleType="solid"
               variant="primary"
-              iconRight={<ArrowLgRight width={16} height={16} color={`${color.cgrey300}`} />}
+              iconRight={<ArrowLgRightIcon width={16} height={16} color={`${color.cgrey300}`} />}
             >
-              {isBusy ? <Progress css={cssObj.spinner} /> : '로그인'}
+              {isBusy ? <ProgressIcon css={cssObj.spinner} /> : '로그인'}
             </Button>
           </div>
         </form>

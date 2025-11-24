@@ -5,7 +5,7 @@ import { useForm, useStore } from '@tanstack/react-form';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { Button, IconButton } from '@/common/components';
-import { Delete, Edit, Plus } from '@/common/icons';
+import { DeleteIcon, EditIcon, PlusIcon } from '@/common/icons';
 import {
   gigwanQueryKeys,
   useEmploymentCategoriesQuery,
@@ -239,7 +239,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       aria-label={`${value || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
                                       title={isEditing ? '편집 종료' : '수정'}
                                     >
-                                      <Edit width={16} height={16} />
+                                      <EditIcon width={16} height={16} />
                                     </IconButton>
                                     <IconButton
                                       styleType="normal"
@@ -252,7 +252,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       aria-label={`${value || '상태'} 삭제`}
                                       title="삭제"
                                     >
-                                      <Delete width={16} height={16} />
+                                      <DeleteIcon width={16} height={16} />
                                     </IconButton>
                                   </div>
                                 </div>
@@ -265,7 +265,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                           size="medium"
                           styleType="outlined"
                           variant="secondary"
-                          iconRight={<Plus width={16} height={16} />}
+                          iconRight={<PlusIcon width={16} height={16} />}
                           onClick={() => {
                             const localId = createLocalId();
                             statusesField.pushValue({

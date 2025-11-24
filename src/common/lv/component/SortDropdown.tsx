@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { ArrowLgDown, RadioCheckedActive, RadioCheckedDisabled, RadioUncheckedActive, RadioUncheckedDisabled } from '@/common/icons';
+import { ArrowLgDownIcon, RadioCheckedActiveIcon, RadioCheckedDisabledIcon, RadioUncheckedActiveIcon, RadioUncheckedDisabledIcon } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import type { ListViewSortProps } from './types';
@@ -32,9 +32,9 @@ export function SortDropdown({ sort }: { sort: ListViewSortProps }) {
   const getSortOptionIcon = (optionValue: string) => {
     const isActive = optionValue === sort.value;
     if (!sort.options.some((option) => option.value === optionValue)) {
-      return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
+      return isActive ? <RadioCheckedDisabledIcon /> : <RadioUncheckedDisabledIcon />;
     }
-    return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
+    return isActive ? <RadioCheckedActiveIcon /> : <RadioUncheckedActiveIcon />;
   };
 
   return (
@@ -45,7 +45,7 @@ export function SortDropdown({ sort }: { sort: ListViewSortProps }) {
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <span>{displayLabel}</span>
-        <ArrowLgDown css={lvCss.filterTriggerCaret} />
+        <ArrowLgDownIcon css={lvCss.filterTriggerCaret} />
       </button>
       {isOpen && (
         <div css={lvCss.filterMenu}>

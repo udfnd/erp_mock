@@ -55,7 +55,7 @@ export type SayongjaListSectionProps = {
   handlers: SayongjaListSectionHandlers;
 };
 
-export type SayongjaSettingsSectionProps = {
+export type SayongjaRightsidePanelsSectionProps = {
   gigwanNanoId: string;
   selectedSayongjas: SayongjaListItem[];
   isCreating: boolean;
@@ -68,7 +68,7 @@ export type SayongjaSettingsSectionProps = {
 
 export type UseSayongjaListViewSectionsResult = {
   listSectionProps: SayongjaListSectionProps;
-  settingsSectionProps: SayongjaSettingsSectionProps;
+  settingsSectionProps: SayongjaRightsidePanelsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
   isHwalseongFilterOptions: typeof IS_HWALSEONG_FILTER_OPTIONS;
   jojikFilterOptions: { label: string; value: string }[];
@@ -152,7 +152,9 @@ export function useSayongjaListViewSections({
     return filtered.length ? filtered : undefined;
   };
 
-  const isHwalseongSelection = filters.isHwalseong.filter((value) => value !== 'all' && value !== '');
+  const isHwalseongSelection = filters.isHwalseong.filter(
+    (value) => value !== 'all' && value !== '',
+  );
   const isHwalseongFilter =
     isHwalseongSelection.length === 1 ? isHwalseongSelection[0] === 'true' : undefined;
 
@@ -263,7 +265,7 @@ export function useSayongjaListViewSections({
     },
   };
 
-  const settingsSectionProps: SayongjaSettingsSectionProps = {
+  const settingsSectionProps: SayongjaRightsidePanelsSectionProps = {
     gigwanNanoId,
     selectedSayongjas,
     isCreating,

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useMemo, useState } from 'react';
 
 import { getGigwanName } from '@/domain/gigwan/api';
-import { ArrowLgRight, Progress } from '@/common/icons';
+import { ArrowLgRightIcon, ProgressIcon } from '@/common/icons';
 import { Button, Textfield } from '@/common/components';
 
 import { cssObj } from './style';
@@ -96,9 +96,9 @@ export default function EnterCodePage() {
               disabled={isButtonDisabled}
               styleType="solid"
               variant="primary"
-              iconRight={<ArrowLgRight width={16} height={16} color={`${color.cgrey300}`} />}
+              iconRight={<ArrowLgRightIcon width={16} height={16} color={`${color.cgrey300}`} />}
             >
-              {isLoading ? <Progress css={cssObj.spinner} /> : '확인'}
+              {isLoading ? <ProgressIcon css={cssObj.spinner} /> : '확인'}
             </Button>
           </div>
         </form>

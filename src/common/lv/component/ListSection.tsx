@@ -13,7 +13,7 @@ import {
 
 import { cssObj as lvCss } from '@/common/lv/style';
 import { Checkbox } from '@/common/components';
-import { Plus } from '@/common/icons';
+import { PlusIcon } from '@/common/icons';
 import { color } from '@/style';
 
 import type { ListViewTableProps } from './types';
@@ -93,7 +93,7 @@ export function ListSection<TData>({
                 >
                   <>
                     {primaryAction.label}
-                    <Plus width={16} height={16} color={`${color.white}`} />
+                    <PlusIcon width={16} height={16} color={`${color.white}`} />
                   </>
                 </button>
               </div>

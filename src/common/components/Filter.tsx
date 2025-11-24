@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import { StateDown, StateUp } from '@/common/icons';
+import { StateDownIcon, StateUpIcon } from '@/common/icons';
 import {
   filterBaseStyles,
   filterRecipe,
@@ -42,7 +42,7 @@ export const Filter = React.forwardRef<HTMLButtonElement, FilterProps>(
       >
         {iconLeft && <span css={iconWrapper}>{iconLeft}</span>}
         {children}
-        <span css={iconWrapper}>{active ? <StateUp /> : <StateDown />}</span>
+        <span css={iconWrapper}>{active ? <StateUpIcon /> : <StateDownIcon />}</span>
       </button>
     );
   },

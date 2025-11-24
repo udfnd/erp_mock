@@ -1,6 +1,6 @@
 'use client';
 
-import { TableChart } from '@/common/icons';
+import { TableChartIcon } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import { ToolbarFilters } from '../component/ToolbarFilters';
@@ -27,7 +27,7 @@ export function ToolbarLayout({
         <div css={lvCss.toolbarControls}>
           <ToolbarSort sort={sort} />
           <button type="button" css={lvCss.viewChangeButton}>
-            <TableChart />
+            <TableChartIcon />
             {viewChangeLabel}
           </button>
         </div>

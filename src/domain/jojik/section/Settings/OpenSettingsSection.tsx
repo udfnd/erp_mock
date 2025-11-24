@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { Button, Checkbox, LabeledInput } from '@/common/components';
-import { Copy } from '@/common/icons';
+import { CopyIcon } from '@/common/icons';
 import { type JojikDetailResponse, useJojikQuery, useUpdateJojikMutation } from '@/domain/jojik/api';
 import { apiClient } from '@/global';
 
@@ -243,7 +243,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
               size="small"
               styleType="text"
               variant="secondary"
-              iconLeft={<Copy width={16} height={16} />}
+              iconLeft={<CopyIcon width={16} height={16} />}
               onClick={handleCopyLink}
               disabled={!linkRequestUrl}
             >

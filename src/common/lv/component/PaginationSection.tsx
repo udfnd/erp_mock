@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 
-import { ArrowMdLeftDouble, ArrowMdLeftSingle, ArrowMdRightDouble, ArrowMdRightSingle } from '@/common/icons';
+import { ArrowMdLeftDoubleIcon, ArrowMdLeftSingleIcon, ArrowMdRightDoubleIcon, ArrowMdRightSingleIcon } from '@/common/icons';
 import { cssObj as lvCss } from '@/common/lv/style';
 
 import type { ListViewPaginationProps } from './types';
@@ -48,7 +48,7 @@ export function PaginationSection<TData>({ table }: ListViewPaginationProps<TDat
           disabled={!canUseDoubleArrows || !canGoPrev}
           onClick={() => handleGoToPage(1)}
         >
-          <ArrowMdLeftDouble />
+          <ArrowMdLeftDoubleIcon />
         </button>
         <button
           type="button"
@@ -56,7 +56,7 @@ export function PaginationSection<TData>({ table }: ListViewPaginationProps<TDat
           disabled={!canGoPrev}
           onClick={() => handleGoToPage(currentPage - 1)}
         >
-          <ArrowMdLeftSingle />
+          <ArrowMdLeftSingleIcon />
         </button>
 
         <div css={lvCss.paginationPageList}>
@@ -90,7 +90,7 @@ export function PaginationSection<TData>({ table }: ListViewPaginationProps<TDat
           disabled={!canGoNext}
           onClick={() => handleGoToPage(currentPage + 1)}
         >
-          <ArrowMdRightSingle />
+          <ArrowMdRightSingleIcon />
         </button>
         <button
           type="button"
@@ -98,7 +98,7 @@ export function PaginationSection<TData>({ table }: ListViewPaginationProps<TDat
           disabled={!canUseDoubleArrows || !canGoNext}
           onClick={() => handleGoToPage(totalPages)}
         >
-          <ArrowMdRightDouble />
+          <ArrowMdRightDoubleIcon />
         </button>
       </div>
     </footer>

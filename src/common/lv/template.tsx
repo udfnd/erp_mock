@@ -22,19 +22,19 @@ import {
 
 import { type ButtonProps, Checkbox } from '@/common/components';
 import {
-  ArrowLgDown,
-  ArrowMdLeftDouble,
-  ArrowMdLeftSingle,
-  ArrowMdRightDouble,
-  ArrowMdRightSingle,
-  Close,
-  Plus,
-  RadioCheckedActive,
-  RadioCheckedDisabled,
-  RadioUncheckedActive,
-  RadioUncheckedDisabled,
-  Search,
-  TableChart,
+  ArrowLgDownIcon,
+  ArrowMdLeftDoubleIcon,
+  ArrowMdLeftSingleIcon,
+  ArrowMdRightDoubleIcon,
+  ArrowMdRightSingleIcon,
+  CloseIcon,
+  PlusIcon,
+  RadioCheckedActiveIcon,
+  RadioCheckedDisabledIcon,
+  RadioUncheckedActiveIcon,
+  RadioUncheckedDisabledIcon,
+  SearchIcon,
+  TableChartIcon,
 } from '@/common/icons';
 
 import { cssObj } from './style';
@@ -261,7 +261,7 @@ export function Template<TData>({
                   <button type="button" css={cssObj.addElementButton} {...primaryActionProps}>
                     <>
                       {primaryActionLabel}
-                      <Plus width={16} height={16} color={`${color.white}`} />
+                      <PlusIcon width={16} height={16} color={`${color.white}`} />
                     </>
                   </button>
                 </div>
@@ -323,19 +323,19 @@ export function Template<TData>({
 
     const isActive = optionValue === sort.value;
     if (!sort.options.some((option) => option.value === optionValue)) {
-      return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
+      return isActive ? <RadioCheckedDisabledIcon /> : <RadioUncheckedDisabledIcon />;
     }
 
-    return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
+    return isActive ? <RadioCheckedActiveIcon /> : <RadioUncheckedActiveIcon />;
   };
 
   const getFilterOptionIcon = (filter: ListViewTemplateToolbarFilter, optionValue: string) => {
     const isActive = filter.value.includes(optionValue);
     if (!filter.options.some((option) => option.value === optionValue)) {
-      return isActive ? <RadioCheckedDisabled /> : <RadioUncheckedDisabled />;
+      return isActive ? <RadioCheckedDisabledIcon /> : <RadioUncheckedDisabledIcon />;
     }
 
-    return isActive ? <RadioCheckedActive /> : <RadioUncheckedActive />;
+    return isActive ? <RadioCheckedActiveIcon /> : <RadioUncheckedActiveIcon />;
   };
 
   useEffect(() => {
@@ -525,10 +525,10 @@ export function Template<TData>({
                       onClick={handleClearSearch}
                       aria-label="검색어 지우기"
                     >
-                      <Close />
+                      <CloseIcon />
                     </button>
                   ) : (
-                    <Search css={cssObj.searchIcon} />
+                    <SearchIcon css={cssObj.searchIcon} />
                   ))}
                 <input
                   ref={searchInputRef}
@@ -547,7 +547,7 @@ export function Template<TData>({
                     onClick={handleSearchSubmit}
                     aria-label="검색"
                   >
-                    <Search />
+                    <SearchIcon />
                   </button>
                 )}
               </div>
@@ -561,7 +561,7 @@ export function Template<TData>({
                     onClick={() => setIsSortDropdownOpen((prev) => !prev)}
                   >
                     <span>{sortDisplayLabel}</span>
-                    <ArrowLgDown />
+                    <ArrowLgDownIcon />
                   </button>
 
                   {isSortDropdownOpen && (
@@ -610,7 +610,7 @@ export function Template<TData>({
               )}
               {toolbarActionsNode}
               <button type="button" css={cssObj.viewChangeButton}>
-                <TableChart />
+                <TableChartIcon />
                 리스트뷰
               </button>
             </div>
@@ -625,7 +625,7 @@ export function Template<TData>({
             onClick={() => setIsFiltersDropdownOpen((prev) => !prev)}
           >
             <span>{filtersDisplayLabel}</span>
-            <ArrowLgDown />
+            <ArrowLgDownIcon />
           </button>
 
           {isFiltersDropdownOpen && (
@@ -683,9 +683,9 @@ export function Template<TData>({
                       >
                         <span css={cssObj.filterOptionContent}>
                           {areArraysEqual(filter.value, defaultValue) ? (
-                            <RadioCheckedActive />
+                            <RadioCheckedActiveIcon />
                           ) : (
-                            <RadioUncheckedActive />
+                            <RadioUncheckedActiveIcon />
                           )}
                           <span>{filter.placeholder}</span>
                         </span>
@@ -821,7 +821,7 @@ export function Template<TData>({
                 disabled={!canUseDoubleArrows || !canGoPrev}
                 onClick={() => handleGoToPage(1, 'segment')}
               >
-                <ArrowMdLeftDouble />
+                <ArrowMdLeftDoubleIcon />
               </button>
               <button
                 type="button"
@@ -829,7 +829,7 @@ export function Template<TData>({
                 disabled={!canGoPrev}
                 onClick={() => handleGoToPage(currentPage - 1, 'segment')}
               >
-                <ArrowMdLeftSingle />
+                <ArrowMdLeftSingleIcon />
               </button>
 
               <div css={cssObj.paginationPageList}>
@@ -862,7 +862,7 @@ export function Template<TData>({
                 disabled={!canGoNext}
                 onClick={() => handleGoToPage(currentPage + 1, 'segment')}
               >
-                <ArrowMdRightSingle />
+                <ArrowMdRightSingleIcon />
               </button>
               <button
                 type="button"
@@ -870,7 +870,7 @@ export function Template<TData>({
                 disabled={!canUseDoubleArrows || !canGoNext}
                 onClick={() => handleGoToPage(totalPages, 'segment')}
               >
-                <ArrowMdRightDouble />
+                <ArrowMdRightDoubleIcon />
               </button>
             </div>
           </footer>

@@ -2,7 +2,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
-import { Plus } from '@/common/icons';
+import { PlusIcon } from '@/common/icons';
 import { useCreateJojikMutation } from '@/domain/jojik/api';
 
 import { cssObj } from '../../styles';
@@ -63,7 +63,7 @@ export function CreateJojikPanel({ gigwanNanoId, onExit, onAfterMutation }: Crea
           isFull
           form={formId}
           disabled={!name.trim() || isSaving}
-          iconRight={<Plus />}
+          iconRight={<PlusIcon />}
         >
           조직 생성하기
         </Button>

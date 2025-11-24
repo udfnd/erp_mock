@@ -1,5 +1,5 @@
 import { Button } from '@/common/components';
-import { Magic } from '@/common/icons';
+import { MagicIcon } from '@/common/icons';
 
 import { cssObj } from '../../styles';
 
@@ -16,7 +16,7 @@ export function QuickActionsPanel({ onStartCreate }: QuickActionsPanelProps) {
       <div css={cssObj.panelBody}>
         <span css={cssObj.panelSubtitle}>빠른 액션</span>
         <div>
-          <Button variant="secondary" size="medium" iconLeft={<Magic />} onClick={onStartCreate}>
+          <Button variant="secondary" size="medium" iconLeft={<MagicIcon />} onClick={onStartCreate}>
             조직 생성 마법사
           </Button>
         </div>

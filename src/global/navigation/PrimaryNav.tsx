@@ -6,7 +6,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { SidebarClose, SidebarOpen } from '@/common/icons';
+import { SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthStore, switchUser } from '@/global/auth';
@@ -465,7 +465,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
           aria-controls="primary-nav-list"
           aria-label={effectiveIsOpen ? '메뉴 접기' : '메뉴 열기'}
         >
-          {effectiveIsOpen ? <SidebarClose css={styles.icon} /> : <SidebarOpen css={styles.icon} />}
+          {effectiveIsOpen ? <SidebarCloseIcon css={styles.icon} /> : <SidebarOpenIcon css={styles.icon} />}
         </button>
       </div>
 

@@ -2,7 +2,7 @@ import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
-import { License } from '@/common/icons';
+import { LicenseIcon } from '@/common/icons';
 import type { HomepageLink, JojikPermission, UpdateJojikRequest } from '@/domain/jojik/api/jojik.schema';
 import type {
   UpdateJojikMutationResult,
@@ -116,7 +116,7 @@ export function SingleSelectionPanelContent({
             permissions.map((permission) => (
               <div key={permission.nanoId} css={cssObj.permissionItem}>
                 <div>
-                  <License />
+                  <LicenseIcon />
                   {permission.name}
                 </div>
                 <span>{permission.sysPermissionType}</span>
