@@ -37,7 +37,7 @@ export type ListViewPrimaryActionProps = {
 
 export type ListViewToolbarProps = {
   search: ListViewSearchProps;
-  filters: ListViewFilter[];
+  filters?: ListViewFilter[];
   sort: ListViewSortProps;
   totalCount: number;
   onSearchFocusChange?: (focused: boolean) => void;

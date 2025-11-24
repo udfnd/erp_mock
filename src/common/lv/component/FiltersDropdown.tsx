@@ -14,7 +14,15 @@ import { cssObj as lvCss } from '@/common/lv/style';
 
 import type { ListViewFilter } from './types';
 
-export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
+type Props = {
+  filters?: ListViewFilter[];
+};
+
+export function FiltersDropdown({ filters }: Props) {
+  const filterList = filters ?? [];
+
+  if (!filterList.length) return null;
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,11 +43,11 @@ export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
 
   const hasActiveFilter = useMemo(
     () =>
-      filters.some((filter) => {
+      filterList.some((filter) => {
         const defaults = filter.defaultValue ?? [];
         return filter.value.some((value) => !defaults.includes(value));
       }),
-    [filters],
+    [filterList],
   );
 
   const getFilterSummary = (filter: ListViewFilter) => {
@@ -82,8 +90,8 @@ export function FiltersDropdown({ filters }: { filters: ListViewFilter[] }) {
       </button>
       {isOpen && (
         <div css={lvCss.filterMenu}>
-          {filters.map((filter, index) => {
-            const isLast = index === filters.length - 1;
+          {filterList.map((filter, index) => {
+            const isLast = index === filterList.length - 1;
             const summary = getFilterSummary(filter);
             return (
               <div key={filter.key} css={lvCss.filterGroup(!isLast)}>
