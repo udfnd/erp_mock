@@ -1,5 +1,9 @@
 import { apiClient } from '@/global';
-import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
+import {
+  useAuthedQuery,
+  useAuthedMutation,
+  type UseAuthedQueryOptions,
+} from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -78,8 +82,14 @@ export const getJojik = async (nanoId: string): Promise<JojikDetailResponse> => 
   return parseOrThrow(JojikDetailResponseSchema, res.data);
 };
 
-export const useJojikQuery = (nanoId: string, options?: { enabled?: boolean }) =>
-  useAuthedQuery<JojikDetailResponse, unknown>({
+type UseJojikQueryOptions = Omit<
+  UseAuthedQueryOptions<JojikDetailResponse, unknown, ['jojik', string]>,
+  'queryKey' | 'queryFn'
+>;
+
+export const useJojikQuery = (nanoId: string, options?: UseJojikQueryOptions) =>
+  useAuthedQuery<JojikDetailResponse, unknown, ['jojik', string]>({
+    ...options,
     queryKey: ['jojik', nanoId],
     queryFn: () => getJojik(nanoId),
     enabled: !!nanoId && (options?.enabled ?? true),
