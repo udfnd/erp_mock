@@ -38,7 +38,7 @@ export function ListSection<TData>({
   onSelectedRowsChange,
   onDimmerClick,
 }: ListViewTableProps<TData>) {
-  const selectionColumn: ColumnDef<TData, any> = useMemo(
+  const selectionColumn: ColumnDef<TData> = useMemo(
     () => ({
       id: '__row_selection__',
       header: ({ table }) => (
@@ -78,7 +78,7 @@ export function ListSection<TData>({
     [],
   );
 
-  const primaryActionColumn: ColumnDef<TData, any> | null = useMemo(
+  const primaryActionColumn: ColumnDef<TData> | null = useMemo(
     () =>
       primaryAction
         ? {

@@ -19,10 +19,8 @@ type Props = {
 };
 
 export function FiltersDropdown({ filters }: Props) {
-  const filterList = filters ?? [];
-
-  if (!filterList.length) return null;
-
+  const filterList = useMemo(() => filters ?? [], [filters]);
+  const hasFilters = filterList.length > 0;
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,6 +75,8 @@ export function FiltersDropdown({ filters }: Props) {
 
     filter.onChange(toggledValue);
   };
+
+  if (!hasFilters) return null;
 
   return (
     <div css={lvCss.filterDropdown} ref={dropdownRef}>

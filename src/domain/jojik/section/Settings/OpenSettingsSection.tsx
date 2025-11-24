@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { Button, Checkbox, LabeledInput } from '@/common/components';
@@ -42,7 +42,16 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
   const queryClient = useQueryClient();
   const updateJojikMutation = useUpdateJojikMutation(jojikNanoId);
 
-  const jojikQuery = useJojikQuery(jojikNanoId, { enabled: Boolean(jojikNanoId) });
+  const jojikQuery = useJojikQuery(jojikNanoId, {
+    enabled: Boolean(jojikNanoId),
+    onSuccess: (jojikData) => {
+      setOpenFileNanoIds((jojikData.openFiles ?? []).map((file) => file.nanoId));
+      setBasicInfoNanoId(jojikData.openSangtaeNanoId ?? '');
+      setOpenFileNanoId(jojikData.canAccessOpenFileSangtaeNanoId ?? '');
+      setHadaNanoId(jojikData.canHadaLinkRequestSangtaeNanoId ?? '');
+      setFeedback(null);
+    },
+  });
   const { data: jojik } = jojikQuery;
   const { data: openFileSangtaesData, isLoading: isOpenFileSangtaesLoading } = useCanAccessOpenFileSangtaesQuery();
   const { data: hadaSangtaesData, isLoading: isHadaSangtaesLoading } = useCanHadaLinkRequestSangtaesQuery();
@@ -53,15 +62,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
   const [hadaNanoId, setHadaNanoId] = useState('');
   const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(null);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
-
-  useEffect(() => {
-    if (!jojik) return;
-    setOpenFileNanoIds((jojik.openFiles ?? []).map((file) => file.nanoId));
-    setBasicInfoNanoId(jojik.openSangtaeNanoId ?? '');
-    setOpenFileNanoId(jojik.canAccessOpenFileSangtaeNanoId ?? '');
-    setHadaNanoId(jojik.canHadaLinkRequestSangtaeNanoId ?? '');
-    setFeedback(null);
-  }, [jojik]);
 
   const openFileOptions = useMemo(() => jojik?.openFiles ?? [], [jojik?.openFiles]);
 
