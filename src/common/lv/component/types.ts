@@ -45,7 +45,7 @@ export type ListViewToolbarProps = {
 
 export type ListViewTableProps<TData> = {
   data: TData[];
-  columns: ColumnDef<TData>[];
+  columns: ColumnDef<TData, any>[];
   state: ListViewState<TData>;
   primaryAction?: ListViewPrimaryActionProps;
   manualPagination?: boolean;

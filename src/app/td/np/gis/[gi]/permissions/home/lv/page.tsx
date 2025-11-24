@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 
+import { extractGigwanNanoId } from '@/common/utils';
 import { useAuth } from '@/global/auth';
 import {
   PermissionListSection,
@@ -16,7 +17,7 @@ type PageParams = {
 
 export default function NpGigwanPermissionListViewPage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
+  const gigwanNanoId = extractGigwanNanoId(params?.gi);
   const { isAuthenticated } = useAuth();
 
   const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions, permissionTypeOptions } =

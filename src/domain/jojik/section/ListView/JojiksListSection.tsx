@@ -9,7 +9,6 @@ import { cssObj } from './styles';
 import type { JojikListSectionProps } from './useJojikListViewSections';
 import {
   CREATED_AT_FILTER_NOW,
-  columnHelper,
   createSortableHeader,
   formatDate,
   type CreatedAtFilterValue,
@@ -91,16 +90,20 @@ export function JojiksListSection({
     }
   };
 
-  const columns = useMemo<ColumnDef<JojikListItem, unknown>[]>(
+  const columns = useMemo<ColumnDef<JojikListItem, any>[]>(
     () => [
-      columnHelper.accessor('name', {
+      {
+        id: 'name',
+        accessorKey: 'name',
         header: createSortableHeader('전체 조직'),
-        cell: (info) => info.getValue(),
+        cell: (info) => info.getValue<string>(),
         meta: { maxWidth: 120 },
-      }),
-      columnHelper.accessor('createdAt', {
+      },
+      {
+        id: 'createdAt',
+        accessorKey: 'createdAt',
         header: createSortableHeader('생성일'),
-        cell: (info) => formatDate(info.getValue()),
+        cell: (info) => formatDate(info.getValue<string>()),
         filterFn: (row, columnId, filterValue) => {
           const value = filterValue as CreatedAtFilterValue | undefined;
 
@@ -120,7 +123,7 @@ export function JojiksListSection({
 
           return diff <= threshold;
         },
-      }),
+      },
     ],
     [],
   );

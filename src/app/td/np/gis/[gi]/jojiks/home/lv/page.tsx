@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 
 import { ListViewLayout } from '@/common/lv/layout';
+import { extractGigwanNanoId } from '@/common/utils';
 import {
   JojiksListSection,
   createJojikSettingsPanels,
@@ -17,7 +18,7 @@ type PageParams = {
 
 export default function NpGigwanJojikListViewPage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? ''); // TODO: [하] util 로 리팩토링
+  const gigwanNanoId = extractGigwanNanoId(params?.gi);
   const { isAuthenticated } = useAuth();
 
   const { listSectionProps, settingsSectionProps, sortOptions, createdAtFilterOptions } =
