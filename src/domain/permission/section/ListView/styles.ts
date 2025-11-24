@@ -2,35 +2,52 @@
 
 import { css } from '@emotion/react';
 
-export const permissionListViewCss = {
-  panel: css`
-    width: 360px;
-    flex: 0 0 360px;
-    border-left: 1px solid #e5e7eb;
-    padding: 20px;
+import { color, typography } from '@/style';
+
+export const cssObj = {
+  listSection: css`
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border-right: 1px solid ${color.cgrey100};
+    gap: 16px;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    height: 100%;
     box-sizing: border-box;
-    background: #fff;
-    min-height: 100%;
+  `,
+  settingsPanel: css`
+    width: 400px;
+    min-width: 400px;
+    background: ${color.white};
+    min-height: 0;
     max-height: 100%;
-    overflow: auto;
+    height: 100%;
+    overflow-y: auto;
+    border-left: 1px solid ${color.cgrey100};
+    box-sizing: border-box;
   `,
   panelHeader: css`
-    margin-bottom: 12px;
+    padding: 16px;
   `,
   panelTitle: css`
     font-size: 18px;
-    font-weight: 700;
-    margin: 0 0 4px;
+    font-weight: 600;
+    color: ${color.black};
+    ${typography.bodySB};
   `,
   panelSubtitle: css`
-    margin: 0;
-    color: #6b7280;
-    font-size: 13px;
+    ${typography.bodySmallSB};
+    color: ${color.cgrey500};
+    margin-top: 4px;
   `,
   panelBody: css`
     display: flex;
     flex-direction: column;
     gap: 12px;
+    padding: 0 16px 16px;
   `,
   panelSection: css`
     display: flex;
@@ -39,10 +56,10 @@ export const permissionListViewCss = {
   `,
   panelLabel: css`
     font-size: 13px;
-    color: #4b5563;
+    color: ${color.cgrey600};
   `,
   helperText: css`
-    color: #6b7280;
+    color: ${color.cgrey500};
     font-size: 12px;
     margin: 0;
   `,
@@ -55,14 +72,14 @@ export const permissionListViewCss = {
   tag: css`
     display: inline-flex;
     align-items: center;
-    background: #f3f4f6;
-    color: #374151;
+    background: ${color.cgrey50};
+    color: ${color.cgrey800};
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 12px;
   `,
   listBox: css`
-    border: 1px solid #e5e7eb;
+    border: 1px solid ${color.cgrey100};
     border-radius: 8px;
     padding: 8px;
     max-height: 240px;
@@ -74,11 +91,11 @@ export const permissionListViewCss = {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #111827;
+    color: ${color.black};
     font-size: 14px;
     cursor: pointer;
     &:hover {
-      background: #f9fafb;
+      background: ${color.blue10};
     }
   `,
   addUserContainer: css`
@@ -89,8 +106,8 @@ export const permissionListViewCss = {
     right: calc(100% + 12px);
     top: 0;
     width: 320px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey100};
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

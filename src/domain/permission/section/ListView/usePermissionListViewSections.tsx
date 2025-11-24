@@ -6,22 +6,16 @@ import { type ColumnDef } from '@tanstack/react-table';
 
 import { ListViewState, useListViewState } from '@/common/lv';
 import { useGetPermissionTypesQuery } from '@/domain/system/api';
-import {
-  useBatchlinkPermissionSayongjaMutation,
-  useGetPermissionsQuery,
-  useGetPermissionSayongjasQuery,
-} from '@/domain/permission/api';
-import { useGetSayongjasQuery } from '@/domain/sayongja/api';
+import { useGetPermissionsQuery } from '@/domain/permission/api';
 import type { GetPermissionsRequest, Permission } from '@/domain/permission/api';
-import type { SayongjaListItem } from '@/domain/sayongja/api';
 
 import {
-  PAGE_SIZE_OPTIONS,
   SORT_OPTIONS,
   columnHelper,
   getSortOptionFromState,
   getSortStateFromOption,
 } from './constants';
+import type { PermissionRightsidePanelsProps } from './PermissionRightsidePanels/statePanels';
 
 export type PermissionListViewHookParams = {
   gigwanNanoId: string;
@@ -38,7 +32,6 @@ export type PermissionListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
   onPermissionTypeFilterChange: (value: string[]) => void;
-  onPageSizeChange: (size: number) => void;
   onSelectedPermissionsChange: (permissions: Permission[]) => void;
   onAddUsersClick: () => void;
 };
@@ -56,25 +49,12 @@ export type PermissionListSectionProps = {
   totalPages: number;
   handlers: PermissionListSectionHandlers;
   isAddUserEnabled: boolean;
-  isAddUserPopupOpen: boolean;
-  availableSayongjas: SayongjaListItem[];
-  addUserSelection: Set<string>;
-  onToggleSayongjaSelection: (nanoId: string) => void;
-  onApplyAddUsers: () => Promise<void>;
-};
-
-export type PermissionSettingsSectionProps = {
-  gigwanNanoId: string;
-  selectedPermissions: Permission[];
-  isAuthenticated: boolean;
-  onAfterMutation: () => Promise<unknown> | void;
 };
 
 export type UsePermissionListViewSectionsResult = {
   listSectionProps: PermissionListSectionProps;
-  settingsSectionProps: PermissionSettingsSectionProps;
+  settingsSectionProps: PermissionRightsidePanelsProps;
   sortOptions: typeof SORT_OPTIONS;
-  pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
   permissionTypeOptions: { label: string; value: string }[];
 };
 
@@ -84,7 +64,7 @@ export function usePermissionListViewSections({
 }: PermissionListViewHookParams): UsePermissionListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<Permission>({
-    initialSorting: getSortStateFromOption('nameAsc'),
+    initialSorting: [],
     initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
@@ -164,8 +144,6 @@ export function usePermissionListViewSections({
   ) as ColumnDef<Permission, unknown>[];
 
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
-  const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
-  const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -181,60 +159,14 @@ export function usePermissionListViewSections({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handlePageSizeChange = (size: number) => {
-    setPagination({ pageIndex: 0, pageSize: size });
-  };
-
   const handleAfterMutation = async () => {
     await refetch();
     setRowSelection({});
     setSelectedPermissions([]);
-    setIsAddUserPopupOpen(false);
   };
 
   const handleSelectedPermissionsChange = (items: Permission[]) => {
     setSelectedPermissions(items);
-    setAddUserSelection(new Set());
-    if (items.length !== 1) {
-      setIsAddUserPopupOpen(false);
-    }
-  };
-
-  const clearAddUser = () => {
-    setIsAddUserPopupOpen(false);
-    setAddUserSelection(new Set());
-  };
-
-  const { data: sayongjasData } = useGetSayongjasQuery(
-    {
-      gigwanNanoId,
-      pageNumber: 1,
-      pageSize: 50,
-    },
-    {
-      enabled: isAuthenticated && Boolean(gigwanNanoId) && isAddUserPopupOpen,
-    },
-  );
-  const availableSayongjas = sayongjasData?.sayongjas ?? [];
-
-  const selectedPermissionNanoId =
-    selectedPermissions.length === 1 ? selectedPermissions[0].nanoId : '';
-  const { refetch: refetchPermissionSayongjas } = useGetPermissionSayongjasQuery(
-    selectedPermissionNanoId,
-    {
-      enabled: false,
-    },
-  );
-
-  const batchlinkMutation = useBatchlinkPermissionSayongjaMutation(selectedPermissionNanoId);
-  const handleApplyAddUsers = async () => {
-    if (!selectedPermissionNanoId || addUserSelection.size === 0) return;
-    await batchlinkMutation.mutateAsync({
-      sayongjas: Array.from(addUserSelection).map((nanoId) => ({ nanoId })),
-    });
-    await refetchPermissionSayongjas();
-    clearAddUser();
-    await handleAfterMutation();
   };
 
   const listSectionProps: PermissionListSectionProps = {
@@ -252,29 +184,13 @@ export function usePermissionListViewSections({
       onSearchChange: handleSearchChange,
       onSortChange: handleSortChange,
       onPermissionTypeFilterChange: handlePermissionTypeFilterChange,
-      onPageSizeChange: handlePageSizeChange,
       onSelectedPermissionsChange: handleSelectedPermissionsChange,
-      onAddUsersClick: () => setIsAddUserPopupOpen((prev) => !prev),
+      onAddUsersClick: () => undefined,
     },
     isAddUserEnabled: selectedPermissions.length === 1,
-    isAddUserPopupOpen,
-    availableSayongjas,
-    addUserSelection,
-    onToggleSayongjaSelection: (nanoId: string) => {
-      setAddUserSelection((prev) => {
-        const next = new Set(prev);
-        if (next.has(nanoId)) {
-          next.delete(nanoId);
-        } else {
-          next.add(nanoId);
-        }
-        return next;
-      });
-    },
-    onApplyAddUsers: handleApplyAddUsers,
   };
 
-  const settingsSectionProps: PermissionSettingsSectionProps = {
+  const settingsSectionProps: PermissionRightsidePanelsProps = {
     gigwanNanoId,
     selectedPermissions,
     isAuthenticated,
@@ -285,7 +201,6 @@ export function usePermissionListViewSections({
     listSectionProps,
     settingsSectionProps,
     sortOptions: SORT_OPTIONS,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
     permissionTypeOptions,
   };
 }
