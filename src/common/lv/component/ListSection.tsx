@@ -207,7 +207,7 @@ export function ListSection<TData>({
           </table>
         </div>
       </div>
-      {hasRows && <PaginationSection table={table} />}
+      {hasRows && <PaginationSection<TData> table={table} />}
     </div>
   );
 }

@@ -64,6 +64,6 @@ export type ListViewTableProps<TData> = {
   onDimmerClick?: () => void;
 };
 
-export type ListViewPaginationProps = {
-  table: Table<unknown>;
+export type ListViewPaginationProps<TData> = {
+  table: Table<TData>;
 };

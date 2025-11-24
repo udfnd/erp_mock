@@ -7,7 +7,7 @@ import { cssObj as lvCss } from '@/common/lv/style';
 
 import type { ListViewPaginationProps } from './types';
 
-export function PaginationSection({ table }: ListViewPaginationProps) {
+export function PaginationSection<TData>({ table }: ListViewPaginationProps<TData>) {
   const MAX_PAGE_BUTTONS = 10;
   const pagination = table.getState().pagination;
   const pageCount = table.getPageCount();
