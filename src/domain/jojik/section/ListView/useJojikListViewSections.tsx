@@ -6,13 +6,7 @@ import type { ReactNode } from 'react';
 import { ListViewState, useListViewState } from '@/common/lv';
 import { type JojikListItem, useJojiksQuery } from '@/domain/jojik/api';
 
-import {
-  CREATED_AT_FILTER_OPTIONS,
-  SORT_OPTIONS,
-  getSortOptionFromState,
-  getSortStateFromOption,
-  type CreatedAtFilterValue,
-} from './constants';
+import { SORT_OPTIONS, getSortOptionFromState, getSortStateFromOption } from './constants';
 
 export type JojikListViewHookParams = {
   gigwanNanoId: string;
@@ -24,7 +18,6 @@ export type ListSectionState = ListViewState<JojikListItem>;
 export type JojikListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
-  onCreatedFilterChange: (value: CreatedAtFilterValue) => void;
   onSelectedJojiksChange: (jojiks: JojikListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
@@ -38,7 +31,6 @@ export type JojikListSectionProps = {
   totalPages: number;
   searchTerm: string;
   sortByOption?: string;
-  currentCreatedFilter: CreatedAtFilterValue;
   pagination: ListSectionState['pagination'];
   isCreating: boolean;
   handlers: JojikListSectionHandlers;
@@ -64,7 +56,6 @@ export type UseJojikListViewSectionsResult = {
   listSectionProps: JojikListSectionProps;
   settingsSectionProps: JojikSettingsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
-  createdAtFilterOptions: typeof CREATED_AT_FILTER_OPTIONS;
 };
 
 export function useJojikListViewSections({
@@ -89,10 +80,8 @@ export function useJojikListViewSections({
 
   const {
     sorting,
-    columnFilters,
     pagination,
     setSorting,
-    setColumnFilters,
     setPagination,
     setRowSelection,
   } = listViewState;
@@ -126,24 +115,9 @@ export function useJojikListViewSections({
     (jojiksData?.paginationData?.totalPageCount as number | undefined) ??
     Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  const currentCreatedFilter =
-    (columnFilters.find((filter) => filter.id === 'createdAt')?.value as
-      | CreatedAtFilterValue
-      | undefined) ?? 'all';
-
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-  };
-
-  const handleCreatedFilterChange = (value: CreatedAtFilterValue) => {
-    setColumnFilters((prev) => {
-      const others = prev.filter((filter) => filter.id !== 'createdAt');
-      if (value === 'all') {
-        return others;
-      }
-      return [...others, { id: 'createdAt', value }];
-    });
   };
 
   const handleSortChange = (value: string) => {
@@ -181,13 +155,11 @@ export function useJojikListViewSections({
     totalPages,
     searchTerm,
     sortByOption,
-    currentCreatedFilter,
     pagination: listViewState.pagination,
     isCreating,
     handlers: {
       onSearchChange: handleSearchChange,
       onSortChange: handleSortChange,
-      onCreatedFilterChange: handleCreatedFilterChange,
       onSelectedJojiksChange: setSelectedJojiks,
       onAddClick: handleAddClick,
       onStopCreate: stopCreate,
@@ -208,6 +180,5 @@ export function useJojikListViewSections({
     listSectionProps,
     settingsSectionProps,
     sortOptions: SORT_OPTIONS,
-    createdAtFilterOptions: CREATED_AT_FILTER_OPTIONS,
   };
 }

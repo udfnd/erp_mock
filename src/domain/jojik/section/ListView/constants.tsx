@@ -2,22 +2,12 @@ import { type HeaderContext, type SortingState } from '@tanstack/react-table';
 
 import type { JojikListItem } from '@/domain/jojik/api/jojik.schema';
 
-export type CreatedAtFilterValue = 'all' | '7' | '30';
-
 export const SORT_OPTIONS = [
   { label: '최근 생성 순', value: 'createdAtDesc' },
   { label: '오래된 순', value: 'createdAtAsc' },
   { label: '이름 오름차순', value: 'nameAsc' },
   { label: '이름 내림차순', value: 'nameDesc' },
 ];
-
-export const CREATED_AT_FILTER_OPTIONS: { label: string; value: CreatedAtFilterValue }[] = [
-  { label: '전체 기간', value: 'all' },
-  { label: '최근 7일', value: '7' },
-  { label: '최근 30일', value: '30' },
-];
-
-export const CREATED_AT_FILTER_NOW = Date.now();
 
 export const formatDate = (value: string) => {
   const parsed = new Date(value);

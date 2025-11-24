@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -75,6 +76,31 @@ export type SayongjaSettingsSectionComponentProps = SayongjaSettingsSectionProps
   employmentCategoryOptions: { label: string; value: string }[];
   workTypeOptions: { label: string; value: string }[];
 };
+
+export type SayongjaSettingsPanels = {
+  noneSelected: ReactNode;
+  oneSelected: ReactNode;
+  multipleSelected: ReactNode;
+};
+
+export function createSayongjaSettingsPanels({
+  employmentCategoryOptions,
+  workTypeOptions,
+  ...settingsSectionProps
+}: SayongjaSettingsSectionComponentProps): SayongjaSettingsPanels {
+  const sharedProps = { employmentCategoryOptions, workTypeOptions, ...settingsSectionProps };
+
+  return {
+    noneSelected: <SayongjaSettingsSection {...sharedProps} selectedSayongjas={[]} />,
+    oneSelected: (
+      <SayongjaSettingsSection
+        {...sharedProps}
+        selectedSayongjas={settingsSectionProps.selectedSayongjas.slice(0, 1)}
+      />
+    ),
+    multipleSelected: <SayongjaSettingsSection {...sharedProps} />,
+  };
+}
 
 export function SayongjaSettingsSection({
   gigwanNanoId,

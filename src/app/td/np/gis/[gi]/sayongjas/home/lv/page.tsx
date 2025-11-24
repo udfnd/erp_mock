@@ -8,7 +8,7 @@ import { extractGigwanNanoId } from '@/common/utils';
 import { useAuth } from '@/global/auth';
 import {
   SayongjaListSection,
-  SayongjaSettingsSection,
+  createSayongjaSettingsPanels,
   useSayongjaListViewSections,
 } from '@/domain/sayongja/section/ListView';
 
@@ -50,12 +50,13 @@ export default function NpGigwanSayongjaListViewPage() {
     ],
   );
 
-  const baseSettingsProps = useMemo(
-    () => ({
-      ...settingsSectionProps,
-      employmentCategoryOptions,
-      workTypeOptions,
-    }),
+  const settingsPanels = useMemo(
+    () =>
+      createSayongjaSettingsPanels({
+        ...settingsSectionProps,
+        employmentCategoryOptions,
+        workTypeOptions,
+      }),
     [employmentCategoryOptions, settingsSectionProps, workTypeOptions],
   );
 
@@ -65,14 +66,9 @@ export default function NpGigwanSayongjaListViewPage() {
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedSayongjas}
-      NoneSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} selectedSayongjas={[]} />}
-      OneSelectedComponent={
-        <SayongjaSettingsSection
-          {...baseSettingsProps}
-          selectedSayongjas={settingsSectionProps.selectedSayongjas.slice(0, 1)}
-        />
-      }
-      MultipleSelectedComponent={<SayongjaSettingsSection {...baseSettingsProps} />}
+      NoneSelectedComponent={settingsPanels.noneSelected}
+      OneSelectedComponent={settingsPanels.oneSelected}
+      MultipleSelectedComponent={settingsPanels.multipleSelected}
     >
       <SayongjaListSection {...listSectionAllProps} />
     </ListViewLayout>
