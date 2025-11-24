@@ -4,33 +4,17 @@ import { css } from '@emotion/react';
 
 import { color } from '@/style';
 
-export const jusoListViewCss = {
-  page: css`
-    display: flex;
-    box-sizing: border-box;
-  `,
-  listSection: css`
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    border-right: 1px solid ${color.cgrey100};
-    gap: 16px;
-    min-width: 0;
-    min-height: 0;
-    max-width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-  `,
+export const cssObj = {
   settingsPanel: css`
-    width: 360px;
-    flex: 0 0 360px;
+    width: 400px;
+    min-width: 400px;
     background: ${color.white};
     display: flex;
     flex-direction: column;
-    min-height: 100%;
+    min-height: 0;
     max-height: 100%;
-    overflow: auto;
+    height: 100%;
+    overflow-y: auto;
   `,
   panelHeader: css`
     padding: 24px;
