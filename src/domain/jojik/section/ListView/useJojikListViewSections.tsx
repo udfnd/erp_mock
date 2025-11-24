@@ -128,6 +128,7 @@ export function useJojikListViewSections({
     (jojiksData?.paginationData?.totalPageCount as number | undefined) ??
     Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
+  // TODO: [상] columns는 리스트뷰 렌더링 하는 쪽에 있는 것이 낫지 않은지?
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {

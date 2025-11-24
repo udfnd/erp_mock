@@ -4,7 +4,11 @@ import { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 
 import { ListViewLayout } from '@/common/lv/layout';
-import { JojikListSection, JojikSettingsSection, useJojikListViewSections } from '@/domain/jojik/section/ListView';
+import {
+  JojiksListSection,
+  JojikSettingsSection,
+  useJojikListViewSections,
+} from '@/domain/jojik/section/ListView';
 import { useAuth } from '@/global/auth';
 
 type PageParams = {
@@ -13,7 +17,7 @@ type PageParams = {
 
 export default function NpGigwanJojikListViewPage() {
   const params = useParams<PageParams>();
-  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? '');
+  const gigwanNanoId = Array.isArray(params?.gi) ? (params?.gi[0] ?? '') : (params?.gi ?? ''); // TODO: [하] util 로 리팩토링
   const { isAuthenticated } = useAuth();
 
   const { listSectionProps, settingsSectionProps, sortOptions, createdAtFilterOptions } =
@@ -43,7 +47,7 @@ export default function NpGigwanJojikListViewPage() {
       }
       MultipleSelectedComponent={<JojikSettingsSection {...settingsSectionProps} />}
     >
-      <JojikListSection {...listSectionAllProps} />
+      <JojiksListSection {...listSectionAllProps} />
     </ListViewLayout>
   );
 }

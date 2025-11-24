@@ -14,11 +14,12 @@ import type {
   JojikPermission,
   HomepageLink,
 } from '@/domain/jojik/api/jojik.schema';
-import { License, Magic, Plus } from '@/common/icons';
+import { License, Magic, Plus } from '@/common/icons'; // TODO: [하] 뒤에 LicenseIcon 붙이는 것을 추천
 
 import { cssObj } from './styles';
 import type { JojikSettingsSectionProps } from './useJojikListViewSections';
 
+// TODO: [상] 컴포넌트 이름들 통일시키기
 export function JojikSettingsSection({
   gigwanNanoId,
   selectedJojiks,

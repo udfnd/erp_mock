@@ -21,7 +21,7 @@ export type JojikListSectionComponentProps = JojikListSectionProps & {
 
 const DEFAULT_CREATED_FILTER = ['all'];
 
-export function JojikListSection({
+export function JojiksListSection({
   data,
   columns,
   state,
@@ -48,7 +48,8 @@ export function JojikListSection({
         value: [createdFilterValue],
         defaultValue: DEFAULT_CREATED_FILTER,
         options: createdAtFilterOptions,
-        onChange: (value) => handlers.onCreatedFilterChange((value[0] as typeof createdFilterValue) ?? 'all'),
+        onChange: (value) =>
+          handlers.onCreatedFilterChange((value[0] as typeof createdFilterValue) ?? 'all'),
       },
     ],
     [createdAtFilterOptions, createdFilterValue, handlers],
@@ -92,7 +93,11 @@ export function JojikListSection({
   return (
     <section css={cssObj.listSection}>
       <ToolbarSection
-        search={{ value: searchTerm, onChange: handlers.onSearchChange, placeholder: '조직 이름으로 검색' }}
+        search={{
+          value: searchTerm,
+          onChange: handlers.onSearchChange,
+          placeholder: '조직 이름으로 검색',
+        }}
         filters={toolbarFilters}
         sort={sortProps}
         totalCount={totalCount}

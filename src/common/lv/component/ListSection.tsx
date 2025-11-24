@@ -21,9 +21,10 @@ import { PaginationSection } from './PaginationSection';
 
 const DEFAULT_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
+// TODO: [상] columns 즉 react table을 여기에서 호출 및 정의
 export function ListSection<TData>({
   data,
-  columns,
+  columns, // TODO: [하] columns에 컴포넌트가 들어갔을 때의 코드 구조 검토 (e.x. 값을 호버링 했을 때 툴팁 출력)
   state,
   primaryAction,
   manualPagination,
@@ -45,7 +46,8 @@ export function ListSection<TData>({
           {(() => {
             const isAllRowsSelected = table.getIsAllRowsSelected();
             const isSomeRowsSelected =
-              (table.getIsSomeRowsSelected?.() ?? table.getIsSomePageRowsSelected?.()) && !isAllRowsSelected;
+              (table.getIsSomeRowsSelected?.() ?? table.getIsSomePageRowsSelected?.()) &&
+              !isAllRowsSelected;
 
             return (
               <Checkbox
@@ -150,7 +152,12 @@ export function ListSection<TData>({
     <div css={lvCss.tableContainer}>
       <div css={lvCss.tableWrapperContainer}>
         {isDimmed ? (
-          <button type="button" css={lvCss.tableDimmer} onClick={onDimmerClick} aria-label="검색창 포커스 해제" />
+          <button
+            type="button"
+            css={lvCss.tableDimmer}
+            onClick={onDimmerClick}
+            aria-label="검색창 포커스 해제"
+          />
         ) : null}
         <div css={lvCss.tableWrapper}>
           <table css={lvCss.table}>
@@ -159,7 +166,9 @@ export function ListSection<TData>({
                 <tr key={headerGroup.id} css={lvCss.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
                     <th key={header.id} colSpan={header.colSpan} css={lvCss.tableHeaderCell}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>

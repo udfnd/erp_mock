@@ -1,4 +1,4 @@
-export { JojikListSection } from './JojikListSection';
+export { JojiksListSection } from './JojiksListSection';
 export { JojikSettingsSection } from './JojikSettingsSection';
 export { useJojikListViewSections } from './useJojikListViewSections';
 export type {

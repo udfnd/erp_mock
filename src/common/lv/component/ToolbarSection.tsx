@@ -7,6 +7,7 @@ import { FiltersDropdown } from './FiltersDropdown';
 import { SortDropdown } from './SortDropdown';
 import type { ListViewToolbarProps } from './types';
 
+// TODO: [상] layout으로 변경, 안쪽의 검색, 필터, 정렬은 모두 별도의 컴포넌트로 분리
 export function ToolbarSection({
   search,
   filters,
