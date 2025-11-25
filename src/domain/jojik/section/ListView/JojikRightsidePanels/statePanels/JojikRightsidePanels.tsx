@@ -8,7 +8,7 @@ import {
   SingleSelectionPanel,
 } from '@/domain/jojik/section/ListView/JojikRightsidePanels/components';
 
-export type JojikMissingGigwanPanelsProps = Record<string, never>;
+export type JojikMissingGigwanPanelsProps = Record<string, unknown>;
 
 export const JojikMissingGigwanPanels = (_: JojikMissingGigwanPanelsProps) => (
   <RightsidePanelsContainer>

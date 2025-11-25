@@ -32,7 +32,6 @@ export default function NpGigwanJojikListViewPage() {
   const pageKey = gigwanNanoId || 'no-gi';
   const {
     gigwanNanoId: settingsGigwanNanoId,
-    selectedJojiks,
     isCreating,
     onStartCreate,
     onExitCreate,

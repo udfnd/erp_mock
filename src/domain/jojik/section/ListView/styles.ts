@@ -261,7 +261,7 @@ export const cssObj = {
     padding: 6px 8px;
     border-radius: 8px;
     background: ${color.blue50};
-    color: ${color.blue700};
+    color: ${color.blue600};
     font-size: 13px;
     font-weight: 600;
   `,
@@ -286,7 +286,7 @@ export const cssObj = {
   `,
 
   homepageLink: css`
-    color: ${color.blue500};
+    color: ${color.blue400};
     text-decoration: underline;
     word-break: break-all;
   `,
