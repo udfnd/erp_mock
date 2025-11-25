@@ -66,72 +66,36 @@ export default function NpGigwanSayongjaListViewPage() {
     isAuthenticated: settingsIsAuthenticated,
   } = settingsSectionProps;
 
-  const noneSelectedPanel =
-    !settingsGigwanNanoId ? (
-      <MissingGigwanPanels />
-    ) : isCreating ? (
-      <CreatingPanels
-        gigwanNanoId={settingsGigwanNanoId}
-        employmentCategoryOptions={employmentCategoryOptions}
-        workTypeOptions={workTypeOptions}
-        onExit={onExitCreate}
-        onAfterMutation={onAfterMutation}
-      />
-    ) : (
-      <NoneSelectedPanels onStartCreate={onStartCreate} />
-    );
-
-  const oneSelectedPanel = (() => {
-    if (!settingsGigwanNanoId) return <MissingGigwanPanels />;
-    if (isCreating)
-      return (
-        <CreatingPanels
-          gigwanNanoId={settingsGigwanNanoId}
-          employmentCategoryOptions={employmentCategoryOptions}
-          workTypeOptions={workTypeOptions}
-          onExit={onExitCreate}
-          onAfterMutation={onAfterMutation}
-        />
-      );
-
-    const [primarySelected] = selectedSayongjas;
-
-    return primarySelected ? (
-      <OneSelectedPanels
-        sayongjaNanoId={primarySelected.nanoId}
-        sayongjaName={primarySelected.name}
-        gigwanNanoId={settingsGigwanNanoId}
-        onAfterMutation={onAfterMutation}
-        isAuthenticated={settingsIsAuthenticated}
-        employmentCategoryOptions={employmentCategoryOptions}
-        workTypeOptions={workTypeOptions}
-      />
-    ) : (
-      noneSelectedPanel
-    );
-  })();
-
-  const multipleSelectedPanel = !settingsGigwanNanoId ? (
-    <MissingGigwanPanels />
-  ) : isCreating ? (
-    <CreatingPanels
-      gigwanNanoId={settingsGigwanNanoId}
-      employmentCategoryOptions={employmentCategoryOptions}
-      workTypeOptions={workTypeOptions}
-      onExit={onExitCreate}
-      onAfterMutation={onAfterMutation}
-    />
-  ) : (
-    <MultipleSelectedPanels sayongjas={selectedSayongjas} />
-  );
-
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedSayongjas}
-      NoneSelectedComponent={noneSelectedPanel}
-      OneSelectedComponent={oneSelectedPanel}
-      MultipleSelectedComponent={multipleSelectedPanel}
+      isCreating={isCreating}
+      isParentMissing={!settingsGigwanNanoId}
+      rightPanelProps={{
+        gigwanNanoId: settingsGigwanNanoId,
+        onStartCreate,
+        onExitCreate,
+        onAfterMutation,
+        isAuthenticated: settingsIsAuthenticated,
+        employmentCategoryOptions,
+        workTypeOptions,
+      }}
+      CreatingComponent={CreatingPanels}
+      NoneSelectedComponent={NoneSelectedPanels}
+      SingleSelectedComponent={OneSelectedPanels}
+      MultipleSelectedComponent={MultipleSelectedPanels}
+      MissingParentComponent={MissingGigwanPanels}
+      getSingleSelectedProps={(selectedItem) => ({
+        sayongjaNanoId: selectedItem.nanoId,
+        sayongjaName: selectedItem.name,
+        gigwanNanoId: settingsGigwanNanoId,
+        onAfterMutation,
+        isAuthenticated: settingsIsAuthenticated,
+        employmentCategoryOptions,
+        workTypeOptions,
+      })}
+      getMultipleSelectedProps={(sayongjas) => ({ sayongjas })}
     >
       <SayongjaListSection {...listSectionAllProps} />
     </ListViewLayout>

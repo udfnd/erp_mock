@@ -36,18 +36,12 @@ export default function NpJojikJawonMemoListViewPage() {
 
   const pageKey = useMemo(() => jojikNanoId || 'no-jo', [jojikNanoId]);
 
-  const placeholderPanels = useMemo(
-    () => <PlaceholderPanel jojikNanoId={jojikNanoId} />,
-    [jojikNanoId],
-  );
-
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={[]}
-      NoneSelectedComponent={placeholderPanels}
-      OneSelectedComponent={placeholderPanels}
-      MultipleSelectedComponent={placeholderPanels}
+      NoneSelectedComponent={PlaceholderPanel}
+      rightPanelProps={{ jojikNanoId }}
     >
       <p style={{ margin: 0 }}>메모 페이지 제작중</p>
     </ListViewLayout>
