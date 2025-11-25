@@ -414,11 +414,6 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     );
   }, [flattenedItems, selectedJojikNanoId]);
 
-  const selectedJojikChildren = useMemo(() => {
-    if (!selectedJojikItem) return [] as Item[];
-    return getVisibleChildren(selectedJojikItem);
-  }, [getVisibleChildren, selectedJojikItem]);
-
   const getIsItemActive = useCallback(
     (item: Item) => {
       if (item.entityType === 'boon') return selectedBoonNanoId === item.entityNanoId;
@@ -474,6 +469,11 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     },
     [isGigwanExpanded, selectedJojikNanoId, selectedKonNanoId, selectedSueopNanoId],
   );
+
+  const selectedJojikChildren = useMemo(() => {
+    if (!selectedJojikItem) return [] as Item[];
+    return getVisibleChildren(selectedJojikItem);
+  }, [getVisibleChildren, selectedJojikItem]);
 
   const navigateIfHref = useCallback(
     (href?: string | null) => {
