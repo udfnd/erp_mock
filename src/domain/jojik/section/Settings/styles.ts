@@ -45,7 +45,7 @@ export const cssObj = {
     margin-top: auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 20px;
   `,
 
@@ -83,8 +83,12 @@ export const cssObj = {
   `,
 
   fieldLabel: css`
-    ${typography.captionB};
-    color: ${color.black};
+    ${typography.bodySmallM};
+    color: ${color.cgrey700};
+  `,
+
+  fieldLabelPoint: css`
+    color: ${color.red};
   `,
 
   select: css`

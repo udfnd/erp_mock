@@ -29,12 +29,6 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const [nameInput, setNameInput] = useState<string | undefined>(undefined);
   const [introInput, setIntroInput] = useState<string | undefined>(undefined);
   const [addressInput, setAddressInput] = useState<string | undefined>(undefined);
-  const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(
-    null,
-  );
-  const [addressFeedback, setAddressFeedback] = useState<
-    null | { type: 'success' | 'error'; message: string }
-  >(null);
 
   const { data: jojik, isError } = jojikQuery;
 
@@ -65,13 +59,9 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       { name: trimmedName, intro: trimmedIntro },
       {
         onSuccess: async (data) => {
-          setFeedback({ type: 'success', message: '조직 기본 설정이 저장되었습니다.' });
           setNameInput(data.name ?? trimmedName);
           setIntroInput(data.intro ?? trimmedIntro);
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
-        },
-        onError: () => {
-          setFeedback({ type: 'error', message: '저장에 실패했습니다. 다시 시도해주세요.' });
         },
       },
     );
@@ -84,12 +74,8 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       { address: trimmedAddress },
       {
         onSuccess: async () => {
-          setAddressFeedback({ type: 'success', message: '조직 주소가 저장되었습니다.' });
           setAddressInput(trimmedAddress);
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
-        },
-        onError: () => {
-          setAddressFeedback({ type: 'error', message: '주소 저장에 실패했습니다. 다시 시도해주세요.' });
         },
       },
     );
@@ -107,16 +93,13 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       </div>
 
       <div css={cssObj.cardBody}>
-        {isError && !jojik ? (
-          <p css={cssObj.errorText}>조직 정보를 불러오지 못했습니다.</p>
-        ) : null}
+        {isError && !jojik ? <p css={cssObj.errorText}>조직 정보를 불러오지 못했습니다.</p> : null}
         <Textfield
           label="조직 이름"
           helperText="30자 내의 조직 이름을 입력해주세요"
           maxLength={30}
           value={currentName}
           onValueChange={(value) => {
-            setFeedback(null);
             setNameInput(value);
           }}
           singleLine
@@ -127,20 +110,13 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           maxLength={100}
           value={currentIntro}
           onValueChange={(value) => {
-            setFeedback(null);
             setIntroInput(value);
           }}
         />
         <div css={cssObj.cardFooter}>
-          {feedback ? (
-            <span css={feedback.type === 'error' ? cssObj.feedback.error : cssObj.feedback.success}>
-              {feedback.message}
-            </span>
-          ) : (
-            <span css={cssObj.statusText}>조직 이름과 소개를 수정한 후 저장하세요.</span>
-          )}
           <Button
             size="small"
+            variant="secondary"
             styleType="solid"
             disabled={!isDirty || !isValid || isSaving}
             onClick={handleSave}
@@ -149,31 +125,19 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
             저장
           </Button>
         </div>
-
         <Textfield
           label="조직 주소"
           placeholder="조직 주소를 입력하세요"
           value={currentAddress}
           onValueChange={(value) => {
-            setAddressFeedback(null);
             setAddressInput(value);
           }}
-          helperText="조직 주소를 입력하고 저장을 눌러 반영하세요."
+          singleLine
         />
         <div css={cssObj.cardFooter}>
-          {addressFeedback ? (
-            <span
-              css={
-                addressFeedback.type === 'error' ? cssObj.feedback.error : cssObj.feedback.success
-              }
-            >
-              {addressFeedback.message}
-            </span>
-          ) : (
-            <span css={cssObj.statusText}>조직 주소를 입력하고 저장하세요.</span>
-          )}
           <Button
             size="small"
+            variant="secondary"
             styleType="solid"
             disabled={!isAddressDirty || !isAddressValid || isAddressSaving}
             onClick={handleAddressSave}

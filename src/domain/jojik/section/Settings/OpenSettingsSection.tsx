@@ -41,9 +41,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
     undefined,
   );
   const [hadaPermissionNanoId, setHadaPermissionNanoId] = useState<string | undefined>(undefined);
-  const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(
-    null,
-  );
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const currentBasicInfoOpen = isBasicInfoOpen ?? Boolean(jojik?.openSangtae);
@@ -74,7 +71,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
       },
       {
         onSuccess: async (data) => {
-          setFeedback({ type: 'success', message: '오픈 설정이 저장되었습니다.' });
           setIsBasicInfoOpen(Boolean(data.openSangtae));
           setOpenFilePermissionNanoId(
             data.canAccessOpenFileSangtaeNanoId ?? currentOpenFilePermissionNanoId,
@@ -84,14 +80,12 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
           );
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
-        onError: () => {
-          setFeedback({ type: 'error', message: '오픈 설정 저장에 실패했습니다.' });
-        },
       },
     );
   };
 
-  const linkRequestUrl = (jojik as JojikDetailResponse | undefined)?.jaewonsaengLinkRequestUrl ?? '';
+  const linkRequestUrl =
+    (jojik as JojikDetailResponse | undefined)?.jaewonsaengLinkRequestUrl ?? '';
 
   const handleCopyLink = async () => {
     if (!linkRequestUrl) return;
@@ -128,13 +122,13 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
         <div css={cssObj.selectGroupGrid}>
           <div css={cssObj.selectGroup}>
             <span css={cssObj.fieldLabel}>
-              누구나 학원 표시 기본 정보를 조회할 수 있음 (정보 오픈)
+              누구나 학원 표시 기본 정보를 조회할 수 있음 (정보 오픈){' '}
+              <span css={cssObj.fieldLabelPoint}>*</span>
             </span>
             <select
               css={cssObj.select}
               value={currentBasicInfoOpen ? 'true' : 'false'}
               onChange={(event) => {
-                setFeedback(null);
                 setIsBasicInfoOpen(event.target.value === 'true');
               }}
             >
@@ -143,12 +137,13 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
             </select>
           </div>
           <div css={cssObj.selectGroup}>
-            <span css={cssObj.fieldLabel}>오픈 파일 / 컨텐츠를 열람할 수 있는 사람</span>
+            <span css={cssObj.fieldLabel}>
+              오픈 파일 / 컨텐츠를 열람할 수 있는 사람 <span css={cssObj.fieldLabelPoint}>*</span>
+            </span>
             <select
               css={cssObj.select}
               value={currentOpenFilePermissionNanoId}
               onChange={(event) => {
-                setFeedback(null);
                 setOpenFilePermissionNanoId(event.target.value);
               }}
               disabled={openContentsDisabled}
@@ -162,12 +157,14 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
             </select>
           </div>
           <div css={cssObj.selectGroup}>
-            <span css={cssObj.fieldLabel}>학원에 하다 재원생 연동 신청을 할 수 있는 사람</span>
+            <span css={cssObj.fieldLabel}>
+              학원에 하다 재원생 연동 신청을 할 수 있는 사람{' '}
+              <span css={cssObj.fieldLabelPoint}>*</span>
+            </span>
             <select
               css={cssObj.select}
               value={currentHadaPermissionNanoId}
               onChange={(event) => {
-                setFeedback(null);
                 setHadaPermissionNanoId(event.target.value);
               }}
               disabled={hadaPermissionsDisabled}
@@ -182,7 +179,9 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
           </div>
         </div>
         <div css={cssObj.linkField}>
-          <span css={cssObj.fieldLabel}>재원생 연동 신청 URL</span>
+          <span css={cssObj.fieldLabel}>
+            재원생 연동 신청 URL <span css={cssObj.fieldLabelPoint}>*</span>
+          </span>
           <div css={cssObj.linkRow}>
             <div css={cssObj.linkInput}>
               <LabeledInput
@@ -209,13 +208,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
           ) : null}
         </div>
         <div css={cssObj.cardFooter}>
-          {feedback ? (
-            <span css={feedback.type === 'error' ? cssObj.feedback.error : cssObj.feedback.success}>
-              {feedback.message}
-            </span>
-          ) : (
-            <span css={cssObj.statusText}>변경 사항을 저장해 적용하세요.</span>
-          )}
           <Button
             size="small"
             styleType="solid"

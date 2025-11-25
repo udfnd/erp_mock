@@ -15,7 +15,8 @@ export const globalStyles = css`
     -webkit-font-smoothing: antialiased;
   }
 
-  body {
+  body,
+  textarea {
     line-height: 1.5;
     font-family: var(--font-pretendard);
     background-color: #ffffff;
