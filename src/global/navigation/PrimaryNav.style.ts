@@ -116,8 +116,37 @@ export const cssObj = {
 
   toggleBar: css`
     display: flex;
-    justify-content: flex-end;
+    gap: 4px;
+    justify-content: space-between;
     width: 100%;
+  `,
+
+  searchInputWrapper: css`
+    position: relative;
+  `,
+
+  searchInputWrapperHidden: css`
+    display: none;
+    pointer-events: none;
+  `,
+
+  searchInput: css`
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid ${color.cgrey200};
+    background-color: ${color.white};
+    padding: 4px 6px;
+    ${typography.captionR};
+  `,
+
+  searchInputIcon: css`
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: ${color.black};
   `,
 
   toggleButton: css`
@@ -195,16 +224,10 @@ export const cssObj = {
   navBackButton: css`
     ${typography.bodySmallSB};
     padding-left: 0;
-  `,
 
-  navBackIcon: css`
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    & > svg {
-      width: 12px;
-      height: 12px;
+    > svg {
+      width: 16px;
+      height: 16px;
     }
   `,
 
@@ -246,6 +269,12 @@ export const cssObj = {
       ${typography.bodySmallM};
     `,
   },
+
+  selectedGigwanName: css`
+    ${typography.captionB};
+    color: ${color.cgrey600};
+    padding: 0;
+  `,
 
   selectedJojikContainer: css`
     border-bottom: 1px solid ${color.cgrey100};

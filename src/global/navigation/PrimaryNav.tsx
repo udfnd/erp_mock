@@ -14,7 +14,12 @@ import React, {
 import type { AnchorHTMLAttributes } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { ArrowMdLeftSingleIcon, SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
+import {
+  ArrowMdLeftSingleIcon,
+  FilterBlueIcon,
+  SidebarCloseIcon,
+  SidebarOpenIcon,
+} from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthStore, switchUser } from '@/global/auth';
@@ -722,6 +727,10 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       data-open={effectiveIsOpen ? 'true' : 'false'}
     >
       <div css={cssObj.toggleBar}>
+        <div css={[cssObj.searchInputWrapper, !effectiveIsOpen && cssObj.searchInputWrapperHidden]}>
+          <input placeholder="기관/조직/수업 검색" css={cssObj.searchInput} />
+          <FilterBlueIcon css={cssObj.searchInputIcon} />
+        </div>
         <button
           type="button"
           css={cssObj.toggleButton}
@@ -745,19 +754,11 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
               <li key="gigwan-back" css={cssObj.navListItem}>
                 <button
                   type="button"
-                  css={[
-                    ...cssObj.navLink.inactive,
-                    cssObj.navLinkDepth[1],
-                    cssObj.navBackButton,
-                  ]}
+                  css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1], cssObj.navBackButton]}
                   onClick={handleBackToGigwan}
                 >
-                  <span css={[cssObj.navIcon, cssObj.navBackIcon]} aria-hidden>
-                    <ArrowMdLeftSingleIcon />
-                  </span>
-                  <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>
-                    {hierarchy.gigwan.name}
-                  </span>
+                  <ArrowMdLeftSingleIcon />
+                  <span css={cssObj.selectedGigwanName}>{hierarchy.gigwan.name}</span>
                 </button>
               </li>
             )}
@@ -766,11 +767,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
               css={[cssObj.navListItem, cssObj.selectedJojikContainer]}
             >
               <div
-                css={[
-                  ...cssObj.navLink.active,
-                  cssObj.navLinkDepth[1],
-                  cssObj.selectedJojikButton,
-                ]}
+                css={[...cssObj.navLink.active, cssObj.navLinkDepth[1], cssObj.selectedJojikButton]}
               >
                 <span css={[cssObj.navIcon, cssObj.navIconActive]} aria-hidden />
                 <span css={[cssObj.navLabel, cssObj.navLabelWeight.active]}>
