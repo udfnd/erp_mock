@@ -32,16 +32,21 @@ type PrimaryNavHierarchy = {
     sueops: Array<{
       nanoId: string;
       name: string;
+      kons: Array<{
+        nanoId: string;
+        name: string;
+        boons: Array<{ nanoId: string; name: string }>;
+      }>;
     }>;
   }>;
 };
 
-type ItemEntityType = 'gigwan' | 'jojik' | 'sueop' | 'kon';
+type ItemEntityType = 'gigwan' | 'jojik' | 'sueop' | 'kon' | 'boon';
 
 type Item = {
   key: string;
   label: string;
-  depth: 1 | 2 | 3;
+  depth: 1 | 2 | 3 | 4;
   href?: string | null;
   baseHref?: string | null;
   children?: Item[];
@@ -101,6 +106,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const storedProfileKeyRef = useRef<string | null>(null);
+  const [activeItemKey, setActiveItemKey] = useState<string | null>(null);
+  const [isGigwanExpanded, setIsGigwanExpanded] = useState(true);
 
   const { state: authState, accessToken, setAuthState, clearAll } = useAuth();
 
@@ -120,12 +127,40 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const gigwanNanoIdFromParams = useMemo(() => getParamValue(params, 'gi'), [params]);
   const gigwanNanoId = authState.gigwanNanoId ?? gigwanNanoIdFromParams ?? null;
   const [resolvedGigwanNanoId, setResolvedGigwanNanoId] = useState<string | null>(gigwanNanoId);
+  const activeJojikNanoId = useMemo(() => getParamValue(params, 'jo'), [params]);
+  const activeSueopNanoId = useMemo(() => getParamValue(params, 'su'), [params]);
+  const activeKonNanoId = useMemo(() => getParamValue(params, 'ko'), [params]);
+  const activeBoonNanoId = useMemo(() => getParamValue(params, 'bo'), [params]);
+  const [selectedJojikNanoId, setSelectedJojikNanoId] = useState<string | null>(
+    activeJojikNanoId,
+  );
+  const [selectedSueopNanoId, setSelectedSueopNanoId] = useState<string | null>(
+    activeSueopNanoId,
+  );
+  const [selectedKonNanoId, setSelectedKonNanoId] = useState<string | null>(activeKonNanoId);
+  const [selectedBoonNanoId, setSelectedBoonNanoId] = useState<string | null>(activeBoonNanoId);
 
   useEffect(() => {
     if (gigwanNanoId) {
       setResolvedGigwanNanoId(gigwanNanoId);
     }
   }, [gigwanNanoId]);
+
+  useEffect(() => {
+    setSelectedJojikNanoId(activeJojikNanoId);
+  }, [activeJojikNanoId]);
+
+  useEffect(() => {
+    setSelectedSueopNanoId(activeSueopNanoId);
+  }, [activeSueopNanoId]);
+
+  useEffect(() => {
+    setSelectedKonNanoId(activeKonNanoId);
+  }, [activeKonNanoId]);
+
+  useEffect(() => {
+    setSelectedBoonNanoId(activeBoonNanoId);
+  }, [activeBoonNanoId]);
 
   const { data: gigwanNameData } = useGigwanNameQuery(resolvedGigwanNanoId ?? '', {
     enabled: Boolean(resolvedGigwanNanoId),
@@ -198,6 +233,14 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
         sueops: (jojik.sueops ?? []).map((sueop) => ({
           nanoId: sueop.nanoId,
           name: sueop.name,
+          kons: (sueop.kons ?? []).map((kon) => ({
+            nanoId: kon.nanoId,
+            name: kon.name,
+            boons: (kon.boons ?? []).map((boon) => ({
+              nanoId: boon.nanoId,
+              name: boon.name,
+            })),
+          })),
         })),
       })),
     };
@@ -226,7 +269,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       });
     }
 
-    type SidebarKon = { nanoId: string; name: string };
+    type SidebarBoon = { nanoId: string; name: string };
+    type SidebarKon = { nanoId: string; name: string; boons?: SidebarBoon[] | null };
     type SidebarSueop = { nanoId: string; name: string; kons?: SidebarKon[] | null };
     type SidebarJojik = { nanoId: string; name: string; sueops?: SidebarSueop[] | null };
 
@@ -241,14 +285,26 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
           }));
 
     const mapSueopToItem = (sueop: SidebarSueop): Item => {
-      const konItems = (sueop.kons ?? []).map<Item>((kon) => ({
-        key: `kon-${kon.nanoId}`,
-        label: kon.name,
-        depth: 3,
-        href: null,
-        entityType: 'kon',
-        entityNanoId: kon.nanoId,
-      }));
+      const konItems = (sueop.kons ?? []).map<Item>((kon) => {
+        const boonItems = (kon.boons ?? []).map<Item>((boon) => ({
+          key: `boon-${boon.nanoId}`,
+          label: boon.name,
+          depth: 4,
+          href: null,
+          entityType: 'boon',
+          entityNanoId: boon.nanoId,
+        }));
+
+        return {
+          key: `kon-${kon.nanoId}`,
+          label: kon.name,
+          depth: 3,
+          href: null,
+          children: boonItems.length > 0 ? boonItems : undefined,
+          entityType: 'kon',
+          entityNanoId: kon.nanoId,
+        };
+      });
 
       return {
         key: `sueop-${sueop.nanoId}`,
@@ -281,10 +337,6 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     return [...list, ...jojikItems];
   }, [hierarchy, sidebarData?.jojiks]);
 
-  const activeJojikNanoId = useMemo(() => getParamValue(params, 'jo'), [params]);
-  const activeSueopNanoId = useMemo(() => getParamValue(params, 'su'), [params]);
-  const activeKonNanoId = useMemo(() => getParamValue(params, 'ko'), [params]);
-
   const flattenedItems = useMemo(() => {
     const result: Item[] = [];
     const visit = (nodes: Item[]) => {
@@ -297,7 +349,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     return result;
   }, [items]);
 
-  const activeItemKey = useMemo(() => {
+  const activeItemKeyFromPath = useMemo(() => {
     const findByEntity = (type: ItemEntityType, nanoId: string | null | undefined) => {
       if (!nanoId) return null;
       return (
@@ -307,6 +359,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     };
 
     const prioritizedEntityKey =
+      findByEntity('boon', activeBoonNanoId) ??
       findByEntity('kon', activeKonNanoId) ??
       findByEntity('sueop', activeSueopNanoId) ??
       findByEntity('jojik', activeJojikNanoId) ??
@@ -335,6 +388,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
 
     return flattenedItems[0]?.key ?? null;
   }, [
+    activeBoonNanoId,
     activeJojikNanoId,
     activeKonNanoId,
     activeSueopNanoId,
@@ -343,7 +397,155 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     resolvedGigwanNanoId,
   ]);
 
-  const getIsItemActive = useCallback((item: Item) => item.key === activeItemKey, [activeItemKey]);
+  useEffect(() => {
+    setActiveItemKey(activeItemKeyFromPath);
+  }, [activeItemKeyFromPath]);
+
+  useEffect(() => {
+    setIsGigwanExpanded(Boolean(resolvedGigwanNanoId));
+  }, [resolvedGigwanNanoId]);
+
+  const getIsItemActive = useCallback(
+    (item: Item) => {
+      if (item.entityType === 'boon') return selectedBoonNanoId === item.entityNanoId;
+      if (item.entityType === 'kon') return selectedKonNanoId === item.entityNanoId;
+      if (item.entityType === 'sueop') return selectedSueopNanoId === item.entityNanoId;
+      if (item.entityType === 'jojik') return selectedJojikNanoId === item.entityNanoId;
+      if (item.entityType === 'gigwan') return Boolean(resolvedGigwanNanoId);
+      return item.key === activeItemKey;
+    },
+    [
+      activeItemKey,
+      resolvedGigwanNanoId,
+      selectedBoonNanoId,
+      selectedJojikNanoId,
+      selectedKonNanoId,
+      selectedSueopNanoId,
+    ],
+  );
+
+  const getVisibleChildren = useCallback(
+    (item: Item): Item[] => {
+      if (!item.children) return [];
+      if (item.entityType === 'gigwan') {
+        if (!isGigwanExpanded) return [];
+        if (selectedJojikNanoId) {
+          return item.children.filter((child) => child.entityNanoId === selectedJojikNanoId);
+        }
+        return item.children;
+      }
+
+      if (item.entityType === 'jojik') {
+        if (selectedJojikNanoId && item.entityNanoId !== selectedJojikNanoId) return [];
+        if (selectedSueopNanoId) {
+          return (item.children ?? []).filter((child) => child.entityNanoId === selectedSueopNanoId);
+        }
+        return item.children ?? [];
+      }
+
+      if (item.entityType === 'sueop') {
+        if (selectedSueopNanoId && item.entityNanoId !== selectedSueopNanoId) return [];
+        if (selectedKonNanoId) {
+          return (item.children ?? []).filter((child) => child.entityNanoId === selectedKonNanoId);
+        }
+        return item.children ?? [];
+      }
+
+      if (item.entityType === 'kon') {
+        if (selectedKonNanoId && item.entityNanoId !== selectedKonNanoId) return [];
+        return item.children ?? [];
+      }
+
+      return item.children ?? [];
+    },
+    [isGigwanExpanded, selectedJojikNanoId, selectedKonNanoId, selectedSueopNanoId],
+  );
+
+  const navigateIfHref = useCallback(
+    (href?: string | null) => {
+      if (!href) return;
+      router.push(href);
+    },
+    [router],
+  );
+
+  const handleItemClick = useCallback(
+    (item: Item) => {
+      setActiveItemKey(item.key);
+
+      switch (item.entityType) {
+        case 'gigwan': {
+          setIsGigwanExpanded((prev) => !prev);
+          setSelectedJojikNanoId(null);
+          setSelectedSueopNanoId(null);
+          setSelectedKonNanoId(null);
+          setSelectedBoonNanoId(null);
+          navigateIfHref(item.href);
+          return;
+        }
+        case 'jojik': {
+          if (selectedJojikNanoId === item.entityNanoId) {
+            setSelectedJojikNanoId(null);
+            setSelectedSueopNanoId(null);
+            setSelectedKonNanoId(null);
+            setSelectedBoonNanoId(null);
+            setIsGigwanExpanded(true);
+            if (hierarchy.gigwan?.nanoId) {
+              navigateIfHref(`/td/np/gis/${hierarchy.gigwan.nanoId}/manage/home/dv`);
+            }
+            return;
+          }
+          setSelectedJojikNanoId(item.entityNanoId ?? null);
+          setSelectedSueopNanoId(null);
+          setSelectedKonNanoId(null);
+          setSelectedBoonNanoId(null);
+          setIsGigwanExpanded(true);
+          navigateIfHref(item.href);
+          return;
+        }
+        case 'sueop': {
+          if (selectedSueopNanoId === item.entityNanoId) {
+            setSelectedSueopNanoId(null);
+            setSelectedKonNanoId(null);
+            setSelectedBoonNanoId(null);
+            return;
+          }
+          setSelectedSueopNanoId(item.entityNanoId ?? null);
+          setSelectedKonNanoId(null);
+          setSelectedBoonNanoId(null);
+          return;
+        }
+        case 'kon': {
+          if (selectedKonNanoId === item.entityNanoId) {
+            setSelectedKonNanoId(null);
+            setSelectedBoonNanoId(null);
+            return;
+          }
+          setSelectedKonNanoId(item.entityNanoId ?? null);
+          setSelectedBoonNanoId(null);
+          return;
+        }
+        case 'boon': {
+          if (selectedBoonNanoId === item.entityNanoId) {
+            setSelectedBoonNanoId(null);
+            return;
+          }
+          setSelectedBoonNanoId(item.entityNanoId ?? null);
+          return;
+        }
+        default:
+          navigateIfHref(item.href);
+      }
+    },
+    [
+      hierarchy.gigwan?.nanoId,
+      navigateIfHref,
+      selectedBoonNanoId,
+      selectedJojikNanoId,
+      selectedKonNanoId,
+      selectedSueopNanoId,
+    ],
+  );
 
   const filteredHistory = useMemo(() => {
     if (!authState.gigwanNanoId) return [] as AuthHistoryEntry[];
@@ -445,6 +647,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const renderItems = (list: Item[]) =>
     list.map((item) => {
       const isActive = getIsItemActive(item);
+      const visibleChildren = getVisibleChildren(item);
+      const isExpanded = visibleChildren.length > 0;
       const linkStyles = [
         ...cssObj.navLink[isActive ? 'active' : 'inactive'],
         cssObj.navLinkDepth[item.depth],
@@ -454,22 +658,28 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
         cssObj.navLabelWeight[isActive ? 'active' : 'inactive'],
       ] as const;
       const iconStyles = isActive ? [cssObj.navIcon, cssObj.navIconActive] : [cssObj.navIcon];
+      const commonProps = {
+        css: linkStyles,
+        onClick: () => handleItemClick(item),
+        'aria-current': isActive ? 'page' : undefined,
+        'aria-expanded': item.children ? isExpanded : undefined,
+      };
 
       return (
         <li key={item.key} css={cssObj.navListItem}>
           {item.href ? (
-            <Link href={item.href} css={linkStyles} aria-current={isActive ? 'page' : undefined}>
+            <Link href={item.href} {...commonProps}>
               <span css={iconStyles} aria-hidden />
               <span css={labelStyles}>{item.label}</span>
             </Link>
           ) : (
-            <span css={linkStyles} aria-disabled="true">
+            <button type="button" {...commonProps}>
               <span css={iconStyles} aria-hidden />
               <span css={labelStyles}>{item.label}</span>
-            </span>
+            </button>
           )}
-          {item.children && item.children.length > 0 && (
-            <ul css={cssObj.navChildList}>{renderItems(item.children)}</ul>
+          {visibleChildren.length > 0 && (
+            <ul css={cssObj.navChildList}>{renderItems(visibleChildren)}</ul>
           )}
         </li>
       );

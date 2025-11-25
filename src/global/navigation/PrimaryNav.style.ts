@@ -58,6 +58,11 @@ const navLinkBase = css`
   border-radius: ${radius.md};
   text-decoration: none;
   color: ${color.black};
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
   transition:
     background 0.2s ease,
     color 0.2s ease;
@@ -159,6 +164,9 @@ export const cssObj = {
     `,
     3: css`
       padding-left: 32px;
+    `,
+    4: css`
+      padding-left: 44px;
     `,
   } as const,
 
