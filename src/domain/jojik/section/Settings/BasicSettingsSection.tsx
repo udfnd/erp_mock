@@ -36,7 +36,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
     null | { type: 'success' | 'error'; message: string }
   >(null);
 
-  const { data: jojik, error } = jojikQuery;
+  const { data: jojik, isError } = jojikQuery;
 
   const currentName = nameInput ?? jojik?.name ?? '';
   const currentIntro = introInput ?? jojik?.intro ?? '';
@@ -107,7 +107,9 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       </div>
 
       <div css={cssObj.cardBody}>
-        {error ? <p css={cssObj.errorText}>조직 정보를 불러오지 못했습니다.</p> : null}
+        {isError && !jojik ? (
+          <p css={cssObj.errorText}>조직 정보를 불러오지 못했습니다.</p>
+        ) : null}
         <Textfield
           label="조직 이름"
           helperText="30자 내의 조직 이름을 입력해주세요"
