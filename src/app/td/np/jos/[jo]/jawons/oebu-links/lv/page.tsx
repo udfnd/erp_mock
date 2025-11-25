@@ -15,6 +15,7 @@ import {
   OneSelectedPanels,
   useOebuLinkListViewSections,
 } from '@/domain/oebu-link/section';
+import type { OebuLinkListItem } from '@/domain/oebu-link/section/ListView/useOebuLinkListViewSections';
 
 type PageParams = {
   jo?: string | string[];
@@ -50,70 +51,33 @@ export default function OebuLinksListViewPage() {
     iconOptions,
   } = settingsSectionProps;
 
-  const noneSelectedPanel = !settingsJojikNanoId ? (
-    <MissingJojikPanels />
-  ) : !settingsIsAuthenticated ? (
-    <AuthenticationRequiredPanels />
-  ) : isCreating ? (
-    <CreatingPanels
-      jojikNanoId={settingsJojikNanoId}
-      iconOptions={iconOptions}
-      onExit={onExitCreate}
-      onAfterMutation={onAfterMutation}
-    />
-  ) : (
-    <NoneSelectedPanels onStartCreate={onStartCreate} />
-  );
-
-  const oneSelectedPanel = (() => {
-    if (!settingsJojikNanoId) return <MissingJojikPanels />;
-    if (!settingsIsAuthenticated) return <AuthenticationRequiredPanels />;
-    if (isCreating)
-      return (
-        <CreatingPanels
-          jojikNanoId={settingsJojikNanoId}
-          iconOptions={iconOptions}
-          onExit={onExitCreate}
-          onAfterMutation={onAfterMutation}
-        />
-      );
-
-    const [primarySelected] = selectedLinks;
-
-    return primarySelected ? (
-      <OneSelectedPanels
-        oebuLinkNanoId={primarySelected.nanoId}
-        oebuLinkName={primarySelected.name}
-        iconOptions={iconOptions}
-        onAfterMutation={onAfterMutation}
-      />
-    ) : (
-      noneSelectedPanel
-    );
-  })();
-
-  const multipleSelectedPanel = !settingsJojikNanoId ? (
-    <MissingJojikPanels />
-  ) : !settingsIsAuthenticated ? (
-    <AuthenticationRequiredPanels />
-  ) : isCreating ? (
-    <CreatingPanels
-      jojikNanoId={settingsJojikNanoId}
-      iconOptions={iconOptions}
-      onExit={onExitCreate}
-      onAfterMutation={onAfterMutation}
-    />
-  ) : (
-    <MultipleSelectedPanels oebuLinks={selectedLinks} />
-  );
-
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedLinks}
-      NoneSelectedComponent={noneSelectedPanel}
-      OneSelectedComponent={oneSelectedPanel}
-      MultipleSelectedComponent={multipleSelectedPanel}
+      isCreating={isCreating}
+      isParentMissing={!settingsJojikNanoId}
+      isAuthenticated={settingsIsAuthenticated}
+      rightPanelProps={{
+        jojikNanoId: settingsJojikNanoId,
+        onStartCreate,
+        onExitCreate,
+        onAfterMutation,
+        iconOptions,
+      }}
+      CreatingComponent={CreatingPanels}
+      NoneSelectedComponent={NoneSelectedPanels}
+      SingleSelectedComponent={OneSelectedPanels}
+      MultipleSelectedComponent={MultipleSelectedPanels}
+      MissingParentComponent={MissingJojikPanels}
+      AuthenticationRequiredComponent={AuthenticationRequiredPanels}
+      getSingleSelectedProps={(selectedItem, props) => ({
+        oebuLinkNanoId: selectedItem.nanoId,
+        oebuLinkName: selectedItem.name,
+        iconOptions: props.iconOptions,
+        onAfterMutation: props.onAfterMutation,
+      })}
+      getMultipleSelectedProps={(oebuLinks) => ({ oebuLinks })}
     >
       <OebuLinkListSection {...listSectionAllProps} />
     </ListViewLayout>

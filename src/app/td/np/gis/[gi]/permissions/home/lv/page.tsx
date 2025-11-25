@@ -45,49 +45,27 @@ export default function NpGigwanPermissionListViewPage() {
     onAfterMutation,
   } = settingsSectionProps;
 
-  const noneSelectedPanel = (
-    <RightsidePanelsContainer>
-      {!settingsGigwanNanoId ? <MissingGigwanPanel /> : <NoSelectionPanel />}
-    </RightsidePanelsContainer>
-  );
-
-  const oneSelectedPanel = (() => {
-    if (!settingsGigwanNanoId)
-      return (
-        <RightsidePanelsContainer>
-          <MissingGigwanPanel />
-        </RightsidePanelsContainer>
-      );
-
-    const [primarySelected] = selectedPermissions;
-
-    return primarySelected ? (
-      <RightsidePanelsContainer>
-        <SinglePermissionPanel
-          nanoId={primarySelected.nanoId}
-          gigwanNanoId={settingsGigwanNanoId}
-          isAuthenticated={settingsIsAuthenticated}
-          onAfterMutation={onAfterMutation}
-        />
-      </RightsidePanelsContainer>
-    ) : (
-      noneSelectedPanel
-    );
-  })();
-
-  const multipleSelectedPanel = (
-    <RightsidePanelsContainer>
-      {!settingsGigwanNanoId ? <MissingGigwanPanel /> : <MultiSelectionPanel />}
-    </RightsidePanelsContainer>
-  );
-
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedPermissions}
-      NoneSelectedComponent={noneSelectedPanel}
-      OneSelectedComponent={oneSelectedPanel}
-      MultipleSelectedComponent={multipleSelectedPanel}
+      isParentMissing={!settingsGigwanNanoId}
+      RightPanelWrapperComponent={RightsidePanelsContainer}
+      rightPanelProps={{
+        gigwanNanoId: settingsGigwanNanoId,
+        isAuthenticated: settingsIsAuthenticated,
+        onAfterMutation,
+      }}
+      NoneSelectedComponent={NoSelectionPanel}
+      SingleSelectedComponent={SinglePermissionPanel}
+      MultipleSelectedComponent={MultiSelectionPanel}
+      MissingParentComponent={MissingGigwanPanel}
+      getSingleSelectedProps={(selectedItem, props) => ({
+        nanoId: selectedItem.nanoId,
+        gigwanNanoId: props.gigwanNanoId,
+        isAuthenticated: props.isAuthenticated,
+        onAfterMutation: props.onAfterMutation,
+      })}
     >
       <PermissionListSection {...listSectionAllProps} />
     </ListViewLayout>

@@ -58,50 +58,31 @@ export default function NpJojikJawonJusoListViewPage() {
     isAuthenticated: settingsIsAuthenticated,
   } = settingsSectionProps;
 
-  const noneSelectedPanel = !settingsJojikNanoId ? (
-    <MissingJojikPanels />
-  ) : isCreating ? (
-    <CreatingPanels jojikNanoId={settingsJojikNanoId} onExit={onExitCreate} onAfterMutation={onAfterMutation} />
-  ) : (
-    <NoneSelectedPanels onStartCreate={onStartCreate} />
-  );
-
-  const oneSelectedPanel = (() => {
-    if (!settingsJojikNanoId) return <MissingJojikPanels />;
-    if (isCreating)
-      return (
-        <CreatingPanels jojikNanoId={settingsJojikNanoId} onExit={onExitCreate} onAfterMutation={onAfterMutation} />
-      );
-
-    const [primarySelected] = selectedJusos;
-
-    return primarySelected ? (
-      <OneSelectedPanels
-        jusoNanoId={primarySelected.nanoId}
-        jusoName={primarySelected.jusoName}
-        onAfterMutation={onAfterMutation}
-        isAuthenticated={settingsIsAuthenticated}
-      />
-    ) : (
-      noneSelectedPanel
-    );
-  })();
-
-  const multipleSelectedPanel = !settingsJojikNanoId ? (
-    <MissingJojikPanels />
-  ) : isCreating ? (
-    <CreatingPanels jojikNanoId={settingsJojikNanoId} onExit={onExitCreate} onAfterMutation={onAfterMutation} />
-  ) : (
-    <MultipleSelectedPanels jusos={selectedJusos} />
-  );
-
   return (
     <ListViewLayout
       key={pageKey}
       selectedItems={settingsSectionProps.selectedJusos}
-      NoneSelectedComponent={noneSelectedPanel}
-      OneSelectedComponent={oneSelectedPanel}
-      MultipleSelectedComponent={multipleSelectedPanel}
+      isCreating={isCreating}
+      isParentMissing={!settingsJojikNanoId}
+      rightPanelProps={{
+        jojikNanoId: settingsJojikNanoId,
+        onStartCreate,
+        onExitCreate,
+        onAfterMutation,
+        isAuthenticated: settingsIsAuthenticated,
+      }}
+      CreatingComponent={CreatingPanels}
+      NoneSelectedComponent={NoneSelectedPanels}
+      SingleSelectedComponent={OneSelectedPanels}
+      MultipleSelectedComponent={MultipleSelectedPanels}
+      MissingParentComponent={MissingJojikPanels}
+      getSingleSelectedProps={(selectedItem, props) => ({
+        jusoNanoId: selectedItem.nanoId,
+        jusoName: selectedItem.jusoName,
+        onAfterMutation: props.onAfterMutation,
+        isAuthenticated: props.isAuthenticated,
+      })}
+      getMultipleSelectedProps={(jusos) => ({ jusos })}
     >
       <JusoListSection {...listSectionAllProps} />
     </ListViewLayout>
