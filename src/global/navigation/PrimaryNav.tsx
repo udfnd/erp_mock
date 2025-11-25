@@ -3,7 +3,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
@@ -482,7 +489,11 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
           aria-controls="primary-nav-list"
           aria-label={effectiveIsOpen ? '메뉴 접기' : '메뉴 열기'}
         >
-          {effectiveIsOpen ? <SidebarCloseIcon css={styles.icon} /> : <SidebarOpenIcon css={styles.icon} />}
+          {effectiveIsOpen ? (
+            <SidebarCloseIcon css={styles.icon} />
+          ) : (
+            <SidebarOpenIcon css={styles.icon} />
+          )}
         </button>
       </div>
 

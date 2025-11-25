@@ -8,8 +8,7 @@ import { useGigwanNameQuery } from '@/domain/gigwan/api';
 import { useJojikQuery } from '@/domain/jojik/api';
 
 import { NavItem, getDynamicHref } from './nav.data';
-import * as styles from './SecondaryNav.style';
-
+import { cssObj } from './SecondaryNav.style';
 
 type Props = {
   navItems: NavItem[];
@@ -43,17 +42,19 @@ export const SecondaryNav = ({ navItems }: Props) => {
       if (result.includes('{조직명}')) result = result.replaceAll('{조직명}', jojikName ?? '');
       return result;
     },
-    [gigwanName, jojikName]
+    [gigwanName, jojikName],
   );
 
   if (!navItems || navItems.length === 0) return null;
 
   return (
-    <nav css={styles.navContainer} aria-label="세부 내비게이션">
-      <ul css={styles.navList}>
+    <nav css={cssObj.navContainer} aria-label="세부 내비게이션">
+      <ul css={cssObj.navList}>
         {navItems.map((item) => {
           const href = getDynamicHref(item.href, params);
-          const resolvedBasePath = item.basePath ? getDynamicHref(item.basePath, params) : undefined;
+          const resolvedBasePath = item.basePath
+            ? getDynamicHref(item.basePath, params)
+            : undefined;
           const isActive = resolvedBasePath
             ? pathname.startsWith(resolvedBasePath)
             : href
@@ -61,17 +62,15 @@ export const SecondaryNav = ({ navItems }: Props) => {
               : false;
 
           return (
-            <li key={item.name} css={styles.navListItem}>
+            <li key={item.name} css={cssObj.navListItem}>
               {href ? (
-                <Chip
-                  size="lg"
-                  variant="outlined"
-                  active={isActive}
+                <button
+                  css={cssObj.secondaryNavButton(isActive)}
                   aria-current={isActive ? 'page' : undefined}
                   onClick={() => router.push(href)}
                 >
                   {resolveDisplayName(item.name)}
-                </Chip>
+                </button>
               ) : (
                 <Chip size="sm" variant="outlined" disabled>
                   {resolveDisplayName(item.name)}

@@ -30,13 +30,6 @@ const PlaceholderPanel = ({ jojikNanoId }: PlaceholderProps) => (
   </div>
 );
 
-const PlaceholderList = ({ jojikNanoId }: PlaceholderProps) => (
-  <div style={{ padding: '24px', lineHeight: 1.6 }}>
-    <p style={{ margin: 0 }}>자원별 메모 리스트 영역이 곧 제공됩니다.</p>
-    {jojikNanoId && <p style={{ marginTop: '8px' }}>현재 선택된 조직: {jojikNanoId}</p>}
-  </div>
-);
-
 export default function NpJojikJawonMemoListViewPage() {
   const params = useParams<PageParams>();
   const jojikNanoId = extractJojikNanoId(params?.jo);
@@ -56,7 +49,7 @@ export default function NpJojikJawonMemoListViewPage() {
       OneSelectedComponent={placeholderPanels}
       MultipleSelectedComponent={placeholderPanels}
     >
-      <PlaceholderList jojikNanoId={jojikNanoId} />
+      <p style={{ margin: 0 }}>메모 페이지 제작중</p>
     </ListViewLayout>
   );
 }
