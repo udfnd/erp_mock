@@ -58,6 +58,11 @@ const navLinkBase = css`
   border-radius: ${radius.md};
   text-decoration: none;
   color: ${color.black};
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
   transition:
     background 0.2s ease,
     color 0.2s ease;
@@ -160,6 +165,9 @@ export const cssObj = {
     3: css`
       padding-left: 32px;
     `,
+    4: css`
+      padding-left: 44px;
+    `,
   } as const,
 
   navLink: {
@@ -179,6 +187,11 @@ export const cssObj = {
       `,
     ] as IT[],
   } as Record<'active' | 'inactive', IT[]>,
+
+  navBackButton: css`
+    ${typography.bodySmallSB};
+    padding-left: 0;
+  `,
 
   navIcon: css`
     width: 16px;
@@ -218,6 +231,18 @@ export const cssObj = {
       ${typography.bodySmallM};
     `,
   },
+
+  selectedJojikContainer: css`
+    border-bottom: 1px solid ${color.cgrey100};
+    padding-bottom: ${spacing.sm};
+    margin-bottom: ${spacing.sm};
+  `,
+
+  selectedJojikLabel: css`
+    ${typography.bodySmallSB};
+    padding: ${spacing.sm} ${spacing.base};
+    display: inline-block;
+  `,
 
   navFooter: {
     show: [navFooterBase] as IT[],
