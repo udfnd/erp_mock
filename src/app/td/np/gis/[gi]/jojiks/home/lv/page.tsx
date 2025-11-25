@@ -62,9 +62,11 @@ export default function NpGigwanJojikListViewPage() {
       SingleSelectedComponent={JojikSingleSelectedPanels}
       MultipleSelectedComponent={JojikMultipleSelectedPanels}
       MissingParentComponent={JojikMissingGigwanPanels}
-      getSingleSelectedProps={({ nanoId, name }) => ({
+      getSingleSelectedProps={({ nanoId, name }, { onAfterMutation, isAuthenticated: sectionIsAuthenticated }) => ({
         jojikNanoId: nanoId,
         jojikName: name,
+        onAfterMutation,
+        isAuthenticated: sectionIsAuthenticated,
       })}
       getMultipleSelectedProps={(jojiks) => ({ jojiks })}
     >

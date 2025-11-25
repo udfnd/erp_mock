@@ -6,25 +6,35 @@ import { cssObj } from './styles';
 
 type ComponentProps<P> = React.ComponentType<P>;
 
-type Props<T, P = Record<string, never>> = {
+type Props<
+  T,
+  BaseProps extends object = Record<string, never>,
+  SingleSelectedProps extends object = BaseProps,
+  MultipleSelectedProps extends object = BaseProps,
+> = {
   children: React.ReactNode;
   selectedItems: T[];
   isCreating?: boolean;
   isParentMissing?: boolean;
   isAuthenticated?: boolean;
-  rightPanelProps?: P;
+  rightPanelProps?: BaseProps;
   RightPanelWrapperComponent?: React.ComponentType<{ children: React.ReactNode }>;
-  CreatingComponent?: ComponentProps<P>;
-  NoneSelectedComponent?: ComponentProps<P>;
-  SingleSelectedComponent?: ComponentProps<P>;
-  MultipleSelectedComponent?: ComponentProps<P>;
-  MissingParentComponent?: ComponentProps<P>;
-  AuthenticationRequiredComponent?: ComponentProps<P>;
-  getSingleSelectedProps?: (selectedItem: T) => Partial<P>;
-  getMultipleSelectedProps?: (selectedItems: T[]) => Partial<P>;
+  CreatingComponent?: ComponentProps<BaseProps>;
+  NoneSelectedComponent?: ComponentProps<BaseProps>;
+  SingleSelectedComponent?: ComponentProps<SingleSelectedProps>;
+  MultipleSelectedComponent?: ComponentProps<MultipleSelectedProps>;
+  MissingParentComponent?: ComponentProps<BaseProps>;
+  AuthenticationRequiredComponent?: ComponentProps<BaseProps>;
+  getSingleSelectedProps?: (selectedItem: T, baseProps: BaseProps) => SingleSelectedProps;
+  getMultipleSelectedProps?: (selectedItems: T[], baseProps: BaseProps) => MultipleSelectedProps;
 };
 
-export function ListViewLayout<T, P = Record<string, never>>({
+export function ListViewLayout<
+  T,
+  BaseProps extends object = Record<string, never>,
+  SingleSelectedProps extends object = BaseProps,
+  MultipleSelectedProps extends object = BaseProps,
+>({
   children,
   selectedItems,
   isCreating = false,
@@ -40,24 +50,28 @@ export function ListViewLayout<T, P = Record<string, never>>({
   AuthenticationRequiredComponent,
   getSingleSelectedProps,
   getMultipleSelectedProps,
-}: Props<T, P>) {
-  const baseProps = (rightPanelProps ?? {}) as P;
+}: Props<T, BaseProps, SingleSelectedProps, MultipleSelectedProps>) {
+  const baseProps = (rightPanelProps ?? {}) as BaseProps;
 
   const renderSingleSelected = () => {
     if (!SingleSelectedComponent) return null;
 
     const [selectedItem] = selectedItems;
-    const singleProps = getSingleSelectedProps?.(selectedItem) ?? {};
+    const singleProps =
+      getSingleSelectedProps?.(selectedItem, baseProps) ??
+      ((baseProps as unknown) as SingleSelectedProps);
 
-    return <SingleSelectedComponent {...baseProps} {...singleProps} />;
+    return <SingleSelectedComponent {...singleProps} />;
   };
 
   const renderMultipleSelected = () => {
     if (!MultipleSelectedComponent) return null;
 
-    const multipleProps = getMultipleSelectedProps?.(selectedItems) ?? {};
+    const multipleProps =
+      getMultipleSelectedProps?.(selectedItems, baseProps) ??
+      ((baseProps as unknown) as MultipleSelectedProps);
 
-    return <MultipleSelectedComponent {...baseProps} {...multipleProps} />;
+    return <MultipleSelectedComponent {...multipleProps} />;
   };
 
   const renderRightPanel = () => {

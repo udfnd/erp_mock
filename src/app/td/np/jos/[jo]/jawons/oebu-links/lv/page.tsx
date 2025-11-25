@@ -71,11 +71,11 @@ export default function OebuLinksListViewPage() {
       MultipleSelectedComponent={MultipleSelectedPanels}
       MissingParentComponent={MissingJojikPanels}
       AuthenticationRequiredComponent={AuthenticationRequiredPanels}
-      getSingleSelectedProps={(selectedItem) => ({
+      getSingleSelectedProps={(selectedItem, props) => ({
         oebuLinkNanoId: selectedItem.nanoId,
         oebuLinkName: selectedItem.name,
-        iconOptions,
-        onAfterMutation,
+        iconOptions: props.iconOptions,
+        onAfterMutation: props.onAfterMutation,
       })}
       getMultipleSelectedProps={(oebuLinks) => ({ oebuLinks })}
     >

@@ -86,14 +86,14 @@ export default function NpGigwanSayongjaListViewPage() {
       SingleSelectedComponent={OneSelectedPanels}
       MultipleSelectedComponent={MultipleSelectedPanels}
       MissingParentComponent={MissingGigwanPanels}
-      getSingleSelectedProps={(selectedItem) => ({
+      getSingleSelectedProps={(selectedItem, props) => ({
         sayongjaNanoId: selectedItem.nanoId,
         sayongjaName: selectedItem.name,
-        gigwanNanoId: settingsGigwanNanoId,
-        onAfterMutation,
-        isAuthenticated: settingsIsAuthenticated,
-        employmentCategoryOptions,
-        workTypeOptions,
+        gigwanNanoId: props.gigwanNanoId,
+        onAfterMutation: props.onAfterMutation,
+        isAuthenticated: props.isAuthenticated,
+        employmentCategoryOptions: props.employmentCategoryOptions,
+        workTypeOptions: props.workTypeOptions,
       })}
       getMultipleSelectedProps={(sayongjas) => ({ sayongjas })}
     >

@@ -76,11 +76,11 @@ export default function NpJojikJawonJusoListViewPage() {
       SingleSelectedComponent={OneSelectedPanels}
       MultipleSelectedComponent={MultipleSelectedPanels}
       MissingParentComponent={MissingJojikPanels}
-      getSingleSelectedProps={(selectedItem) => ({
+      getSingleSelectedProps={(selectedItem, props) => ({
         jusoNanoId: selectedItem.nanoId,
         jusoName: selectedItem.jusoName,
-        onAfterMutation,
-        isAuthenticated: settingsIsAuthenticated,
+        onAfterMutation: props.onAfterMutation,
+        isAuthenticated: props.isAuthenticated,
       })}
       getMultipleSelectedProps={(jusos) => ({ jusos })}
     >

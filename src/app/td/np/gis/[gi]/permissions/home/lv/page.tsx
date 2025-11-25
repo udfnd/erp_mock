@@ -60,11 +60,11 @@ export default function NpGigwanPermissionListViewPage() {
       SingleSelectedComponent={SinglePermissionPanel}
       MultipleSelectedComponent={MultiSelectionPanel}
       MissingParentComponent={MissingGigwanPanel}
-      getSingleSelectedProps={(selectedItem) => ({
+      getSingleSelectedProps={(selectedItem, props) => ({
         nanoId: selectedItem.nanoId,
-        gigwanNanoId: settingsGigwanNanoId,
-        isAuthenticated: settingsIsAuthenticated,
-        onAfterMutation,
+        gigwanNanoId: props.gigwanNanoId,
+        isAuthenticated: props.isAuthenticated,
+        onAfterMutation: props.onAfterMutation,
       })}
     >
       <PermissionListSection {...listSectionAllProps} />
