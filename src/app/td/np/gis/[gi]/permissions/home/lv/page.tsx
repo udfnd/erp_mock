@@ -7,13 +7,13 @@ import { ListViewLayout } from '@/common/lv/layout';
 import { extractGigwanNanoId } from '@/common/utils';
 import { useAuth } from '@/global/auth';
 import {
-  MissingGigwanPanels,
-  MultipleSelectedPanels,
-  NoneSelectedPanels,
-  OneSelectedPanels,
-  PermissionListSection,
-  usePermissionListViewSections,
-} from '@/domain/permission/section';
+  RightsidePanelsContainer,
+  MissingGigwanPanel,
+  NoSelectionPanel,
+  MultiSelectionPanel,
+  SinglePermissionPanel,
+} from '@/domain/permission/section/ListView/PermissionRightsidePanels/components';
+import { PermissionListSection, usePermissionListViewSections } from '@/domain/permission/section';
 
 type PageParams = {
   gi?: string | string[];
@@ -45,29 +45,40 @@ export default function NpGigwanPermissionListViewPage() {
     onAfterMutation,
   } = settingsSectionProps;
 
-  const noneSelectedPanel = !settingsGigwanNanoId ? <MissingGigwanPanels /> : <NoneSelectedPanels />;
+  const noneSelectedPanel = (
+    <RightsidePanelsContainer>
+      {!settingsGigwanNanoId ? <MissingGigwanPanel /> : <NoSelectionPanel />}
+    </RightsidePanelsContainer>
+  );
 
   const oneSelectedPanel = (() => {
-    if (!settingsGigwanNanoId) return <MissingGigwanPanels />;
+    if (!settingsGigwanNanoId)
+      return (
+        <RightsidePanelsContainer>
+          <MissingGigwanPanel />
+        </RightsidePanelsContainer>
+      );
 
     const [primarySelected] = selectedPermissions;
 
     return primarySelected ? (
-      <OneSelectedPanels
-        permissionNanoId={primarySelected.nanoId}
-        gigwanNanoId={settingsGigwanNanoId}
-        isAuthenticated={settingsIsAuthenticated}
-        onAfterMutation={onAfterMutation}
-      />
+      <RightsidePanelsContainer>
+        <SinglePermissionPanel
+          nanoId={primarySelected.nanoId}
+          gigwanNanoId={settingsGigwanNanoId}
+          isAuthenticated={settingsIsAuthenticated}
+          onAfterMutation={onAfterMutation}
+        />
+      </RightsidePanelsContainer>
     ) : (
       noneSelectedPanel
     );
   })();
 
-  const multipleSelectedPanel = !settingsGigwanNanoId ? (
-    <MissingGigwanPanels />
-  ) : (
-    <MultipleSelectedPanels />
+  const multipleSelectedPanel = (
+    <RightsidePanelsContainer>
+      {!settingsGigwanNanoId ? <MissingGigwanPanel /> : <MultiSelectionPanel />}
+    </RightsidePanelsContainer>
   );
 
   return (
