@@ -3,8 +3,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, LabeledInput } from '@/common/components';
-import { ArrowLgDownIcon, CopyIcon } from '@/common/icons';
+import { Button } from '@/common/components';
+import { ArrowLgDownIcon, QrcodeIcon } from '@/common/icons';
 import {
   type JojikDetailResponse,
   useJojikQuery,
@@ -29,7 +29,13 @@ type DropdownProps = {
   onChange: (value: string) => void;
 };
 
-function Dropdown({ value, options, placeholder = '선택하세요', disabled, onChange }: DropdownProps) {
+function Dropdown({
+  value,
+  options,
+  placeholder = '선택하세요',
+  disabled,
+  onChange,
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -63,7 +69,9 @@ function Dropdown({ value, options, placeholder = '선택하세요', disabled, o
         }}
         disabled={disabled}
       >
-        <span css={[cssObj.dropdownLabel, !hasSelection && cssObj.dropdownPlaceholder]}>{displayLabel}</span>
+        <span css={[cssObj.dropdownLabel, !hasSelection && cssObj.dropdownPlaceholder]}>
+          {displayLabel}
+        </span>
         <ArrowLgDownIcon css={[cssObj.dropdownCaret, isOpen && { transform: 'rotate(180deg)' }]} />
       </button>
       {isOpen && (
@@ -175,7 +183,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
 
   const copyMessage =
     copyStatus === 'success'
-      ? '링크를 복사했습니다.'
+      ? 'QR 코드 생성.'
       : copyStatus === 'error'
         ? '링크 복사에 실패했습니다. 다시 시도해주세요.'
         : null;
@@ -257,23 +265,16 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
             재원생 연동 신청 URL <span css={cssObj.fieldLabelPoint}>*</span>
           </span>
           <div css={cssObj.linkRow}>
-            <div css={cssObj.linkInput}>
-              <LabeledInput
-                value={linkRequestUrl}
-                readOnly
-                placeholder="재원생 연동 신청 URL이 없습니다"
-              />
+            <div css={cssObj.linkLabelWrapper}>
+              <label css={cssObj.linkLabel}>{linkRequestUrl}</label>
+              <button
+                css={cssObj.qrcodeButton}
+                onClick={handleCopyLink}
+                disabled={copyButtonDisabled}
+              >
+                <QrcodeIcon width={16} height={16} />
+              </button>
             </div>
-            <Button
-              size="small"
-              styleType="text"
-              variant="secondary"
-              iconLeft={<CopyIcon width={16} height={16} />}
-              onClick={handleCopyLink}
-              disabled={copyButtonDisabled}
-            >
-              {copyStatus === 'success' ? '복사됨' : '복사'}
-            </Button>
           </div>
           {copyMessage ? (
             <span css={copyStatus === 'error' ? cssObj.feedback.error : cssObj.feedback.success}>

@@ -91,8 +91,8 @@ export const cssObj = {
   addressInputWrapper: css`
     gap: 8px;
     padding: 0 12px;
-    svg {
-      color: ${color.blue600};
+    > svg {
+      color: ${color.cgrey500};
     }
   `,
 
@@ -119,6 +119,10 @@ export const cssObj = {
     &:disabled {
       cursor: not-allowed;
       color: ${color.cgrey300};
+    }
+
+    > svg {
+      color: ${color.cgrey500};
     }
   `,
 
@@ -267,7 +271,30 @@ export const cssObj = {
     gap: 8px;
   `,
 
-  linkInput: css`
+  linkLabelWrapper: css`
+    width: 100%;
+    display: flex;
+    padding: 8px 12px;
+    align-items: center;
+    gap: 4px;
+    border-radius: 8px;
+    border: 1px solid ${color.cgrey200};
+    background: ${color.white};
+  `,
+
+  linkLabel: css`
     flex: 1;
+  `,
+
+  qrcodeButton: css`
+    border: 1px solid ${color.cgrey200};
+    border-radius: 50%;
+    background-color: ${color.white};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    width: 24px;
+    height: 24px;
   `,
 } as const;

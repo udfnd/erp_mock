@@ -5,7 +5,12 @@ import { useId, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { EditIcon, LocationIcon } from '@/common/icons';
-import { inputSingleLine, inputWrapperRecipe, label, labelWrapper } from '@/common/components/Textfield.style';
+import {
+  inputSingleLine,
+  inputWrapperRecipe,
+  label,
+  labelWrapper,
+} from '@/common/components/Textfield.style';
 import {
   useJojikQuery,
   useUpdateJojikMutation,
@@ -157,7 +162,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
               value={currentAddress}
               onChange={(event) => setAddressInput(event.target.value)}
               placeholder="조직 주소를 입력하세요"
-              disabled={isAddressSaving}
+              disabled
             />
             <button
               type="button"
