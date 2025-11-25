@@ -7,7 +7,8 @@ import { BasicSettingsSection, OpenSettingsSection } from '@/domain/jojik/sectio
 
 export default function JoManageSettingPage() {
   const { jo } = useParams<{ jo: string }>();
-  const jojikNanoId = Array.isArray(jo) ? jo[0] : jo;
+  const rawJo = Array.isArray(jo) ? jo[0] : jo;
+  const jojikNanoId = rawJo;
 
   if (!jojikNanoId) return null;
 

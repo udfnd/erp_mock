@@ -14,6 +14,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
     iconRight?: ReactNode;
     children?: ReactNode;
     isFull?: boolean;
+    isLoading?: boolean;
   };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -29,11 +30,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       isFull = false,
       children,
       className,
+      isLoading = false,
       ...props
     },
     ref,
   ) => {
     const recipeStyles = buttonRecipe({ styleType, variant, size, iconOnly, disabled, isFull });
+    const isButtonDisabled = disabled || isLoading;
 
     return (
       <button
@@ -41,7 +44,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         type="button"
         css={[buttonBaseStyles, ...recipeStyles]}
         className={className}
-        disabled={disabled}
+        disabled={isButtonDisabled}
         {...props}
       >
         {iconLeft && !iconOnly && <span css={iconWrapper}>{iconLeft}</span>}

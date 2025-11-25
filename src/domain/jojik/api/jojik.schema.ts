@@ -75,7 +75,9 @@ export const JojikDetailResponseSchema = z.object({
   jaewonsaengLinkRequestUrl: z.string(),
   openSangtae: z.boolean(),
   canAccessOpenFileSangtae: z.string(),
+  canAccessOpenFileSangtaeNanoId: z.string().nullish(),
   canHadaLinkRequestSangtae: z.string(),
+  canHadaLinkRequestSangtaeNanoId: z.string().nullish(),
   homepageUrl: HomepageLinkSchema.nullable(),
   openFiles: z.array(JojikOpenFileSchema),
   juso: z
