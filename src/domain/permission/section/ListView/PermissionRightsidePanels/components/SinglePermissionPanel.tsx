@@ -98,19 +98,18 @@ export function SinglePermissionPanel({
   return (
     <>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>권한 상세</h2>
-        <p css={cssObj.panelSubtitle}>{permissionDetail?.type.name}</p>
+        <h2 css={cssObj.panelTitle}>{currentName} 설정</h2>
       </div>
       <form css={cssObj.panelBody} onSubmit={handleSubmit}>
         <div css={cssObj.panelSection}>
+          <h3 css={cssObj.panelSubtitle}>사용자 속성</h3>
           <Textfield
             label="권한 이름"
             value={currentName}
             onValueChange={setNameInput}
             singleLine
-            required
+            helperText="30자 이내의 권한 이름을 입력해 주세요."
           />
-          <p css={cssObj.helperText}>조직: {permissionDetail?.linkJojik?.name ?? '미지정'}</p>
         </div>
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelTitle}>연결 객체들</h3>

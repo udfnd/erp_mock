@@ -40,7 +40,6 @@ export default function NpGigwanPermissionListViewPage() {
 
   const {
     gigwanNanoId: settingsGigwanNanoId,
-    selectedPermissions,
     isAuthenticated: settingsIsAuthenticated,
     onAfterMutation,
   } = settingsSectionProps;

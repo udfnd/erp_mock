@@ -40,8 +40,7 @@ export const cssObj = {
   `,
   panelSubtitle: css`
     ${typography.bodySmallSB};
-    color: ${color.cgrey500};
-    margin-top: 4px;
+    color: ${color.black};
   `,
   panelBody: css`
     display: flex;
@@ -73,7 +72,7 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     background: ${color.cgrey50};
-    color: ${color.cgrey800};
+    color: ${color.cgrey700};
     padding: 4px 8px;
     border-radius: 6px;
     font-size: 12px;

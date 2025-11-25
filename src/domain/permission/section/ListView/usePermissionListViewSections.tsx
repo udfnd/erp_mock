@@ -15,7 +15,13 @@ import {
   getSortOptionFromState,
   getSortStateFromOption,
 } from './constants';
-import type { PermissionRightsidePanelsProps } from './PermissionRightsidePanels/statePanels';
+
+type PermissionRightsidePanelsProps = {
+  gigwanNanoId: string;
+  selectedPermissions: { nanoId: string }[];
+  isAuthenticated: boolean;
+  onAfterMutation: () => Promise<unknown> | void;
+};
 
 export type PermissionListViewHookParams = {
   gigwanNanoId: string;
@@ -126,17 +132,12 @@ export function usePermissionListViewSections({
   const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
-        header: '권한 이름',
+        header: '권한명',
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor((row) => row.type.name, {
         id: 'type',
-        header: '시스템 타입',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor((row) => row.jojik?.name ?? '-', {
-        id: 'jojik',
-        header: '조직',
+        header: '권한 시스템 타입',
         cell: (info) => info.getValue(),
       }),
     ],

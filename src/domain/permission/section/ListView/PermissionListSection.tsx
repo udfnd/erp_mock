@@ -35,7 +35,6 @@ export function PermissionListSection({
   handlers,
   sortOptions,
   permissionTypeOptions,
-  isAddUserEnabled,
 }: PermissionListSectionComponentProps) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -106,11 +105,6 @@ export function PermissionListSection({
         data={data}
         columns={columns}
         state={state}
-        primaryAction={{
-          label: '사용자 추가',
-          onClick: handlers.onAddUsersClick,
-          disabled: !isAddUserEnabled,
-        }}
         manualPagination
         manualSorting
         pageCount={totalPages}

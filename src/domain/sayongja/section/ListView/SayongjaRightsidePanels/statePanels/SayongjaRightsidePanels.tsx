@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 import { RightsidePanelsContainer } from '@/domain/sayongja/section/ListView/SayongjaRightsidePanels/components/RightsidePanelsContainer';
 import { CreateSayongjaPanel } from '@/domain/sayongja/section/ListView/SayongjaRightsidePanels/components/CreateSayongjaPanel';
 import { MissingGigwanPanel } from '@/domain/sayongja/section/ListView/SayongjaRightsidePanels/components/MissingGigwanPanel';
@@ -9,13 +7,7 @@ import { QuickActionsPanel } from '@/domain/sayongja/section/ListView/SayongjaRi
 import { SingleSelectionPanel } from '@/domain/sayongja/section/ListView/SayongjaRightsidePanels/components/SingleSelectionPanel';
 import type { SingleSelectionPanelProps } from '@/domain/sayongja/section/ListView/SayongjaRightsidePanels/components/SingleSelectionPanel';
 
-export type SayongjaRightsidePanelState = {
-  noneSelected: ReactNode;
-  oneSelected: ReactNode;
-  multipleSelected: ReactNode;
-};
-
-export type MissingGigwanPanelsProps = Record<string, never>;
+export type MissingGigwanPanelsProps = Record<string, unknown>;
 
 export const MissingGigwanPanels = (_: MissingGigwanPanelsProps) => (
   <RightsidePanelsContainer>
