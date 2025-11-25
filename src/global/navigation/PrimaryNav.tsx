@@ -14,7 +14,7 @@ import React, {
 import type { AnchorHTMLAttributes } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
+import { ArrowMdLeftSingleIcon, SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthStore, switchUser } from '@/global/auth';
@@ -132,12 +132,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const activeSueopNanoId = useMemo(() => getParamValue(params, 'su'), [params]);
   const activeKonNanoId = useMemo(() => getParamValue(params, 'ko'), [params]);
   const activeBoonNanoId = useMemo(() => getParamValue(params, 'bo'), [params]);
-  const [selectedJojikNanoId, setSelectedJojikNanoId] = useState<string | null>(
-    activeJojikNanoId,
-  );
-  const [selectedSueopNanoId, setSelectedSueopNanoId] = useState<string | null>(
-    activeSueopNanoId,
-  );
+  const [selectedJojikNanoId, setSelectedJojikNanoId] = useState<string | null>(activeJojikNanoId);
+  const [selectedSueopNanoId, setSelectedSueopNanoId] = useState<string | null>(activeSueopNanoId);
   const [selectedKonNanoId, setSelectedKonNanoId] = useState<string | null>(activeKonNanoId);
   const [selectedBoonNanoId, setSelectedBoonNanoId] = useState<string | null>(activeBoonNanoId);
 
@@ -448,7 +444,9 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       if (item.entityType === 'jojik') {
         if (selectedJojikNanoId && item.entityNanoId !== selectedJojikNanoId) return [];
         if (selectedSueopNanoId) {
-          return (item.children ?? []).filter((child) => child.entityNanoId === selectedSueopNanoId);
+          return (item.children ?? []).filter(
+            (child) => child.entityNanoId === selectedSueopNanoId,
+          );
         }
         return item.children ?? [];
       }
@@ -675,8 +673,11 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       const isActive = getIsItemActive(item);
       const visibleChildren = getVisibleChildren(item);
       const isExpanded = visibleChildren.length > 0;
-      const ariaCurrent: AnchorHTMLAttributes<HTMLAnchorElement>['aria-current'] =
-        isActive ? 'page' : undefined;
+      const isJojikItem = item.entityType === 'jojik';
+
+      const ariaCurrent: AnchorHTMLAttributes<HTMLAnchorElement>['aria-current'] = isActive
+        ? 'page'
+        : undefined;
       const linkStyles = [
         ...cssObj.navLink[isActive ? 'active' : 'inactive'],
         cssObj.navLinkDepth[item.depth],
@@ -746,7 +747,9 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
                   css={[...cssObj.navLink.inactive, cssObj.navBackButton]}
                   onClick={handleBackToGigwan}
                 >
-                  <span css={cssObj.navLabel}>{`< ${hierarchy.gigwan.name}`}</span>
+                  <span css={cssObj.navLabel}>
+                    <ArrowMdLeftSingleIcon /> {hierarchy.gigwan.name}
+                  </span>
                 </button>
               </li>
             )}

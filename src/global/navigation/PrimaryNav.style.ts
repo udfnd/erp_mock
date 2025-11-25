@@ -54,7 +54,7 @@ const navLinkBase = css`
   display: flex;
   align-items: center;
   gap: ${spacing.sm};
-  padding: ${spacing.sm} ${spacing.base};
+  padding: 6px 4px;
   border-radius: ${radius.md};
   text-decoration: none;
   color: ${color.black};
