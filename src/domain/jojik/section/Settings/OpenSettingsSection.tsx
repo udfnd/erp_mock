@@ -1,13 +1,15 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { z } from 'zod';
 
-import { Button, Checkbox, LabeledInput } from '@/common/components';
+import { Button, LabeledInput } from '@/common/components';
 import { CopyIcon } from '@/common/icons';
-import { type JojikDetailResponse, useJojikQuery, useUpdateJojikMutation } from '@/domain/jojik/api';
-import { apiClient } from '@/global';
+import {
+  type JojikDetailResponse,
+  useJojikQuery,
+  useUpdateJojikMutation,
+} from '@/domain/jojik/api';
 
 import { cssObj } from './styles';
 
@@ -16,27 +18,6 @@ type SangtaeOption = { nanoId: string; name: string };
 type OpenSettingsSectionProps = {
   jojikNanoId: string;
 };
-
-const sangtaeSchema = z.object({ nanoId: z.string(), name: z.string() });
-const sangtaeResponseSchema = z.object({ sangtaes: z.array(sangtaeSchema) });
-
-const useCanAccessOpenFileSangtaesQuery = () =>
-  useQuery({
-    queryKey: ['canAccessOpenFileSangtaes'],
-    queryFn: async () => {
-      const res = await apiClient.get('/T/dl/can-access-open-file-sangtaes');
-      return sangtaeResponseSchema.parse(res.data);
-    },
-  });
-
-const useCanHadaLinkRequestSangtaesQuery = () =>
-  useQuery({
-    queryKey: ['canHadaLinkRequestSangtaes'],
-    queryFn: async () => {
-      const res = await apiClient.get('/T/dl/can-hada-link-request-sangtaes');
-      return sangtaeResponseSchema.parse(res.data);
-    },
-  });
 
 export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
   const queryClient = useQueryClient();
@@ -53,14 +34,18 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
     },
   });
   const { data: jojik } = jojikQuery;
-  const { data: openFileSangtaesData, isLoading: isOpenFileSangtaesLoading } = useCanAccessOpenFileSangtaesQuery();
-  const { data: hadaSangtaesData, isLoading: isHadaSangtaesLoading } = useCanHadaLinkRequestSangtaesQuery();
+  const { data: openFileSangtaesData, isLoading: isOpenFileSangtaesLoading } =
+    useCanAccessOpenFileSangtaesQuery();
+  const { data: hadaSangtaesData, isLoading: isHadaSangtaesLoading } =
+    useCanHadaLinkRequestSangtaesQuery();
 
   const [openFileNanoIds, setOpenFileNanoIds] = useState<string[]>([]);
   const [basicInfoNanoId, setBasicInfoNanoId] = useState('');
   const [openFileNanoId, setOpenFileNanoId] = useState('');
   const [hadaNanoId, setHadaNanoId] = useState('');
-  const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(null);
+  const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(
+    null,
+  );
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const openFileOptions = useMemo(() => jojik?.openFiles ?? [], [jojik?.openFiles]);
@@ -111,7 +96,8 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
     );
   };
 
-  const linkRequestUrl = (jojik as JojikDetailResponse | undefined)?.jaewonsaengLinkRequestUrl ?? '';
+  const linkRequestUrl =
+    (jojik as JojikDetailResponse | undefined)?.jaewonsaengLinkRequestUrl ?? '';
 
   const handleCopyLink = async () => {
     if (!linkRequestUrl) return;
@@ -138,16 +124,15 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
     <section css={cssObj.card}>
       <div css={cssObj.cardHeader}>
         <div css={cssObj.cardTitleGroup}>
-          <h2 css={cssObj.cardTitle}>오픈 파일 · 컨텐츠 설정</h2>
-          <p css={cssObj.cardSubtitle}>
-            조직 정보와 오픈 파일 접근 범위를 조정하고, 필요한 파일만 공개하세요.
-          </p>
+          <h2 css={cssObj.cardTitle}>오픈 파일/컨텐츠</h2>
         </div>
       </div>
       <div css={cssObj.cardBody}>
         <div css={cssObj.selectGroupGrid}>
           <div css={cssObj.selectGroup}>
-            <span css={cssObj.fieldLabel}>조직 기본 정보 공개 범위</span>
+            <span css={cssObj.fieldLabel}>
+              누구나 학원 표시 기본 정보를 조회할 수 있음 (정보 오픈)
+            </span>
             <select
               css={cssObj.select}
               value={basicInfoNanoId}
@@ -164,10 +149,9 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
                 </option>
               ))}
             </select>
-            <span css={cssObj.fieldDescription}>조직 소개, 기본 정보 등의 공개 범위를 지정합니다.</span>
           </div>
           <div css={cssObj.selectGroup}>
-            <span css={cssObj.fieldLabel}>오픈 파일 접근 권한</span>
+            <span css={cssObj.fieldLabel}>오픈 파일 / 컨텐츠를 열람할 수 있는 사람</span>
             <select
               css={cssObj.select}
               value={openFileNanoId}
@@ -184,10 +168,9 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
                 </option>
               ))}
             </select>
-            <span css={cssObj.fieldDescription}>첨부된 오픈 파일을 조회할 수 있는 대상을 선택하세요.</span>
           </div>
           <div css={cssObj.selectGroup}>
-            <span css={cssObj.fieldLabel}>하다 링크 요청 승인 대상</span>
+            <span css={cssObj.fieldLabel}>학원에 하다 재원생 연동 신청을 할 수 있는 사람</span>
             <select
               css={cssObj.select}
               value={hadaNanoId}
@@ -204,30 +187,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
                 </option>
               ))}
             </select>
-            <span css={cssObj.fieldDescription}>하다 링크 요청을 처리할 수 있는 사용자를 선택하세요.</span>
-          </div>
-        </div>
-
-        <div css={cssObj.openFileSection}>
-          <span css={cssObj.sectionTitle}>공개할 오픈 파일 선택</span>
-          <span css={cssObj.sectionDescription}>
-            공개할 파일만 선택하면 해당 권한을 가진 사용자에게만 노출됩니다.
-          </span>
-          <div css={cssObj.openFileList}>
-            {openFileOptions.length > 0 ? (
-              openFileOptions.map((file) => (
-                <label key={file.nanoId} css={cssObj.openFileItem}>
-                  <Checkbox
-                    checked={openFileNanoIds.includes(file.nanoId)}
-                    onChange={() => handleToggleOpenFile(file.nanoId)}
-                    ariaLabel={`${file.name} 공개 여부`}
-                  />
-                  <span css={cssObj.openFileName}>{file.name}</span>
-                </label>
-              ))
-            ) : (
-              <span css={cssObj.emptyText}>연결된 오픈 파일이 없습니다.</span>
-            )}
           </div>
         </div>
         <div css={cssObj.linkField}>
@@ -257,20 +216,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
           ) : null}
         </div>
       </div>
-      <footer css={cssObj.cardFooter}>
-        {feedback ? (
-          <span css={cssObj.feedback[feedback.type]}>{feedback.message}</span>
-        ) : (
-          <span css={cssObj.statusText}>
-            {isOpenFileSangtaesLoading || isHadaSangtaesLoading
-              ? '접근 권한 옵션을 불러오는 중입니다.'
-              : '공개 범위와 파일 선택을 조정한 후 저장을 눌러주세요.'}
-          </span>
-        )}
-        <Button size="small" styleType="solid" variant="primary" disabled={!isDirty || !isValid || isSaving} onClick={handleSave}>
-          {isSaving ? '저장 중...' : '저장'}
-        </Button>
-      </footer>
     </section>
   );
 }

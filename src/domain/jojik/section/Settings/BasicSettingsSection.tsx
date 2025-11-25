@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
-import { Button, Chip, Textfield } from '@/common/components';
+import { Textfield } from '@/common/components';
 import { useJojikQuery, useUpdateJojikMutation } from '@/domain/jojik/api';
 
 import { cssObj } from './styles';
@@ -26,7 +26,9 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
 
   const [name, setName] = useState('');
   const [intro, setIntro] = useState('');
-  const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(null);
+  const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(
+    null,
+  );
 
   const { data: jojik, isLoading, isFetching, error } = jojikQuery;
 
@@ -65,19 +67,14 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       <div css={cssObj.cardHeader}>
         <div css={cssObj.cardTitleGroup}>
           <h2 css={cssObj.cardTitle}>조직 기본 설정</h2>
-          <p css={cssObj.cardSubtitle}>조직 이름과 소개를 관리할 수 있습니다.</p>
         </div>
-        <Chip size="sm" variant="outlined" disabled>
-          조직 코드 {jojikNanoId}
-        </Chip>
       </div>
 
       <div css={cssObj.cardBody}>
         {error ? <p css={cssObj.errorText}>조직 정보를 불러오지 못했습니다.</p> : null}
         <Textfield
           label="조직 이름"
-          placeholder="30자 내의 조직 이름을 입력해주세요"
-          required
+          helperText="30자 내의 조직 이름을 입력해주세요"
           maxLength={30}
           value={name}
           onValueChange={(value) => {
@@ -97,24 +94,6 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           }}
         />
       </div>
-      <footer css={cssObj.cardFooter}>
-        {feedback ? (
-          <span css={cssObj.feedback[feedback.type]}>{feedback.message}</span>
-        ) : (
-          <span css={cssObj.statusText}>
-            {isLoading || isFetching ? '조직 정보를 불러오는 중입니다.' : '조직 이름과 소개를 수정할 수 있습니다.'}
-          </span>
-        )}
-        <Button
-          size="small"
-          styleType="solid"
-          variant="primary"
-          disabled={!isDirty || !isValid || isSaving}
-          onClick={handleSave}
-        >
-          {isSaving ? '저장 중...' : '저장'}
-        </Button>
-      </footer>
     </section>
   );
 }
