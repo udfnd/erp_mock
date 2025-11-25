@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
@@ -68,6 +68,20 @@ const isWithinPath = (currentPath: string, target: string | null | undefined) =>
 };
 
 const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
+
+const useHydrated = (): boolean =>
+  useSyncExternalStore(
+    (cb) => {
+      if (typeof window !== 'undefined') {
+        const id = requestAnimationFrame(cb);
+        return () => cancelAnimationFrame(id);
+      }
+
+      return () => {};
+    },
+    () => true,
+    () => false,
+  );
 
 export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const pathname = usePathname();
@@ -417,6 +431,9 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   }, [clearAll, router]);
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
+  const hydrated = useHydrated();
+
+  if (!hydrated) return null;
 
   const renderItems = (list: Item[]) =>
     list.map((item) => {
