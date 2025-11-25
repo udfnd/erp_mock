@@ -1,10 +1,10 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, LabeledInput } from '@/common/components';
-import { CopyIcon } from '@/common/icons';
+import { ArrowLgDownIcon, CopyIcon } from '@/common/icons';
 import {
   type JojikDetailResponse,
   useJojikQuery,
@@ -18,6 +18,80 @@ import {
 import { cssObj } from './styles';
 
 type SangtaeOption = { nanoId: string; name: string };
+
+type DropdownOption = { value: string; label: string; disabled?: boolean };
+
+type DropdownProps = {
+  value: string;
+  options: DropdownOption[];
+  placeholder?: string;
+  disabled?: boolean;
+  onChange: (value: string) => void;
+};
+
+function Dropdown({ value, options, placeholder = '선택하세요', disabled, onChange }: DropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (target && dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  const selectedOption = options.find((option) => option.value === value);
+  const displayLabel = selectedOption?.label ?? placeholder;
+  const hasSelection = Boolean(selectedOption);
+
+  return (
+    <div css={cssObj.dropdown} ref={dropdownRef}>
+      <button
+        type="button"
+        css={cssObj.dropdownButton(isOpen, disabled)}
+        onClick={() => {
+          if (disabled) return;
+          setIsOpen((prev) => !prev);
+        }}
+        disabled={disabled}
+      >
+        <span css={[cssObj.dropdownLabel, !hasSelection && cssObj.dropdownPlaceholder]}>{displayLabel}</span>
+        <ArrowLgDownIcon css={[cssObj.dropdownCaret, isOpen && { transform: 'rotate(180deg)' }]} />
+      </button>
+      {isOpen && (
+        <div css={cssObj.dropdownMenu}>
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              css={[
+                cssObj.dropdownOption,
+                option.value === value && cssObj.dropdownOptionSelected,
+                option.disabled && { cursor: 'not-allowed' },
+              ]}
+              onClick={() => {
+                if (option.disabled) return;
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              disabled={option.disabled}
+            >
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type OpenSettingsSectionProps = {
   jojikNanoId: string;
@@ -125,57 +199,57 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
               누구나 학원 표시 기본 정보를 조회할 수 있음 (정보 오픈){' '}
               <span css={cssObj.fieldLabelPoint}>*</span>
             </span>
-            <select
-              css={cssObj.select}
+            <Dropdown
               value={currentBasicInfoOpen ? 'true' : 'false'}
-              onChange={(event) => {
-                setIsBasicInfoOpen(event.target.value === 'true');
+              options={[
+                { value: 'true', label: '열림' },
+                { value: 'false', label: '닫힘' },
+              ]}
+              onChange={(value) => {
+                setIsBasicInfoOpen(value === 'true');
               }}
-            >
-              <option value="true">열림</option>
-              <option value="false">닫힘</option>
-            </select>
+            />
           </div>
           <div css={cssObj.selectGroup}>
             <span css={cssObj.fieldLabel}>
               오픈 파일 / 컨텐츠를 열람할 수 있는 사람 <span css={cssObj.fieldLabelPoint}>*</span>
             </span>
-            <select
-              css={cssObj.select}
+            <Dropdown
               value={currentOpenFilePermissionNanoId}
-              onChange={(event) => {
-                setOpenFilePermissionNanoId(event.target.value);
-              }}
+              placeholder="선택하세요"
+              options={[
+                { value: '', label: '선택하세요' },
+                ...(openContentsPermissionsData?.sangtaes ?? []).map((option: SangtaeOption) => ({
+                  value: option.nanoId,
+                  label: option.name,
+                })),
+              ]}
               disabled={openContentsDisabled}
-            >
-              <option value="">선택하세요</option>
-              {(openContentsPermissionsData?.sangtaes ?? []).map((option: SangtaeOption) => (
-                <option key={option.nanoId} value={option.nanoId}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => {
+                setOpenFilePermissionNanoId(value);
+              }}
+            />
           </div>
           <div css={cssObj.selectGroup}>
             <span css={cssObj.fieldLabel}>
               학원에 하다 재원생 연동 신청을 할 수 있는 사람{' '}
               <span css={cssObj.fieldLabelPoint}>*</span>
             </span>
-            <select
-              css={cssObj.select}
+            <Dropdown
               value={currentHadaPermissionNanoId}
-              onChange={(event) => {
-                setHadaPermissionNanoId(event.target.value);
-              }}
+              placeholder="선택하세요"
+              options={[
+                { value: '', label: '선택하세요' },
+                ...(hadaPermissionsData?.sangtaes ?? []).map((option: SangtaeOption) => ({
+                  value: option.nanoId,
+                  label: option.name,
+                })),
+              ]}
               disabled={hadaPermissionsDisabled}
-            >
-              <option value="">선택하세요</option>
-              {(hadaPermissionsData?.sangtaes ?? []).map((option: SangtaeOption) => (
-                <option key={option.nanoId} value={option.nanoId}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => {
+                setHadaPermissionNanoId(value);
+              }}
+            />
           </div>
         </div>
         <div css={cssObj.linkField}>
