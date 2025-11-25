@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button, LabeledInput } from '@/common/components';
 import { CopyIcon } from '@/common/icons';
@@ -29,12 +29,6 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
 
   const jojikQuery = useJojikQuery(jojikNanoId, {
     enabled: Boolean(jojikNanoId),
-    onSuccess: (jojikData) => {
-      setIsBasicInfoOpen(Boolean(jojikData.openSangtae));
-      setOpenFilePermissionNanoId(jojikData.canAccessOpenFileSangtaeNanoId ?? '');
-      setHadaPermissionNanoId(jojikData.canHadaLinkRequestSangtaeNanoId ?? '');
-      setFeedback(null);
-    },
   });
   const { data: jojik } = jojikQuery;
   const { data: openContentsPermissionsData, isLoading: isOpenContentsLoading } =
@@ -42,46 +36,51 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
   const { data: hadaPermissionsData, isLoading: isHadaPermissionsLoading } =
     useGetHadaJaewonsangLinkRequestPermissionsQuery();
 
-  const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(false);
-  const [openFilePermissionNanoId, setOpenFilePermissionNanoId] = useState('');
-  const [hadaPermissionNanoId, setHadaPermissionNanoId] = useState('');
+  const [isBasicInfoOpen, setIsBasicInfoOpen] = useState<boolean | undefined>(undefined);
+  const [openFilePermissionNanoId, setOpenFilePermissionNanoId] = useState<string | undefined>(
+    undefined,
+  );
+  const [hadaPermissionNanoId, setHadaPermissionNanoId] = useState<string | undefined>(undefined);
   const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(
     null,
   );
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const currentBasicInfoOpen = isBasicInfoOpen ?? Boolean(jojik?.openSangtae);
+  const currentOpenFilePermissionNanoId =
+    openFilePermissionNanoId ?? jojik?.canAccessOpenFileSangtaeNanoId ?? '';
+  const currentHadaPermissionNanoId =
+    hadaPermissionNanoId ?? jojik?.canHadaLinkRequestSangtaeNanoId ?? '';
 
   const isDirty = useMemo(() => {
     if (!jojik) return false;
     return (
-      isBasicInfoOpen !== Boolean(jojik.openSangtae) ||
-      openFilePermissionNanoId !== (jojik.canAccessOpenFileSangtaeNanoId ?? '') ||
-      hadaPermissionNanoId !== (jojik.canHadaLinkRequestSangtaeNanoId ?? '')
+      currentBasicInfoOpen !== Boolean(jojik.openSangtae) ||
+      currentOpenFilePermissionNanoId !== (jojik.canAccessOpenFileSangtaeNanoId ?? '') ||
+      currentHadaPermissionNanoId !== (jojik.canHadaLinkRequestSangtaeNanoId ?? '')
     );
-  }, [hadaPermissionNanoId, isBasicInfoOpen, jojik, openFilePermissionNanoId]);
+  }, [currentBasicInfoOpen, currentHadaPermissionNanoId, currentOpenFilePermissionNanoId, jojik]);
 
-  const isValid = Boolean(openFilePermissionNanoId && hadaPermissionNanoId);
+  const isValid = Boolean(currentOpenFilePermissionNanoId && currentHadaPermissionNanoId);
 
   const handleSave = () => {
     if (!isDirty || !isValid) return;
 
     updateJojikMutation.mutate(
       {
-        openSangtae: isBasicInfoOpen,
-        canAccessOpenFileSangtaeNanoId: openFilePermissionNanoId,
-        canHadaLinkRequestSangtaeNanoId: hadaPermissionNanoId,
+        openSangtae: currentBasicInfoOpen,
+        canAccessOpenFileSangtaeNanoId: currentOpenFilePermissionNanoId,
+        canHadaLinkRequestSangtaeNanoId: currentHadaPermissionNanoId,
       },
       {
         onSuccess: async (data) => {
           setFeedback({ type: 'success', message: '오픈 설정이 저장되었습니다.' });
           setIsBasicInfoOpen(Boolean(data.openSangtae));
-          setOpenFilePermissionNanoId(data.canAccessOpenFileSangtaeNanoId ?? openFilePermissionNanoId);
+          setOpenFilePermissionNanoId(
+            data.canAccessOpenFileSangtaeNanoId ?? currentOpenFilePermissionNanoId,
+          );
           setHadaPermissionNanoId(
-            data.canHadaLinkRequestSangtaeNanoId ?? hadaPermissionNanoId,
+            data.canHadaLinkRequestSangtaeNanoId ?? currentHadaPermissionNanoId,
           );
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
@@ -114,9 +113,9 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
         : null;
 
   const isSaving = updateJojikMutation.isPending;
-  const openContentsDisabled = !isMounted || isOpenContentsLoading;
-  const hadaPermissionsDisabled = !isMounted || isHadaPermissionsLoading;
-  const copyButtonDisabled = !isMounted || !linkRequestUrl;
+  const openContentsDisabled = isOpenContentsLoading || !openContentsPermissionsData;
+  const hadaPermissionsDisabled = isHadaPermissionsLoading || !hadaPermissionsData;
+  const copyButtonDisabled = !linkRequestUrl;
 
   return (
     <section css={cssObj.card}>
@@ -133,7 +132,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
             </span>
             <select
               css={cssObj.select}
-              value={isBasicInfoOpen ? 'true' : 'false'}
+              value={currentBasicInfoOpen ? 'true' : 'false'}
               onChange={(event) => {
                 setFeedback(null);
                 setIsBasicInfoOpen(event.target.value === 'true');
@@ -147,7 +146,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
             <span css={cssObj.fieldLabel}>오픈 파일 / 컨텐츠를 열람할 수 있는 사람</span>
             <select
               css={cssObj.select}
-              value={openFilePermissionNanoId}
+              value={currentOpenFilePermissionNanoId}
               onChange={(event) => {
                 setFeedback(null);
                 setOpenFilePermissionNanoId(event.target.value);
@@ -166,7 +165,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
             <span css={cssObj.fieldLabel}>학원에 하다 재원생 연동 신청을 할 수 있는 사람</span>
             <select
               css={cssObj.select}
-              value={hadaPermissionNanoId}
+              value={currentHadaPermissionNanoId}
               onChange={(event) => {
                 setFeedback(null);
                 setHadaPermissionNanoId(event.target.value);
@@ -185,12 +184,13 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
         <div css={cssObj.linkField}>
           <span css={cssObj.fieldLabel}>재원생 연동 신청 URL</span>
           <div css={cssObj.linkRow}>
-            <LabeledInput
-              value={linkRequestUrl}
-              readOnly
-              containerClassName={cssObj.linkInput}
-              placeholder="재원생 연동 신청 URL이 없습니다"
-            />
+            <div css={cssObj.linkInput}>
+              <LabeledInput
+                value={linkRequestUrl}
+                readOnly
+                placeholder="재원생 연동 신청 URL이 없습니다"
+              />
+            </div>
             <Button
               size="small"
               styleType="text"
@@ -218,7 +218,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
           )}
           <Button
             size="small"
-            styleType="filled"
+            styleType="solid"
             disabled={!isDirty || !isValid || isSaving}
             onClick={handleSave}
             isLoading={isSaving}

@@ -24,18 +24,11 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
 
   const jojikQuery = useJojikQuery(jojikNanoId, {
     enabled: Boolean(jojikNanoId),
-    onSuccess: (jojikData) => {
-      setName(jojikData.name ?? '');
-      setIntro(jojikData.intro ?? '');
-      setAddress(formatJojikAddress(jojikData));
-      setFeedback(null);
-      setAddressFeedback(null);
-    },
   });
 
-  const [name, setName] = useState('');
-  const [intro, setIntro] = useState('');
-  const [address, setAddress] = useState('');
+  const [nameInput, setNameInput] = useState<string | undefined>(undefined);
+  const [introInput, setIntroInput] = useState<string | undefined>(undefined);
+  const [addressInput, setAddressInput] = useState<string | undefined>(undefined);
   const [feedback, setFeedback] = useState<null | { type: 'success' | 'error'; message: string }>(
     null,
   );
@@ -45,17 +38,21 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
 
   const { data: jojik, error } = jojikQuery;
 
-  const trimmedName = name.trim();
-  const trimmedIntro = intro.trim();
-  const trimmedAddress = address.trim();
+  const currentName = nameInput ?? jojik?.name ?? '';
+  const currentIntro = introInput ?? jojik?.intro ?? '';
+  const currentAddress = addressInput ?? formatJojikAddress(jojik);
+
+  const trimmedName = currentName.trim();
+  const trimmedIntro = currentIntro.trim();
+  const trimmedAddress = currentAddress.trim();
 
   const isDirty = useMemo(() => {
-    if (!jojik) return trimmedName.length > 0 || trimmedIntro.length > 0;
+    if (!jojik) return false;
     return trimmedName !== (jojik.name ?? '') || trimmedIntro !== (jojik.intro ?? '');
   }, [jojik, trimmedIntro, trimmedName]);
 
   const isAddressDirty = useMemo(() => {
-    if (!jojik) return trimmedAddress.length > 0;
+    if (!jojik) return false;
     return trimmedAddress !== formatJojikAddress(jojik);
   }, [jojik, trimmedAddress]);
 
@@ -69,8 +66,8 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       {
         onSuccess: async (data) => {
           setFeedback({ type: 'success', message: '조직 기본 설정이 저장되었습니다.' });
-          setName(data.name ?? trimmedName);
-          setIntro(data.intro ?? trimmedIntro);
+          setNameInput(data.name ?? trimmedName);
+          setIntroInput(data.intro ?? trimmedIntro);
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
         onError: () => {
@@ -88,7 +85,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
       {
         onSuccess: async () => {
           setAddressFeedback({ type: 'success', message: '조직 주소가 저장되었습니다.' });
-          setAddress(trimmedAddress);
+          setAddressInput(trimmedAddress);
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
         onError: () => {
@@ -115,10 +112,10 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           label="조직 이름"
           helperText="30자 내의 조직 이름을 입력해주세요"
           maxLength={30}
-          value={name}
+          value={currentName}
           onValueChange={(value) => {
             setFeedback(null);
-            setName(value);
+            setNameInput(value);
           }}
           singleLine
         />
@@ -126,10 +123,10 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           label="조직 소개"
           placeholder="조직 소개를 입력하세요"
           maxLength={100}
-          value={intro}
+          value={currentIntro}
           onValueChange={(value) => {
             setFeedback(null);
-            setIntro(value);
+            setIntroInput(value);
           }}
         />
         <div css={cssObj.cardFooter}>
@@ -142,7 +139,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           )}
           <Button
             size="small"
-            styleType="filled"
+            styleType="solid"
             disabled={!isDirty || !isValid || isSaving}
             onClick={handleSave}
             isLoading={isSaving}
@@ -154,10 +151,10 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
         <Textfield
           label="조직 주소"
           placeholder="조직 주소를 입력하세요"
-          value={address}
+          value={currentAddress}
           onValueChange={(value) => {
             setAddressFeedback(null);
-            setAddress(value);
+            setAddressInput(value);
           }}
           helperText="조직 주소를 입력하고 저장을 눌러 반영하세요."
         />
@@ -175,7 +172,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           )}
           <Button
             size="small"
-            styleType="filled"
+            styleType="solid"
             disabled={!isAddressDirty || !isAddressValid || isAddressSaving}
             onClick={handleAddressSave}
             isLoading={isAddressSaving}
