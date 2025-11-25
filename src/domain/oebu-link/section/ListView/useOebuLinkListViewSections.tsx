@@ -10,7 +10,6 @@ import { useGetOebuLinksQuery } from '@/domain/oebu-link/api';
 import type { GetOebuLinksRequest, OebuLinkListItem } from '@/domain/oebu-link/api';
 
 import {
-  PAGE_SIZE_OPTIONS,
   SORT_OPTIONS,
   columnHelper,
   formatDate,
@@ -29,7 +28,6 @@ export type OebuLinkListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
   onIconFilterChange: (values: string[]) => void;
-  onPageSizeChange: (size: number) => void;
   onSelectedLinksChange: (links: OebuLinkListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
@@ -65,7 +63,6 @@ export type UseOebuLinkListViewSectionsResult = {
   listSectionProps: OebuLinkListSectionProps;
   settingsSectionProps: OebuLinkRightsidePanelsSectionProps;
   sortOptions: typeof SORT_OPTIONS;
-  pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
   iconFilterOptions: { label: string; value: string }[];
 };
 
@@ -75,7 +72,7 @@ export function useOebuLinkListViewSections({
 }: OebuLinkListViewHookParams): UseOebuLinkListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<OebuLinkListItem>({
-    initialSorting: [{ id: 'createdAt', desc: true }],
+    initialSorting: [],
     initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
@@ -164,10 +161,6 @@ export function useOebuLinkListViewSections({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handlePageSizeChange = (size: number) => {
-    setPagination({ pageIndex: 0, pageSize: size });
-  };
-
   const clearSelection = () => {
     setRowSelection({});
   };
@@ -207,7 +200,6 @@ export function useOebuLinkListViewSections({
       onSearchChange: handleSearchChange,
       onSortChange: handleSortChange,
       onIconFilterChange: handleIconFilterChange,
-      onPageSizeChange: handlePageSizeChange,
       onSelectedLinksChange: setSelectedLinks,
       onAddClick: handleAddClick,
       onStopCreate: stopCreate,
@@ -229,7 +221,6 @@ export function useOebuLinkListViewSections({
     listSectionProps,
     settingsSectionProps,
     sortOptions: SORT_OPTIONS,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
     iconFilterOptions,
   };
 }

@@ -71,7 +71,7 @@ export function useJusoListViewSections({
 }: JusoListViewHookParams): UseJusoListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<JusoListItem>({
-    initialSorting: [{ id: 'createdAt', desc: true }],
+    initialSorting: [],
     initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 

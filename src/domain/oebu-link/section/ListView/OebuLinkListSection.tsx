@@ -12,7 +12,6 @@ import { cssObj } from './styles';
 
 export type OebuLinkListSectionComponentProps = OebuLinkListSectionProps & {
   sortOptions: { label: string; value: string }[];
-  pageSizeOptions: number[];
   iconFilterOptions: { label: string; value: string }[];
 };
 
@@ -27,14 +26,11 @@ function createRowEventHandlers(
   };
 }
 
-const DEFAULT_ICON_FILTERS = ['all'];
-
 export function OebuLinkListSection({
   data,
   columns,
   state,
   isListLoading,
-  pagination,
   searchTerm,
   sortByOption,
   iconFilters,
@@ -43,43 +39,26 @@ export function OebuLinkListSection({
   isCreating,
   handlers,
   sortOptions,
-  pageSizeOptions,
   iconFilterOptions,
 }: OebuLinkListSectionComponentProps) {
   const rowEventHandlers = useMemo(() => createRowEventHandlers(handlers), [handlers]);
-  const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
+  const sortValue = sortByOption ?? '';
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const toolbarFilters = useMemo<ListViewFilter[]>(
     () => {
-      const iconFilterValue = iconFilters.length ? iconFilters : DEFAULT_ICON_FILTERS;
-      const pageSizeValue = pagination.pageSize ? [`${pagination.pageSize}`] : [];
-
       const iconFilter: ListViewFilter = {
         key: 'iconFilter',
         label: '아이콘',
-        value: iconFilterValue,
-        defaultValue: DEFAULT_ICON_FILTERS,
+        value: iconFilters,
+        defaultValue: [],
         options: iconFilterOptions,
         onChange: handlers.onIconFilterChange,
       };
 
-      const pageSizeFilter: ListViewFilter = {
-        key: 'pageSize',
-        label: '페이지 크기',
-        value: pageSizeValue,
-        defaultValue: pageSizeOptions.length ? [`${pageSizeOptions[0]}`] : pageSizeValue,
-        options: pageSizeOptions.map((size) => ({ label: `${size}개/페이지`, value: `${size}` })),
-        onChange: (values) => {
-          const parsed = Number(values.at(-1) ?? pagination.pageSize);
-          const nextSize = Number.isFinite(parsed) ? parsed : pagination.pageSize;
-          handlers.onPageSizeChange(nextSize);
-        },
-      };
-
-      return [iconFilter, pageSizeFilter];
+      return [iconFilter];
     },
-    [handlers, iconFilterOptions, iconFilters, pageSizeOptions, pagination.pageSize],
+    [handlers, iconFilterOptions, iconFilters],
   );
 
   const sortProps: ListViewSortProps = useMemo(

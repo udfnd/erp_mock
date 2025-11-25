@@ -25,17 +25,16 @@ export default function OebuLinksListViewPage() {
   const jojikNanoId = Array.isArray(params?.jo) ? (params?.jo[0] ?? '') : params?.jo ?? '';
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions, iconFilterOptions } =
+  const { listSectionProps, settingsSectionProps, sortOptions, iconFilterOptions } =
     useOebuLinkListViewSections({ jojikNanoId, isAuthenticated });
 
   const listSectionAllProps = useMemo(
     () => ({
       ...listSectionProps,
       sortOptions,
-      pageSizeOptions,
       iconFilterOptions,
     }),
-    [iconFilterOptions, listSectionProps, pageSizeOptions, sortOptions],
+    [iconFilterOptions, listSectionProps, sortOptions],
   );
 
   const pageKey = jojikNanoId || 'no-jo';

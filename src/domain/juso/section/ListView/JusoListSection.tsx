@@ -38,7 +38,7 @@ export function JusoListSection({
 }: JusoListSectionComponentProps) {
   const rowEventHandlers = useMemo(() => createRowEventHandlers(handlers), [handlers]);
 
-  const sortValue = sortByOption ?? sortOptions[0]?.value ?? '';
+  const sortValue = sortByOption ?? '';
 
   return (
     <Template
