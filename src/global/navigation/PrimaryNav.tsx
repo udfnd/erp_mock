@@ -11,6 +11,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from 'react';
+import type { AnchorHTMLAttributes } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { SidebarCloseIcon, SidebarOpenIcon } from '@/common/icons';
@@ -674,6 +675,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       const isActive = getIsItemActive(item);
       const visibleChildren = getVisibleChildren(item);
       const isExpanded = visibleChildren.length > 0;
+      const ariaCurrent: AnchorHTMLAttributes<HTMLAnchorElement>['aria-current'] =
+        isActive ? 'page' : undefined;
       const linkStyles = [
         ...cssObj.navLink[isActive ? 'active' : 'inactive'],
         cssObj.navLinkDepth[item.depth],
@@ -686,7 +689,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       const commonProps = {
         css: linkStyles,
         onClick: () => handleItemClick(item),
-        'aria-current': isActive ? 'page' : undefined,
+        'aria-current': ariaCurrent,
         'aria-expanded': item.children ? isExpanded : undefined,
       };
 
