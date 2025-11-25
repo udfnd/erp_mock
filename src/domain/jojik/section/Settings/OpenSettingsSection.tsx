@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button, LabeledInput } from '@/common/components';
 import { CopyIcon } from '@/common/icons';
@@ -49,6 +49,11 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
     null,
   );
   const [copyStatus, setCopyStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const isDirty = useMemo(() => {
     if (!jojik) return false;
@@ -109,6 +114,9 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
         : null;
 
   const isSaving = updateJojikMutation.isPending;
+  const openContentsDisabled = !isMounted || isOpenContentsLoading;
+  const hadaPermissionsDisabled = !isMounted || isHadaPermissionsLoading;
+  const copyButtonDisabled = !isMounted || !linkRequestUrl;
 
   return (
     <section css={cssObj.card}>
@@ -144,7 +152,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
                 setFeedback(null);
                 setOpenFilePermissionNanoId(event.target.value);
               }}
-              disabled={isOpenContentsLoading}
+              disabled={openContentsDisabled}
             >
               <option value="">선택하세요</option>
               {(openContentsPermissionsData?.sangtaes ?? []).map((option: SangtaeOption) => (
@@ -163,7 +171,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
                 setFeedback(null);
                 setHadaPermissionNanoId(event.target.value);
               }}
-              disabled={isHadaPermissionsLoading}
+              disabled={hadaPermissionsDisabled}
             >
               <option value="">선택하세요</option>
               {(hadaPermissionsData?.sangtaes ?? []).map((option: SangtaeOption) => (
@@ -189,7 +197,7 @@ export function OpenSettingsSection({ jojikNanoId }: OpenSettingsSectionProps) {
               variant="secondary"
               iconLeft={<CopyIcon width={16} height={16} />}
               onClick={handleCopyLink}
-              disabled={!linkRequestUrl}
+              disabled={copyButtonDisabled}
             >
               {copyStatus === 'success' ? '복사됨' : '복사'}
             </Button>
