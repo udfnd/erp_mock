@@ -405,6 +405,20 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     setIsGigwanExpanded(Boolean(resolvedGigwanNanoId));
   }, [resolvedGigwanNanoId]);
 
+  const selectedJojikItem = useMemo(() => {
+    if (!selectedJojikNanoId) return null;
+    return (
+      flattenedItems.find(
+        (item) => item.entityType === 'jojik' && item.entityNanoId === selectedJojikNanoId,
+      ) ?? null
+    );
+  }, [flattenedItems, selectedJojikNanoId]);
+
+  const selectedJojikChildren = useMemo(() => {
+    if (!selectedJojikItem) return [] as Item[];
+    return getVisibleChildren(selectedJojikItem);
+  }, [getVisibleChildren, selectedJojikItem]);
+
   const getIsItemActive = useCallback(
     (item: Item) => {
       if (item.entityType === 'boon') return selectedBoonNanoId === item.entityNanoId;
@@ -546,6 +560,17 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       selectedSueopNanoId,
     ],
   );
+
+  const handleBackToGigwan = useCallback(() => {
+    setSelectedJojikNanoId(null);
+    setSelectedSueopNanoId(null);
+    setSelectedKonNanoId(null);
+    setSelectedBoonNanoId(null);
+    setIsGigwanExpanded(true);
+    if (hierarchy.gigwan?.nanoId) {
+      navigateIfHref(`/td/np/gis/${hierarchy.gigwan.nanoId}/manage/home/dv`);
+    }
+  }, [hierarchy.gigwan?.nanoId, navigateIfHref]);
 
   const filteredHistory = useMemo(() => {
     if (!authState.gigwanNanoId) return [] as AuthHistoryEntry[];
@@ -709,7 +734,30 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       </div>
 
       <ul id="primary-nav-list" css={cssObj.navList[effectiveIsOpen ? 'show' : 'hide']}>
-        {renderItems(items)}
+        {selectedJojikItem ? (
+          <>
+            {hierarchy.gigwan && (
+              <li key="gigwan-back" css={cssObj.navListItem}>
+                <button
+                  type="button"
+                  css={[...cssObj.navLink.inactive, cssObj.navBackButton]}
+                  onClick={handleBackToGigwan}
+                >
+                  <span css={cssObj.navLabel}>{`< ${hierarchy.gigwan.name}`}</span>
+                </button>
+              </li>
+            )}
+            <li
+              key={`selected-jojik-${selectedJojikItem.key}`}
+              css={[cssObj.navListItem, cssObj.selectedJojikContainer]}
+            >
+              <span css={cssObj.selectedJojikLabel}>{selectedJojikItem.label}</span>
+            </li>
+            {renderItems(selectedJojikChildren)}
+          </>
+        ) : (
+          renderItems(items)
+        )}
       </ul>
 
       <div css={cssObj.navFooter[effectiveIsOpen ? 'show' : 'hide']}>

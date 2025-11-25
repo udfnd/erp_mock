@@ -188,6 +188,11 @@ export const cssObj = {
     ] as IT[],
   } as Record<'active' | 'inactive', IT[]>,
 
+  navBackButton: css`
+    ${typography.bodySmallSB};
+    padding-left: 0;
+  `,
+
   navIcon: css`
     width: 16px;
     height: 16px;
@@ -226,6 +231,18 @@ export const cssObj = {
       ${typography.bodySmallM};
     `,
   },
+
+  selectedJojikContainer: css`
+    border-bottom: 1px solid ${color.cgrey100};
+    padding-bottom: ${spacing.sm};
+    margin-bottom: ${spacing.sm};
+  `,
+
+  selectedJojikLabel: css`
+    ${typography.bodySmallSB};
+    padding: ${spacing.sm} ${spacing.base};
+    display: inline-block;
+  `,
 
   navFooter: {
     show: [navFooterBase] as IT[],
