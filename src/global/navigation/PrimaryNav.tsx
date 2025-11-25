@@ -681,6 +681,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
       const linkStyles = [
         ...cssObj.navLink[isActive ? 'active' : 'inactive'],
         cssObj.navLinkDepth[item.depth],
+        ...(!selectedJojikItem && isJojikItem ? [cssObj.navLinkJojikOffset] : []),
       ] as const;
       const labelStyles = [
         cssObj.navLabel,
@@ -744,11 +745,18 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
               <li key="gigwan-back" css={cssObj.navListItem}>
                 <button
                   type="button"
-                  css={[...cssObj.navLink.inactive, cssObj.navBackButton]}
+                  css={[
+                    ...cssObj.navLink.inactive,
+                    cssObj.navLinkDepth[1],
+                    cssObj.navBackButton,
+                  ]}
                   onClick={handleBackToGigwan}
                 >
-                  <span css={cssObj.navLabel}>
-                    <ArrowMdLeftSingleIcon /> {hierarchy.gigwan.name}
+                  <span css={[cssObj.navIcon, cssObj.navBackIcon]} aria-hidden>
+                    <ArrowMdLeftSingleIcon />
+                  </span>
+                  <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>
+                    {hierarchy.gigwan.name}
                   </span>
                 </button>
               </li>
@@ -757,9 +765,22 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
               key={`selected-jojik-${selectedJojikItem.key}`}
               css={[cssObj.navListItem, cssObj.selectedJojikContainer]}
             >
-              <span css={cssObj.selectedJojikLabel}>{selectedJojikItem.label}</span>
+              <div
+                css={[
+                  ...cssObj.navLink.active,
+                  cssObj.navLinkDepth[1],
+                  cssObj.selectedJojikButton,
+                ]}
+              >
+                <span css={[cssObj.navIcon, cssObj.navIconActive]} aria-hidden />
+                <span css={[cssObj.navLabel, cssObj.navLabelWeight.active]}>
+                  {selectedJojikItem.label}
+                </span>
+              </div>
+              {selectedJojikChildren.length > 0 && (
+                <ul css={cssObj.navChildList}>{renderItems(selectedJojikChildren)}</ul>
+              )}
             </li>
-            {renderItems(selectedJojikChildren)}
           </>
         ) : (
           renderItems(items)
