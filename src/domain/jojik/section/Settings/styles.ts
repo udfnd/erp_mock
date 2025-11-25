@@ -82,6 +82,46 @@ export const cssObj = {
     gap: 6px;
   `,
 
+  addressField: css`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  `,
+
+  addressInputWrapper: css`
+    gap: 8px;
+    padding: 0 12px;
+    svg {
+      color: ${color.blue600};
+    }
+  `,
+
+  addressInput: css`
+    flex: 1;
+  `,
+
+  addressEditButton: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: ${color.cgrey500};
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    &:hover {
+      background: ${color.cgrey50};
+      color: ${color.blue600};
+    }
+    &:disabled {
+      cursor: not-allowed;
+      color: ${color.cgrey300};
+    }
+  `,
+
   fieldLabel: css`
     ${typography.bodySmallM};
     color: ${color.cgrey700};
@@ -91,18 +131,81 @@ export const cssObj = {
     color: ${color.red};
   `,
 
-  select: css`
+  dropdown: css`
+    position: relative;
+  `,
+
+  dropdownButton: (isOpen: boolean, disabled?: boolean) => css`
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid ${color.cgrey200};
+    padding: 10px 12px;
+    border: 1px solid ${isOpen ? color.blue600 : color.cgrey200};
     border-radius: 8px;
-    background: ${color.white};
+    background: ${disabled ? color.cgrey100 : color.white};
     ${typography.bodyR};
-    color: ${color.black};
-    &:focus {
+    color: ${disabled ? color.cgrey400 : color.black};
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: ${disabled ? 'not-allowed' : 'pointer'};
+    &:focus-visible {
       outline: 2px solid ${color.blue100};
       border-color: ${color.blue600};
     }
+  `,
+
+  dropdownLabel: css`
+    flex: 1;
+    text-align: left;
+  `,
+
+  dropdownPlaceholder: css`
+    color: ${color.cgrey400};
+  `,
+
+  dropdownCaret: css`
+    transition: transform 0.2s ease;
+  `,
+
+  dropdownMenu: css`
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    max-height: 240px;
+    overflow-y: auto;
+  `,
+
+  dropdownOption: css`
+    width: 100%;
+    padding: 10px 12px;
+    background: ${color.white};
+    border: none;
+    text-align: left;
+    ${typography.bodyR};
+    color: ${color.black};
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    &:hover {
+      background: ${color.cgrey50};
+    }
+    &:disabled {
+      color: ${color.cgrey300};
+      cursor: not-allowed;
+    }
+  `,
+
+  dropdownOptionSelected: css`
+    background: ${color.blue50};
+    color: ${color.blue600};
   `,
 
   fieldDescription: css`
