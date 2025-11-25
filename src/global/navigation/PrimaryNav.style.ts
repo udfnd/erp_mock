@@ -1,3 +1,5 @@
+'use client';
+
 import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { color } from '@/style/color';
@@ -8,250 +10,272 @@ type IT = Interpolation<Theme>;
 
 const collapsedRange = '(min-width: 960px) and (max-width: 1279px)';
 
-const navContainerBase = css({
-  position: 'sticky',
-  top: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  width: '200px',
-  maxWidth: '200px',
-  minWidth: '40px',
-  padding: '10px 12px 24px',
-  background: color.cgrey10,
-  borderRight: `1px solid ${color.cgrey100}`,
-  color: color.black,
-  gap: spacing.xl,
-  height: '100vh',
-  overflowY: 'auto',
-  overflowX: 'hidden',
-  boxSizing: 'border-box',
-  flexShrink: 0,
-  transition: 'max-width 0.2s ease-in-out, padding 0.2s ease-in-out',
-  '@media (max-width: 959px)': {
-    display: 'none',
+const navContainerBase = css`
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  max-width: 200px;
+  min-width: 40px;
+  padding: 10px 12px 24px;
+  background: ${color.cgrey10};
+  border-right: 1px solid ${color.cgrey100};
+  color: ${color.black};
+  gap: ${spacing.xl};
+  height: 100vh;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition:
+    max-width 0.2s ease-in-out,
+    padding 0.2s ease-in-out;
+  overflow-x: hidden;
+
+  @media (max-width: 959px) {
+    display: none;
+  }
+`;
+
+const navListBase = css`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${spacing.xs};
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+`;
+
+const navLinkBase = css`
+  ${typography.captionR};
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  padding: ${spacing.sm} ${spacing.base};
+  border-radius: ${radius.md};
+  text-decoration: none;
+  color: ${color.black};
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+  &:focus-visible {
+    outline: 2px solid ${color.blue400};
+    outline-offset: 4px;
+  }
+`;
+
+const navFooterBase = css`
+  display: flex;
+  flex-direction: column;
+  gap: ${spacing.sm};
+  margin-top: auto;
+  width: 100%;
+`;
+
+export const cssObj = {
+  navContainerOpen: [
+    navContainerBase,
+    css`
+      max-width: 200px;
+      padding: 10px 12px 24px;
+      align-items: initial;
+
+      @media ${collapsedRange} {
+        max-width: 200px;
+        padding: 10px 12px 24px;
+        align-items: initial;
+      }
+    `,
+  ] as IT[],
+
+  navContainerClosed: [
+    navContainerBase,
+    css`
+      max-width: 40px;
+      padding: 8px;
+      align-items: center;
+      overflow-x: hidden;
+
+      @media ${collapsedRange} {
+        max-width: 40px;
+        padding: 8px;
+        align-items: center;
+        overflow-x: hidden;
+      }
+    `,
+  ] as IT[],
+
+  toggleBar: css`
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  `,
+
+  toggleButton: css`
+    appearance: none;
+    background: transparent;
+    border: none;
+    line-height: 0;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue400};
+      outline-offset: 2px;
+    }
+  `,
+
+  icon: css`
+    width: 24px;
+    height: 24px;
+  `,
+
+  navList: {
+    show: [navListBase] as IT[],
+    hide: [navListBase, css({ display: 'none' })] as IT[],
+  } as Record<'show' | 'hide', IT[]>,
+
+  navChildList: css`
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.xs};
+    width: 100%;
+  `,
+
+  navListItem: css`
+    width: 100%;
+  `,
+
+  navLinkDepth: {
+    1: css``,
+    2: css`
+      padding-left: 20px;
+    `,
+    3: css`
+      padding-left: 32px;
+    `,
+  } as const,
+
+  navLink: {
+    active: [
+      navLinkBase,
+      css`
+        color: ${color.blue600};
+        border-radius: 8px;
+      `,
+    ] as IT[],
+    inactive: [
+      navLinkBase,
+      css`
+        &:hover {
+          background: ${color.cgrey50};
+        }
+      `,
+    ] as IT[],
+  } as Record<'active' | 'inactive', IT[]>,
+
+  navIcon: css`
+    width: 16px;
+    height: 16px;
+    border-radius: 100px;
+    background: ${color.cgrey200};
+    flex-shrink: 0;
+  `,
+
+  navIconActive: css`
+    border: 2px solid ${color.blue};
+  `,
+
+  navLabel: css`
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+
+    @media ${collapsedRange} {
+      aside[data-open='false'] & {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    }
+  `,
+
+  navLabelWeight: {
+    active: css`
+      ${typography.bodySmallSB};
+    `,
+    inactive: css`
+      ${typography.bodySmallM};
+    `,
   },
-});
 
-export const navContainerOpen: IT[] = [
-  navContainerBase,
-  css({
-    maxWidth: '200px',
-    padding: '10px 12px 24px',
-    alignItems: 'initial',
-    [`@media ${collapsedRange}`]: {
-      maxWidth: '200px',
-      padding: '10px 12px 24px',
-      alignItems: 'initial',
-    },
-  }),
-];
+  navFooter: {
+    show: [navFooterBase] as IT[],
+    hide: [navFooterBase, css({ display: 'none' })] as IT[],
+  } as Record<'show' | 'hide', IT[]>,
 
-export const navContainerClosed: IT[] = [
-  navContainerBase,
-  css({
-    maxWidth: '40px',
-    padding: '8px',
-    alignItems: 'center',
-    overflowX: 'hidden',
-    [`@media ${collapsedRange}`]: {
-      maxWidth: '40px',
-      padding: '8px',
-      alignItems: 'center',
-      overflowX: 'hidden',
-    },
-  }),
-];
+  footerVersion: css`
+    margin-top: ${spacing.md};
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  `,
 
-export const toggleBar = css({
-  display: 'flex',
-  justifyContent: 'flex-end',
-  width: '100%',
-});
+  footerBrand: css`
+    ${typography.captionR};
+    color: ${color.blue600};
+  `,
 
-export const toggleButton = css({
-  appearance: 'none',
-  background: 'transparent',
-  border: 'none',
-  lineHeight: 0,
-  cursor: 'pointer',
-  '&:focus-visible': {
-    outline: `2px solid ${color.blue400}`,
-    outlineOffset: '2px',
-  },
-});
+  footerVerText: css`
+    ${typography.captionR};
+    color: ${color.cgrey600};
+  `,
 
-export const icon = css({
-  width: '24px',
-  height: '24px',
-});
+  footerProfileSection: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${spacing.sm};
+    position: relative;
+  `,
 
-const navListBase = css({
-  listStyle: 'none',
-  margin: 0,
-  padding: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: spacing.xs,
-  flex: 1,
-  width: '100%',
-});
+  footerVersionGroup: css`
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  `,
 
-export const navList: Record<'show' | 'hide', IT[]> = {
-  show: [navListBase],
-  hide: [navListBase, css({ display: 'none' })],
+  profileTriggerButton: css`
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid ${color.cgrey200};
+    padding: 0;
+    overflow: hidden;
+    background-color: ${color.white};
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue400};
+      outline-offset: 2px;
+    }
+  `,
+
+  profileTriggerImage: css`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  `,
 };
-
-export const navChildList = css({
-  listStyle: 'none',
-  margin: 0,
-  padding: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: spacing.xs,
-  width: '100%',
-});
-
-export const navListItem = css({
-  width: '100%',
-});
-
-const navLinkBase = css({
-  ...typography.captionR,
-  display: 'flex',
-  alignItems: 'center',
-  gap: spacing.sm,
-  padding: `${spacing.sm} ${spacing.base}`,
-  borderRadius: radius.md,
-  textDecoration: 'none',
-  color: color.black,
-  transition: 'background 0.2s ease, color 0.2s ease',
-  '&:focus-visible': {
-    outline: `2px solid ${color.blue400}`,
-    outlineOffset: '4px',
-  },
-});
-
-export const navLinkDepth = {
-  1: css({}),
-  2: css({ paddingLeft: '20px' }),
-  3: css({ paddingLeft: '32px' }),
-} as const;
-
-export const navLink: Record<'active' | 'inactive', IT[]> = {
-  active: [
-    navLinkBase,
-    css({
-      color: color.blue600,
-      background: color.blue200,
-      borderRadius: '8px',
-      '&:hover': {
-        background: color.blue200,
-      },
-    }),
-  ],
-  inactive: [
-    navLinkBase,
-    css({
-      '&:hover': {
-        background: color.cgrey50,
-      },
-    }),
-  ],
-};
-
-export const navIcon = css({
-  width: '16px',
-  height: '16px',
-  borderRadius: '100px',
-  background: color.cgrey200,
-  flexShrink: 0,
-});
-
-export const navLabel = css({
-  whiteSpace: 'nowrap',
-  transition: 'opacity 0.2s ease',
-  [`@media ${collapsedRange}`]: {
-    ['aside[data-open="false"] &']: {
-      position: 'absolute',
-      width: '1px',
-      height: '1px',
-      padding: 0,
-      margin: '-1px',
-      overflow: 'hidden',
-      clip: 'rect(0, 0, 0, 0)',
-      border: 0,
-    },
-  },
-});
-
-export const navLabelWeight = {
-  active: css({ ...typography.captionB }),
-  inactive: css({ ...typography.captionR }),
-};
-
-const navFooterBase = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: spacing.sm,
-  marginTop: 'auto',
-  width: '100%',
-});
-
-export const navFooter: Record<'show' | 'hide', IT[]> = {
-  show: [navFooterBase],
-  hide: [navFooterBase, css({ display: 'none' })],
-};
-
-export const footerVersion = css({
-  marginTop: spacing.md,
-  display: 'flex',
-  alignItems: 'center',
-  gap: '2px',
-});
-
-export const footerBrand = css({
-  ...typography.captionR,
-  color: color.blue600,
-});
-
-export const footerVerText = css({
-  ...typography.captionR,
-  color: color.cgrey600,
-});
-
-export const footerProfileSection = css({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: spacing.sm,
-  position: 'relative',
-});
-
-export const footerVersionGroup = css({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '2px',
-});
-
-export const profileTriggerButton = css({
-  width: '40px',
-  height: '40px',
-  borderRadius: '50%',
-  border: `1px solid ${color.cgrey200}`,
-  padding: 0,
-  overflow: 'hidden',
-  backgroundColor: color.white,
-  cursor: 'pointer',
-  flexShrink: 0,
-  '&:focus-visible': {
-    outline: `2px solid ${color.blue400}`,
-    outlineOffset: '2px',
-  },
-});
-
-export const profileTriggerImage = css({
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-  display: 'block',
-});

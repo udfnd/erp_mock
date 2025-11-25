@@ -18,7 +18,7 @@ import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthStore, switchUser } from '@/global/auth';
 
-import * as styles from './PrimaryNav.style';
+import { cssObj } from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
 import MyProfileModal from './MyProfileModal';
 
@@ -446,29 +446,30 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     list.map((item) => {
       const isActive = getIsItemActive(item);
       const linkStyles = [
-        ...styles.navLink[isActive ? 'active' : 'inactive'],
-        styles.navLinkDepth[item.depth],
+        ...cssObj.navLink[isActive ? 'active' : 'inactive'],
+        cssObj.navLinkDepth[item.depth],
       ] as const;
       const labelStyles = [
-        styles.navLabel,
-        styles.navLabelWeight[isActive ? 'active' : 'inactive'],
+        cssObj.navLabel,
+        cssObj.navLabelWeight[isActive ? 'active' : 'inactive'],
       ] as const;
+      const iconStyles = isActive ? [cssObj.navIcon, cssObj.navIconActive] : [cssObj.navIcon];
 
       return (
-        <li key={item.key} css={styles.navListItem}>
+        <li key={item.key} css={cssObj.navListItem}>
           {item.href ? (
             <Link href={item.href} css={linkStyles} aria-current={isActive ? 'page' : undefined}>
-              <span css={styles.navIcon} aria-hidden />
+              <span css={iconStyles} aria-hidden />
               <span css={labelStyles}>{item.label}</span>
             </Link>
           ) : (
             <span css={linkStyles} aria-disabled="true">
-              <span css={styles.navIcon} aria-hidden />
+              <span css={iconStyles} aria-hidden />
               <span css={labelStyles}>{item.label}</span>
             </span>
           )}
           {item.children && item.children.length > 0 && (
-            <ul css={styles.navChildList}>{renderItems(item.children)}</ul>
+            <ul css={cssObj.navChildList}>{renderItems(item.children)}</ul>
           )}
         </li>
       );
@@ -476,39 +477,39 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
 
   return (
     <aside
-      css={effectiveIsOpen ? styles.navContainerOpen : styles.navContainerClosed}
+      css={effectiveIsOpen ? cssObj.navContainerOpen : cssObj.navContainerClosed}
       aria-label="기본 내비게이션"
       data-open={effectiveIsOpen ? 'true' : 'false'}
     >
-      <div css={styles.toggleBar}>
+      <div css={cssObj.toggleBar}>
         <button
           type="button"
-          css={styles.toggleButton}
+          css={cssObj.toggleButton}
           onClick={handleToggle}
           aria-expanded={effectiveIsOpen}
           aria-controls="primary-nav-list"
           aria-label={effectiveIsOpen ? '메뉴 접기' : '메뉴 열기'}
         >
           {effectiveIsOpen ? (
-            <SidebarCloseIcon css={styles.icon} />
+            <SidebarCloseIcon css={cssObj.icon} />
           ) : (
-            <SidebarOpenIcon css={styles.icon} />
+            <SidebarOpenIcon css={cssObj.icon} />
           )}
         </button>
       </div>
 
-      <ul id="primary-nav-list" css={styles.navList[effectiveIsOpen ? 'show' : 'hide']}>
+      <ul id="primary-nav-list" css={cssObj.navList[effectiveIsOpen ? 'show' : 'hide']}>
         {renderItems(items)}
       </ul>
 
-      <div css={styles.navFooter[effectiveIsOpen ? 'show' : 'hide']}>
+      <div css={cssObj.navFooter[effectiveIsOpen ? 'show' : 'hide']}>
         <a
           href="https://example.com/purchase-strike"
           target="_blank"
           rel="noopener noreferrer"
-          css={[...styles.navLink.inactive, styles.navLinkDepth[1]]}
+          css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1]]}
         >
-          <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>
+          <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>
             마법사 구매 및 파업 신고
           </span>
         </a>
@@ -516,27 +517,27 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
           href="https://example.com/feature-request"
           target="_blank"
           rel="noopener noreferrer"
-          css={[...styles.navLink.inactive, styles.navLinkDepth[1]]}
+          css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1]]}
         >
-          <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>기능 요청</span>
+          <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>기능 요청</span>
         </a>
         <a
           href="https://example.com/contact-dada"
           target="_blank"
           rel="noopener noreferrer"
-          css={[...styles.navLink.inactive, styles.navLinkDepth[1]]}
+          css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1]]}
         >
-          <span css={[styles.navLabel, styles.navLabelWeight.inactive]}>다다팀에 문의하기</span>
+          <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>다다팀에 문의하기</span>
         </a>
 
-        <div css={styles.footerProfileSection}>
-          <div css={styles.footerVersionGroup}>
-            <span css={styles.footerBrand}>티키타</span>
-            <span css={styles.footerVerText}>&nbsp;Ver 0.1.0</span>
+        <div css={cssObj.footerProfileSection}>
+          <div css={cssObj.footerVersionGroup}>
+            <span css={cssObj.footerBrand}>티키타</span>
+            <span css={cssObj.footerVerText}>&nbsp;Ver 0.1.0</span>
           </div>
           <button
             type="button"
-            css={styles.profileTriggerButton}
+            css={cssObj.profileTriggerButton}
             onClick={handleProfileButtonClick}
             ref={profileButtonRef}
             aria-haspopup="dialog"
@@ -548,7 +549,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
               alt="내 프로필"
               width={40}
               height={40}
-              css={styles.profileTriggerImage}
+              css={cssObj.profileTriggerImage}
               unoptimized
             />
           </button>
