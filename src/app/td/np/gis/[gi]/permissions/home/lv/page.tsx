@@ -7,13 +7,13 @@ import { ListViewLayout } from '@/common/lv/layout';
 import { extractGigwanNanoId } from '@/common/utils';
 import { useAuth } from '@/global/auth';
 import {
-  RightsidePanelsContainer,
-  MissingGigwanPanel,
-  NoSelectionPanel,
-  MultiSelectionPanel,
-  SinglePermissionPanel,
-} from '@/domain/permission/section/ListView/PermissionRightsidePanels/components';
-import { PermissionListSection, usePermissionListViewSections } from '@/domain/permission/section';
+  PermissionListSection,
+  PermissionMissingGigwanPanels,
+  PermissionMultipleSelectedPanels,
+  PermissionNoneSelectedPanels,
+  PermissionSingleSelectedPanels,
+  usePermissionListViewSections,
+} from '@/domain/permission/section';
 
 type PageParams = {
   gi?: string | string[];
@@ -24,8 +24,12 @@ export default function NpGigwanPermissionListViewPage() {
   const gigwanNanoId = extractGigwanNanoId(params?.gi);
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, sortOptions, permissionTypeOptions } =
-    usePermissionListViewSections({ gigwanNanoId, isAuthenticated });
+  const {
+    listSectionProps,
+    settingsSectionProps,
+    sortOptions,
+    permissionTypeOptions,
+  } = usePermissionListViewSections({ gigwanNanoId, isAuthenticated });
 
   const listSectionAllProps = useMemo(
     () => ({
@@ -40,6 +44,7 @@ export default function NpGigwanPermissionListViewPage() {
 
   const {
     gigwanNanoId: settingsGigwanNanoId,
+    selectedPermissions,
     isAuthenticated: settingsIsAuthenticated,
     onAfterMutation,
   } = settingsSectionProps;
@@ -47,18 +52,18 @@ export default function NpGigwanPermissionListViewPage() {
   return (
     <ListViewLayout
       key={pageKey}
-      selectedItems={settingsSectionProps.selectedPermissions}
+      selectedItems={selectedPermissions}
       isParentMissing={!settingsGigwanNanoId}
-      RightPanelWrapperComponent={RightsidePanelsContainer}
       rightPanelProps={{
         gigwanNanoId: settingsGigwanNanoId,
         isAuthenticated: settingsIsAuthenticated,
         onAfterMutation,
       }}
-      NoneSelectedComponent={NoSelectionPanel}
-      SingleSelectedComponent={SinglePermissionPanel}
-      MultipleSelectedComponent={MultiSelectionPanel}
-      MissingParentComponent={MissingGigwanPanel}
+      NoneSelectedComponent={PermissionNoneSelectedPanels}
+      SingleSelectedComponent={PermissionSingleSelectedPanels}
+      MultipleSelectedComponent={PermissionMultipleSelectedPanels}
+      MissingParentComponent={PermissionMissingGigwanPanels}
+      getMultipleSelectedProps={(permissions) => ({ permissions })}
       getSingleSelectedProps={(selectedItem, props) => ({
         nanoId: selectedItem.nanoId,
         gigwanNanoId: props.gigwanNanoId,
