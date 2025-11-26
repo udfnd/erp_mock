@@ -6,7 +6,7 @@ import { RefObject, useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/common/components';
 import type { AuthHistoryEntry } from '@/global/auth';
 
-import * as styles from './MyProfileMenu.style';
+import { cssObj } from './MyProfileMenu.style';
 
 type MyProfileMenuProps = {
   gigwanName: string | null;
@@ -61,51 +61,51 @@ export default function MyProfileMenu({
   return (
     <div
       ref={containerRef}
-      css={styles.container}
+      css={cssObj.container}
       role="dialog"
       aria-modal="false"
       aria-label="내 프로필 메뉴"
     >
-      <div css={styles.header}>
+      <div css={cssObj.header}>
         <Image
           src={profileImageUrl}
           alt="내 프로필 이미지"
           width={48}
           height={48}
-          css={styles.profileImage}
+          css={cssObj.profileImage}
           unoptimized
         />
-        <div css={styles.userInfo}>
-          <span css={styles.userName}>{userName}</span>
-          <span css={styles.gigwanName}>{gigwanName ?? '기관 정보 없음'}</span>
+        <div css={cssObj.userInfo}>
+          <span css={cssObj.userName}>{userName}</span>
+          <span css={cssObj.gigwanName}>{gigwanName ?? '기관 정보 없음'}</span>
         </div>
-        <button type="button" css={styles.closeButton} onClick={onClose} aria-label="메뉴 닫기">
+        <button type="button" css={cssObj.closeButton} onClick={onClose} aria-label="메뉴 닫기">
           ×
         </button>
       </div>
-      <div css={styles.historySection}>
-        <span css={styles.historyTitle}>같은 기관의 다른 사용자</span>
-        <div css={styles.historyList}>
+      <div css={cssObj.historySection}>
+        <span css={cssObj.historyTitle}>같은 기관의 다른 사용자</span>
+        <div css={cssObj.historyList}>
           {recentHistory.length === 0 ? (
-            <span css={styles.historyEmpty}>같은 기관의 다른 사용자가 없습니다.</span>
+            <span css={cssObj.historyEmpty}>같은 기관의 다른 사용자가 없습니다.</span>
           ) : (
             recentHistory.map((entry) => (
               <button
                 key={entry.sayongjaNanoId}
                 type="button"
-                css={styles.historyButton}
+                css={cssObj.historyButton}
                 onClick={() => onSelectHistory(entry)}
               >
-                <span css={styles.historyButtonName}>{entry.sayongjaName}</span>
+                <span css={cssObj.historyButtonName}>{entry.sayongjaName}</span>
                 {entry.gigwanName ? (
-                  <span css={styles.historyButtonGigwan}>{entry.gigwanName}</span>
+                  <span css={cssObj.historyButtonGigwan}>{entry.gigwanName}</span>
                 ) : null}
               </button>
             ))
           )}
         </div>
       </div>
-      <div css={styles.actions}>
+      <div css={cssObj.actions}>
         <Button styleType="text" variant="secondary" size="small" onClick={onLogout}>
           로그아웃
         </Button>

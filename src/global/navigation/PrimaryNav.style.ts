@@ -29,7 +29,8 @@ const navContainerBase = css`
   transition:
     max-width 0.2s ease-in-out,
     padding 0.2s ease-in-out;
-  overflow-x: hidden;
+  overflow: visible;
+  z-index: 10;
 
   @media (max-width: 959px) {
     display: none;

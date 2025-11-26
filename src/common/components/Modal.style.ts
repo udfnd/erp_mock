@@ -1,112 +1,140 @@
+'use client';
+
 import { css } from '@emotion/react';
 import { color, typography } from '@/style';
 
-export const overlayStyle = css({
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.45)',
-  backdropFilter: 'blur(4px)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1300,
-  padding: 24,
-});
+export const cssObj = {
+  overlay: css`
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+    padding: 24px;
+  `,
 
-export const modalContainerStyle = css({
-  width: 'min(840px, calc(100% - 48px))',
-  maxHeight: '80vh',
-  borderRadius: 16,
-  boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)',
-  backgroundColor: color.white,
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-});
+  modalContainer: css`
+    width: min(840px, calc(100% - 220px));
+    height: calc(100vh - 160px);
+    border-radius: 8px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+    background-color: ${color.white};
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  `,
 
-export const headerStyle = css({
-  backgroundColor: color.cgrey50,
-  padding: '24px 32px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: 16,
-});
+  header: css`
+    background-color: ${color.cgrey50};
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  `,
 
-export const titleStyle = css({
-  ...typography.titleSmallB,
-  color: color.cgrey700,
-  margin: 0,
-});
+  title: css`
+    ${typography.bodyB};
+    color: ${color.black};
+  `,
 
-export const closeButtonStyle = css({
-  border: 'none',
-  background: 'transparent',
-  color: color.cgrey500,
-  cursor: 'pointer',
-  padding: 8,
-  borderRadius: 8,
-  transition: 'background 0.2s ease, color 0.2s ease',
-  '&:hover': {
-    background: color.cgrey100,
-    color: color.cgrey600,
-  },
-  '&:focus-visible': {
-    outline: `2px solid ${color.blue}`,
-    outlineOffset: 2,
-  },
-});
+  headerButtonWrapper: css`
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  `,
 
-export const bodyLayoutStyle = css({
-  display: 'grid',
-  gridTemplateColumns: '220px 1fr',
-  minHeight: 0,
-  flex: 1,
-});
+  closeButton: css`
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: ${color.cgrey500};
+    cursor: pointer;
+    border-radius: 8px;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
 
-export const menuListStyle = css({
-  listStyle: 'none',
-  margin: 0,
-  padding: '16px 0',
-  backgroundColor: color.cgrey50,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 4,
-  overflowY: 'auto',
-});
+    > svg {
+      width: 16px;
+      height: 16px;
+    }
 
-export const menuItemStyle = css({
-  ...typography.bodyM,
-  color: color.cgrey500,
-  padding: '12px 24px',
-  cursor: 'pointer',
-  border: 'none',
-  borderRadius: 0,
-  textAlign: 'left',
-  backgroundColor: 'transparent',
-  transition: 'background 0.2s ease, color 0.2s ease',
-  '&:hover, &:focus-visible': {
-    backgroundColor: color.cgrey100,
-    color: color.cgrey600,
-    outline: 'none',
-  },
-});
+    &:hover {
+      background: ${color.cgrey100};
+      color: ${color.cgrey600};
+    }
 
-export const activeMenuItemStyle = css({
-  backgroundColor: color.blue200,
-  color: color.blue,
-  '&:hover, &:focus-visible': {
-    backgroundColor: color.blue200,
-    color: color.blue,
-  },
-});
+    &:focus-visible {
+      outline: 2px solid ${color.blue};
+      outline-offset: 2px;
+    }
+  `,
 
-export const contentWrapperStyle = css({
-  backgroundColor: color.white,
-  padding: '24px 32px',
-  overflowY: 'auto',
-});
+  bodyLayout: css`
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 0;
+    flex: 1;
+  `,
 
-export const contentInnerStyle = css({
-  minHeight: 0,
-});
+  menuList: css`
+    list-style: none;
+    margin: 0;
+    padding: 12px;
+    background-color: ${color.cgrey50};
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+  `,
+
+  menuItem: css`
+    width: 100%;
+    border-radius: 8px;
+    ${typography.captionR};
+    color: ${color.cgrey500};
+    padding: 6px 8px;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    background-color: transparent;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      background-color: ${color.cgrey100};
+      color: ${color.cgrey600};
+      outline: none;
+    }
+  `,
+
+  activeMenuItem: css`
+    background-color: ${color.blue200};
+    color: ${color.blue};
+    ${typography.captionB};
+
+    &:hover,
+    &:focus-visible {
+      background-color: ${color.blue200};
+      color: ${color.blue};
+    }
+  `,
+
+  contentWrapper: css`
+    background-color: ${color.white};
+    padding: 16px;
+    overflow: auto;
+  `,
+
+  contentInner: css`
+    min-height: 0;
+  `,
+};

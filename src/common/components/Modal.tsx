@@ -2,19 +2,8 @@
 
 import React, { ReactNode, useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  activeMenuItemStyle,
-  bodyLayoutStyle,
-  closeButtonStyle,
-  contentInnerStyle,
-  contentWrapperStyle,
-  headerStyle,
-  menuItemStyle,
-  menuListStyle,
-  modalContainerStyle,
-  overlayStyle,
-  titleStyle,
-} from './Modal.style';
+import { cssObj } from './Modal.style';
+import { CloseIcon, MovelinkIcon } from '@/common/icons';
 
 export type ModalMenu = {
   id: string;
@@ -86,34 +75,49 @@ export const Modal: React.FC<ModalProps> = ({
   }
 
   const modalContent = (
-    <div css={overlayStyle} role="presentation" onClick={onClose}>
+    <div css={cssObj.overlay} role="presentation" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        css={modalContainerStyle}
+        css={cssObj.modalContainer}
         className={className}
         onClick={(event) => event.stopPropagation()}
       >
-        <div css={headerStyle}>
-          <h2 id={titleId} css={titleStyle}>
+        <div css={cssObj.header}>
+          <h2 id={titleId} css={cssObj.title}>
             {title}
           </h2>
-          <button type="button" onClick={onClose} css={closeButtonStyle} aria-label="Close modal">
-            ×
-          </button>
+          <div css={cssObj.headerButtonWrapper}>
+            <button
+              type="button"
+              onClick={onClose}
+              css={cssObj.closeButton}
+              aria-label="Close modal"
+            >
+              <MovelinkIcon />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              css={cssObj.closeButton}
+              aria-label="Close modal"
+            >
+              <CloseIcon />
+            </button>
+          </div>
         </div>
 
-        <div css={bodyLayoutStyle}>
+        <div css={cssObj.bodyLayout}>
           <nav aria-label={`${title} 메뉴`}>
-            <ul css={menuListStyle}>
+            <ul css={cssObj.menuList}>
               {menus.map((menu) => {
                 const isActive = (effectiveActiveMenuId ?? menus[0]?.id) === menu.id;
                 return (
                   <li key={menu.id}>
                     <button
                       type="button"
-                      css={[menuItemStyle, isActive && activeMenuItemStyle]}
+                      css={[cssObj.menuItem, isActive && cssObj.activeMenuItem]}
                       onClick={() => handleSelectMenu(menu.id)}
                     >
                       {menu.label}
@@ -124,8 +128,8 @@ export const Modal: React.FC<ModalProps> = ({
             </ul>
           </nav>
 
-          <section css={contentWrapperStyle} aria-live="polite">
-            <div css={contentInnerStyle}>{activeMenu?.content}</div>
+          <section css={cssObj.contentWrapper} aria-live="polite">
+            <div css={cssObj.contentInner}>{activeMenu?.content}</div>
           </section>
         </div>
       </div>

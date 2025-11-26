@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 
 import { color, typography } from '@/style';
 
-export const modalStyles = {
+export const cssObj = {
   content: css`
     display: flex;
     flex-direction: column;
@@ -10,19 +10,16 @@ export const modalStyles = {
   `,
   tabLayout: css`
     display: flex;
-    flex-wrap: wrap;
     gap: 16px;
-    align-items: stretch;
   `,
   sectionCard: css`
     background: ${color.cgrey10};
     padding: 16px;
     border-radius: 8px;
-    flex: 1 1 360px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    min-width: 0;
+    min-width: 415px;
   `,
   sectionHeader: css`
     display: flex;
@@ -58,7 +55,7 @@ export const modalStyles = {
   `,
   infoValue: css`
     ${typography.bodyR};
-    color: ${color.cgrey800};
+    color: ${color.cgrey700};
     flex: 1;
     word-break: break-word;
     text-align: right;
@@ -100,7 +97,7 @@ export const modalStyles = {
   `,
   permissionName: css`
     ${typography.bodySB};
-    color: ${color.cgrey800};
+    color: ${color.cgrey700};
   `,
   permissionRole: css`
     ${typography.captionB};
