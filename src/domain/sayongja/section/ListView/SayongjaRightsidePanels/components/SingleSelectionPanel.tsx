@@ -58,6 +58,7 @@ export type SingleSelectionPanelContentProps = {
   permissions: { name: string; nanoId: string; role: string }[];
   onRefreshPermissions: () => Promise<unknown> | void;
   gigwanNanoId: string;
+  isAuthenticated: boolean;
   employmentCategoryOptions: { label: string; value: string }[];
   workTypeOptions: { label: string; value: string }[];
 };
@@ -119,6 +120,7 @@ export function SingleSelectionPanel({
       permissions={permissionData?.permissions ?? []}
       onRefreshPermissions={refetchPermissions}
       gigwanNanoId={gigwanNanoId}
+      isAuthenticated={isAuthenticated}
       employmentCategoryOptions={employmentCategoryOptions}
       workTypeOptions={workTypeOptions}
     />
@@ -139,6 +141,7 @@ export function SingleSelectionPanelContent({
   permissions,
   onRefreshPermissions,
   gigwanNanoId,
+  isAuthenticated,
   employmentCategoryOptions,
   workTypeOptions,
 }: SingleSelectionPanelContentProps) {
@@ -351,11 +354,18 @@ export function SingleSelectionPanelContent({
     setPermissionPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handlePermissionRowsChange = (rows: Row<Permission>[]) => {
+  const lastSelectedPermissionIdsRef = useRef<string>('');
+
+  const handlePermissionRowsChange = useCallback((rows: Row<Permission>[]) => {
     const selected = rows.map((row) => row.original);
+    const selectedIds = selected.map((item) => item.nanoId).join(',');
+
+    if (lastSelectedPermissionIdsRef.current === selectedIds) return;
+
+    lastSelectedPermissionIdsRef.current = selectedIds;
     setSelectedPermissionItems(selected);
     setSelectedPermissionNanoId(selected[0]?.nanoId ?? '');
-  };
+  }, []);
 
   const handlePermissionDimmerClick = () => {
     setIsPermissionSearchFocused(false);
