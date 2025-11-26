@@ -100,6 +100,8 @@ export const cssObj = {
   addUserContainer: css`
     position: relative;
     z-index: 2;
+    display: flex;
+    justify-content: flex-end;
   `,
   addUserPopup: css`
     position: fixed;

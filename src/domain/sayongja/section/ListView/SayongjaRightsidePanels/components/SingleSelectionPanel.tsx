@@ -1,6 +1,3 @@
-'use client';
-
-import { createPortal } from 'react-dom';
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
@@ -146,9 +143,10 @@ export function SingleSelectionPanelContent({
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [activeLinkedTab, setActiveLinkedTab] = useState('permissions');
   const permissionActionRef = useRef<HTMLDivElement>(null);
-  const [permissionTooltipPosition, setPermissionTooltipPosition] = useState<{ top: number; left: number } | null>(
-    null,
-  );
+  const [permissionTooltipPosition, setPermissionTooltipPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
@@ -261,8 +259,8 @@ export function SingleSelectionPanelContent({
       if (!container) return;
 
       const rect = container.getBoundingClientRect();
-      const left = rect.left + window.scrollX - 12 - 280;
-      const top = rect.top + window.scrollY;
+      const left = rect.left - 280 - 12;
+      const top = rect.top;
 
       setPermissionTooltipPosition({ left, top });
     };
@@ -282,7 +280,13 @@ export function SingleSelectionPanelContent({
     await permissionLinkMutation.mutateAsync({ sayongjas: [{ nanoId: sayongjaNanoId }] });
     closePermissionTooltip();
     await onRefreshPermissions();
-  }, [closePermissionTooltip, onRefreshPermissions, permissionLinkMutation, sayongjaNanoId, selectedPermissionNanoId]);
+  }, [
+    closePermissionTooltip,
+    onRefreshPermissions,
+    permissionLinkMutation,
+    sayongjaNanoId,
+    selectedPermissionNanoId,
+  ]);
 
   const handleGeneratePassword = () => {
     const generated = generateRandomPassword();
@@ -308,7 +312,10 @@ export function SingleSelectionPanelContent({
               {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
             </div>
 
-            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]} ref={permissionActionRef}>
+            <div
+              css={[cssObj.sectionActions, cssObj.permissionActionContainer]}
+              ref={permissionActionRef}
+            >
               <Button
                 styleType="outlined"
                 variant="assistive"
@@ -319,50 +326,48 @@ export function SingleSelectionPanelContent({
               >
                 권한 추가
               </Button>
-              {isPermissionTooltipOpen && permissionTooltipPosition
-                ? createPortal(
-                    <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
-                      <label css={cssObj.panelLabel}>추가할 권한 선택</label>
-                      <select
-                        css={cssObj.toolbarSelect}
-                        value={selectedPermissionNanoId}
-                        onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
-                      >
-                        <option value="">권한을 선택하세요</option>
-                        {availablePermissions.map((permission) => (
-                          <option key={permission.nanoId} value={permission.nanoId}>
-                            {permission.name}
-                          </option>
-                        ))}
-                      </select>
+              {/* createPortal 제거, position: fixed로 렌더링 */}
+              {isPermissionTooltipOpen && permissionTooltipPosition ? (
+                <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
+                  <label css={cssObj.panelLabel}>추가할 권한 선택</label>
+                  <select
+                    css={cssObj.toolbarSelect}
+                    value={selectedPermissionNanoId}
+                    onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
+                  >
+                    <option value="">권한을 선택하세요</option>
+                    {availablePermissions.map((permission) => (
+                      <option key={permission.nanoId} value={permission.nanoId}>
+                        {permission.name}
+                      </option>
+                    ))}
+                  </select>
 
-                      {permissionsQuery.isError && (
-                        <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
-                      )}
+                  {permissionsQuery.isError && (
+                    <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
+                  )}
 
-                      <div css={cssObj.permissionTooltipActions}>
-                        <Button
-                          styleType="solid"
-                          variant="secondary"
-                          size="small"
-                          onClick={handlePermissionLink}
-                          disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
-                        >
-                          연결
-                        </Button>
-                        <Button
-                          styleType="outlined"
-                          variant="assistive"
-                          size="small"
-                          onClick={closePermissionTooltip}
-                        >
-                          닫기
-                        </Button>
-                      </div>
-                    </div>,
-                    document.body,
-                  )
-                : null}
+                  <div css={cssObj.permissionTooltipActions}>
+                    <Button
+                      styleType="solid"
+                      variant="secondary"
+                      size="small"
+                      onClick={handlePermissionLink}
+                      disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
+                    >
+                      연결
+                    </Button>
+                    <Button
+                      styleType="outlined"
+                      variant="assistive"
+                      size="small"
+                      onClick={closePermissionTooltip}
+                    >
+                      닫기
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </>
         ),
