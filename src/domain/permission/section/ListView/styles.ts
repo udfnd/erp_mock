@@ -102,9 +102,7 @@ export const cssObj = {
     z-index: 2;
   `,
   addUserPopup: css`
-    position: absolute;
-    right: calc(100% + 12px);
-    top: 0;
+    position: fixed;
     width: 320px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};

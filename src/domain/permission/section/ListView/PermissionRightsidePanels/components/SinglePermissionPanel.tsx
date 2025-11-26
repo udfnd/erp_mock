@@ -1,4 +1,5 @@
-import { type FormEvent, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Checkbox, Textfield } from '@/common/components';
 import {
@@ -37,6 +38,8 @@ export function SinglePermissionPanel({
   const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
   const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
   const [activeLinkedTab, setActiveLinkedTab] = useState('users');
+  const addUserAnchorRef = useRef<HTMLDivElement>(null);
+  const [addUserPopupPosition, setAddUserPopupPosition] = useState<{ top: number; left: number } | null>(null);
 
   const { data: sayongjasData } = useGetSayongjasQuery(
     {
@@ -49,6 +52,33 @@ export function SinglePermissionPanel({
     },
   );
   const availableSayongjas = sayongjasData?.sayongjas ?? [];
+
+  useEffect(() => {
+    if (!isAddUserPopupOpen) {
+      setAddUserPopupPosition(null);
+      return;
+    }
+
+    const updatePosition = () => {
+      const anchor = addUserAnchorRef.current;
+      if (!anchor) return;
+
+      const rect = anchor.getBoundingClientRect();
+      const left = rect.left + window.scrollX - 12 - 320;
+      const top = rect.top + window.scrollY;
+
+      setAddUserPopupPosition({ left, top });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isAddUserPopupOpen]);
 
   const [nameInput, setNameInput] = useState<string | null>(null);
 
@@ -116,7 +146,7 @@ export function SinglePermissionPanel({
                 <p css={cssObj.helperText}>아직 연결된 사용자가 없습니다.</p>
               ) : null}
             </div>
-            <div css={cssObj.addUserContainer}>
+            <div css={cssObj.addUserContainer} ref={addUserAnchorRef}>
               <Button
                 styleType="outlined"
                 variant="secondary"
@@ -126,68 +156,71 @@ export function SinglePermissionPanel({
               >
                 사용자 추가
               </Button>
-              {isAddUserPopupOpen ? (
-                <div css={cssObj.addUserPopup}>
-                  <div css={cssObj.listBox}>
-                    {availableSayongjas.map((sayongja) => {
-                      const isChecked = addUserSelection.has(sayongja.nanoId);
-                      const toggle = () => toggleSayongjaSelection(sayongja.nanoId);
+              {isAddUserPopupOpen && addUserPopupPosition
+                ? createPortal(
+                    <div css={cssObj.addUserPopup} style={addUserPopupPosition}>
+                      <div css={cssObj.listBox}>
+                        {availableSayongjas.map((sayongja) => {
+                          const isChecked = addUserSelection.has(sayongja.nanoId);
+                          const toggle = () => toggleSayongjaSelection(sayongja.nanoId);
 
-                      return (
-                        <div
-                          key={sayongja.nanoId}
-                          css={cssObj.listRow}
-                          role="button"
-                          tabIndex={0}
-                          onClick={toggle}
-                          onKeyDown={(event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault();
-                              toggle();
-                            }
-                          }}
+                          return (
+                            <div
+                              key={sayongja.nanoId}
+                              css={cssObj.listRow}
+                              role="button"
+                              tabIndex={0}
+                              onClick={toggle}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  toggle();
+                                }
+                              }}
+                            >
+                              <Checkbox
+                                checked={isChecked}
+                                onChange={(event) => {
+                                  event.stopPropagation();
+                                  toggle();
+                                }}
+                                onClick={(event) => event.stopPropagation()}
+                                ariaLabel={`${sayongja.name} 선택`}
+                              />
+                              <span>
+                                {sayongja.name}
+                                {sayongja.employedAt ? ` · ${sayongja.employedAt}` : ''}
+                              </span>
+                            </div>
+                          );
+                        })}
+                        {availableSayongjas.length === 0 ? (
+                          <p css={cssObj.helperText}>추가할 사용자를 찾지 못했습니다.</p>
+                        ) : null}
+                      </div>
+                      <div css={cssObj.popupActions}>
+                        <Button
+                          styleType="solid"
+                          variant="secondary"
+                          size="small"
+                          onClick={handleApplyAddUsers}
+                          disabled={addUserSelection.size === 0 || batchlinkMutation.isPending}
                         >
-                          <Checkbox
-                            checked={isChecked}
-                            onChange={(event) => {
-                              event.stopPropagation();
-                              toggle();
-                            }}
-                            onClick={(event) => event.stopPropagation()}
-                            ariaLabel={`${sayongja.name} 선택`}
-                          />
-                          <span>
-                            {sayongja.name}
-                            {sayongja.employedAt ? ` · ${sayongja.employedAt}` : ''}
-                          </span>
-                        </div>
-                      );
-                    })}
-                    {availableSayongjas.length === 0 ? (
-                      <p css={cssObj.helperText}>추가할 사용자를 찾지 못했습니다.</p>
-                    ) : null}
-                  </div>
-                  <div css={cssObj.popupActions}>
-                    <Button
-                      styleType="solid"
-                      variant="secondary"
-                      size="small"
-                      onClick={handleApplyAddUsers}
-                      disabled={addUserSelection.size === 0 || batchlinkMutation.isPending}
-                    >
-                      적용
-                    </Button>
-                    <Button
-                      styleType="outlined"
-                      variant="assistive"
-                      size="small"
-                      onClick={clearAddUserPopup}
-                    >
-                      취소
-                    </Button>
-                  </div>
-                </div>
-              ) : null}
+                          적용
+                        </Button>
+                        <Button
+                          styleType="outlined"
+                          variant="assistive"
+                          size="small"
+                          onClick={clearAddUserPopup}
+                        >
+                          취소
+                        </Button>
+                      </div>
+                    </div>,
+                    document.body,
+                  )
+                : null}
             </div>
           </>
         ),
