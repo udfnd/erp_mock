@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Checkbox, Textfield } from '@/common/components';
 import {
@@ -51,7 +51,10 @@ export function SinglePermissionPanel({
       enabled: isAuthenticated && Boolean(gigwanNanoId) && isAddUserPopupOpen,
     },
   );
-  const availableSayongjas = sayongjasData?.sayongjas ?? [];
+  const availableSayongjas = useMemo(
+    () => sayongjasData?.sayongjas ?? [],
+    [sayongjasData?.sayongjas],
+  );
 
   useEffect(() => {
     if (!isAddUserPopupOpen) {
@@ -98,7 +101,7 @@ export function SinglePermissionPanel({
   const isSaving = updateMutation.isPending;
   const hasChanged = currentName.trim() !== originalName.trim();
 
-  const toggleSayongjaSelection = (sayongjaNanoId: string) => {
+  const toggleSayongjaSelection = useCallback((sayongjaNanoId: string) => {
     setAddUserSelection((prev) => {
       const next = new Set(prev);
       if (next.has(sayongjaNanoId)) {
@@ -108,19 +111,19 @@ export function SinglePermissionPanel({
       }
       return next;
     });
-  };
+  }, []);
 
-  const closeAddUserPopup = () => {
+  const closeAddUserPopup = useCallback(() => {
     setIsAddUserPopupOpen(false);
     setAddUserPopupPosition(null);
-  };
+  }, []);
 
-  const clearAddUserPopup = () => {
+  const clearAddUserPopup = useCallback(() => {
     closeAddUserPopup();
     setAddUserSelection(new Set());
-  };
+  }, [closeAddUserPopup]);
 
-  const toggleAddUserPopup = () => {
+  const toggleAddUserPopup = useCallback(() => {
     setIsAddUserPopupOpen((prev) => {
       const next = !prev;
 
@@ -130,9 +133,9 @@ export function SinglePermissionPanel({
 
       return next;
     });
-  };
+  }, []);
 
-  const handleApplyAddUsers = async () => {
+  const handleApplyAddUsers = useCallback(async () => {
     if (addUserSelection.size === 0) return;
     await batchlinkMutation.mutateAsync({
       sayongjas: Array.from(addUserSelection).map((nanoId) => ({ nanoId })),
@@ -140,7 +143,7 @@ export function SinglePermissionPanel({
     await refetchPermissionSayongjas();
     clearAddUserPopup();
     await onAfterMutation();
-  };
+  }, [addUserSelection, batchlinkMutation, clearAddUserPopup, onAfterMutation, refetchPermissionSayongjas]);
 
   const linkedObjectTabs = useMemo(
     () => [

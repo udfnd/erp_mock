@@ -246,7 +246,10 @@ export function SingleSelectionPanelContent({
     }
   };
 
-  const availablePermissions = permissionsQuery.data?.permissions ?? [];
+  const availablePermissions = useMemo(
+    () => permissionsQuery.data?.permissions ?? [],
+    [permissionsQuery.data?.permissions],
+  );
 
   useEffect(() => {
     if (!isPermissionTooltipOpen) {
@@ -274,12 +277,12 @@ export function SingleSelectionPanelContent({
     };
   }, [isPermissionTooltipOpen]);
 
-  const handlePermissionLink = async () => {
+  const handlePermissionLink = useCallback(async () => {
     if (!selectedPermissionNanoId) return;
     await permissionLinkMutation.mutateAsync({ sayongjas: [{ nanoId: sayongjaNanoId }] });
     closePermissionTooltip();
     await onRefreshPermissions();
-  };
+  }, [closePermissionTooltip, onRefreshPermissions, permissionLinkMutation, sayongjaNanoId, selectedPermissionNanoId]);
 
   const handleGeneratePassword = () => {
     const generated = generateRandomPassword();
