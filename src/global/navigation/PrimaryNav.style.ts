@@ -13,7 +13,7 @@ const collapsedRange = '(min-width: 960px) and (max-width: 1279px)';
 const navContainerBase = css`
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 300;
   display: flex;
   flex-direction: column;
   width: 200px;
@@ -30,7 +30,7 @@ const navContainerBase = css`
   transition:
     max-width 0.2s ease-in-out,
     padding 0.2s ease-in-out;
-  overflow-x: hidden;
+  overflow: visible;
 
   @media (max-width: 959px) {
     display: none;

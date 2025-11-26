@@ -17,7 +17,7 @@ export const container = css({
   border: `1px solid ${color.cgrey100}`,
   borderRadius: radius.md,
   boxShadow: shadow.sm,
-  zIndex: 30,
+  zIndex: 400,
 });
 
 export const header = css({
