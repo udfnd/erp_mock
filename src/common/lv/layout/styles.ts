@@ -31,7 +31,7 @@ export const cssObj = {
     max-height: 100%;
     display: flex;
     position: relative;
-    z-index: 1;
+    z-index: 2000;
     overflow: visible;
   `,
 };

@@ -183,6 +183,10 @@ export const cssObj = {
     max-height: 100%;
     height: 100%;
     overflow-y: auto;
+    overflow-x: visible;
+    position: relative;
+    z-index: 3000;
+    isolation: isolate;
   `,
 
   panelHeader: css`
@@ -302,11 +306,13 @@ export const cssObj = {
   permissionActionContainer: css`
     position: relative;
     align-items: center;
-    z-index: 2;
+    z-index: 3500;
+    overflow: visible;
   `,
   permissionTooltip: css`
     position: fixed;
-    width: 280px;
+    left: 0;
+    top: 0;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 10px;
@@ -314,8 +320,85 @@ export const cssObj = {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    z-index: 1200;
+    gap: 12px;
+    z-index: 12000;
+    max-width: calc(100vw - 32px);
+  `,
+  permissionTooltipHeader: css`
+    display: flex;
+    gap: 8px;
+  `,
+  permissionTooltipToolbar: css`
+    display: flex;
+    gap: 8px;
+  `,
+  permissionTooltipContent: css`
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 12px;
+    align-items: start;
+  `,
+  permissionTooltipListSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  permissionTooltipList: css`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 260px;
+    overflow: auto;
+  `,
+  permissionTooltipListItem: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    background: ${color.white};
+    cursor: pointer;
+    ${typography.bodySmallM};
+    color: ${color.black};
+    &:hover {
+      background: ${color.blue10};
+    }
+  `,
+  permissionTooltipListItemSelected: css`
+    border-color: ${color.blue300};
+    background: ${color.blue50};
+  `,
+  permissionLinkedBadge: css`
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: ${color.cgrey50};
+    color: ${color.cgrey600};
+    ${typography.captionM};
+  `,
+  permissionTooltipSelectedSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  permissionSelectedList: css`
+    min-height: 120px;
+    border: 1px dashed ${color.cgrey100};
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  `,
+  permissionSelectedItem: css`
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: ${color.blue10};
+    color: ${color.blue600};
+    ${typography.bodySmallM};
   `,
   permissionTooltipActions: css`
     display: flex;
