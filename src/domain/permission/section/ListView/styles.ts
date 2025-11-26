@@ -105,13 +105,54 @@ export const cssObj = {
   `,
   addUserPopup: css`
     position: fixed;
-    width: 320px;
+    width: 680px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1200;
+  `,
+  addUserPopupContent: css`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  `,
+  popupGrid: css`
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+  `,
+  popupTableWrapper: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    overflow: hidden;
+    background: ${color.white};
+  `,
+  selectedUserPanel: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: ${color.white};
+  `,
+  selectedUserLabel: css`
+    ${typography.bodySmallSB};
+    color: ${color.black};
+  `,
+  selectedUserList: css`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  `,
+  selectedUserItem: css`
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: ${color.blue10};
+    color: ${color.cgrey700};
+    ${typography.bodySmallM};
   `,
   popupActions: css`
     display: flex;

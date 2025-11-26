@@ -306,7 +306,7 @@ export const cssObj = {
   `,
   permissionTooltip: css`
     position: fixed;
-    width: 280px;
+    width: 680px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 10px;
@@ -316,6 +316,47 @@ export const cssObj = {
     flex-direction: column;
     gap: 10px;
     z-index: 100;
+  `,
+  permissionTooltipHeader: css`
+    border-bottom: 1px solid ${color.cgrey50};
+    padding-bottom: 8px;
+  `,
+  permissionTooltipContent: css`
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    align-items: start;
+  `,
+  permissionTooltipTable: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    overflow: hidden;
+    background: ${color.white};
+  `,
+  permissionTooltipSelected: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: ${color.white};
+  `,
+  selectedPermissionLabel: css`
+    ${typography.bodySmallSB};
+    color: ${color.black};
+  `,
+  selectedPermissionList: css`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  `,
+  selectedPermissionItem: css`
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: ${color.blue10};
+    color: ${color.cgrey700};
+    ${typography.bodySmallM};
   `,
   permissionTooltipActions: css`
     display: flex;

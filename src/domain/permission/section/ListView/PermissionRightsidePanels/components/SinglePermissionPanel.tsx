@@ -1,13 +1,25 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 
-import { Button, Checkbox, Textfield } from '@/common/components';
+import { Button, Textfield } from '@/common/components';
+import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
+import { ToolbarLayout } from '@/common/lv/layout';
 import {
   useBatchlinkPermissionSayongjaMutation,
   useGetPermissionDetailQuery,
   useGetPermissionSayongjasQuery,
   useUpdatePermissionMutation,
 } from '@/domain/permission/api';
-import { useGetSayongjasQuery } from '@/domain/sayongja/api';
+import { type SayongjaListItem, useGetSayongjasQuery } from '@/domain/sayongja/api';
+import { useListViewState } from '@/common/lv';
+import {
+  IS_HWALSEONG_FILTER_OPTIONS,
+  SORT_OPTIONS as SAYONGJA_SORT_OPTIONS,
+  columnHelper as sayongjaColumnHelper,
+  formatDate,
+  getSortOptionFromState as getSayongjaSortOptionFromState,
+  getSortStateFromOption as getSayongjaSortStateFromOption,
+} from '@/domain/sayongja/section/ListView/constants';
 
 import { cssObj } from '../../styles';
 
@@ -34,6 +46,18 @@ export function SinglePermissionPanel({
   const updateMutation = useUpdatePermissionMutation(nanoId);
   const batchlinkMutation = useBatchlinkPermissionSayongjaMutation(nanoId);
 
+  const addUserListState = useListViewState<SayongjaListItem>({
+    initialSorting: getSayongjaSortStateFromOption('nameAsc'),
+    initialPagination: { pageIndex: 0, pageSize: 10 },
+  });
+  const {
+    sorting: addUserSorting,
+    pagination: addUserPagination,
+    setSorting: setAddUserSorting,
+    setPagination: setAddUserPagination,
+    setRowSelection: setAddUserRowSelection,
+  } = addUserListState;
+
   const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
   const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
   const [activeLinkedTab, setActiveLinkedTab] = useState('users');
@@ -42,12 +66,31 @@ export function SinglePermissionPanel({
     top: number;
     left: number;
   } | null>(null);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userFilters, setUserFilters] = useState<{ isHwalseong: string[] }>({ isHwalseong: ['all'] });
+  const [userSortOption, setUserSortOption] = useState<string | undefined>('nameAsc');
+  const [isUserSearchFocused, setIsUserSearchFocused] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<SayongjaListItem[]>([]);
 
-  const { data: sayongjasData } = useGetSayongjasQuery(
+  const addUserSortValue =
+    getSayongjaSortOptionFromState(addUserSorting) ?? userSortOption;
+
+  const resolvedIsHwalseongFilter = userFilters.isHwalseong.includes('true') &&
+    !userFilters.isHwalseong.includes('false')
+      ? true
+      : userFilters.isHwalseong.includes('false') &&
+          !userFilters.isHwalseong.includes('true')
+        ? false
+        : undefined;
+
+  const { data: sayongjasData, isLoading: isAddUserLoading } = useGetSayongjasQuery(
     {
       gigwanNanoId,
-      pageNumber: 1,
-      pageSize: 50,
+      sayongjaNameSearch: userSearchTerm ? userSearchTerm : undefined,
+      isHwalseongFilter: resolvedIsHwalseongFilter,
+      pageNumber: addUserPagination.pageIndex + 1,
+      pageSize: addUserPagination.pageSize,
+      sortByOption: addUserSortValue,
     },
     {
       enabled: isAuthenticated && Boolean(gigwanNanoId) && isAddUserPopupOpen,
@@ -57,6 +100,96 @@ export function SinglePermissionPanel({
     () => sayongjasData?.sayongjas ?? [],
     [sayongjasData?.sayongjas],
   );
+
+  const addUserTotalCount =
+    (sayongjasData?.paginationData?.totalItemCount as number | undefined) ??
+    availableSayongjas.length;
+  const addUserTotalPages = Math.max(
+    1,
+    Math.ceil(addUserTotalCount / Math.max(addUserPagination.pageSize, 1)),
+  );
+
+  const addUserColumns = useMemo<ColumnDef<SayongjaListItem, unknown>[]>(
+    () => [
+      sayongjaColumnHelper.accessor('name', {
+        header: '이름',
+        cell: (info) => info.getValue(),
+      }),
+      sayongjaColumnHelper.accessor('employedAt', {
+        header: '입사일',
+        cell: (info) => formatDate(info.getValue()),
+      }),
+      sayongjaColumnHelper.accessor('isHwalseong', {
+        header: '활성 여부',
+        cell: (info) => (info.getValue() ? '활성' : '비활성'),
+      }),
+    ],
+    [],
+  );
+
+  const handleUserSearchChange = (value: string) => {
+    setUserSearchTerm(value);
+    setAddUserPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const handleUserFilterChange = (value: string[]) => {
+    setUserFilters({ isHwalseong: value.length ? value : ['all'] });
+    setAddUserPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const handleUserSortChange = (value: string) => {
+    setUserSortOption(value);
+    setAddUserSorting(getSayongjaSortStateFromOption(value));
+    setAddUserPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const handleSelectedUsersChange = (rows: Row<SayongjaListItem>[]) => {
+    const items = rows.map((row) => row.original);
+    setAddUserSelection(new Set(items.map((item) => item.nanoId)));
+    setSelectedUsers(items);
+  };
+
+  const handleUserDimmerClick = () => {
+    setIsUserSearchFocused(false);
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
+  const addUserToolbarFilters: ListViewFilter[] = useMemo(
+    () => [
+      {
+        key: 'isHwalseong',
+        label: '활성 여부',
+        value: userFilters.isHwalseong,
+        defaultValue: ['all'],
+        options: IS_HWALSEONG_FILTER_OPTIONS,
+        onChange: handleUserFilterChange,
+      },
+    ],
+    [handleUserFilterChange, userFilters.isHwalseong],
+  );
+
+  const addUserSortProps: ListViewSortProps = useMemo(
+    () => ({
+      label: '정렬 기준',
+      value: addUserSortValue,
+      placeholder: '정렬 기준',
+      options: SAYONGJA_SORT_OPTIONS,
+      onChange: handleUserSortChange,
+    }),
+    [addUserSortValue, handleUserSortChange],
+  );
+
+  useEffect(() => {
+    const selectionByIndex: Record<string, boolean> = {};
+    availableSayongjas.forEach((item, index) => {
+      if (addUserSelection.has(item.nanoId)) {
+        selectionByIndex[index.toString()] = true;
+      }
+    });
+    setAddUserRowSelection(selectionByIndex);
+  }, [addUserSelection, availableSayongjas, setAddUserRowSelection]);
 
   useEffect(() => {
     if (!isAddUserPopupOpen) {
@@ -68,7 +201,7 @@ export function SinglePermissionPanel({
       if (!anchor) return;
 
       const rect = anchor.getBoundingClientRect();
-      const left = rect.left - 320 - 12;
+      const left = rect.left - 680 - 12;
       const top = rect.top;
 
       setAddUserPopupPosition({ left, top });
@@ -103,18 +236,6 @@ export function SinglePermissionPanel({
   const isSaving = updateMutation.isPending;
   const hasChanged = currentName.trim() !== originalName.trim();
 
-  const toggleSayongjaSelection = useCallback((sayongjaNanoId: string) => {
-    setAddUserSelection((prev) => {
-      const next = new Set(prev);
-      if (next.has(sayongjaNanoId)) {
-        next.delete(sayongjaNanoId);
-      } else {
-        next.add(sayongjaNanoId);
-      }
-      return next;
-    });
-  }, []);
-
   const closeAddUserPopup = useCallback(() => {
     setIsAddUserPopupOpen(false);
     setAddUserPopupPosition(null);
@@ -123,7 +244,9 @@ export function SinglePermissionPanel({
   const clearAddUserPopup = useCallback(() => {
     closeAddUserPopup();
     setAddUserSelection(new Set());
-  }, [closeAddUserPopup]);
+    setSelectedUsers([]);
+    setAddUserRowSelection({});
+  }, [closeAddUserPopup, setAddUserRowSelection]);
 
   const toggleAddUserPopup = useCallback(() => {
     setIsAddUserPopupOpen((prev) => {
@@ -184,63 +307,71 @@ export function SinglePermissionPanel({
               </Button>
               {isAddUserPopupOpen && addUserPopupPosition ? (
                 <div css={cssObj.addUserPopup} style={addUserPopupPosition}>
-                  <div css={cssObj.listBox}>
-                    {availableSayongjas.map((sayongja) => {
-                      const isChecked = addUserSelection.has(sayongja.nanoId);
-                      const toggle = () => toggleSayongjaSelection(sayongja.nanoId);
-
-                      return (
-                        <div
-                          key={sayongja.nanoId}
-                          css={cssObj.listRow}
-                          role="button"
-                          tabIndex={0}
-                          onClick={toggle}
-                          onKeyDown={(event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault();
-                              toggle();
-                            }
-                          }}
-                        >
-                          <Checkbox
-                            checked={isChecked}
-                            onChange={(event) => {
-                              event.stopPropagation();
-                              toggle();
-                            }}
-                            onClick={(event) => event.stopPropagation()}
-                            ariaLabel={`${sayongja.name} 선택`}
-                          />
-                          <span>
-                            {sayongja.name}
-                            {sayongja.employedAt ? ` · ${sayongja.employedAt}` : ''}
-                          </span>
+                  <div css={cssObj.addUserPopupContent}>
+                    <ToolbarLayout
+                      search={{
+                        value: userSearchTerm,
+                        onChange: handleUserSearchChange,
+                        placeholder: '사용자 이름으로 검색',
+                      }}
+                      filters={addUserToolbarFilters}
+                      sort={addUserSortProps}
+                      totalCount={addUserTotalCount}
+                      onSearchFocusChange={setIsUserSearchFocused}
+                    />
+                    <div css={cssObj.popupGrid}>
+                      <div css={cssObj.popupTableWrapper}>
+                        <ListSection
+                          data={availableSayongjas}
+                          columns={addUserColumns}
+                          state={addUserListState}
+                          manualPagination
+                          manualSorting
+                          pageCount={addUserTotalPages}
+                          isLoading={isAddUserLoading}
+                          loadingMessage="사용자 데이터를 불러오는 중입니다..."
+                          emptyMessage="조건에 맞는 사용자가 없습니다. 검색어나 필터를 조정해 보세요."
+                          isDimmed={isUserSearchFocused}
+                          rowEventHandlers={{ selectOnClick: true }}
+                          onSelectedRowsChange={handleSelectedUsersChange}
+                          onDimmerClick={handleUserDimmerClick}
+                        />
+                      </div>
+                      <div css={cssObj.selectedUserPanel}>
+                        <span css={cssObj.selectedUserLabel}>선택된 사용자들</span>
+                        <div css={cssObj.selectedUserList}>
+                          {selectedUsers.length ? (
+                            selectedUsers.map((user) => (
+                              <div key={user.nanoId} css={cssObj.selectedUserItem}>
+                                {user.name}
+                                {user.employedAt ? ` · ${formatDate(user.employedAt)}` : ''}
+                              </div>
+                            ))
+                          ) : (
+                            <p css={cssObj.helperText}>선택된 사용자가 없습니다.</p>
+                          )}
                         </div>
-                      );
-                    })}
-                    {availableSayongjas.length === 0 ? (
-                      <p css={cssObj.helperText}>추가할 사용자를 찾지 못했습니다.</p>
-                    ) : null}
-                  </div>
-                  <div css={cssObj.popupActions}>
-                    <Button
-                      styleType="solid"
-                      variant="secondary"
-                      size="small"
-                      onClick={handleApplyAddUsers}
-                      disabled={addUserSelection.size === 0 || batchlinkMutation.isPending}
-                    >
-                      적용
-                    </Button>
-                    <Button
-                      styleType="outlined"
-                      variant="assistive"
-                      size="small"
-                      onClick={clearAddUserPopup}
-                    >
-                      취소
-                    </Button>
+                      </div>
+                    </div>
+                    <div css={cssObj.popupActions}>
+                      <Button
+                        styleType="solid"
+                        variant="secondary"
+                        size="small"
+                        onClick={handleApplyAddUsers}
+                        disabled={addUserSelection.size === 0 || batchlinkMutation.isPending}
+                      >
+                        적용
+                      </Button>
+                      <Button
+                        styleType="outlined"
+                        variant="assistive"
+                        size="small"
+                        onClick={clearAddUserPopup}
+                      >
+                        취소
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -250,16 +381,28 @@ export function SinglePermissionPanel({
       },
     ],
     [
-      addUserSelection,
+      addUserColumns,
+      addUserListState,
+      addUserPopupPosition,
+      addUserSelection.size,
+      addUserSortProps,
+      addUserToolbarFilters,
+      addUserTotalCount,
+      addUserTotalPages,
       availableSayongjas,
       batchlinkMutation.isPending,
-      addUserPopupPosition,
       clearAddUserPopup,
       handleApplyAddUsers,
+      handleSelectedUsersChange,
+      handleUserDimmerClick,
+      handleUserSearchChange,
+      isAddUserLoading,
       isAddUserPopupOpen,
-      toggleAddUserPopup,
-      toggleSayongjaSelection,
       sayongjaLinks?.sayongjas,
+      selectedUsers,
+      setIsUserSearchFocused,
+      toggleAddUserPopup,
+      userSearchTerm,
     ],
   );
 
