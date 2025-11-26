@@ -55,7 +55,6 @@ export function SinglePermissionPanel({
 
   useEffect(() => {
     if (!isAddUserPopupOpen) {
-      setAddUserPopupPosition(null);
       return;
     }
 
@@ -111,9 +110,26 @@ export function SinglePermissionPanel({
     });
   };
 
-  const clearAddUserPopup = () => {
+  const closeAddUserPopup = () => {
     setIsAddUserPopupOpen(false);
+    setAddUserPopupPosition(null);
+  };
+
+  const clearAddUserPopup = () => {
+    closeAddUserPopup();
     setAddUserSelection(new Set());
+  };
+
+  const toggleAddUserPopup = () => {
+    setIsAddUserPopupOpen((prev) => {
+      const next = !prev;
+
+      if (!next) {
+        setAddUserPopupPosition(null);
+      }
+
+      return next;
+    });
   };
 
   const handleApplyAddUsers = async () => {
@@ -131,33 +147,33 @@ export function SinglePermissionPanel({
       {
         key: 'users',
         label: '사용자들',
-        content: (
-          <>
-            <div>
-              <span css={cssObj.tag}>사용자들</span>
-            </div>
-            <div css={cssObj.listBox}>
-              {sayongjaLinks?.sayongjas.map((item) => (
-                <div key={item.nanoId} css={cssObj.listRow}>
-                  {item.name} {item.employmentSangtae ? `(${item.employmentSangtae.name})` : ''}
-                </div>
-              ))}
-              {sayongjaLinks?.sayongjas.length === 0 ? (
-                <p css={cssObj.helperText}>아직 연결된 사용자가 없습니다.</p>
-              ) : null}
-            </div>
-            <div css={cssObj.addUserContainer} ref={addUserAnchorRef}>
-              <Button
-                styleType="outlined"
-                variant="secondary"
-                size="small"
-                onClick={() => setIsAddUserPopupOpen((prev) => !prev)}
-                aria-expanded={isAddUserPopupOpen}
-              >
-                사용자 추가
-              </Button>
-              {isAddUserPopupOpen && addUserPopupPosition
-                ? createPortal(
+          content: (
+            <>
+              <div>
+                <span css={cssObj.tag}>사용자들</span>
+              </div>
+              <div css={cssObj.listBox}>
+                {sayongjaLinks?.sayongjas.map((item) => (
+                  <div key={item.nanoId} css={cssObj.listRow}>
+                    {item.name} {item.employmentSangtae ? `(${item.employmentSangtae.name})` : ''}
+                  </div>
+                ))}
+                {sayongjaLinks?.sayongjas.length === 0 ? (
+                  <p css={cssObj.helperText}>아직 연결된 사용자가 없습니다.</p>
+                ) : null}
+              </div>
+              <div css={cssObj.addUserContainer} ref={addUserAnchorRef}>
+                <Button
+                  styleType="outlined"
+                  variant="secondary"
+                  size="small"
+                  onClick={toggleAddUserPopup}
+                  aria-expanded={isAddUserPopupOpen}
+                >
+                  사용자 추가
+                </Button>
+                {isAddUserPopupOpen && addUserPopupPosition
+                  ? createPortal(
                     <div css={cssObj.addUserPopup} style={addUserPopupPosition}>
                       <div css={cssObj.listBox}>
                         {availableSayongjas.map((sayongja) => {
@@ -230,9 +246,11 @@ export function SinglePermissionPanel({
       addUserSelection,
       availableSayongjas,
       batchlinkMutation.isPending,
+      addUserPopupPosition,
       clearAddUserPopup,
       handleApplyAddUsers,
       isAddUserPopupOpen,
+      toggleAddUserPopup,
       toggleSayongjaSelection,
       sayongjaLinks?.sayongjas,
     ],
