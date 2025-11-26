@@ -305,7 +305,9 @@ export const cssObj = {
     z-index: 2;
   `,
   permissionTooltip: css`
-    position: fixed;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
     width: 520px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
@@ -315,7 +317,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 1200;
+    z-index: 5;
   `,
   permissionTooltipHeader: css`
     display: flex;

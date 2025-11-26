@@ -1,7 +1,6 @@
 'use client';
 
-import { createPortal } from 'react-dom';
-import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type FormEvent, useCallback, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -148,10 +147,6 @@ export function SingleSelectionPanelContent({
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [activeLinkedTab, setActiveLinkedTab] = useState('permissions');
-  const permissionActionRef = useRef<HTMLDivElement>(null);
-  const [permissionTooltipPosition, setPermissionTooltipPosition] = useState<{ top: number; left: number } | null>(
-    null,
-  );
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
@@ -184,7 +179,6 @@ export function SingleSelectionPanelContent({
 
   const closePermissionTooltip = useCallback(() => {
     setIsPermissionTooltipOpen(false);
-    setPermissionTooltipPosition(null);
     setSelectedPermissionNanoId('');
   }, []);
 
@@ -193,7 +187,6 @@ export function SingleSelectionPanelContent({
       const next = !prev;
 
       if (!next) {
-        setPermissionTooltipPosition(null);
         setSelectedPermissionNanoId('');
       }
 
@@ -284,32 +277,6 @@ export function SingleSelectionPanelContent({
     [availablePermissions, permissions, selectedPermissionNanoId],
   );
 
-  useEffect(() => {
-    if (!isPermissionTooltipOpen) {
-      return;
-    }
-
-    const updatePosition = () => {
-      const container = permissionActionRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const left = rect.left + window.scrollX - 12 - 280;
-      const top = rect.top + window.scrollY;
-
-      setPermissionTooltipPosition({ left, top });
-    };
-
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
-
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
-    };
-  }, [isPermissionTooltipOpen]);
-
   const handlePermissionLink = useCallback(async () => {
     if (!selectedPermissionNanoId) return;
     await permissionLinkMutation.mutateAsync({ sayongjas: [{ nanoId: sayongjaNanoId }] });
@@ -341,7 +308,7 @@ export function SingleSelectionPanelContent({
               {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
             </div>
 
-            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]} ref={permissionActionRef}>
+            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
               <Button
                 styleType="outlined"
                 variant="assistive"
@@ -352,106 +319,103 @@ export function SingleSelectionPanelContent({
               >
                 권한 추가
               </Button>
-              {isPermissionTooltipOpen && permissionTooltipPosition
-                ? createPortal(
-                    <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
-                      <div css={cssObj.permissionTooltipHeader}>
-                        <Textfield
-                          singleLine
-                          placeholder="권한 검색"
-                          value={permissionSearch}
-                          onValueChange={setPermissionSearch}
-                        />
+              {isPermissionTooltipOpen ? (
+                <div css={cssObj.permissionTooltip}>
+                  <div css={cssObj.permissionTooltipHeader}>
+                    <Textfield
+                      singleLine
+                      placeholder="권한 검색"
+                      value={permissionSearch}
+                      onValueChange={setPermissionSearch}
+                    />
+                  </div>
+
+                  <div css={cssObj.permissionTooltipToolbar}>
+                    <Button
+                      styleType="outlined"
+                      variant="assistive"
+                      size="small"
+                      onClick={() => setHideLinkedPermissions((prev) => !prev)}
+                    >
+                      {hideLinkedPermissions ? '연결 안 된 권한만 보기' : '모든 권한 보기'}
+                    </Button>
+                    <Button
+                      styleType="ghost"
+                      variant="secondary"
+                      size="small"
+                      onClick={() =>
+                        setPermissionSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+                      }
+                    >
+                      정렬: {permissionSortDirection === 'asc' ? '이름 오름차순' : '이름 내림차순'}
+                    </Button>
+                  </div>
+
+                  <div css={cssObj.permissionTooltipContent}>
+                    <div css={cssObj.permissionTooltipListSection}>
+                      <label css={cssObj.panelLabel}>검색 결과</label>
+                      <div css={cssObj.permissionTooltipList}>
+                        {filteredPermissions.map((permission) => {
+                          const isLinked = linkedPermissionIds.has(permission.nanoId);
+                          const isSelected = selectedPermissionNanoId === permission.nanoId;
+
+                          return (
+                            <button
+                              key={permission.nanoId}
+                              type="button"
+                              css={[
+                                cssObj.permissionTooltipListItem,
+                                isSelected ? cssObj.permissionTooltipListItemSelected : null,
+                              ]}
+                              onClick={() => setSelectedPermissionNanoId(permission.nanoId)}
+                            >
+                              <span>{permission.name}</span>
+                              {isLinked ? <span css={cssObj.permissionLinkedBadge}>연결됨</span> : null}
+                            </button>
+                          );
+                        })}
+                        {!filteredPermissions.length ? (
+                          <p css={cssObj.helperText}>조건에 맞는 권한이 없습니다.</p>
+                        ) : null}
+                        {permissionsQuery.isError && (
+                          <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
+                        )}
                       </div>
+                    </div>
 
-                      <div css={cssObj.permissionTooltipToolbar}>
-                        <Button
-                          styleType="outlined"
-                          variant="assistive"
-                          size="small"
-                          onClick={() => setHideLinkedPermissions((prev) => !prev)}
-                        >
-                          {hideLinkedPermissions ? '연결 안 된 권한만 보기' : '모든 권한 보기'}
-                        </Button>
-                        <Button
-                          styleType="ghost"
-                          variant="secondary"
-                          size="small"
-                          onClick={() =>
-                            setPermissionSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-                          }
-                        >
-                          정렬: {permissionSortDirection === 'asc' ? '이름 오름차순' : '이름 내림차순'}
-                        </Button>
+                    <div css={cssObj.permissionTooltipSelectedSection}>
+                      <label css={cssObj.panelLabel}>선택된 권한들</label>
+                      <div css={cssObj.permissionSelectedList}>
+                        {selectedPermission ? (
+                          <span css={cssObj.permissionSelectedItem}>{selectedPermission.name}</span>
+                        ) : (
+                          <p css={cssObj.helperText}>선택된 권한이 없습니다.</p>
+                        )}
                       </div>
+                    </div>
+                  </div>
 
-                      <div css={cssObj.permissionTooltipContent}>
-                        <div css={cssObj.permissionTooltipListSection}>
-                          <label css={cssObj.panelLabel}>검색 결과</label>
-                          <div css={cssObj.permissionTooltipList}>
-                            {filteredPermissions.map((permission) => {
-                              const isLinked = linkedPermissionIds.has(permission.nanoId);
-                              const isSelected = selectedPermissionNanoId === permission.nanoId;
-
-                              return (
-                                <button
-                                  key={permission.nanoId}
-                                  type="button"
-                                  css={[
-                                    cssObj.permissionTooltipListItem,
-                                    isSelected ? cssObj.permissionTooltipListItemSelected : null,
-                                  ]}
-                                  onClick={() => setSelectedPermissionNanoId(permission.nanoId)}
-                                >
-                                  <span>{permission.name}</span>
-                                  {isLinked ? <span css={cssObj.permissionLinkedBadge}>연결됨</span> : null}
-                                </button>
-                              );
-                            })}
-                            {!filteredPermissions.length ? (
-                              <p css={cssObj.helperText}>조건에 맞는 권한이 없습니다.</p>
-                            ) : null}
-                            {permissionsQuery.isError && (
-                              <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div css={cssObj.permissionTooltipSelectedSection}>
-                          <label css={cssObj.panelLabel}>선택된 권한들</label>
-                          <div css={cssObj.permissionSelectedList}>
-                            {selectedPermission ? (
-                              <span css={cssObj.permissionSelectedItem}>{selectedPermission.name}</span>
-                            ) : (
-                              <p css={cssObj.helperText}>선택된 권한이 없습니다.</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div css={cssObj.permissionTooltipActions}>
-                        <Button
-                          styleType="solid"
-                          variant="secondary"
-                          size="small"
-                          onClick={handlePermissionLink}
-                          disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
-                        >
-                          연결
-                        </Button>
-                        <Button
-                          styleType="outlined"
-                          variant="assistive"
-                          size="small"
-                          onClick={closePermissionTooltip}
-                        >
-                          닫기
-                        </Button>
-                      </div>
-                    </div>,
-                    document.body,
-                  )
-                : null}
+                  <div css={cssObj.permissionTooltipActions}>
+                    <Button
+                      styleType="solid"
+                      variant="secondary"
+                      size="small"
+                      onClick={handlePermissionLink}
+                      disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
+                    >
+                      연결
+                    </Button>
+                    <Button
+                      styleType="outlined"
+                      variant="assistive"
+                      size="small"
+                      onClick={closePermissionTooltip}
+                    >
+                      닫기
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </>
         ),
@@ -467,7 +431,6 @@ export function SingleSelectionPanelContent({
         linkedPermissionIds,
         permissionSearch,
         permissionSortDirection,
-        permissionTooltipPosition,
         permissionLinkMutation.isPending,
         permissions,
         permissionsQuery.isError,
