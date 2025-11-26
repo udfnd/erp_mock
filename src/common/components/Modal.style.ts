@@ -17,7 +17,7 @@ export const cssObj = {
   `,
 
   modalContainer: css`
-    width: min(840px, calc(100% - 220px));
+    width: calc(100vw - 220px);
     height: calc(100vh - 160px);
     border-radius: 8px;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);

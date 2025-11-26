@@ -20,7 +20,7 @@ export const labelWrapper = css({
 
 export const label = css({
   ...typography.bodySmallM,
-  color: color.cgrey700,
+  color: color.cgrey600,
 });
 
 export const requiredAsterisk = css({

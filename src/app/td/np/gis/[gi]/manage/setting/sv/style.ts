@@ -5,5 +5,6 @@ export const cssObj = {
     min-height: 100%;
     display: flex;
     gap: 16px;
+    padding: 16px;
   `,
 } as const;

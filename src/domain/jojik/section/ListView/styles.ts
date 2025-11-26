@@ -292,12 +292,29 @@ export const cssObj = {
   `,
 
   permissionItem: css`
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: ${color.cgrey10};
+    border: 1px solid ${color.cgrey200};
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 12px;
-    border: 1px solid ${color.cgrey100};
-    border-radius: 8px;
-    background: ${color.blue10};
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  `,
+
+  permissionName: css`
+    ${typography.bodySmallR};
+    color: ${color.cgrey400};
+  `,
+
+  permissionRole: css`
+    ${typography.captionR};
+    color: ${color.cgrey400};
   `,
 };

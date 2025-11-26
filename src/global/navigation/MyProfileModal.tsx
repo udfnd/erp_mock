@@ -2,11 +2,12 @@
 
 import React, { useMemo } from 'react';
 
-import { Modal } from '@/common/components';
+import { Modal, Textfield } from '@/common/components';
 import { useGigwanQuery } from '@/domain/gigwan/api';
 import { useGetSayongjaDetailQuery, useGetSayongjaPermissionsQuery } from '@/domain/sayongja/api';
 
 import { cssObj } from './MyProfileModal.style';
+import { LicenseIcon } from '@/common/icons';
 
 type MyProfileModalProps = {
   isOpen: boolean;
@@ -102,24 +103,45 @@ function ProfileInformationTab({
             <h3 css={cssObj.sectionTitle}>기본 정보</h3>
           </div>
           <div css={cssObj.sectionBody}>
-            <InfoRow label="이름" value={sayongja?.name ?? userName ?? '정보 없음'} />
-            <InfoRow label="로그인 아이디" value={sayongja?.loginId ?? '정보 없음'} />
-            <InfoRow label="재직 기관" value={sayongja?.employedAt ?? '정보 없음'} />
-            <InfoRow
-              label="계정 생성"
-              value={isSayongjaLoading ? '불러오는 중...' : formatDate(sayongja?.createdAt)}
+            <span css={cssObj.basicDataLabel}>기본 데이터</span>
+            <div css={cssObj.basicDataWrapper}>
+              <div>
+                <span>생성</span>
+                <p>{formatDate(sayongja?.createdAt)}</p>
+              </div>
+              <div>
+                <span>기관 소유자 여부</span>
+                <p>예</p>
+              </div>
+            </div>
+            <Textfield label="이름" value={sayongja?.name ?? ''} readOnly disabled singleLine />
+            <Textfield
+              label="입사일"
+              value={sayongja?.employedAt ?? ''}
+              readOnly
+              disabled
+              singleLine
             />
-            <InfoRow
-              label="상태"
-              value={
-                isSayongjaLoading ? (
-                  '불러오는 중...'
-                ) : statusBadges && statusBadges.length > 0 ? (
-                  <span css={cssObj.badgeRow}>{statusBadges}</span>
-                ) : (
-                  '정보 없음'
-                )
-              }
+            <Textfield
+              label="재직 상태"
+              value={sayongja?.employmentSangtae?.name ?? ''}
+              readOnly
+              disabled
+              singleLine
+            />
+            <Textfield
+              label="근무 형태"
+              value={sayongja?.workTypeSangtae?.name ?? ''}
+              readOnly
+              disabled
+              singleLine
+            />
+            <Textfield
+              label="계정 활성 상태"
+              value={sayongja?.isHwalseong ? '활성중' : '비활성중'}
+              readOnly
+              disabled
+              singleLine
             />
           </div>
         </section>
@@ -128,27 +150,16 @@ function ProfileInformationTab({
             <h3 css={cssObj.sectionTitle}>기관 정보</h3>
           </div>
           <div css={cssObj.sectionBody}>
-            <InfoRow
-              label="기관 이름"
-              value={
-                isGigwanLoading
-                  ? '불러오는 중...'
-                  : (gigwan?.name ?? '기관 정보를 불러올 수 없습니다.')
-              }
-            />
-            <InfoRow
-              label="기관 소개"
-              value={
-                gigwan?.intro || (isGigwanLoading ? '불러오는 중...' : '기관 소개가 없습니다.')
-              }
-            />
-            <InfoRow label="기관 식별자" value={gigwan?.nanoId ?? gigwanNanoId ?? '정보 없음'} />
+            <Textfield label="기관 이름" value={gigwan?.name ?? ''} readOnly disabled singleLine />
+            <Textfield label="기관 소개" value={gigwan?.intro ?? ''} readOnly disabled />
           </div>
         </section>
         <section css={cssObj.sectionCard}>
           <div css={cssObj.sectionHeader}>
             <h3 css={cssObj.sectionTitle}>기관 권한</h3>
           </div>
+          <span css={cssObj.basicDataLabel}>권한 확인</span>
+
           <div css={cssObj.sectionBody}>
             {isPermissionsLoading ? (
               <span css={cssObj.loadingText}>권한 정보를 불러오는 중입니다...</span>
@@ -156,7 +167,10 @@ function ProfileInformationTab({
               <div css={cssObj.permissionList}>
                 {permissions?.permissions?.map((permission) => (
                   <div key={permission.nanoId} css={cssObj.permissionItem}>
-                    <span css={cssObj.permissionName}>{permission.name}</span>
+                    <div>
+                      <LicenseIcon />
+                      <span css={cssObj.permissionName}>{permission.name}</span>
+                    </div>
                     <span css={cssObj.permissionRole}>{permission.role}</span>
                   </div>
                 ))}

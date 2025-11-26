@@ -9,7 +9,7 @@ import { typography } from '@/style/typo';
 export const cssObj = {
   container: css`
     position: absolute;
-    left: calc(100% + 12px);
+    left: calc(100% + 14px);
     bottom: 0;
     width: 280px;
     display: flex;
@@ -24,6 +24,15 @@ export const cssObj = {
   `,
 
   header: css`
+    margin-bottom: 8px;
+  `,
+
+  headerTitle: css`
+    ${typography.bodySB};
+    margin-bottom: 8px;
+  `,
+
+  userProfile: css`
     display: flex;
     align-items: center;
     gap: ${spacing.sm};
@@ -46,40 +55,25 @@ export const cssObj = {
   `,
 
   userName: css`
-    ${typography.bodyB};
-    color: ${color.cgrey700};
+    ${typography.bodySmallR};
+    color: ${color.black};
   `,
 
   gigwanName: css`
-    ${typography.bodySmallR};
-    color: ${color.cgrey500};
-  `,
-
-  closeButton: css`
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: ${color.cgrey400};
-    cursor: pointer;
-    padding: ${spacing.xs};
-    margin: -${spacing.xs};
-    line-height: 0;
-
-    &:focus-visible {
-      outline: 2px solid ${color.blue200};
-      outline-offset: 2px;
-    }
+    ${typography.bodyLargeB};
+    color: ${color.black};
   `,
 
   historySection: css`
+    margin-top: 16px;
     display: flex;
     flex-direction: column;
     gap: ${spacing.xs};
   `,
 
   historyTitle: css`
-    ${typography.captionB};
-    color: ${color.cgrey500};
+    ${typography.bodySB};
+    color: ${color.black};
   `,
 
   historyList: css`
@@ -130,12 +124,5 @@ export const cssObj = {
     padding: ${spacing.sm} ${spacing.base};
     border-radius: ${radius.md};
     background: ${color.cgrey10};
-  `,
-
-  actions: css`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: ${spacing.sm};
   `,
 };

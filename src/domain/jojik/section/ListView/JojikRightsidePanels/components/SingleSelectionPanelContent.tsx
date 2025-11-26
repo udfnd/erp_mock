@@ -1,13 +1,14 @@
-import type { FormEvent } from 'react';
+import React, { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
-import { LicenseIcon } from '@/common/icons';
-import type { HomepageLink, JojikPermission, UpdateJojikRequest } from '@/domain/jojik/api/jojik.schema';
+import { LicenseIcon, WebIcon } from '@/common/icons';
 import type {
-  UpdateJojikMutationResult,
-  DeleteJojikMutationResult,
-} from '../types';
+  HomepageLink,
+  JojikPermission,
+  UpdateJojikRequest,
+} from '@/domain/jojik/api/jojik.schema';
+import type { UpdateJojikMutationResult, DeleteJojikMutationResult } from '../types';
 
 import { cssObj } from '../../styles';
 
@@ -89,21 +90,14 @@ export function SingleSelectionPanelContent({
         </form>
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
-          {homepageUrl ? (
-            <div css={cssObj.homepageInfo}>
-              <span css={cssObj.panelText}>{homepageUrl.titleName}</span>
-              <a
-                css={cssObj.homepageLink}
-                href={homepageUrl.linkUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {homepageUrl.linkUrl}
-              </a>
+          <div css={cssObj.homepageInfo}>
+            <div css={cssObj.permissionItem}>
+              <div>
+                <WebIcon />
+                <input css={cssObj.permissionName}>{homepageUrl?.linkUrl}</input>
+              </div>
             </div>
-          ) : (
-            <span css={cssObj.panelText}>등록된 홈페이지 정보가 없습니다.</span>
-          )}
+          </div>
         </div>
 
         <div css={cssObj.panelSection}>
@@ -117,9 +111,9 @@ export function SingleSelectionPanelContent({
               <div key={permission.nanoId} css={cssObj.permissionItem}>
                 <div>
                   <LicenseIcon />
-                  {permission.name}
+                  <span css={cssObj.permissionName}>{permission.name}</span>
                 </div>
-                <span>{permission.sysPermissionType}</span>
+                <span css={cssObj.permissionRole}>{permission.sysPermissionType}</span>
               </div>
             ))
           )}

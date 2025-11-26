@@ -7,6 +7,8 @@ import { Button } from '@/common/components';
 import type { AuthHistoryEntry } from '@/global/auth';
 
 import { cssObj } from './MyProfileMenu.style';
+import { InfoBlackIcon, XCircleBlackIcon } from '@/common/icons';
+import PlusIcon from '@/common/icons/PlusIcon';
 
 type MyProfileMenuProps = {
   gigwanName: string | null;
@@ -67,24 +69,30 @@ export default function MyProfileMenu({
       aria-label="내 프로필 메뉴"
     >
       <div css={cssObj.header}>
-        <Image
-          src={profileImageUrl}
-          alt="내 프로필 이미지"
-          width={48}
-          height={48}
-          css={cssObj.profileImage}
-          unoptimized
-        />
-        <div css={cssObj.userInfo}>
-          <span css={cssObj.userName}>{userName}</span>
-          <span css={cssObj.gigwanName}>{gigwanName ?? '기관 정보 없음'}</span>
+        <h3 css={cssObj.headerTitle}>내 프로필</h3>
+        <div css={cssObj.userProfile}>
+          <Image
+            src={profileImageUrl}
+            alt="내 프로필 이미지"
+            width={48}
+            height={48}
+            css={cssObj.profileImage}
+            unoptimized
+          />
+          <div css={cssObj.userInfo}>
+            <span css={cssObj.userName}>{gigwanName}</span>
+            <span css={cssObj.gigwanName}>{userName}</span>
+          </div>
         </div>
-        <button type="button" css={cssObj.closeButton} onClick={onClose} aria-label="메뉴 닫기">
-          ×
-        </button>
       </div>
+      <Button variant="secondary" size="small" iconLeft={<InfoBlackIcon />} onClick={onAddUser}>
+        사용자 설정
+      </Button>
+      <Button variant="assistive" size="small" iconLeft={<XCircleBlackIcon />} onClick={onLogout}>
+        로그아웃
+      </Button>
       <div css={cssObj.historySection}>
-        <span css={cssObj.historyTitle}>같은 기관의 다른 사용자</span>
+        <span css={cssObj.historyTitle}>다른 사용자 전환</span>
         <div css={cssObj.historyList}>
           {recentHistory.length === 0 ? (
             <span css={cssObj.historyEmpty}>같은 기관의 다른 사용자가 없습니다.</span>
@@ -104,13 +112,8 @@ export default function MyProfileMenu({
             ))
           )}
         </div>
-      </div>
-      <div css={cssObj.actions}>
-        <Button styleType="text" variant="secondary" size="small" onClick={onLogout}>
-          로그아웃
-        </Button>
-        <Button styleType="outlined" variant="secondary" size="small" onClick={onAddUser}>
-          사용자 관리로 이동
+        <Button variant="assistive" iconRight={<PlusIcon />}>
+          사용자 추가
         </Button>
       </div>
     </div>
