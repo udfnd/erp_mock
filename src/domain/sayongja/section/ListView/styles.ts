@@ -316,7 +316,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 100;
+    z-index: 1200;
   `,
   permissionTooltipActions: css`
     display: flex;

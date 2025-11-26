@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -207,6 +207,14 @@ export function SingleSelectionPanelContent({
     await onAfterMutation();
   };
 
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+
+    if (generatedPassword && value !== generatedPassword) {
+      setGeneratedPassword('');
+    }
+  };
+
   const handleDelete = async () => {
     if (!window.confirm('정말로 이 사용자를 삭제하시겠습니까?')) return;
 
@@ -230,13 +238,6 @@ export function SingleSelectionPanelContent({
     setPasswordConfirm(generated);
     setGeneratedPassword(generated);
   };
-
-  useEffect(() => {
-    if (!generatedPassword) return;
-    if (password !== generatedPassword) {
-      setGeneratedPassword('');
-    }
-  }, [generatedPassword, password]);
 
   const linkedObjectTabs = useMemo(
     () => [
@@ -323,10 +324,10 @@ export function SingleSelectionPanelContent({
     ],
   );
 
-  useEffect(() => {
-    if (!linkedObjectTabs.find((tab) => tab.key === activeLinkedTab)) {
-      setActiveLinkedTab(linkedObjectTabs[0]?.key ?? '');
-    }
+  const resolvedActiveLinkedTab = useMemo(() => {
+    const hasActiveTab = linkedObjectTabs.some((tab) => tab.key === activeLinkedTab);
+
+    return hasActiveTab ? activeLinkedTab : linkedObjectTabs[0]?.key ?? '';
   }, [activeLinkedTab, linkedObjectTabs]);
 
   return (
@@ -416,7 +417,7 @@ export function SingleSelectionPanelContent({
             label="비밀번호"
             placeholder="변경 시에만 입력"
             value={password}
-            onValueChange={setPassword}
+            onValueChange={handlePasswordChange}
             helperText={passwordHelperText}
             status={hasPasswordError ? 'negative' : 'normal'}
           />
@@ -453,7 +454,7 @@ export function SingleSelectionPanelContent({
                 type="button"
                 css={[
                   cssObj.linkedNavButton,
-                  tab.key === activeLinkedTab ? cssObj.linkedNavButtonActive : null,
+                  tab.key === resolvedActiveLinkedTab ? cssObj.linkedNavButtonActive : null,
                 ]}
                 onClick={() => setActiveLinkedTab(tab.key)}
               >
@@ -462,7 +463,7 @@ export function SingleSelectionPanelContent({
             ))}
           </div>
           <div css={cssObj.linkedContent}>
-            {linkedObjectTabs.find((tab) => tab.key === activeLinkedTab)?.content ?? (
+            {linkedObjectTabs.find((tab) => tab.key === resolvedActiveLinkedTab)?.content ?? (
               <p css={cssObj.helperText}>연결된 객체가 없습니다.</p>
             )}
           </div>
