@@ -1,11 +1,16 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ColumnDef, Row } from '@tanstack/react-table';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
+import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
+import { ToolbarLayout } from '@/common/lv/layout';
 import {
   useBatchlinkPermissionSayongjaMutation,
   useGetPermissionsQuery,
 } from '@/domain/permission/api';
+import { type Permission } from '@/domain/permission/api';
+import { useGetPermissionTypesQuery } from '@/domain/system/api';
 import {
   useDeleteSayongjaMutation,
   useGetSayongjaDetailQuery,
@@ -14,6 +19,7 @@ import {
 } from '@/domain/sayongja/api';
 import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/api';
 
+import { useListViewState } from '@/common/lv';
 import { cssObj } from '../../styles';
 import {
   HWALSEONG_OPTIONS,
@@ -21,6 +27,12 @@ import {
   getPasswordConfirmHelperText,
   getPasswordHelperText,
 } from './constants';
+import {
+  SORT_OPTIONS as PERMISSION_SORT_OPTIONS,
+  columnHelper as permissionColumnHelper,
+  getSortOptionFromState as getPermissionSortOptionFromState,
+  getSortStateFromOption as getPermissionSortStateFromOption,
+} from '@/domain/permission/section/ListView/constants';
 
 export type SingleSelectionPanelProps = {
   sayongjaNanoId: string;
@@ -147,9 +159,57 @@ export function SingleSelectionPanelContent({
     top: number;
     left: number;
   } | null>(null);
+  const [permissionSearchTerm, setPermissionSearchTerm] = useState('');
+  const [permissionFilters, setPermissionFilters] = useState<{ permissionTypeNanoIds: string[] }>({
+    permissionTypeNanoIds: ['all'],
+  });
+  const [permissionSortOption, setPermissionSortOption] = useState<string | undefined>('nameAsc');
+  const [selectedPermissionItems, setSelectedPermissionItems] = useState<Permission[]>([]);
+  const [isPermissionSearchFocused, setIsPermissionSearchFocused] = useState(false);
+
+  const permissionListState = useListViewState<Permission>({
+    initialSorting: getPermissionSortStateFromOption('nameAsc'),
+    initialPagination: { pageIndex: 0, pageSize: 10 },
+  });
+  const {
+    sorting: permissionSorting,
+    pagination: permissionPagination,
+    setSorting: setPermissionSorting,
+    setPagination: setPermissionPagination,
+    setRowSelection: setPermissionRowSelection,
+  } = permissionListState;
+
+  const permissionSortValue =
+    getPermissionSortOptionFromState(permissionSorting) ?? permissionSortOption;
+
+  const { data: permissionTypesData } = useGetPermissionTypesQuery({
+    enabled: isPermissionTooltipOpen && isAuthenticated,
+  });
+
+  const permissionTypeOptions = useMemo(
+    () => [
+      { label: '전체 권한 시스템', value: 'all' },
+      ...(permissionTypesData?.permissionTypes.map((type) => ({
+        label: type.name,
+        value: type.nanoId,
+      })) ?? []),
+    ],
+    [permissionTypesData?.permissionTypes],
+  );
+
+  const permissionTypeFilters = permissionFilters.permissionTypeNanoIds.filter(
+    (value) => value !== 'all' && value !== '',
+  );
 
   const permissionsQuery = useGetPermissionsQuery(
-    { gigwanNanoId, pageNumber: 1, pageSize: 50 },
+    {
+      gigwanNanoId,
+      permissionNameSearch: permissionSearchTerm ? permissionSearchTerm : undefined,
+      permissionTypeFilters: permissionTypeFilters.length ? permissionTypeFilters : undefined,
+      pageNumber: permissionPagination.pageIndex + 1,
+      pageSize: permissionPagination.pageSize,
+      sortByOption: permissionSortValue,
+    },
     { enabled: isPermissionTooltipOpen && Boolean(gigwanNanoId) },
   );
   const permissionLinkMutation = useBatchlinkPermissionSayongjaMutation(
@@ -181,7 +241,9 @@ export function SingleSelectionPanelContent({
     setIsPermissionTooltipOpen(false);
     setPermissionTooltipPosition(null);
     setSelectedPermissionNanoId('');
-  }, []);
+    setSelectedPermissionItems([]);
+    setPermissionRowSelection({});
+  }, [setPermissionRowSelection]);
 
   const togglePermissionTooltip = useCallback(() => {
     setIsPermissionTooltipOpen((prev) => {
@@ -249,6 +311,88 @@ export function SingleSelectionPanelContent({
     [permissionsQuery.data?.permissions],
   );
 
+  const permissionTotalCount =
+    (permissionsQuery.data?.paginationData?.totalItemCount as number | undefined) ??
+    availablePermissions.length;
+  const permissionTotalPages = Math.max(
+    1,
+    Math.ceil(permissionTotalCount / Math.max(permissionPagination.pageSize, 1)),
+  );
+
+  const permissionColumns = useMemo<ColumnDef<Permission, unknown>[]>(
+    () => [
+      permissionColumnHelper.accessor('name', {
+        header: '권한명',
+        cell: (info) => info.getValue(),
+      }),
+      permissionColumnHelper.accessor((row) => row.type.name, {
+        id: 'type',
+        header: '권한 시스템 타입',
+        cell: (info) => info.getValue(),
+        enableSorting: false,
+      }),
+    ],
+    [],
+  );
+
+  const handlePermissionSearchChange = (value: string) => {
+    setPermissionSearchTerm(value);
+    setPermissionPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const handlePermissionFilterChange = (value: string[]) => {
+    setPermissionFilters({ permissionTypeNanoIds: value.length ? value : ['all'] });
+    setPermissionPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const handlePermissionSortChange = (value: string) => {
+    setPermissionSortOption(value);
+    setPermissionSorting(getPermissionSortStateFromOption(value));
+    setPermissionPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
+
+  const handlePermissionRowsChange = (rows: Row<Permission>[]) => {
+    const selected = rows.map((row) => row.original);
+    setSelectedPermissionItems(selected);
+    setSelectedPermissionNanoId(selected[0]?.nanoId ?? '');
+  };
+
+  const handlePermissionDimmerClick = () => {
+    setIsPermissionSearchFocused(false);
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
+  const permissionToolbarFilters: ListViewFilter[] = useMemo(
+    () => [
+      {
+        key: 'permissionType',
+        label: '권한 시스템',
+        value: permissionFilters.permissionTypeNanoIds,
+        defaultValue: ['all'],
+        options: permissionTypeOptions,
+        onChange: (value) => handlePermissionFilterChange(value),
+      },
+    ],
+    [
+      handlePermissionFilterChange,
+      permissionFilters.permissionTypeNanoIds,
+      permissionTypeOptions,
+    ],
+  );
+
+  const permissionSortProps: ListViewSortProps = useMemo(
+    () => ({
+      label: '정렬 기준',
+      value: permissionSortValue,
+      placeholder: '정렬 기준',
+      options: PERMISSION_SORT_OPTIONS,
+      onChange: handlePermissionSortChange,
+    }),
+    [handlePermissionSortChange, permissionSortValue],
+  );
+
   useEffect(() => {
     if (!isPermissionTooltipOpen) {
       return;
@@ -259,7 +403,7 @@ export function SingleSelectionPanelContent({
       if (!container) return;
 
       const rect = container.getBoundingClientRect();
-      const left = rect.left - 280 - 12;
+      const left = rect.left - 680 - 12;
       const top = rect.top;
 
       setPermissionTooltipPosition({ left, top });
@@ -329,19 +473,52 @@ export function SingleSelectionPanelContent({
               {/* createPortal 제거, position: fixed로 렌더링 */}
               {isPermissionTooltipOpen && permissionTooltipPosition ? (
                 <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
-                  <label css={cssObj.panelLabel}>추가할 권한 선택</label>
-                  <select
-                    css={cssObj.toolbarSelect}
-                    value={selectedPermissionNanoId}
-                    onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
-                  >
-                    <option value="">권한을 선택하세요</option>
-                    {availablePermissions.map((permission) => (
-                      <option key={permission.nanoId} value={permission.nanoId}>
-                        {permission.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div css={cssObj.permissionTooltipHeader}>
+                    <ToolbarLayout
+                      search={{
+                        value: permissionSearchTerm,
+                        onChange: handlePermissionSearchChange,
+                        placeholder: '권한 이름으로 검색',
+                      }}
+                      filters={permissionToolbarFilters}
+                      sort={permissionSortProps}
+                      totalCount={permissionTotalCount}
+                      onSearchFocusChange={setIsPermissionSearchFocused}
+                    />
+                  </div>
+                  <div css={cssObj.permissionTooltipContent}>
+                    <div css={cssObj.permissionTooltipTable}>
+                      <ListSection
+                        data={availablePermissions}
+                        columns={permissionColumns}
+                        state={permissionListState}
+                        manualPagination
+                        manualSorting
+                        pageCount={permissionTotalPages}
+                        isLoading={permissionsQuery.isLoading}
+                        loadingMessage="권한 데이터를 불러오는 중입니다..."
+                        emptyMessage="조건에 맞는 권한이 없습니다. 검색어나 필터를 조정해 보세요."
+                        isDimmed={isPermissionSearchFocused}
+                        rowEventHandlers={{ selectOnClick: true }}
+                        onSelectedRowsChange={handlePermissionRowsChange}
+                        onDimmerClick={handlePermissionDimmerClick}
+                      />
+                    </div>
+                    <div css={cssObj.permissionTooltipSelected}>
+                      <span css={cssObj.selectedPermissionLabel}>선택된 권한들</span>
+                      <div css={cssObj.selectedPermissionList}>
+                        {selectedPermissionItems.length ? (
+                          selectedPermissionItems.map((item) => (
+                            <div key={item.nanoId} css={cssObj.selectedPermissionItem}>
+                              {item.name}
+                            </div>
+                          ))
+                        ) : (
+                          <p css={cssObj.helperText}>선택된 권한이 없습니다.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
                   {permissionsQuery.isError && (
                     <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
