@@ -1,7 +1,7 @@
 import React, { FormEvent, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
-import { LicenseIcon, WebIcon } from '@/common/icons';
+import { LicenseIcon } from '@/common/icons';
 import type {
   HomepageLink,
   JojikPermission,
@@ -91,39 +91,29 @@ export function SingleSelectionPanelContent({
               helperText="30자 이내의 이름을 입력해 주세요."
               maxLength={30}
             />
+            <div css={cssObj.sectionActions}>
+              <Button
+                type="submit"
+                size="small"
+                disabled={isUpdating || name.trim() === (jojikName ?? '').trim()}
+              >
+                저장
+              </Button>
+            </div>
           </div>
 
           <div css={cssObj.panelSection}>
             <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
-            <div css={cssObj.homepageInfo}>
-              <div css={cssObj.permissionItem}>
-                <div>
-                  <WebIcon />
-                  <span css={cssObj.permissionName}>{homepage || '-'}</span>
-                </div>
-              </div>
-              <Textfield
-                singleLine
-                label="조직 홈페이지"
-                value={homepage}
-                onValueChange={setHomepage}
-                placeholder="-"
-                helperText="조직의 홈페이지 주소를 입력하거나 비워서 삭제할 수 있습니다."
-              />
+            <Textfield singleLine value={homepage} onValueChange={setHomepage} placeholder="-" />
+            <div css={cssObj.sectionActions}>
+              <Button
+                type="submit"
+                size="small"
+                disabled={isUpdating || homepage.trim() === initialHomepageUrl.trim()}
+              >
+                저장
+              </Button>
             </div>
-          </div>
-
-          <div css={cssObj.sectionActions}>
-            <Button
-              type="submit"
-              size="small"
-              disabled={
-                isUpdating ||
-                (name.trim() === (jojikName ?? '').trim() && homepage.trim() === initialHomepageUrl.trim())
-              }
-            >
-              저장
-            </Button>
           </div>
         </form>
 

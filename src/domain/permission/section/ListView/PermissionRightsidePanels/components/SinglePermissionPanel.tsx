@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useMemo, useState } from 'react';
 
 import { Button, Checkbox, Textfield } from '@/common/components';
 import {
@@ -205,10 +205,10 @@ export function SinglePermissionPanel({
     ],
   );
 
-  useEffect(() => {
-    if (!linkedObjectTabs.find((tab) => tab.key === activeLinkedTab)) {
-      setActiveLinkedTab(linkedObjectTabs[0]?.key ?? '');
-    }
+  const resolvedActiveLinkedTab = useMemo(() => {
+    const hasActiveTab = linkedObjectTabs.some((tab) => tab.key === activeLinkedTab);
+
+    return hasActiveTab ? activeLinkedTab : (linkedObjectTabs[0]?.key ?? '');
   }, [activeLinkedTab, linkedObjectTabs]);
 
   return (
@@ -236,7 +236,7 @@ export function SinglePermissionPanel({
                 type="button"
                 css={[
                   cssObj.linkedNavButton,
-                  tab.key === activeLinkedTab ? cssObj.linkedNavButtonActive : null,
+                  tab.key === resolvedActiveLinkedTab ? cssObj.linkedNavButtonActive : null,
                 ]}
                 onClick={() => setActiveLinkedTab(tab.key)}
               >
@@ -245,7 +245,7 @@ export function SinglePermissionPanel({
             ))}
           </div>
           <div css={cssObj.linkedContent}>
-            {linkedObjectTabs.find((tab) => tab.key === activeLinkedTab)?.content ?? (
+            {linkedObjectTabs.find((tab) => tab.key === resolvedActiveLinkedTab)?.content ?? (
               <p css={cssObj.helperText}>연결된 객체가 없습니다.</p>
             )}
           </div>

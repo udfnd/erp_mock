@@ -133,13 +133,13 @@ export const cssObj = {
     border-radius: 0;
     ${typography.bodySmallM};
     &:hover {
-      color: ${color.cgrey800};
+      color: ${color.cgrey700};
     }
   `,
   linkedNavButtonActive: css`
     color: ${color.black};
     font-weight: 700;
-    border-bottom-color: ${color.blue400};
+    border-bottom-color: ${color.black};
   `,
   linkedContent: css`
     display: flex;
