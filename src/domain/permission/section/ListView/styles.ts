@@ -97,19 +97,82 @@ export const cssObj = {
       background: ${color.blue10};
     }
   `,
+  addUserRowSelected: css`
+    background: ${color.blue50};
+    border: 1px solid ${color.blue300};
+  `,
+  addUserRowContent: css`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  `,
+  addUserRowMeta: css`
+    ${typography.captionM};
+    color: ${color.cgrey500};
+  `,
   addUserContainer: css`
     position: relative;
     z-index: 2;
   `,
   addUserPopup: css`
     position: fixed;
-    width: 320px;
+    width: 520px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1200;
+  `,
+  addUserPopupHeader: css`
+    display: flex;
+    gap: 8px;
+  `,
+  addUserPopupToolbar: css`
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  `,
+  addUserPopupContent: css`
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 12px;
+    margin-top: 12px;
+  `,
+  addUserListSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  addUserSelectedSection: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  permissionLinkedBadge: css`
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: ${color.cgrey50};
+    color: ${color.cgrey600};
+    ${typography.captionM};
+  `,
+  permissionSelectedList: css`
+    min-height: 120px;
+    border: 1px dashed ${color.cgrey100};
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  `,
+  permissionSelectedItem: css`
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: ${color.blue10};
+    color: ${color.blue600};
+    ${typography.bodySmallM};
   `,
   popupActions: css`
     display: flex;
