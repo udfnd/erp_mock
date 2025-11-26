@@ -105,13 +105,53 @@ export const cssObj = {
   `,
   addUserPopup: css`
     position: fixed;
-    width: 320px;
+    width: 880px;
+    max-width: 900px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;
-    padding: 12px;
+    padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1200;
+  `,
+  popupHeader: css`
+    display: flex;
+  `,
+  popupToolbar: css`
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  `,
+  popupControl: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 180px;
+  `,
+  popupBody: css`
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+  `,
+  popupTableWrapper: css`
+    flex: 3 1 0;
+    min-width: 0;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    overflow: hidden;
+    background: ${color.white};
+  `,
+  popupSelectedSection: css`
+    flex: 1 1 0;
+    min-width: 200px;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+    background: ${color.cgrey10};
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   `,
   popupActions: css`
     display: flex;
