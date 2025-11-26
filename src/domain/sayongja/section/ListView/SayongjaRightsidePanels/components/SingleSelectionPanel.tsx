@@ -1,7 +1,7 @@
 'use client';
 
 import { createPortal } from 'react-dom';
-import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -179,6 +179,25 @@ export function SingleSelectionPanelContent({
     hasPasswordError ||
     hasPasswordConfirmError;
 
+  const closePermissionTooltip = useCallback(() => {
+    setIsPermissionTooltipOpen(false);
+    setPermissionTooltipPosition(null);
+    setSelectedPermissionNanoId('');
+  }, []);
+
+  const togglePermissionTooltip = useCallback(() => {
+    setIsPermissionTooltipOpen((prev) => {
+      const next = !prev;
+
+      if (!next) {
+        setPermissionTooltipPosition(null);
+        setSelectedPermissionNanoId('');
+      }
+
+      return next;
+    });
+  }, []);
+
   const handleAttributeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const payload: UpdateSayongjaRequest = {};
@@ -231,7 +250,6 @@ export function SingleSelectionPanelContent({
 
   useEffect(() => {
     if (!isPermissionTooltipOpen) {
-      setPermissionTooltipPosition(null);
       return;
     }
 
@@ -259,8 +277,7 @@ export function SingleSelectionPanelContent({
   const handlePermissionLink = async () => {
     if (!selectedPermissionNanoId) return;
     await permissionLinkMutation.mutateAsync({ sayongjas: [{ nanoId: sayongjaNanoId }] });
-    setIsPermissionTooltipOpen(false);
-    setSelectedPermissionNanoId('');
+    closePermissionTooltip();
     await onRefreshPermissions();
   };
 
@@ -293,7 +310,7 @@ export function SingleSelectionPanelContent({
                 styleType="outlined"
                 variant="assistive"
                 isFull
-                onClick={() => setIsPermissionTooltipOpen((prev) => !prev)}
+                onClick={togglePermissionTooltip}
                 aria-expanded={isPermissionTooltipOpen}
                 iconRight={<PlusIcon />}
               >
@@ -334,7 +351,7 @@ export function SingleSelectionPanelContent({
                           styleType="outlined"
                           variant="assistive"
                           size="small"
-                          onClick={() => setIsPermissionTooltipOpen(false)}
+                          onClick={closePermissionTooltip}
                         >
                           닫기
                         </Button>
@@ -350,11 +367,14 @@ export function SingleSelectionPanelContent({
     ],
     [
       availablePermissions,
+      closePermissionTooltip,
       handlePermissionLink,
       isPermissionTooltipOpen,
+      permissionTooltipPosition,
       permissionLinkMutation.isPending,
       permissions,
       permissionsQuery.isError,
+      togglePermissionTooltip,
       selectedPermissionNanoId,
     ],
   );
