@@ -185,7 +185,7 @@ export const cssObj = {
     overflow-y: auto;
     overflow-x: visible;
     position: relative;
-    z-index: 50;
+    z-index: 3000;
     isolation: isolate;
   `,
 
@@ -306,7 +306,7 @@ export const cssObj = {
   permissionActionContainer: css`
     position: relative;
     align-items: center;
-    z-index: 60;
+    z-index: 3500;
     overflow: visible;
   `,
   permissionTooltip: css`
@@ -322,7 +322,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 80;
+    z-index: 12000;
   `,
   permissionTooltipHeader: css`
     display: flex;

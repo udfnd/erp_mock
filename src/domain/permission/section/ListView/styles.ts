@@ -28,7 +28,7 @@ export const cssObj = {
     overflow-y: auto;
     overflow-x: visible;
     position: relative;
-    z-index: 50;
+    z-index: 3000;
     isolation: isolate;
     border-left: 1px solid ${color.cgrey100};
     box-sizing: border-box;
@@ -116,7 +116,7 @@ export const cssObj = {
   `,
   addUserContainer: css`
     position: relative;
-    z-index: 60;
+    z-index: 3500;
     overflow: visible;
   `,
   addUserPopup: css`
@@ -129,7 +129,7 @@ export const cssObj = {
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    z-index: 80;
+    z-index: 12000;
   `,
   addUserPopupHeader: css`
     display: flex;
