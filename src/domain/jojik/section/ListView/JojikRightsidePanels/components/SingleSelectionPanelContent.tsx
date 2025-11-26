@@ -80,24 +80,39 @@ export function SingleSelectionPanelContent({
         <h2 css={cssObj.panelTitle}>{jojikName} 설정</h2>
       </div>
       <div css={cssObj.panelBody}>
-        <form css={cssObj.panelSection} onSubmit={handleSubmitName}>
-          <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
-          <Textfield
-            singleLine
-            label="조직명"
-            value={name}
-            onValueChange={setName}
-            helperText="30자 이내의 이름을 입력해 주세요."
-            maxLength={30}
-          />
-          <Textfield
-            singleLine
-            label="조직 홈페이지"
-            value={homepage}
-            onValueChange={setHomepage}
-            placeholder="-"
-            helperText="조직의 홈페이지 주소를 입력하거나 비워서 삭제할 수 있습니다."
-          />
+        <form onSubmit={handleSubmitName}>
+          <div css={cssObj.panelSection}>
+            <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
+            <Textfield
+              singleLine
+              label="조직명"
+              value={name}
+              onValueChange={setName}
+              helperText="30자 이내의 이름을 입력해 주세요."
+              maxLength={30}
+            />
+          </div>
+
+          <div css={cssObj.panelSection}>
+            <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
+            <div css={cssObj.homepageInfo}>
+              <div css={cssObj.permissionItem}>
+                <div>
+                  <WebIcon />
+                  <span css={cssObj.permissionName}>{homepage || '-'}</span>
+                </div>
+              </div>
+              <Textfield
+                singleLine
+                label="조직 홈페이지"
+                value={homepage}
+                onValueChange={setHomepage}
+                placeholder="-"
+                helperText="조직의 홈페이지 주소를 입력하거나 비워서 삭제할 수 있습니다."
+              />
+            </div>
+          </div>
+
           <div css={cssObj.sectionActions}>
             <Button
               type="submit"
@@ -111,17 +126,6 @@ export function SingleSelectionPanelContent({
             </Button>
           </div>
         </form>
-        <div css={cssObj.panelSection}>
-          <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
-          <div css={cssObj.homepageInfo}>
-            <div css={cssObj.permissionItem}>
-              <div>
-                <WebIcon />
-                <span css={cssObj.permissionName}>{homepage || '-'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>조직 권한</h3>

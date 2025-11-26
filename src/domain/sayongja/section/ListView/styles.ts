@@ -329,21 +329,22 @@ export const cssObj = {
     margin-bottom: 4px;
   `,
   linkedNavButton: css`
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid ${color.cgrey100};
-    background: ${color.white};
+    padding: 6px 4px;
+    border: none;
+    background: none;
     color: ${color.cgrey600};
     cursor: pointer;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
     ${typography.bodySmallM};
     &:hover {
-      background: ${color.cgrey10};
+      color: ${color.cgrey800};
     }
   `,
   linkedNavButtonActive: css`
-    background: ${color.blue50};
-    border-color: ${color.blue200};
-    color: ${color.blue700};
+    color: ${color.black};
+    font-weight: 700;
+    border-bottom-color: ${color.blue400};
   `,
   linkedContent: css`
     display: flex;
