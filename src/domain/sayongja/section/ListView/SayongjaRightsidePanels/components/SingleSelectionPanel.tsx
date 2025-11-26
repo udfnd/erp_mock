@@ -1,6 +1,7 @@
 'use client';
 
-import { type FormEvent, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -144,6 +145,10 @@ export function SingleSelectionPanelContent({
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [activeLinkedTab, setActiveLinkedTab] = useState('permissions');
+  const permissionActionRef = useRef<HTMLDivElement>(null);
+  const [permissionTooltipPosition, setPermissionTooltipPosition] = useState<{ top: number; left: number } | null>(
+    null,
+  );
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
@@ -173,6 +178,25 @@ export function SingleSelectionPanelContent({
     !passwordConfirm.trim() ||
     hasPasswordError ||
     hasPasswordConfirmError;
+
+  const closePermissionTooltip = useCallback(() => {
+    setIsPermissionTooltipOpen(false);
+    setPermissionTooltipPosition(null);
+    setSelectedPermissionNanoId('');
+  }, []);
+
+  const togglePermissionTooltip = useCallback(() => {
+    setIsPermissionTooltipOpen((prev) => {
+      const next = !prev;
+
+      if (!next) {
+        setPermissionTooltipPosition(null);
+        setSelectedPermissionNanoId('');
+      }
+
+      return next;
+    });
+  }, []);
 
   const handleAttributeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -222,15 +246,43 @@ export function SingleSelectionPanelContent({
     }
   };
 
-  const availablePermissions = permissionsQuery.data?.permissions ?? [];
+  const availablePermissions = useMemo(
+    () => permissionsQuery.data?.permissions ?? [],
+    [permissionsQuery.data?.permissions],
+  );
 
-  const handlePermissionLink = async () => {
+  useEffect(() => {
+    if (!isPermissionTooltipOpen) {
+      return;
+    }
+
+    const updatePosition = () => {
+      const container = permissionActionRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const left = rect.left + window.scrollX - 12 - 280;
+      const top = rect.top + window.scrollY;
+
+      setPermissionTooltipPosition({ left, top });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isPermissionTooltipOpen]);
+
+  const handlePermissionLink = useCallback(async () => {
     if (!selectedPermissionNanoId) return;
     await permissionLinkMutation.mutateAsync({ sayongjas: [{ nanoId: sayongjaNanoId }] });
-    setIsPermissionTooltipOpen(false);
-    setSelectedPermissionNanoId('');
+    closePermissionTooltip();
     await onRefreshPermissions();
-  };
+  }, [closePermissionTooltip, onRefreshPermissions, permissionLinkMutation, sayongjaNanoId, selectedPermissionNanoId]);
 
   const handleGeneratePassword = () => {
     const generated = generateRandomPassword();
@@ -256,58 +308,61 @@ export function SingleSelectionPanelContent({
               {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
             </div>
 
-            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
+            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]} ref={permissionActionRef}>
               <Button
                 styleType="outlined"
                 variant="assistive"
                 isFull
-                onClick={() => setIsPermissionTooltipOpen((prev) => !prev)}
+                onClick={togglePermissionTooltip}
                 aria-expanded={isPermissionTooltipOpen}
                 iconRight={<PlusIcon />}
               >
                 권한 추가
               </Button>
-              {isPermissionTooltipOpen ? (
-                <div css={cssObj.permissionTooltip}>
-                  <label css={cssObj.panelLabel}>추가할 권한 선택</label>
-                  <select
-                    css={cssObj.toolbarSelect}
-                    value={selectedPermissionNanoId}
-                    onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
-                  >
-                    <option value="">권한을 선택하세요</option>
-                    {availablePermissions.map((permission) => (
-                      <option key={permission.nanoId} value={permission.nanoId}>
-                        {permission.name}
-                      </option>
-                    ))}
-                  </select>
+              {isPermissionTooltipOpen && permissionTooltipPosition
+                ? createPortal(
+                    <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
+                      <label css={cssObj.panelLabel}>추가할 권한 선택</label>
+                      <select
+                        css={cssObj.toolbarSelect}
+                        value={selectedPermissionNanoId}
+                        onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
+                      >
+                        <option value="">권한을 선택하세요</option>
+                        {availablePermissions.map((permission) => (
+                          <option key={permission.nanoId} value={permission.nanoId}>
+                            {permission.name}
+                          </option>
+                        ))}
+                      </select>
 
-                  {permissionsQuery.isError && (
-                    <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
-                  )}
+                      {permissionsQuery.isError && (
+                        <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
+                      )}
 
-                  <div css={cssObj.permissionTooltipActions}>
-                    <Button
-                      styleType="solid"
-                      variant="secondary"
-                      size="small"
-                      onClick={handlePermissionLink}
-                      disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
-                    >
-                      연결
-                    </Button>
-                    <Button
-                      styleType="outlined"
-                      variant="assistive"
-                      size="small"
-                      onClick={() => setIsPermissionTooltipOpen(false)}
-                    >
-                      닫기
-                    </Button>
-                  </div>
-                </div>
-              ) : null}
+                      <div css={cssObj.permissionTooltipActions}>
+                        <Button
+                          styleType="solid"
+                          variant="secondary"
+                          size="small"
+                          onClick={handlePermissionLink}
+                          disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
+                        >
+                          연결
+                        </Button>
+                        <Button
+                          styleType="outlined"
+                          variant="assistive"
+                          size="small"
+                          onClick={closePermissionTooltip}
+                        >
+                          닫기
+                        </Button>
+                      </div>
+                    </div>,
+                    document.body,
+                  )
+                : null}
             </div>
           </>
         ),
@@ -315,11 +370,14 @@ export function SingleSelectionPanelContent({
     ],
     [
       availablePermissions,
+      closePermissionTooltip,
       handlePermissionLink,
       isPermissionTooltipOpen,
+      permissionTooltipPosition,
       permissionLinkMutation.isPending,
       permissions,
       permissionsQuery.isError,
+      togglePermissionTooltip,
       selectedPermissionNanoId,
     ],
   );
