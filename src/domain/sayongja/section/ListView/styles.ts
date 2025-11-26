@@ -306,21 +306,62 @@ export const cssObj = {
   `,
   permissionTooltip: css`
     position: fixed;
-    width: 280px;
+    width: 680px;
+    max-width: 680px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 10px;
-    padding: 12px;
+    padding: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     z-index: 100;
+  `,
+  permissionTooltipHeader: css`
+    display: flex;
+  `,
+  permissionTooltipToolbar: css`
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  `,
+  permissionTooltipControl: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 200px;
+  `,
+  permissionTooltipBody: css`
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+  `,
+  permissionTooltipTableWrapper: css`
+    flex: 3 1 0;
+    min-width: 0;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 10px;
+    overflow: hidden;
+    background: ${color.white};
+  `,
+  permissionTooltipSelectedSection: css`
+    flex: 1 1 0;
+    min-width: 200px;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 10px;
+    padding: 12px;
+    background: ${color.cgrey10};
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   `,
   permissionTooltipActions: css`
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+    margin-top: 4px;
   `,
   linkedNav: css`
     display: flex;

@@ -1,4 +1,10 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  type RowSelectionState,
+} from '@tanstack/react-table';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -13,6 +19,11 @@ import {
   useUpdateSayongjaMutation,
 } from '@/domain/sayongja/api';
 import type { SayongjaListItem, UpdateSayongjaRequest } from '@/domain/sayongja/api';
+import { useGetPermissionTypesQuery } from '@/domain/system/api';
+import { columnHelper as permissionColumnHelper, SORT_OPTIONS as PERMISSION_SORT_OPTIONS } from '@/domain/permission/section/ListView/constants';
+import type { Permission } from '@/domain/permission/api';
+
+import { cssObj as lvCss } from '@/common/lv/style';
 
 import { cssObj } from '../../styles';
 import {
@@ -147,9 +158,39 @@ export function SingleSelectionPanelContent({
     top: number;
     left: number;
   } | null>(null);
+  const [permissionSearch, setPermissionSearch] = useState('');
+  const [permissionSortByOption, setPermissionSortByOption] = useState<string>('nameAsc');
+  const [permissionTypeSelections, setPermissionTypeSelections] = useState<string[]>(['all']);
+  const [permissionRowSelection, setPermissionRowSelection] = useState<RowSelectionState>({});
+
+  const { data: permissionTypesData } = useGetPermissionTypesQuery({
+    enabled: isPermissionTooltipOpen,
+  });
+
+  const permissionTypeOptions = useMemo(
+    () => [
+      { label: '전체 권한 시스템', value: 'all' },
+      ...(permissionTypesData?.permissionTypes.map((item) => ({
+        label: item.name,
+        value: item.nanoId,
+      })) ?? []),
+    ],
+    [permissionTypesData?.permissionTypes],
+  );
+
+  const permissionTypeFilters = permissionTypeSelections.filter(
+    (value) => value !== 'all' && value !== '',
+  );
 
   const permissionsQuery = useGetPermissionsQuery(
-    { gigwanNanoId, pageNumber: 1, pageSize: 50 },
+    {
+      gigwanNanoId,
+      permissionNameSearch: permissionSearch || undefined,
+      permissionTypeFilters: permissionTypeFilters.length ? permissionTypeFilters : undefined,
+      pageNumber: 1,
+      pageSize: 10,
+      sortByOption: permissionSortByOption,
+    },
     { enabled: isPermissionTooltipOpen && Boolean(gigwanNanoId) },
   );
   const permissionLinkMutation = useBatchlinkPermissionSayongjaMutation(
@@ -181,6 +222,7 @@ export function SingleSelectionPanelContent({
     setIsPermissionTooltipOpen(false);
     setPermissionTooltipPosition(null);
     setSelectedPermissionNanoId('');
+    setPermissionRowSelection({});
   }, []);
 
   const togglePermissionTooltip = useCallback(() => {
@@ -190,6 +232,7 @@ export function SingleSelectionPanelContent({
       if (!next) {
         setPermissionTooltipPosition(null);
         setSelectedPermissionNanoId('');
+        setPermissionRowSelection({});
       }
 
       return next;
@@ -249,6 +292,66 @@ export function SingleSelectionPanelContent({
     [permissionsQuery.data?.permissions],
   );
 
+  const permissionColumns = useMemo(
+    () => [
+      permissionColumnHelper.accessor('name', {
+        header: '권한명',
+        cell: (info) => info.getValue(),
+      }),
+      permissionColumnHelper.accessor((row) => row.type.name, {
+        id: 'type',
+        header: '권한 시스템',
+        cell: (info) => info.getValue(),
+      }),
+    ],
+    [],
+  );
+
+  const permissionTable = useReactTable({
+    data: availablePermissions,
+    columns: permissionColumns,
+    state: { rowSelection: permissionRowSelection },
+    getCoreRowModel: getCoreRowModel(),
+    onRowSelectionChange: (updater) => {
+      setPermissionRowSelection((prev) => {
+        const nextState = typeof updater === 'function' ? updater(prev) : updater;
+        const selectedId = Object.keys(nextState).find((key) => nextState[key]);
+        setSelectedPermissionNanoId(selectedId ?? '');
+        return nextState;
+      });
+    },
+    getRowId: (row) => row.nanoId,
+    enableRowSelection: true,
+    enableMultiRowSelection: false,
+  });
+
+  const selectedPermission = useMemo(
+    () => availablePermissions.find((permission) => permission.nanoId === selectedPermissionNanoId) ?? null,
+    [availablePermissions, selectedPermissionNanoId],
+  );
+
+  useEffect(() => {
+    if (
+      selectedPermissionNanoId &&
+      !availablePermissions.some((permission) => permission.nanoId === selectedPermissionNanoId)
+    ) {
+      setSelectedPermissionNanoId('');
+      setPermissionRowSelection({});
+    }
+  }, [availablePermissions, selectedPermissionNanoId]);
+
+  useEffect(() => {
+    if (!selectedPermissionNanoId) {
+      setPermissionRowSelection({});
+      return;
+    }
+
+    setPermissionRowSelection({ [selectedPermissionNanoId]: true });
+  }, [selectedPermissionNanoId]);
+
+  const permissionTableRows = permissionTable.getRowModel().rows;
+  const permissionVisibleColumnsLength = permissionTable.getVisibleLeafColumns().length;
+
   useEffect(() => {
     if (!isPermissionTooltipOpen) {
       return;
@@ -259,7 +362,7 @@ export function SingleSelectionPanelContent({
       if (!container) return;
 
       const rect = container.getBoundingClientRect();
-      const left = rect.left - 280 - 12;
+      const left = rect.left - 780 - 12;
       const top = rect.top;
 
       setPermissionTooltipPosition({ left, top });
@@ -329,23 +432,117 @@ export function SingleSelectionPanelContent({
               {/* createPortal 제거, position: fixed로 렌더링 */}
               {isPermissionTooltipOpen && permissionTooltipPosition ? (
                 <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
-                  <label css={cssObj.panelLabel}>추가할 권한 선택</label>
-                  <select
-                    css={cssObj.toolbarSelect}
-                    value={selectedPermissionNanoId}
-                    onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
-                  >
-                    <option value="">권한을 선택하세요</option>
-                    {availablePermissions.map((permission) => (
-                      <option key={permission.nanoId} value={permission.nanoId}>
-                        {permission.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div css={cssObj.permissionTooltipHeader}>
+                    <Textfield
+                      placeholder="권한 이름으로 검색"
+                      value={permissionSearch}
+                      onValueChange={setPermissionSearch}
+                      singleLine
+                    />
+                  </div>
 
-                  {permissionsQuery.isError && (
-                    <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
-                  )}
+                  <div css={cssObj.permissionTooltipToolbar}>
+                    <div css={cssObj.permissionTooltipControl}>
+                      <label css={cssObj.panelLabel}>권한 시스템</label>
+                      <select
+                        css={cssObj.toolbarSelect}
+                        value={permissionTypeSelections[0] ?? 'all'}
+                        onChange={(event) => setPermissionTypeSelections([event.target.value])}
+                      >
+                        {permissionTypeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div css={cssObj.permissionTooltipControl}>
+                      <label css={cssObj.panelLabel}>정렬 기준</label>
+                      <select
+                        css={cssObj.toolbarSelect}
+                        value={permissionSortByOption}
+                        onChange={(event) => setPermissionSortByOption(event.target.value)}
+                      >
+                        {PERMISSION_SORT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div css={cssObj.permissionTooltipBody}>
+                    <div css={cssObj.permissionTooltipTableWrapper}>
+                      <div css={lvCss.tableWrapperContainer}>
+                        <div css={lvCss.tableWrapper}>
+                          <table css={lvCss.table}>
+                            <thead>
+                              {permissionTable.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id} css={lvCss.tableHeadRow}>
+                                  {headerGroup.headers.map((header) => (
+                                    <th key={header.id} css={lvCss.tableHeaderCell} colSpan={header.colSpan}>
+                                      {header.isPlaceholder
+                                        ? null
+                                        : flexRender(header.column.columnDef.header, header.getContext())}
+                                    </th>
+                                  ))}
+                                </tr>
+                              ))}
+                            </thead>
+                            <tbody>
+                              {permissionsQuery.isLoading ? (
+                                <tr>
+                                  <td css={lvCss.stateCell} colSpan={permissionVisibleColumnsLength}>
+                                    권한 목록을 불러오는 중입니다...
+                                  </td>
+                                </tr>
+                              ) : permissionsQuery.isError ? (
+                                <tr>
+                                  <td css={lvCss.stateCell} colSpan={permissionVisibleColumnsLength}>
+                                    권한 목록을 불러오지 못했습니다.
+                                  </td>
+                                </tr>
+                              ) : permissionTableRows.length ? (
+                                permissionTableRows.map((row) => (
+                                  <tr
+                                    key={row.id}
+                                    css={[
+                                      lvCss.tableRow,
+                                      row.getIsSelected() ? lvCss.tableRowSelected : null,
+                                    ]}
+                                    onClick={() => row.toggleSelected()}
+                                  >
+                                    {row.getVisibleCells().map((cell) => (
+                                      <td key={cell.id} css={lvCss.tableCell}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td css={lvCss.stateCell} colSpan={permissionVisibleColumnsLength}>
+                                    조건에 맞는 권한이 없습니다. 검색어나 필터를 조정해 보세요.
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <div css={cssObj.permissionTooltipSelectedSection}>
+                      <span css={cssObj.panelLabel}>선택된 권한들</span>
+                      <div css={cssObj.chipList}>
+                        {selectedPermission ? (
+                          <span css={cssObj.chip}>{selectedPermission.name}</span>
+                        ) : (
+                          <p css={cssObj.helperText}>선택된 권한이 없습니다.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
                   <div css={cssObj.permissionTooltipActions}>
                     <Button
@@ -380,8 +577,16 @@ export function SingleSelectionPanelContent({
       isPermissionTooltipOpen,
       permissionTooltipPosition,
       permissionLinkMutation.isPending,
+      permissionSearch,
+      permissionSortByOption,
+      permissionTableRows,
+      permissionTypeOptions,
+      permissionTypeSelections,
       permissions,
       permissionsQuery.isError,
+      permissionsQuery.isLoading,
+      permissionVisibleColumnsLength,
+      selectedPermission,
       togglePermissionTooltip,
       selectedPermissionNanoId,
     ],
