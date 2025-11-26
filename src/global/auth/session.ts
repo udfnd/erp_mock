@@ -10,12 +10,12 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 
+import { NEXT_PUBLIC_API_BASE_URL } from '@/env';
 import { authStore, setActiveUserId, setAccessTokenFor as cacheAccessTokenFor } from './store';
 import type { TokenSource } from './store';
 import { setApiClientAuthContext } from '../apiClient';
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://staging.api.v3.teachita.com/api';
+export const API_BASE_URL = NEXT_PUBLIC_API_BASE_URL;
 
 const SIGN_IN_PATH = `/T/dl/sayongjas/sign-in`;
 const REFRESH_SEGMENT = 'refresh-access';
