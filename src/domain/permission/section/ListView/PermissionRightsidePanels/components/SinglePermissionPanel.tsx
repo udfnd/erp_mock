@@ -58,17 +58,6 @@ export function SinglePermissionPanel({
     setRowSelection: setAddUserRowSelection,
   } = addUserListState;
 
-  const addUserSortValue =
-    getSayongjaSortOptionFromState(addUserSorting) ?? userSortOption;
-
-  const resolvedIsHwalseongFilter = userFilters.isHwalseong.includes('true') &&
-    !userFilters.isHwalseong.includes('false')
-      ? true
-      : userFilters.isHwalseong.includes('false') &&
-          !userFilters.isHwalseong.includes('true')
-        ? false
-        : undefined;
-
   const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
   const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
   const [activeLinkedTab, setActiveLinkedTab] = useState('users');
@@ -82,6 +71,17 @@ export function SinglePermissionPanel({
   const [userSortOption, setUserSortOption] = useState<string | undefined>('nameAsc');
   const [isUserSearchFocused, setIsUserSearchFocused] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<SayongjaListItem[]>([]);
+
+  const addUserSortValue =
+    getSayongjaSortOptionFromState(addUserSorting) ?? userSortOption;
+
+  const resolvedIsHwalseongFilter = userFilters.isHwalseong.includes('true') &&
+    !userFilters.isHwalseong.includes('false')
+      ? true
+      : userFilters.isHwalseong.includes('false') &&
+          !userFilters.isHwalseong.includes('true')
+        ? false
+        : undefined;
 
   const { data: sayongjasData, isLoading: isAddUserLoading } = useGetSayongjasQuery(
     {
