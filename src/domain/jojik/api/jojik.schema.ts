@@ -98,6 +98,7 @@ export const UpdateJojikRequestSchema = z.object({
   openSangtae: z.boolean().optional(),
   canAccessOpenFileSangtaeNanoId: z.string().optional(),
   canHadaLinkRequestSangtaeNanoId: z.string().optional(),
+  homepageUrl: z.string().nullable().optional(),
   homepageUrlNanoId: z.string().nullable().optional(),
   logoImageNanoId: z.string().nullable().optional(),
   openFileNanoIds: z.array(z.string()).optional(),

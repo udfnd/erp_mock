@@ -323,4 +323,41 @@ export const cssObj = {
     justify-content: flex-end;
     gap: 8px;
   `,
+  linkedNav: css`
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  `,
+  linkedNavButton: css`
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    color: ${color.cgrey600};
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    ${typography.bodySmallM};
+    &:hover {
+      color: ${color.cgrey800};
+    }
+  `,
+  linkedNavButtonActive: css`
+    color: ${color.black};
+    font-weight: 700;
+    border-bottom-color: ${color.blue400};
+  `,
+  linkedContent: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  generatedPasswordText: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey600};
+    margin: 0;
+    span {
+      ${typography.bodySmallSB};
+      color: ${color.black};
+    }
+  `,
 };

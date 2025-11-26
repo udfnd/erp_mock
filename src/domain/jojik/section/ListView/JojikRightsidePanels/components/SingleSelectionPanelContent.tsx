@@ -1,5 +1,4 @@
-import React, { FormEvent } from 'react';
-import { useState } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { LicenseIcon, WebIcon } from '@/common/icons';
@@ -35,19 +34,32 @@ export function SingleSelectionPanelContent({
   deleteMutation,
 }: SingleSelectionPanelContentProps) {
   const [name, setName] = useState(jojikName);
+  const [homepage, setHomepage] = useState(homepageUrl?.linkUrl ?? '');
   const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
+
+  const initialHomepageUrl = useMemo(() => homepageUrl?.linkUrl ?? '', [homepageUrl?.linkUrl]);
 
   const handleSubmitName = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedName = name.trim();
-    if (!trimmedName) {
+    const trimmedHomepage = homepage.trim();
+    const hasNameChange = trimmedName && trimmedName !== (jojikName ?? '').trim();
+    const hasHomepageChange = trimmedHomepage !== initialHomepageUrl.trim();
+
+    if (!hasNameChange && !hasHomepageChange) {
       return;
     }
 
-    const payload: UpdateJojikRequest = {
-      name: trimmedName,
-    };
+    const payload: UpdateJojikRequest = {};
+
+    if (hasNameChange) {
+      payload.name = trimmedName;
+    }
+
+    if (hasHomepageChange) {
+      payload.homepageUrl = trimmedHomepage || null;
+    }
 
     await updateMutation.mutateAsync(payload);
     await onAfterMutation();
@@ -68,37 +80,52 @@ export function SingleSelectionPanelContent({
         <h2 css={cssObj.panelTitle}>{jojikName} 설정</h2>
       </div>
       <div css={cssObj.panelBody}>
-        <form css={cssObj.panelSection} onSubmit={handleSubmitName}>
-          <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
-          <Textfield
-            singleLine
-            label="조직명"
-            value={name}
-            onValueChange={setName}
-            helperText="30자 이내의 이름을 입력해 주세요."
-            maxLength={30}
-          />
+        <form onSubmit={handleSubmitName}>
+          <div css={cssObj.panelSection}>
+            <h3 css={cssObj.panelSubtitle}>조직 속성</h3>
+            <Textfield
+              singleLine
+              label="조직명"
+              value={name}
+              onValueChange={setName}
+              helperText="30자 이내의 이름을 입력해 주세요."
+              maxLength={30}
+            />
+          </div>
+
+          <div css={cssObj.panelSection}>
+            <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
+            <div css={cssObj.homepageInfo}>
+              <div css={cssObj.permissionItem}>
+                <div>
+                  <WebIcon />
+                  <span css={cssObj.permissionName}>{homepage || '-'}</span>
+                </div>
+              </div>
+              <Textfield
+                singleLine
+                label="조직 홈페이지"
+                value={homepage}
+                onValueChange={setHomepage}
+                placeholder="-"
+                helperText="조직의 홈페이지 주소를 입력하거나 비워서 삭제할 수 있습니다."
+              />
+            </div>
+          </div>
+
           <div css={cssObj.sectionActions}>
             <Button
               type="submit"
               size="small"
-              disabled={isUpdating || name.trim() === (jojikName ?? '').trim()}
+              disabled={
+                isUpdating ||
+                (name.trim() === (jojikName ?? '').trim() && homepage.trim() === initialHomepageUrl.trim())
+              }
             >
               저장
             </Button>
           </div>
         </form>
-        <div css={cssObj.panelSection}>
-          <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
-          <div css={cssObj.homepageInfo}>
-            <div css={cssObj.permissionItem}>
-              <div>
-                <WebIcon />
-                <input css={cssObj.permissionName}>{homepageUrl?.linkUrl}</input>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>조직 권한</h3>

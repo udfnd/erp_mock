@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -142,6 +142,8 @@ export function SingleSelectionPanelContent({
   const [workTypeValue, setWorkTypeValue] = useState(workTypeNanoId);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [generatedPassword, setGeneratedPassword] = useState('');
+  const [activeLinkedTab, setActiveLinkedTab] = useState('permissions');
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
@@ -226,7 +228,106 @@ export function SingleSelectionPanelContent({
     const generated = generateRandomPassword();
     setPassword(generated);
     setPasswordConfirm(generated);
+    setGeneratedPassword(generated);
   };
+
+  useEffect(() => {
+    if (!generatedPassword) return;
+    if (password !== generatedPassword) {
+      setGeneratedPassword('');
+    }
+  }, [generatedPassword, password]);
+
+  const linkedObjectTabs = useMemo(
+    () => [
+      {
+        key: 'permissions',
+        label: '권한들',
+        content: (
+          <>
+            <div css={cssObj.permissionList}>
+              {permissions.map((permission) => (
+                <div key={permission.nanoId} css={cssObj.permissionItem}>
+                  <span css={cssObj.permissionName}>{permission.name}</span>
+                  <span css={cssObj.panelText}>{permission.role}</span>
+                </div>
+              ))}
+              {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
+            </div>
+
+            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
+              <Button
+                styleType="outlined"
+                variant="assistive"
+                isFull
+                onClick={() => setIsPermissionTooltipOpen((prev) => !prev)}
+                aria-expanded={isPermissionTooltipOpen}
+                iconRight={<PlusIcon />}
+              >
+                권한 추가
+              </Button>
+              {isPermissionTooltipOpen ? (
+                <div css={cssObj.permissionTooltip}>
+                  <label css={cssObj.panelLabel}>추가할 권한 선택</label>
+                  <select
+                    css={cssObj.toolbarSelect}
+                    value={selectedPermissionNanoId}
+                    onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
+                  >
+                    <option value="">권한을 선택하세요</option>
+                    {availablePermissions.map((permission) => (
+                      <option key={permission.nanoId} value={permission.nanoId}>
+                        {permission.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {permissionsQuery.isError && (
+                    <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
+                  )}
+
+                  <div css={cssObj.permissionTooltipActions}>
+                    <Button
+                      styleType="solid"
+                      variant="secondary"
+                      size="small"
+                      onClick={handlePermissionLink}
+                      disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
+                    >
+                      연결
+                    </Button>
+                    <Button
+                      styleType="outlined"
+                      variant="assistive"
+                      size="small"
+                      onClick={() => setIsPermissionTooltipOpen(false)}
+                    >
+                      닫기
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </>
+        ),
+      },
+    ],
+    [
+      availablePermissions,
+      handlePermissionLink,
+      isPermissionTooltipOpen,
+      permissionLinkMutation.isPending,
+      permissions,
+      permissionsQuery.isError,
+      selectedPermissionNanoId,
+    ],
+  );
+
+  useEffect(() => {
+    if (!linkedObjectTabs.find((tab) => tab.key === activeLinkedTab)) {
+      setActiveLinkedTab(linkedObjectTabs[0]?.key ?? '');
+    }
+  }, [activeLinkedTab, linkedObjectTabs]);
 
   return (
     <>
@@ -332,6 +433,11 @@ export function SingleSelectionPanelContent({
           <Button type="button" variant="assistive" size="small" onClick={handleGeneratePassword}>
             비밀번호 무작위 생성
           </Button>
+          {generatedPassword ? (
+            <p css={cssObj.generatedPasswordText}>
+              생성된 비밀번호: <span>{generatedPassword}</span>
+            </p>
+          ) : null}
           <div css={cssObj.sectionActions}>
             <Button type="submit" size="small" disabled={isPasswordSaveDisabled}>
               비밀번호 변경
@@ -340,69 +446,25 @@ export function SingleSelectionPanelContent({
         </form>
         <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>연결 객체들</h3>
-          <div css={cssObj.panelLabel}>권한들</div>
-          <div css={cssObj.permissionList}>
-            {permissions.map((permission) => (
-              <div key={permission.nanoId} css={cssObj.permissionItem}>
-                <span css={cssObj.permissionName}>{permission.name}</span>
-                <span css={cssObj.panelText}>{permission.role}</span>
-              </div>
+          <div css={cssObj.linkedNav}>
+            {linkedObjectTabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                css={[
+                  cssObj.linkedNavButton,
+                  tab.key === activeLinkedTab ? cssObj.linkedNavButtonActive : null,
+                ]}
+                onClick={() => setActiveLinkedTab(tab.key)}
+              >
+                {tab.label}
+              </button>
             ))}
-            {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
           </div>
-
-          <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
-            <Button
-              styleType="outlined"
-              variant="assistive"
-              isFull
-              onClick={() => setIsPermissionTooltipOpen((prev) => !prev)}
-              aria-expanded={isPermissionTooltipOpen}
-              iconRight={<PlusIcon />}
-            >
-              권한 추가
-            </Button>
-            {isPermissionTooltipOpen ? (
-              <div css={cssObj.permissionTooltip}>
-                <label css={cssObj.panelLabel}>추가할 권한 선택</label>
-                <select
-                  css={cssObj.toolbarSelect}
-                  value={selectedPermissionNanoId}
-                  onChange={(e) => setSelectedPermissionNanoId(e.target.value)}
-                >
-                  <option value="">권한을 선택하세요</option>
-                  {availablePermissions.map((permission) => (
-                    <option key={permission.nanoId} value={permission.nanoId}>
-                      {permission.name}
-                    </option>
-                  ))}
-                </select>
-
-                {permissionsQuery.isError && (
-                  <p css={cssObj.helperText}>권한 목록을 불러오지 못했습니다.</p>
-                )}
-
-                <div css={cssObj.permissionTooltipActions}>
-                  <Button
-                    styleType="solid"
-                    variant="secondary"
-                    size="small"
-                    onClick={handlePermissionLink}
-                    disabled={!selectedPermissionNanoId || permissionLinkMutation.isPending}
-                  >
-                    연결
-                  </Button>
-                  <Button
-                    styleType="outlined"
-                    variant="assistive"
-                    size="small"
-                    onClick={() => setIsPermissionTooltipOpen(false)}
-                  >
-                    닫기
-                  </Button>
-                </div>
-              </div>
-            ) : null}
+          <div css={cssObj.linkedContent}>
+            {linkedObjectTabs.find((tab) => tab.key === activeLinkedTab)?.content ?? (
+              <p css={cssObj.helperText}>연결된 객체가 없습니다.</p>
+            )}
           </div>
         </div>
 
