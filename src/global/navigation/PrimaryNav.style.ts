@@ -13,6 +13,7 @@ const collapsedRange = '(min-width: 960px) and (max-width: 1279px)';
 const navContainerBase = css`
   position: sticky;
   top: 0;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   width: 200px;
