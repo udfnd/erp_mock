@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useCallback, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
@@ -23,6 +23,8 @@ import {
   getPasswordConfirmHelperText,
   getPasswordHelperText,
 } from './constants';
+
+const PERMISSION_POPUP_WIDTH = 520;
 
 export type SingleSelectionPanelProps = {
   sayongjaNanoId: string;
@@ -136,6 +138,8 @@ export function SingleSelectionPanelContent({
   const [employedAtValue, setEmployedAtValue] = useState(employedAt ?? '');
   const [loginIdValue, setLoginIdValue] = useState(loginId ?? '');
   const [isPermissionTooltipOpen, setIsPermissionTooltipOpen] = useState(false);
+  const [permissionPopupCoords, setPermissionPopupCoords] =
+    useState<{ top: number; left: number } | null>(null);
   const [selectedPermissionNanoId, setSelectedPermissionNanoId] = useState('');
   const [permissionSearch, setPermissionSearch] = useState('');
   const [hideLinkedPermissions, setHideLinkedPermissions] = useState(false);
@@ -147,6 +151,7 @@ export function SingleSelectionPanelContent({
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [activeLinkedTab, setActiveLinkedTab] = useState('permissions');
+  const permissionTriggerRef = useRef<HTMLDivElement | null>(null);
 
   const permissionsQuery = useGetPermissionsQuery(
     { gigwanNanoId, pageNumber: 1, pageSize: 50 },
@@ -177,22 +182,54 @@ export function SingleSelectionPanelContent({
     hasPasswordError ||
     hasPasswordConfirmError;
 
+  const updatePermissionPopupCoords = useCallback(() => {
+    if (!permissionTriggerRef.current) return;
+
+    const triggerRect = permissionTriggerRef.current.getBoundingClientRect();
+    const horizontalPadding = 16;
+    const maxLeft = window.innerWidth - PERMISSION_POPUP_WIDTH - horizontalPadding;
+    const nextLeft = Math.min(Math.max(horizontalPadding, triggerRect.right - PERMISSION_POPUP_WIDTH), maxLeft);
+    const nextTop = triggerRect.bottom + 8;
+
+    setPermissionPopupCoords({ left: nextLeft, top: nextTop });
+  }, []);
+
   const closePermissionTooltip = useCallback(() => {
     setIsPermissionTooltipOpen(false);
     setSelectedPermissionNanoId('');
+    setPermissionPopupCoords(null);
   }, []);
 
   const togglePermissionTooltip = useCallback(() => {
     setIsPermissionTooltipOpen((prev) => {
       const next = !prev;
 
-      if (!next) {
+      if (next) {
+        requestAnimationFrame(() => updatePermissionPopupCoords());
+      } else {
         setSelectedPermissionNanoId('');
+        setPermissionPopupCoords(null);
       }
 
       return next;
     });
-  }, []);
+  }, [updatePermissionPopupCoords]);
+
+  useEffect(() => {
+    if (!isPermissionTooltipOpen) return undefined;
+
+    updatePermissionPopupCoords();
+
+    const handleWindowChange = () => updatePermissionPopupCoords();
+
+    window.addEventListener('resize', handleWindowChange);
+    window.addEventListener('scroll', handleWindowChange, true);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowChange);
+      window.removeEventListener('scroll', handleWindowChange, true);
+    };
+  }, [isPermissionTooltipOpen, updatePermissionPopupCoords]);
 
   const handleAttributeSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -308,7 +345,7 @@ export function SingleSelectionPanelContent({
               {!permissions.length && <p css={cssObj.helperText}>아직 연결된 권한이 없습니다.</p>}
             </div>
 
-            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]}>
+            <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]} ref={permissionTriggerRef}>
               <Button
                 styleType="outlined"
                 variant="assistive"
@@ -320,7 +357,18 @@ export function SingleSelectionPanelContent({
                 권한 추가
               </Button>
               {isPermissionTooltipOpen ? (
-                <div css={cssObj.permissionTooltip}>
+                <div
+                  css={cssObj.permissionTooltip}
+                  style={
+                    permissionPopupCoords
+                      ? {
+                          left: permissionPopupCoords.left,
+                          top: permissionPopupCoords.top,
+                          width: PERMISSION_POPUP_WIDTH,
+                        }
+                      : undefined
+                  }
+                >
                   <div css={cssObj.permissionTooltipHeader}>
                     <Textfield
                       singleLine

@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Checkbox, Textfield } from '@/common/components';
 import {
@@ -10,6 +10,8 @@ import {
 import { useGetSayongjasQuery } from '@/domain/sayongja/api';
 
 import { cssObj } from '../../styles';
+
+const ADD_USER_POPUP_WIDTH = 520;
 
 export type SinglePermissionPanelProps = {
   nanoId: string;
@@ -35,11 +37,13 @@ export function SinglePermissionPanel({
   const batchlinkMutation = useBatchlinkPermissionSayongjaMutation(nanoId);
 
   const [isAddUserPopupOpen, setIsAddUserPopupOpen] = useState(false);
+  const [addUserPopupCoords, setAddUserPopupCoords] = useState<{ top: number; left: number } | null>(null);
   const [addUserSelection, setAddUserSelection] = useState<Set<string>>(new Set());
   const [addUserSearch, setAddUserSearch] = useState('');
   const [hideLinkedUsers, setHideLinkedUsers] = useState(false);
   const [addUserSortDirection, setAddUserSortDirection] = useState<'asc' | 'desc'>('asc');
   const [activeLinkedTab, setActiveLinkedTab] = useState('users');
+  const addUserTriggerRef = useRef<HTMLDivElement | null>(null);
 
   const { data: sayongjasData } = useGetSayongjasQuery(
     {
@@ -89,6 +93,18 @@ export function SinglePermissionPanel({
   const originalName = permissionDetail?.name ?? '';
   const currentName = nameInput ?? originalName;
 
+  const updateAddUserPopupCoords = useCallback(() => {
+    if (!addUserTriggerRef.current) return;
+
+    const triggerRect = addUserTriggerRef.current.getBoundingClientRect();
+    const horizontalPadding = 16;
+    const maxLeft = window.innerWidth - ADD_USER_POPUP_WIDTH - horizontalPadding;
+    const nextLeft = Math.min(Math.max(horizontalPadding, triggerRect.right - ADD_USER_POPUP_WIDTH), maxLeft);
+    const nextTop = triggerRect.bottom + 8;
+
+    setAddUserPopupCoords({ left: nextLeft, top: nextTop });
+  }, []);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = currentName.trim();
@@ -117,6 +133,7 @@ export function SinglePermissionPanel({
 
   const closeAddUserPopup = useCallback(() => {
     setIsAddUserPopupOpen(false);
+    setAddUserPopupCoords(null);
   }, []);
 
   const clearAddUserPopup = useCallback(() => {
@@ -128,9 +145,13 @@ export function SinglePermissionPanel({
     setIsAddUserPopupOpen((prev) => {
       const next = !prev;
 
+      if (next) {
+        requestAnimationFrame(() => updateAddUserPopupCoords());
+      }
+
       return next;
     });
-  }, []);
+  }, [updateAddUserPopupCoords]);
 
   const handleApplyAddUsers = useCallback(async () => {
     if (addUserSelection.size === 0) return;
@@ -141,6 +162,22 @@ export function SinglePermissionPanel({
     clearAddUserPopup();
     await onAfterMutation();
   }, [addUserSelection, batchlinkMutation, clearAddUserPopup, onAfterMutation, refetchPermissionSayongjas]);
+
+  useEffect(() => {
+    if (!isAddUserPopupOpen) return undefined;
+
+    updateAddUserPopupCoords();
+
+    const handleWindowChange = () => updateAddUserPopupCoords();
+
+    window.addEventListener('resize', handleWindowChange);
+    window.addEventListener('scroll', handleWindowChange, true);
+
+    return () => {
+      window.removeEventListener('resize', handleWindowChange);
+      window.removeEventListener('scroll', handleWindowChange, true);
+    };
+  }, [isAddUserPopupOpen, updateAddUserPopupCoords]);
 
   const linkedObjectTabs = useMemo(
     () => [
@@ -162,7 +199,7 @@ export function SinglePermissionPanel({
                   <p css={cssObj.helperText}>아직 연결된 사용자가 없습니다.</p>
                 ) : null}
               </div>
-              <div css={cssObj.addUserContainer}>
+              <div css={cssObj.addUserContainer} ref={addUserTriggerRef}>
                 <Button
                   styleType="outlined"
                   variant="secondary"
@@ -173,7 +210,18 @@ export function SinglePermissionPanel({
                   사용자 추가
                 </Button>
                 {isAddUserPopupOpen ? (
-                  <div css={cssObj.addUserPopup}>
+                  <div
+                    css={cssObj.addUserPopup}
+                    style={
+                      addUserPopupCoords
+                        ? {
+                            left: addUserPopupCoords.left,
+                            top: addUserPopupCoords.top,
+                            width: ADD_USER_POPUP_WIDTH,
+                          }
+                        : undefined
+                    }
+                  >
                     <div css={cssObj.addUserPopupHeader}>
                       <Textfield
                         singleLine

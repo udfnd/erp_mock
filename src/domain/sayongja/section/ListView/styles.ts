@@ -310,10 +310,9 @@ export const cssObj = {
     overflow: visible;
   `,
   permissionTooltip: css`
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    width: 520px;
+    position: fixed;
+    left: 0;
+    top: 0;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 10px;
@@ -323,6 +322,7 @@ export const cssObj = {
     flex-direction: column;
     gap: 12px;
     z-index: 12000;
+    max-width: calc(100vw - 32px);
   `,
   permissionTooltipHeader: css`
     display: flex;

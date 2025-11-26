@@ -120,16 +120,16 @@ export const cssObj = {
     overflow: visible;
   `,
   addUserPopup: css`
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    width: 520px;
+    position: fixed;
+    left: 0;
+    top: 0;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 12000;
+    max-width: calc(100vw - 32px);
   `,
   addUserPopupHeader: css`
     display: flex;
