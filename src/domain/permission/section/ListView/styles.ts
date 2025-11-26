@@ -105,8 +105,8 @@ export const cssObj = {
   `,
   addUserPopup: css`
     position: fixed;
-    width: 880px;
-    max-width: 900px;
+    width: 680px;
+    max-width: 680px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;

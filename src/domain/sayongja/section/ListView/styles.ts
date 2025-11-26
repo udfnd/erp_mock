@@ -306,8 +306,8 @@ export const cssObj = {
   `,
   permissionTooltip: css`
     position: fixed;
-    width: 760px;
-    max-width: 780px;
+    width: 680px;
+    max-width: 680px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 10px;
