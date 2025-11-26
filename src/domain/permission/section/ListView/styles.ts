@@ -112,7 +112,8 @@ export const cssObj = {
   `,
   addUserContainer: css`
     position: relative;
-    z-index: 2;
+    z-index: 10;
+    overflow: visible;
   `,
   addUserPopup: css`
     position: absolute;
@@ -124,7 +125,7 @@ export const cssObj = {
     border-radius: 8px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    z-index: 5;
+    z-index: 25;
   `,
   addUserPopupHeader: css`
     display: flex;

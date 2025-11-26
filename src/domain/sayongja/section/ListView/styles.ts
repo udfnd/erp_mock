@@ -302,7 +302,8 @@ export const cssObj = {
   permissionActionContainer: css`
     position: relative;
     align-items: center;
-    z-index: 2;
+    z-index: 10;
+    overflow: visible;
   `,
   permissionTooltip: css`
     position: absolute;
@@ -317,7 +318,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    z-index: 5;
+    z-index: 25;
   `,
   permissionTooltipHeader: css`
     display: flex;
