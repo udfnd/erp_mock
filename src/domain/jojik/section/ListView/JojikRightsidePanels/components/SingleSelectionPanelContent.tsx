@@ -1,5 +1,4 @@
-import React, { FormEvent } from 'react';
-import { useState } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import { LicenseIcon, WebIcon } from '@/common/icons';
@@ -35,19 +34,32 @@ export function SingleSelectionPanelContent({
   deleteMutation,
 }: SingleSelectionPanelContentProps) {
   const [name, setName] = useState(jojikName);
+  const [homepage, setHomepage] = useState(homepageUrl?.linkUrl ?? '');
   const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
+
+  const initialHomepageUrl = useMemo(() => homepageUrl?.linkUrl ?? '', [homepageUrl?.linkUrl]);
 
   const handleSubmitName = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedName = name.trim();
-    if (!trimmedName) {
+    const trimmedHomepage = homepage.trim();
+    const hasNameChange = trimmedName && trimmedName !== (jojikName ?? '').trim();
+    const hasHomepageChange = trimmedHomepage !== initialHomepageUrl.trim();
+
+    if (!hasNameChange && !hasHomepageChange) {
       return;
     }
 
-    const payload: UpdateJojikRequest = {
-      name: trimmedName,
-    };
+    const payload: UpdateJojikRequest = {};
+
+    if (hasNameChange) {
+      payload.name = trimmedName;
+    }
+
+    if (hasHomepageChange) {
+      payload.homepageUrl = trimmedHomepage || null;
+    }
 
     await updateMutation.mutateAsync(payload);
     await onAfterMutation();
@@ -78,11 +90,22 @@ export function SingleSelectionPanelContent({
             helperText="30자 이내의 이름을 입력해 주세요."
             maxLength={30}
           />
+          <Textfield
+            singleLine
+            label="조직 홈페이지"
+            value={homepage}
+            onValueChange={setHomepage}
+            placeholder="-"
+            helperText="조직의 홈페이지 주소를 입력하거나 비워서 삭제할 수 있습니다."
+          />
           <div css={cssObj.sectionActions}>
             <Button
               type="submit"
               size="small"
-              disabled={isUpdating || name.trim() === (jojikName ?? '').trim()}
+              disabled={
+                isUpdating ||
+                (name.trim() === (jojikName ?? '').trim() && homepage.trim() === initialHomepageUrl.trim())
+              }
             >
               저장
             </Button>
@@ -94,7 +117,7 @@ export function SingleSelectionPanelContent({
             <div css={cssObj.permissionItem}>
               <div>
                 <WebIcon />
-                <input css={cssObj.permissionName}>{homepageUrl?.linkUrl}</input>
+                <span css={cssObj.permissionName}>{homepage || '-'}</span>
               </div>
             </div>
           </div>
