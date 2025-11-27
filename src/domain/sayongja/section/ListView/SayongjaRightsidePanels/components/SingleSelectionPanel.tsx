@@ -322,7 +322,8 @@ export function SingleSelectionPanelContent({
     Math.ceil(permissionTotalCount / Math.max(permissionPagination.pageSize, 1)),
   );
 
-  const permissionColumns = useMemo<ColumnDef<Permission, unknown>[]>(
+  // 🔧 TS2322 해결: TValue를 unknown 대신 any로 지정
+  const permissionColumns = useMemo<ColumnDef<Permission, any>[]>(
     () => [
       permissionColumnHelper.accessor('name', {
         header: '권한명',
@@ -385,11 +386,7 @@ export function SingleSelectionPanelContent({
         onChange: (value) => handlePermissionFilterChange(value),
       },
     ],
-    [
-      handlePermissionFilterChange,
-      permissionFilters.permissionTypeNanoIds,
-      permissionTypeOptions,
-    ],
+    [handlePermissionFilterChange, permissionFilters.permissionTypeNanoIds, permissionTypeOptions],
   );
 
   const permissionSortProps: ListViewSortProps = useMemo(
@@ -414,7 +411,7 @@ export function SingleSelectionPanelContent({
 
       const rect = container.getBoundingClientRect();
       const left = rect.left - 680 - 12;
-      const top = rect.top;
+      const top = rect.top - 600;
 
       setPermissionTooltipPosition({ left, top });
     };
@@ -480,7 +477,6 @@ export function SingleSelectionPanelContent({
               >
                 권한 추가
               </Button>
-              {/* createPortal 제거, position: fixed로 렌더링 */}
               {isPermissionTooltipOpen && permissionTooltipPosition ? (
                 <div css={cssObj.permissionTooltip} style={permissionTooltipPosition}>
                   <div css={cssObj.permissionTooltipHeader}>
@@ -561,16 +557,31 @@ export function SingleSelectionPanelContent({
       },
     ],
     [
+      // 🔧 react-hooks/preserve-manual-memoization: useMemo 안에서 쓰는 값 전부 의존성에 포함
       availablePermissions,
       closePermissionTooltip,
+      handlePermissionDimmerClick,
       handlePermissionLink,
+      handlePermissionRowsChange,
+      handlePermissionSearchChange,
+      isPermissionSearchFocused,
       isPermissionTooltipOpen,
+      permissionColumns,
+      permissionListState,
+      permissionSearchTerm,
+      permissionSortProps,
+      permissionToolbarFilters,
       permissionTooltipPosition,
+      permissionTotalCount,
+      permissionTotalPages,
       permissionLinkMutation.isPending,
       permissions,
       permissionsQuery.isError,
-      togglePermissionTooltip,
+      permissionsQuery.isLoading,
+      selectedPermissionItems,
       selectedPermissionNanoId,
+      setIsPermissionSearchFocused,
+      togglePermissionTooltip,
     ],
   );
 

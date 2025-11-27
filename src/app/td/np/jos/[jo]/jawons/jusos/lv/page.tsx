@@ -32,10 +32,11 @@ export default function NpJojikJawonJusoListViewPage() {
   const jojikNanoId = extractJojikNanoId(params?.jo);
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions } = useJusoListViewSections({
-    jojikNanoId,
-    isAuthenticated,
-  });
+  const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions } =
+    useJusoListViewSections({
+      jojikNanoId,
+      isAuthenticated,
+    });
 
   const listSectionAllProps = useMemo(
     () => ({
@@ -75,7 +76,7 @@ export default function NpJojikJawonJusoListViewPage() {
       NoneSelectedComponent={NoneSelectedPanels}
       SingleSelectedComponent={OneSelectedPanels}
       MultipleSelectedComponent={MultipleSelectedPanels}
-      MissingParentComponent={MissingJojikPanels}
+      // MissingParentComponent={MissingJojikPanels} TODO: refactor
       getSingleSelectedProps={(selectedItem, props) => ({
         jusoNanoId: selectedItem.nanoId,
         jusoName: selectedItem.jusoName,

@@ -113,6 +113,7 @@ export const cssObj = {
   tableRow: css`
     cursor: pointer;
     transition: background-color 0.2s ease;
+
     &:hover {
       background: ${color.blue10};
     }
@@ -120,6 +121,7 @@ export const cssObj = {
 
   tableRowSelected: css`
     background: ${color.blue50};
+
     &:hover {
       background: ${color.blue50};
     }
@@ -216,6 +218,7 @@ export const cssObj = {
     height: 160px;
     padding: 8px;
     background-color: ${color.cgrey10};
+
     > span {
       ${typography.captionB};
       color: ${color.cgrey500};
@@ -328,8 +331,6 @@ export const cssObj = {
     align-items: start;
   `,
   permissionTooltipTable: css`
-    border: 1px solid ${color.cgrey100};
-    border-radius: 8px;
     overflow: hidden;
     background: ${color.white};
   `,
@@ -377,6 +378,7 @@ export const cssObj = {
     border-bottom: 2px solid transparent;
     border-radius: 0;
     ${typography.bodySmallM};
+
     &:hover {
       color: ${color.cgrey700};
     }
@@ -395,6 +397,7 @@ export const cssObj = {
     ${typography.bodySmallM};
     color: ${color.cgrey600};
     margin: 0;
+
     span {
       ${typography.bodySmallSB};
       color: ${color.black};

@@ -133,7 +133,7 @@ export function SayongjaListSection({
     }
   };
 
-  const columns = useMemo<ColumnDef<SayongjaListItem>[]>(
+  const columns = useMemo(
     () => [
       columnHelper.accessor('name', {
         header: createSortableHeader('이름'),
@@ -154,7 +154,11 @@ export function SayongjaListSection({
   return (
     <section css={cssObj.listSection}>
       <ToolbarLayout
-        search={{ value: searchTerm, onChange: handlers.onSearchChange, placeholder: '사용자 이름으로 검색' }}
+        search={{
+          value: searchTerm,
+          onChange: handlers.onSearchChange,
+          placeholder: '사용자 이름으로 검색',
+        }}
         filters={toolbarFilters}
         sort={sortProps}
         totalCount={totalCount}
@@ -164,7 +168,11 @@ export function SayongjaListSection({
         data={data}
         columns={columns}
         state={state}
-        primaryAction={{ label: '새 사용자 추가', onClick: handlers.onAddClick, disabled: isCreating }}
+        primaryAction={{
+          label: '새 사용자 추가',
+          onClick: handlers.onAddClick,
+          disabled: isCreating,
+        }}
         manualPagination
         manualSorting
         pageCount={totalPages}

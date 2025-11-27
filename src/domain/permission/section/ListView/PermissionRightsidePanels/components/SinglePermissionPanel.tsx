@@ -22,6 +22,7 @@ import {
 } from '@/domain/sayongja/section/ListView/constants';
 
 import { cssObj } from '../../styles';
+import { PlusIcon } from '@/common/icons';
 
 export type SinglePermissionPanelProps = {
   nanoId: string;
@@ -67,19 +68,19 @@ export function SinglePermissionPanel({
     left: number;
   } | null>(null);
   const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [userFilters, setUserFilters] = useState<{ isHwalseong: string[] }>({ isHwalseong: ['all'] });
+  const [userFilters, setUserFilters] = useState<{ isHwalseong: string[] }>({
+    isHwalseong: ['all'],
+  });
   const [userSortOption, setUserSortOption] = useState<string | undefined>('nameAsc');
   const [isUserSearchFocused, setIsUserSearchFocused] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<SayongjaListItem[]>([]);
 
-  const addUserSortValue =
-    getSayongjaSortOptionFromState(addUserSorting) ?? userSortOption;
+  const addUserSortValue = getSayongjaSortOptionFromState(addUserSorting) ?? userSortOption;
 
-  const resolvedIsHwalseongFilter = userFilters.isHwalseong.includes('true') &&
-    !userFilters.isHwalseong.includes('false')
+  const resolvedIsHwalseongFilter =
+    userFilters.isHwalseong.includes('true') && !userFilters.isHwalseong.includes('false')
       ? true
-      : userFilters.isHwalseong.includes('false') &&
-          !userFilters.isHwalseong.includes('true')
+      : userFilters.isHwalseong.includes('false') && !userFilters.isHwalseong.includes('true')
         ? false
         : undefined;
 
@@ -109,7 +110,8 @@ export function SinglePermissionPanel({
     Math.ceil(addUserTotalCount / Math.max(addUserPagination.pageSize, 1)),
   );
 
-  const addUserColumns = useMemo<ColumnDef<SayongjaListItem, unknown>[]>(
+  // 🔧 TS2322 해결: TValue를 unknown 대신 any로 맞춰서 columnHelper의 string TValue와 호환되게 함
+  const addUserColumns = useMemo<ColumnDef<SayongjaListItem, any>[]>(
     () => [
       sayongjaColumnHelper.accessor('name', {
         header: '이름',
@@ -294,14 +296,14 @@ export function SinglePermissionPanel({
                 <p css={cssObj.helperText}>아직 연결된 사용자가 없습니다.</p>
               ) : null}
             </div>
-            {/* 앵커 ref 설정 */}
             <div css={cssObj.addUserContainer} ref={addUserAnchorRef}>
               <Button
                 styleType="outlined"
                 variant="secondary"
-                size="small"
+                isFull
                 onClick={toggleAddUserPopup}
                 aria-expanded={isAddUserPopupOpen}
+                iconRight={<PlusIcon />}
               >
                 사용자 추가
               </Button>
@@ -398,6 +400,7 @@ export function SinglePermissionPanel({
       handleUserSearchChange,
       isAddUserLoading,
       isAddUserPopupOpen,
+      isUserSearchFocused, // 🔧 react-hooks/preserve-manual-memoization: 누락된 의존성 추가
       sayongjaLinks?.sayongjas,
       selectedUsers,
       setIsUserSearchFocused,

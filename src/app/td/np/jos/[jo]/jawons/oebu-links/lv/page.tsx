@@ -15,7 +15,6 @@ import {
   OneSelectedPanels,
   useOebuLinkListViewSections,
 } from '@/domain/oebu-link/section';
-import type { OebuLinkListItem } from '@/domain/oebu-link/section/ListView/useOebuLinkListViewSections';
 
 type PageParams = {
   jo?: string | string[];
@@ -23,7 +22,7 @@ type PageParams = {
 
 export default function OebuLinksListViewPage() {
   const params = useParams<PageParams>();
-  const jojikNanoId = Array.isArray(params?.jo) ? (params?.jo[0] ?? '') : params?.jo ?? '';
+  const jojikNanoId = Array.isArray(params?.jo) ? (params?.jo[0] ?? '') : (params?.jo ?? '');
   const { isAuthenticated } = useAuth();
 
   const { listSectionProps, settingsSectionProps, sortOptions, iconFilterOptions } =

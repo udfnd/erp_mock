@@ -3,9 +3,15 @@ import type { ReactNode } from 'react';
 import { RightsidePanelsContainer } from '../components/RightsidePanelsContainer';
 import { CreateJusoPanel } from '../components/CreateJusoPanel';
 import { MissingJojikPanel } from '../components/MissingJojikPanel';
-import { MultiSelectionPanel, type MultiSelectionPanelProps } from '../components/MultiSelectionPanel';
+import {
+  MultiSelectionPanel,
+  type MultiSelectionPanelProps,
+} from '../components/MultiSelectionPanel';
 import { QuickActionsPanel } from '../components/QuickActionsPanel';
-import { SingleSelectionPanel, type SingleSelectionPanelProps } from '../components/SingleSelectionPanel';
+import {
+  SingleSelectionPanel,
+  type SingleSelectionPanelProps,
+} from '../components/SingleSelectionPanel';
 
 export type JusoRightsidePanelState = {
   noneSelected: ReactNode;

@@ -14,6 +14,7 @@ import {
   PermissionSingleSelectedPanels,
   usePermissionListViewSections,
 } from '@/domain/permission/section';
+import { Permission } from '@/domain/permission/api';
 
 type PageParams = {
   gi?: string | string[];
@@ -24,12 +25,8 @@ export default function NpGigwanPermissionListViewPage() {
   const gigwanNanoId = extractGigwanNanoId(params?.gi);
   const { isAuthenticated } = useAuth();
 
-  const {
-    listSectionProps,
-    settingsSectionProps,
-    sortOptions,
-    permissionTypeOptions,
-  } = usePermissionListViewSections({ gigwanNanoId, isAuthenticated });
+  const { listSectionProps, settingsSectionProps, sortOptions, permissionTypeOptions } =
+    usePermissionListViewSections({ gigwanNanoId, isAuthenticated });
 
   const listSectionAllProps = useMemo(
     () => ({
@@ -63,7 +60,7 @@ export default function NpGigwanPermissionListViewPage() {
       SingleSelectedComponent={PermissionSingleSelectedPanels}
       MultipleSelectedComponent={PermissionMultipleSelectedPanels}
       MissingParentComponent={PermissionMissingGigwanPanels}
-      getMultipleSelectedProps={(permissions) => ({ permissions })}
+      getMultipleSelectedProps={(permissions) => ({ permissions: permissions as Permission[] })} // TODO: refactor
       getSingleSelectedProps={(selectedItem, props) => ({
         nanoId: selectedItem.nanoId,
         gigwanNanoId: props.gigwanNanoId,

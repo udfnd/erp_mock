@@ -93,6 +93,7 @@ export const cssObj = {
     color: ${color.black};
     font-size: 14px;
     cursor: pointer;
+
     &:hover {
       background: ${color.blue10};
     }
@@ -124,8 +125,6 @@ export const cssObj = {
     gap: 12px;
   `,
   popupTableWrapper: css`
-    border: 1px solid ${color.cgrey100};
-    border-radius: 8px;
     overflow: hidden;
     background: ${color.white};
   `,
@@ -174,6 +173,7 @@ export const cssObj = {
     border-bottom: 2px solid transparent;
     border-radius: 0;
     ${typography.bodySmallM};
+
     &:hover {
       color: ${color.cgrey700};
     }

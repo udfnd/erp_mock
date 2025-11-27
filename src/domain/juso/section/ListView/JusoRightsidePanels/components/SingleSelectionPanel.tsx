@@ -3,13 +3,17 @@
 import { type FormEvent, useMemo, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
-import { useDeleteJusoMutation, useGetJusoDetailQuery, useUpdateJusoMutation } from '@/domain/juso/api';
+import {
+  useDeleteJusoMutation,
+  useGetJusoDetailQuery,
+  useUpdateJusoMutation,
+} from '@/domain/juso/api';
 import type { UpdateJusoRequest } from '@/domain/juso/api/juso.schema';
 
 import { cssObj } from '../../styles';
 import { useDaumPostcode } from './useDaumPostcode';
 
-type SingleSelectionPanelProps = {
+export type SingleSelectionPanelProps = {
   jusoNanoId: string;
   jusoName: string;
   onAfterMutation: () => Promise<unknown> | void;
@@ -166,17 +170,28 @@ function SingleSelectionPanelContent({
           </p>
         </div>
         {updateMutation.isError ? (
-          <p css={cssObj.helperText}>주소 업데이트 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</p>
+          <p css={cssObj.helperText}>
+            주소 업데이트 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
         ) : null}
         {deleteMutation.isError ? (
           <p css={cssObj.helperText}>주소 삭제 중 문제가 발생했습니다. 다시 시도해 주세요.</p>
         ) : null}
       </form>
       <div css={cssObj.panelFooter}>
-        <Button styleType="text" variant="secondary" onClick={handleDelete} disabled={isSaving || isDeleting}>
+        <Button
+          styleType="text"
+          variant="secondary"
+          onClick={handleDelete}
+          disabled={isSaving || isDeleting}
+        >
           주소 삭제
         </Button>
-        <Button type="submit" form={formId} disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}>
+        <Button
+          type="submit"
+          form={formId}
+          disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}
+        >
           변경 사항 저장
         </Button>
       </div>

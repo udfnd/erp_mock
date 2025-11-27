@@ -89,7 +89,7 @@ export const cssObj = {
   `,
 
   destructiveButton: css`
-    background: ${color.red500};
+    background: ${color.red10};
     color: ${color.white};
   `,
 

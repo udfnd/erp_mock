@@ -45,7 +45,7 @@ export type ListViewToolbarProps = {
 
 export type ListViewTableProps<TData> = {
   data: TData[];
-  columns: ColumnDef<TData, unknown>[];
+  columns: ColumnDef<TData, any>[];
   state: ListViewState<TData>;
   primaryAction?: ListViewPrimaryActionProps;
   manualPagination?: boolean;
@@ -58,7 +58,11 @@ export type ListViewTableProps<TData> = {
   rowEventHandlers?: {
     selectOnClick?: boolean;
     shouldIgnoreRowClick?: (event: React.MouseEvent<HTMLElement>) => boolean;
-    onClick?: (args: { row: Row<TData>; event: React.MouseEvent<HTMLTableRowElement>; table: Table<TData> }) => void;
+    onClick?: (args: {
+      row: Row<TData>;
+      event: React.MouseEvent<HTMLTableRowElement>;
+      table: Table<TData>;
+    }) => void;
   };
   onSelectedRowsChange?: (rows: Row<TData>[]) => void;
   onDimmerClick?: () => void;
