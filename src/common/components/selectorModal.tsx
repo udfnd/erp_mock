@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 
 import { cssObj } from './selectorModal.style';
 import { Button } from './Button';
-import { CloseIcon, MovelinkIcon } from '@/common/icons';
+import { CloseIcon } from '@/common/icons';
 
 export type SelectorModalMenu = {
   id: string;
@@ -84,15 +84,6 @@ export const SelectorModal: React.FC<SelectorModalProps> = ({
     setActiveMenuId(menuId);
   }, []);
 
-  const renderSelectionBadge = () => {
-    if (!selectionLimit) return null;
-    return (
-      <span css={cssObj.selectionBadge} aria-label="선택 가능한 개수">
-        선택 {selectedCount}/{selectionLimit}
-      </span>
-    );
-  };
-
   if (!isOpen || typeof document === 'undefined') {
     return null;
   }
@@ -112,17 +103,8 @@ export const SelectorModal: React.FC<SelectorModalProps> = ({
             <h2 id={titleId} css={cssObj.title}>
               {title}
             </h2>
-            {renderSelectionBadge()}
           </div>
           <div css={cssObj.headerButtonWrapper}>
-            <button
-              type="button"
-              onClick={onClose}
-              css={cssObj.closeButton}
-              aria-label="이전 화면으로"
-            >
-              <MovelinkIcon />
-            </button>
             <button type="button" onClick={onClose} css={cssObj.closeButton} aria-label="닫기">
               <CloseIcon />
             </button>
@@ -155,21 +137,15 @@ export const SelectorModal: React.FC<SelectorModalProps> = ({
 
           <aside css={cssObj.summaryWrapper} aria-label="선택된 항목">
             {summaryContent}
-          </aside>
-        </div>
-
-        <div css={cssObj.footer}>
-          <span css={cssObj.footerText}>
-            {selectionLimit ? `선택 ${selectedCount}/${selectionLimit}` : `총 ${selectedCount}개 선택됨`}
-          </span>
-          <div css={cssObj.footerActions}>
-            <Button styleType="text" variant="secondary" onClick={onClose}>
-              취소
-            </Button>
-            <Button onClick={onComplete} disabled={disableComplete}>
+            <Button
+              css={cssObj.completeButton}
+              size="small"
+              onClick={onComplete}
+              disabled={disableComplete}
+            >
               {completeLabel}
             </Button>
-          </div>
+          </aside>
         </div>
       </div>
     </div>

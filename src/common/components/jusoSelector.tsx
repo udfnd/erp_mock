@@ -80,34 +80,43 @@ const CreateJusoForm = ({ jojikNanoId, onCreated, onAfterMutation }: CreateFormP
 
   return (
     <div css={cssObj.formContainer}>
-      <Textfield
-        singleLine
-        required
-        label="주소 이름"
-        placeholder="주소 이름을 입력하세요"
-        value={jusoName}
-        onValueChange={setJusoName}
-        maxLength={80}
-      />
-      <Textfield
-        singleLine
-        required
-        label="주소"
-        placeholder="주소를 입력해 주세요"
-        value={juso}
-        onValueChange={setJuso}
-        onClick={handleOpenAddressSearch}
-        readOnly
-      />
-      <Textfield
-        singleLine
-        label="상세 주소"
-        placeholder="상세 주소를 입력하세요"
-        value={jusoDetail}
-        onValueChange={setJusoDetail}
-      />
-      <Button onClick={handleSubmit} disabled={!jusoName.trim() || !juso.trim() || isSaving}>
-        새 주소 추가
+      <div css={cssObj.textfieldContainer}>
+        <h3 css={cssObj.formTitle}>주소 정보</h3>
+        <Textfield
+          singleLine
+          required
+          label="주소 이름(별명)"
+          placeholder="주소 이름(별명)을 입력하세요"
+          helperText="이름은 최대 30자까지 입력 가능합니다."
+          value={jusoName}
+          onValueChange={setJusoName}
+          maxLength={30}
+        />
+        <br />
+        <Textfield
+          singleLine
+          required
+          label="주소"
+          placeholder="주소를 입력해 주세요"
+          value={juso}
+          onValueChange={setJuso}
+          onClick={handleOpenAddressSearch}
+          readOnly
+        />
+        <Textfield
+          singleLine
+          placeholder="상세 주소를 입력해주세요 (선택)"
+          value={jusoDetail}
+          onValueChange={setJusoDetail}
+        />
+      </div>
+      <Button
+        css={cssObj.addButton}
+        size="small"
+        onClick={handleSubmit}
+        disabled={!jusoName.trim() || !juso.trim() || isSaving}
+      >
+        생성 및 추가
       </Button>
     </div>
   );
@@ -162,10 +171,7 @@ export function JusoSelector({
   const summaryContent = (
     <div css={cssObj.selectionSummary}>
       <div css={cssObj.selectionHeader}>
-        <h3 css={cssObj.selectionTitle}>선택된 주소</h3>
-        <span css={cssObj.selectionCount}>
-          {selectedJusos.length}/{maxSelectable}
-        </span>
+        <h3 css={cssObj.selectionTitle}>주소 {maxSelectable}개 선택</h3>
       </div>
       {selectedJusos.length ? (
         <div css={cssObj.selectionList}>
@@ -173,12 +179,14 @@ export function JusoSelector({
             <div key={juso.nanoId} css={cssObj.selectionItem}>
               <span css={cssObj.selectionName}>{juso.jusoName}</span>
               <span css={cssObj.selectionAddress}>{juso.juso}</span>
-              {juso.jusoDetail ? <span css={cssObj.selectionAddress}>{juso.jusoDetail}</span> : null}
+              {juso.jusoDetail ? (
+                <span css={cssObj.selectionAddress}>{juso.jusoDetail}</span>
+              ) : null}
             </div>
           ))}
         </div>
       ) : (
-        <p css={cssObj.emptyState}>아직 선택된 주소가 없습니다.</p>
+        <div />
       )}
     </div>
   );
@@ -203,7 +211,10 @@ export function JusoSelector({
           <div css={cssObj.listViewContainer}>
             <JusoListSection
               {...listSectionProps}
-              handlers={{ ...listSectionProps.handlers, onSelectedJusosChange: handleSelectedChange }}
+              handlers={{
+                ...listSectionProps.handlers,
+                onSelectedJusosChange: handleSelectedChange,
+              }}
               sortOptions={sortOptions}
               pageSizeOptions={pageSizeOptions}
             />

@@ -97,9 +97,32 @@ export const cssObj = {
     flex-direction: column;
     gap: 16px;
   `,
+
   formContainer: css`
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    height: 100%;
+    gap: 12px;
+  `,
+
+  textfieldContainer: css`
+    background: ${color.cgrey10};
+    padding: 16px;
+    border: 1px solid ${color.blue100};
+    border-radius: 8px;
+    flex: 1;
+    width: 415px;
+    max-height: 480px;
+    overflow: auto;
+  `,
+
+  formTitle: css`
+    ${typography.bodySB};
+    margin-bottom: 16px;
+  `,
+
+  addButton: css`
+    align-self: flex-end;
+    margin-top: auto;
   `,
 };

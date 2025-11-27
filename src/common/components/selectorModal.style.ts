@@ -105,7 +105,7 @@ export const cssObj = {
     border-radius: 10px;
     ${typography.captionR};
     color: ${color.cgrey500};
-    padding: 10px 12px;
+    padding: 6px 8px;
     cursor: pointer;
     border: none;
     text-align: left;
@@ -142,26 +142,15 @@ export const cssObj = {
     height: 100%;
   `,
   summaryWrapper: css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     border-left: 1px solid ${color.cgrey100};
-    background: ${color.cgrey25};
-    padding: 18px 16px;
+    background: ${color.white};
+    padding: 16px;
     overflow-y: auto;
   `,
-  footer: css`
-    padding: 14px 18px;
-    border-top: 1px solid ${color.cgrey100};
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: ${color.white};
-  `,
-  footerText: css`
-    ${typography.captionR};
-    color: ${color.cgrey600};
-  `,
-  footerActions: css`
-    display: flex;
-    gap: 8px;
+  completeButton: css`
+    margin: auto 0 0 auto;
   `,
 };
