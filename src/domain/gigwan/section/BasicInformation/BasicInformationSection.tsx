@@ -76,15 +76,11 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
     form.reset(nextDefaults);
   }, [gigwan?.name, gigwan?.intro, form, gigwan]);
 
-  const { isDirty, nameMeta, introMeta, values } = useStore(form.store, (state) => ({
+  const { isDirty, nameMeta, introMeta } = useStore(form.store, (state) => ({
     isDirty: state.isDirty,
     nameMeta: state.fieldMeta?.name ?? { errors: [] as string[] },
     introMeta: state.fieldMeta?.intro ?? { errors: [] as string[] },
-    values: state.values as BasicInformationFormValues,
   }));
-
-  const loadedName = gigwan?.name ?? values.name ?? '';
-  const loadedIntro = gigwan?.intro ?? values.intro ?? '';
 
   const hasErrors = useMemo(
     () => (nameMeta.errors?.length ?? 0) > 0 || (introMeta.errors?.length ?? 0) > 0,
@@ -107,17 +103,6 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
       </div>
 
       <div css={css.cardBody}>
-        <div css={css.loadedInfo}>
-          <div css={css.loadedInfoItem}>
-            <span css={css.loadedInfoLabel}>불러온 기관 이름</span>
-            <p css={css.loadedInfoValue}>{loadedName || '불러오는 중...'}</p>
-          </div>
-          <div css={css.loadedInfoItem}>
-            <span css={css.loadedInfoLabel}>불러온 기관 소개</span>
-            <p css={css.loadedInfoValue}>{loadedIntro || '소개가 없습니다.'}</p>
-          </div>
-        </div>
-
         <form.Field
           name="name"
           validators={{

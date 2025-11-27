@@ -108,12 +108,6 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
     },
   });
 
-  useEffect(() => {
-    if (!employmentCategoriesData) return;
-    const nextValues = mapCategoriesToFormValues(employmentCategoriesData.categories);
-    form.reset(nextValues);
-  }, [employmentCategoriesData, form]);
-
   const { categories, isDirty } = useStore(form.store, (state) => {
     const v = state.values as EmploymentCategoriesFormValues;
     return {
@@ -121,6 +115,17 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
       isDirty: state.isDirty,
     };
   });
+
+  const categoriesFromApi = useMemo(
+    () => employmentCategoriesData?.categories ?? [],
+    [employmentCategoriesData?.categories],
+  );
+
+  useEffect(() => {
+    if (!employmentCategoriesData || categoriesFromApi.length === 0 || isDirty) return;
+    const nextValues = mapCategoriesToFormValues(categoriesFromApi);
+    form.reset(nextValues);
+  }, [categoriesFromApi, employmentCategoriesData, form, isDirty]);
 
   const employmentHasEmptyStatus = useMemo(
     () =>
@@ -155,7 +160,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         <form.Field name="categories" mode="array">
           {(categoriesField) => (
             <>
-              {categoriesField.state.value.length === 0 ? (
+              {categoriesField.state.value.length === 0 && categoriesFromApi.length === 0 ? (
                 <p css={css.emptyText}>불러온 재직 카테고리가 없습니다.</p>
               ) : (
                 categoriesField.state.value.map((category, categoryIndex) => (
