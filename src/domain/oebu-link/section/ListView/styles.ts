@@ -11,7 +11,6 @@ export const cssObj = {
     flex-direction: column;
     padding: 16px;
     border-right: 1px solid ${color.cgrey100};
-    gap: 16px;
     min-width: 0;
     min-height: 0;
     max-width: 100%;

@@ -13,14 +13,24 @@ export const globalStyles = css`
   body {
     height: 100%;
     -webkit-font-smoothing: antialiased;
+    font-family: var(--font-pretendard);
   }
 
   body,
   textarea {
     line-height: 1.5;
-    font-family: var(--font-pretendard);
     background-color: #ffffff;
     color: #010821;
+  }
+
+  textarea,
+  input,
+  button,
+  select,
+  option {
+    line-height: inherit;
+    font-family: inherit;
+    color: inherit;
   }
 
   a {

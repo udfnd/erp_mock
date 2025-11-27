@@ -1,9 +1,9 @@
-import { css as emotionCss } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import { color, typography } from '@/style';
 
-export const css = {
-  card: emotionCss`
+export const cssObj = {
+  card: css`
     background: ${color.cgrey10};
     padding: 16px;
     min-width: 410px;
@@ -11,79 +11,80 @@ export const css = {
     flex-direction: column;
     gap: 24px;
   `,
-  cardHeader: emotionCss`
+  cardHeader: css`
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 20px;
   `,
-  cardTitleGroup: emotionCss`
+  cardTitleGroup: css`
     display: flex;
     flex-direction: column;
     gap: 4px;
   `,
-  cardTitle: emotionCss`
+  cardTitle: css`
     ${typography.bodySB};
     color: ${color.black};
   `,
-  cardSubtitle: emotionCss`
+  cardSubtitle: css`
     ${typography.captionR};
     color: ${color.cgrey500};
   `,
-  cardBody: emotionCss`
+  cardBody: css`
     display: flex;
     flex-direction: column;
     gap: 20px;
   `,
-  cardFooter: emotionCss`
+  cardFooter: css`
     margin-top: auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 20px;
   `,
+
   feedback: {
-    success: emotionCss`
+    success: css`
       ${typography.captionB};
       color: ${color.blue600};
     `,
-    error: emotionCss`
+    error: css`
       ${typography.captionB};
       color: ${color.red};
     `,
   } as const,
-  errorText: emotionCss`
+  errorText: css`
     ${typography.bodySmallR};
     color: ${color.red};
   `,
-  categorySection: emotionCss`
+  categorySection: css`
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     background: ${color.cgrey50};
   `,
-  categoryLabel: emotionCss`
+  categoryLabel: css`
     ${typography.bodySmallM};
     color: ${color.black};
   `,
-  statusList: emotionCss`
+  statusList: css`
     display: flex;
     flex-direction: column;
     gap: 8px;
   `,
-  statusItem: emotionCss`
+  statusItem: css`
     display: flex;
     gap: 8px;
     align-items: center;
   `,
-  statusValue: emotionCss`
+  statusValue: css`
     ${typography.bodyR};
     color: ${color.black};
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
   `,
-  statusField: emotionCss`
+  statusField: css`
     display: flex;
     align-items: center;
     gap: 8px;
@@ -92,14 +93,16 @@ export const css = {
     border-radius: 8px;
     background: ${color.white};
     transition: border-color 120ms ease;
+
     &:hover {
       border-color: ${color.cgrey300};
     }
+
     &:focus-within {
       border-color: ${color.blue600};
     }
   `,
-  statusInputField: emotionCss`
+  statusInputField: css`
     ${typography.bodyR};
     flex: 1;
     border: none;
@@ -107,11 +110,12 @@ export const css = {
     background: transparent;
     color: ${color.black};
     min-width: 0;
+
     &::placeholder {
       color: ${color.cgrey400};
     }
   `,
-  statusActions: emotionCss`
+  statusActions: css`
     display: flex;
     align-items: center;
     gap: 4px;

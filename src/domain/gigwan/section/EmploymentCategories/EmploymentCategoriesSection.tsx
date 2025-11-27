@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useMemo, useReducer } from 'react';
 
 import { Button, IconButton } from '@/common/components';
 import { DeleteIcon, EditIcon, PlusIcon } from '@/common/icons';
@@ -13,9 +13,8 @@ import {
 } from '@/domain/gigwan/api';
 import type { EmploymentCategory } from '@/domain/gigwan/api/gigwan.schema';
 
-import { css } from './styles';
+import { cssObj } from './styles';
 import { createLocalId } from '../local-id';
-import { useFeedback } from '../useFeedback';
 
 type EmploymentCategoriesSectionProps = {
   gigwanNanoId: string;
@@ -68,9 +67,7 @@ const employmentEditingReducer = (
     case 'toggle':
       return { ...state, [action.localId]: !state[action.localId] };
     case 'remove': {
-      if (!state[action.localId]) {
-        return state;
-      }
+      if (!state[action.localId]) return state;
       const nextState = { ...state };
       delete nextState[action.localId];
       return nextState;
@@ -84,23 +81,26 @@ const employmentEditingReducer = (
 
 const INITIAL_VALUES: EmploymentCategoriesFormValues = { categories: [] };
 
-export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategoriesSectionProps) {
-  const queryClient = useQueryClient();
-  const { data: employmentCategoriesData, error: employmentError } = useEmploymentCategoriesQuery(
-    gigwanNanoId,
-    { enabled: Boolean(gigwanNanoId) },
-  );
-  const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
+type EmploymentCategoriesFormProps = {
+  gigwanNanoId: string;
+  initialValues: EmploymentCategoriesFormValues;
+  employmentError: unknown;
+};
 
-  const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
+function EmploymentCategoriesForm({
+  gigwanNanoId,
+  initialValues,
+  employmentError,
+}: EmploymentCategoriesFormProps) {
+  const queryClient = useQueryClient();
+  const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
   const [employmentEditing, dispatchEmploymentEditing] = useReducer(employmentEditingReducer, {});
 
   const form = useForm({
-    defaultValues: INITIAL_VALUES,
+    defaultValues: initialValues,
     onSubmit: async ({ value }) => {
       const categoriesPayload = value.categories.map((category) => {
         const seen = new Set<string>();
-
         const sangtaes: Array<
           | { name: string; isHwalseong: boolean }
           | { nanoId: string; name: string; isHwalseong: boolean }
@@ -126,24 +126,17 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         const data = await upsertEmploymentCategoriesMutation.mutateAsync({
           categories: categoriesPayload,
         });
+
         const nextValues = mapCategoriesToFormValues(data.categories);
         form.reset(nextValues);
         dispatchEmploymentEditing({ type: 'reset' });
-        showSuccess('재직 카테고리 상태가 저장되었습니다.');
+
         await queryClient.invalidateQueries({
           queryKey: gigwanQueryKeys.employmentCategories(gigwanNanoId),
         });
-      } catch {
-        showError('재직 카테고리 상태 저장에 실패했습니다.');
-      }
+      } catch {}
     },
   });
-
-  useEffect(() => {
-    if (!employmentCategoriesData) return;
-    const nextValues = mapCategoriesToFormValues(employmentCategoriesData.categories);
-    form.reset(nextValues);
-  }, [employmentCategoriesData, form]);
 
   const { categories, isDirty } = useStore(form.store, (state) => {
     const v = state.values as EmploymentCategoriesFormValues;
@@ -165,42 +158,35 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
 
   const handleSaveEmploymentCategories = useCallback(async () => {
     if (!isDirty || employmentHasEmptyStatus) return;
-    clearFeedback();
     await form.handleSubmit();
-  }, [clearFeedback, employmentHasEmptyStatus, form, isDirty]);
+  }, [employmentHasEmptyStatus, form, isDirty]);
 
-  const toggleEditEmploymentStatus = useCallback(
-    (localId: string) => {
-      dispatchEmploymentEditing({ type: 'toggle', localId });
-      clearFeedback();
-    },
-    [clearFeedback],
-  );
+  const toggleEditEmploymentStatus = (localId: string) => {
+    dispatchEmploymentEditing({ type: 'toggle', localId });
+  };
 
   return (
-    <section css={css.card}>
-      <div css={css.cardHeader}>
-        <div css={css.cardTitleGroup}>
-          <h2 css={css.cardTitle}>사용자 재직 카테고리 상태</h2>
-          <p css={css.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
+    <>
+      <div css={cssObj.cardHeader}>
+        <div css={cssObj.cardTitleGroup}>
+          <h2 css={cssObj.cardTitle}>사용자 재직 카테고리 상태</h2>
+          <p css={cssObj.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
         </div>
       </div>
 
-      <div css={css.cardBody}>
-        {employmentError ? (
-          <p css={css.errorText}>재직 카테고리 정보를 불러오지 못했습니다.</p>
-        ) : null}
+      <div css={cssObj.cardBody}>
+        {employmentError ? <p>재직 카테고리 정보를 불러오지 못했습니다.</p> : null}
 
         <form.Field name="categories" mode="array">
           {(categoriesField) => (
             <>
               {categoriesField.state.value.map((category, categoryIndex) => (
-                <div key={category.nanoId} css={css.categorySection}>
-                  <span css={css.categoryLabel}>{category.name}</span>
+                <div key={category.nanoId} css={cssObj.categorySection}>
+                  <span css={cssObj.categoryLabel}>{category.name}</span>
 
                   <form.Field name={`categories[${categoryIndex}].statuses`} mode="array">
                     {(statusesField) => (
-                      <div css={css.statusList}>
+                      <div css={cssObj.statusList}>
                         {statusesField.state.value.map((status, statusIndex) => (
                           <form.Field
                             key={status.localId}
@@ -213,13 +199,12 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                               const isEditing = Boolean(employmentEditing[localId]);
                               const value = String(field.state.value ?? '');
                               return (
-                                <div css={css.statusField} role="group">
+                                <div css={cssObj.statusField} role="group">
                                   {isEditing ? (
                                     <input
-                                      css={css.statusInputField}
+                                      css={cssObj.statusInputField}
                                       value={value}
                                       onChange={(event) => {
-                                        clearFeedback();
                                         field.handleChange(event.target.value);
                                       }}
                                       onBlur={field.handleBlur}
@@ -228,10 +213,11 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       autoFocus
                                     />
                                   ) : (
-                                    <span css={css.statusValue}>{value.trim() || '새 상태'}</span>
+                                    <span css={cssObj.statusValue}>
+                                      {value.trim() || '새 상태'}
+                                    </span>
                                   )}
-
-                                  <div css={css.statusActions}>
+                                  <div css={cssObj.statusActions}>
                                     <IconButton
                                       styleType="normal"
                                       size="small"
@@ -246,8 +232,10 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                                       size="small"
                                       onClick={() => {
                                         void statusesField.removeValue(statusIndex);
-                                        dispatchEmploymentEditing({ type: 'remove', localId });
-                                        clearFeedback();
+                                        dispatchEmploymentEditing({
+                                          type: 'remove',
+                                          localId,
+                                        });
                                       }}
                                       aria-label={`${value || '상태'} 삭제`}
                                       title="삭제"
@@ -275,7 +263,6 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
                               localId,
                             });
                             dispatchEmploymentEditing({ type: 'toggle', localId });
-                            clearFeedback();
                           }}
                         >
                           추가
@@ -290,8 +277,7 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         </form.Field>
       </div>
 
-      <footer css={css.cardFooter}>
-        {feedback ? <span css={css.feedback[feedback.type]}>{feedback.message}</span> : null}
+      <footer css={cssObj.cardFooter}>
         <Button
           size="small"
           styleType="solid"
@@ -304,6 +290,36 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
           {employmentIsSaving ? '저장 중...' : '저장'}
         </Button>
       </footer>
+    </>
+  );
+}
+
+export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategoriesSectionProps) {
+  const { data: employmentCategoriesData, error: employmentError } = useEmploymentCategoriesQuery(
+    gigwanNanoId,
+    {
+      enabled: Boolean(gigwanNanoId),
+    },
+  );
+
+  const initialValues: EmploymentCategoriesFormValues = employmentCategoriesData
+    ? mapCategoriesToFormValues(employmentCategoriesData.categories)
+    : INITIAL_VALUES;
+
+  const formKey = `${gigwanNanoId}:${
+    employmentCategoriesData?.categories
+      ?.map((c) => `${c.nanoId}:${c.sangtaes.length}`)
+      .join('|') ?? 'empty'
+  }`;
+
+  return (
+    <section css={cssObj.card}>
+      <EmploymentCategoriesForm
+        key={formKey}
+        gigwanNanoId={gigwanNanoId}
+        initialValues={initialValues}
+        employmentError={employmentError}
+      />
     </section>
   );
 }

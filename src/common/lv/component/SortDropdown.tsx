@@ -2,8 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { ArrowLgDownIcon, RadioCheckedActiveIcon, RadioCheckedDisabledIcon, RadioUncheckedActiveIcon, RadioUncheckedDisabledIcon } from '@/common/icons';
-import { cssObj as lvCss } from '@/common/lv/style';
+import {
+  ArrowLgDownIcon,
+  RadioCheckedActiveIcon,
+  RadioCheckedDisabledIcon,
+  RadioUncheckedActiveIcon,
+  RadioUncheckedDisabledIcon,
+} from '@/common/icons';
+import { cssObj } from '@/common/lv/style';
 
 import type { ListViewSortProps } from './types';
 
@@ -38,29 +44,35 @@ export function SortDropdown({ sort }: { sort: ListViewSortProps }) {
   };
 
   return (
-    <div css={lvCss.filterDropdown} ref={dropdownRef}>
+    <div css={cssObj.filterDropdown} ref={dropdownRef}>
       <button
         type="button"
-        css={[lvCss.filterTrigger(isOpen, hasSelection), !hasSelection && !isOpen && lvCss.filterTriggerPlaceholder]}
+        css={[
+          cssObj.filterTrigger(isOpen, hasSelection),
+          !hasSelection && !isOpen && cssObj.filterTriggerPlaceholder,
+        ]}
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <span>{displayLabel}</span>
-        <ArrowLgDownIcon css={lvCss.filterTriggerCaret} />
+        <ArrowLgDownIcon css={cssObj.filterTriggerCaret} />
       </button>
       {isOpen && (
-        <div css={lvCss.filterMenu}>
-          <div css={lvCss.filterGroup(false)}>
+        <div css={cssObj.filterMenu}>
+          <div css={cssObj.filterGroup(false)}>
             {sort.options.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                css={[lvCss.filterOption, option.value === sort.value && lvCss.filterOptionActive]}
+                css={[
+                  cssObj.filterOption,
+                  option.value === sort.value && cssObj.filterOptionActive,
+                ]}
                 onClick={() => {
                   sort.onChange(option.value);
                   setIsOpen(false);
                 }}
               >
-                <span css={lvCss.filterOptionContent}>
+                <span css={cssObj.filterOptionContent}>
                   {getSortOptionIcon(option.value)}
                   <span>{option.label}</span>
                 </span>

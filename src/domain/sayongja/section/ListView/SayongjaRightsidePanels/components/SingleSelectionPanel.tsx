@@ -322,8 +322,7 @@ export function SingleSelectionPanelContent({
     Math.ceil(permissionTotalCount / Math.max(permissionPagination.pageSize, 1)),
   );
 
-  // 🔧 TS2322 해결: TValue를 unknown 대신 any로 지정
-  const permissionColumns = useMemo<ColumnDef<Permission, any>[]>(
+  const permissionColumns = useMemo<ColumnDef<Permission, unknown>[]>(
     () => [
       permissionColumnHelper.accessor('name', {
         header: '권한명',
@@ -557,7 +556,6 @@ export function SingleSelectionPanelContent({
       },
     ],
     [
-      // 🔧 react-hooks/preserve-manual-memoization: useMemo 안에서 쓰는 값 전부 의존성에 포함
       availablePermissions,
       closePermissionTooltip,
       handlePermissionDimmerClick,
@@ -730,13 +728,6 @@ export function SingleSelectionPanelContent({
             )}
           </div>
         </div>
-
-        {deleteMutation.isError && (
-          <p css={cssObj.helperText}>사용자 삭제 중 문제가 발생했습니다. 다시 시도해 주세요.</p>
-        )}
-        {permissionLinkMutation.isError && (
-          <p css={cssObj.helperText}>권한 연결 중 문제가 발생했습니다. 다시 시도해 주세요.</p>
-        )}
       </div>
       <div css={cssObj.panelFooter}>
         <Button variant="red" size="small" isFull onClick={handleDelete} disabled={isDeleting}>

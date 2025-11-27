@@ -34,6 +34,7 @@ export function CreateSayongjaPanel({
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [generatedPassword, setGeneratedPassword] = useState('');
   const [employmentNanoId, setEmploymentNanoId] = useState('all');
   const [workTypeNanoId, setWorkTypeNanoId] = useState('all');
   const [isHwalseongValue, setIsHwalseongValue] = useState('true');
@@ -49,6 +50,7 @@ export function CreateSayongjaPanel({
     const generated = generateRandomPassword();
     setPassword(generated);
     setPasswordConfirm(generated);
+    setGeneratedPassword(generated);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -164,7 +166,7 @@ export function CreateSayongjaPanel({
             </select>
           </div>
         </div>
-        <div css={cssObj.panelLabelSection}>
+        <div css={cssObj.panelSection}>
           <h3 css={cssObj.panelSubtitle}>초기 비밀번호</h3>
           <Textfield
             singleLine
@@ -184,11 +186,15 @@ export function CreateSayongjaPanel({
             helperText={passwordConfirmHelperText}
             status={hasPasswordConfirmError ? 'negative' : 'normal'}
           />
+          <Button variant="assistive" size="small" onClick={handleGeneratePassword}>
+            비밀번호 무작위 생성
+          </Button>
+          {generatedPassword ? (
+            <p css={cssObj.generatedPasswordText}>
+              생성된 비밀번호: <span>{generatedPassword}</span>
+            </p>
+          ) : null}
         </div>
-        <Button variant="assistive" size="small" onClick={handleGeneratePassword}>
-          비밀번호 무작위 생성
-        </Button>
-
         {createMutation.isError && (
           <p css={cssObj.helperText}>
             사용자 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.

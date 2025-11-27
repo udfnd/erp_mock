@@ -11,7 +11,6 @@ export const cssObj = {
     flex-direction: column;
     padding: 16px;
     border-right: 1px solid ${color.cgrey100};
-    gap: 16px;
     min-width: 0;
     min-height: 0;
     max-width: 100%;
@@ -113,6 +112,7 @@ export const cssObj = {
   tableRow: css`
     cursor: pointer;
     transition: background-color 0.2s ease;
+
     &:hover {
       background: ${color.blue10};
     }
@@ -120,6 +120,7 @@ export const cssObj = {
 
   tableRowSelected: css`
     background: ${color.blue50};
+
     &:hover {
       background: ${color.blue50};
     }
@@ -176,18 +177,20 @@ export const cssObj = {
   `,
 
   settingsPanel: css`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     width: 400px;
     min-width: 400px;
-    background: ${color.white};
     min-height: 0;
     max-height: 100%;
     height: 100%;
+    padding: 16px;
+    background: ${color.white};
     overflow-y: auto;
   `,
 
-  panelHeader: css`
-    padding: 16px;
-  `,
+  panelHeader: css``,
 
   panelTitle: css`
     font-size: 18px;
@@ -205,7 +208,6 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 16px;
   `,
 
   helperText: css`
@@ -220,10 +222,14 @@ export const cssObj = {
     gap: 8px;
     padding-bottom: 16px;
     margin-bottom: 8px;
+
+    :last-of-type {
+      border-bottom: none;
+    }
   `,
 
   panelFooter: css`
-    padding: 16px;
+    margin-top: auto;
     display: flex;
     gap: 8px;
   `,
@@ -249,6 +255,7 @@ export const cssObj = {
     font-size: 13px;
     color: ${color.cgrey700};
     text-decoration: none;
+
     &:hover {
       background: ${color.cgrey100};
     }
@@ -273,6 +280,7 @@ export const cssObj = {
     height: 160px;
     padding: 8px;
     background-color: ${color.cgrey10};
+
     > span {
       ${typography.captionB};
       color: ${color.cgrey500};

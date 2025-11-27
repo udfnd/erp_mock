@@ -21,10 +21,9 @@ import { PaginationSection } from './PaginationSection';
 
 const DEFAULT_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 
-// TODO: [상] columns 즉 react table을 여기에서 호출 및 정의
 export function ListSection<TData>({
   data,
-  columns, // TODO: [하] columns에 컴포넌트가 들어갔을 때의 코드 구조 검토 (e.x. 값을 호버링 했을 때 툴팁 출력)
+  columns,
   state,
   primaryAction,
   manualPagination,

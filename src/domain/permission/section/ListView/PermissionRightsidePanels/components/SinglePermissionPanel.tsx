@@ -283,9 +283,6 @@ export function SinglePermissionPanel({
         label: '사용자들',
         content: (
           <>
-            <div>
-              <span css={cssObj.tag}>사용자들</span>
-            </div>
             <div css={cssObj.listBox}>
               {sayongjaLinks?.sayongjas.map((item) => (
                 <div key={item.nanoId} css={cssObj.listRow}>

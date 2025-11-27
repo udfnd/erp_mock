@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useMemo, useRef, useEffect } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -11,8 +11,7 @@ import {
   useUpdateGigwanMutation,
 } from '@/domain/gigwan/api';
 
-import { css } from './styles';
-import { useFeedback } from '../useFeedback';
+import { cssObj } from './styles';
 
 type BasicInformationSectionProps = { gigwanNanoId: string };
 
@@ -20,20 +19,21 @@ type BasicInformationFormValues = {
   name: string;
   intro: string;
 };
-type BasicInformationDefaults = BasicInformationFormValues;
 
-const INITIAL_DEFAULTS: BasicInformationDefaults = { name: '', intro: '' };
-
-export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectionProps) {
+function BasicInformationForm({
+  gigwanNanoId,
+  initialValues,
+}: {
+  gigwanNanoId: string;
+  initialValues: BasicInformationFormValues;
+}) {
   const queryClient = useQueryClient();
-  const { data: gigwan } = useGigwanQuery(gigwanNanoId, { enabled: Boolean(gigwanNanoId) });
   const updateMutation = useUpdateGigwanMutation(gigwanNanoId);
-  const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
 
-  const defaultsRef = useRef<BasicInformationDefaults>(INITIAL_DEFAULTS);
+  const defaultsRef = useRef<BasicInformationFormValues>(initialValues);
 
   const form = useForm({
-    defaultValues: INITIAL_DEFAULTS,
+    defaultValues: initialValues,
     onSubmit: async ({ value }) => {
       const prev = defaultsRef.current;
       const trimmedName = value.name.trim();
@@ -42,12 +42,15 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
       const payload: { name?: string; intro?: string } = {};
       if (trimmedName !== prev.name) payload.name = trimmedName;
       if (trimmedIntro !== prev.intro) payload.intro = trimmedIntro;
-      if (Object.keys(payload).length === 0) return;
+
+      if (Object.keys(payload).length === 0) {
+        return;
+      }
 
       try {
         await updateMutation.mutateAsync(payload);
 
-        const nextDefaults: BasicInformationDefaults = {
+        const nextDefaults: BasicInformationFormValues = {
           name: trimmedName,
           intro: trimmedIntro,
         };
@@ -55,26 +58,10 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
         defaultsRef.current = nextDefaults;
         form.reset(nextDefaults);
 
-        showSuccess('변경사항이 저장되었습니다.');
-
         await invalidateGigwanIdentityQueries(queryClient, gigwanNanoId);
-      } catch {
-        showError('저장에 실패했습니다. 다시 시도해주세요.');
-      }
+      } catch {}
     },
   });
-
-  useEffect(() => {
-    if (!gigwan) return;
-
-    const nextDefaults: BasicInformationDefaults = {
-      name: gigwan.name ?? '',
-      intro: gigwan.intro ?? '',
-    };
-
-    defaultsRef.current = nextDefaults;
-    form.reset(nextDefaults);
-  }, [gigwan?.name, gigwan?.intro, form, gigwan]);
 
   const { isDirty, nameMeta, introMeta } = useStore(form.store, (state) => ({
     isDirty: state.isDirty,
@@ -82,27 +69,23 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
     introMeta: state.fieldMeta?.intro ?? { errors: [] as string[] },
   }));
 
-  const hasErrors = useMemo(
-    () => (nameMeta.errors?.length ?? 0) > 0 || (introMeta.errors?.length ?? 0) > 0,
-    [nameMeta.errors, introMeta.errors],
-  );
+  const hasErrors = (nameMeta.errors?.length ?? 0) > 0 || (introMeta.errors?.length ?? 0) > 0;
 
   const canSave = isDirty && !hasErrors && !updateMutation.isPending;
 
   const handleSave = useCallback(async () => {
-    clearFeedback();
     await form.handleSubmit();
-  }, [clearFeedback, form]);
+  }, [form]);
 
   return (
-    <section css={css.card}>
-      <div css={css.cardHeader}>
-        <div css={css.cardTitleGroup}>
-          <h2 css={css.cardTitle}>기관 기본 설정</h2>
+    <>
+      <div css={cssObj.cardHeader}>
+        <div css={cssObj.cardTitleGroup}>
+          <h2 css={cssObj.cardTitle}>기관 기본 설정</h2>
         </div>
       </div>
 
-      <div css={css.cardBody}>
+      <div css={cssObj.cardBody}>
         <form.Field
           name="name"
           validators={{
@@ -123,7 +106,6 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
                 placeholder="기관 이름을 입력하세요"
                 value={field.state.value}
                 onValueChange={(v) => {
-                  clearFeedback();
                   field.handleChange(v);
                 }}
                 onBlur={field.handleBlur}
@@ -155,7 +137,6 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
                 placeholder="기관의 특징이나 안내 문구를 입력하세요"
                 value={field.state.value}
                 onValueChange={(v) => {
-                  clearFeedback();
                   field.handleChange(v);
                 }}
                 onBlur={field.handleBlur}
@@ -167,8 +148,7 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
           }}
         </form.Field>
 
-        <div css={css.cardFooter}>
-          {feedback ? <span css={css.feedback[feedback.type]}>{feedback.message}</span> : null}
+        <div css={cssObj.cardFooter}>
           <Button
             size="small"
             styleType="solid"
@@ -180,6 +160,30 @@ export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectio
           </Button>
         </div>
       </div>
+    </>
+  );
+}
+
+export function BasicInformationSection({ gigwanNanoId }: BasicInformationSectionProps) {
+  const { data: gigwan } = useGigwanQuery(gigwanNanoId, {
+    enabled: Boolean(gigwanNanoId),
+  });
+
+  const initialValues: BasicInformationFormValues = useMemo(
+    () => ({
+      name: gigwan?.name ?? '',
+      intro: gigwan?.intro ?? '',
+    }),
+    [gigwan?.name, gigwan?.intro],
+  );
+
+  return (
+    <section css={cssObj.card}>
+      <BasicInformationForm
+        key={`${gigwanNanoId}:${initialValues.name}:${initialValues.intro}`}
+        gigwanNanoId={gigwanNanoId}
+        initialValues={initialValues}
+      />
     </section>
   );
 }

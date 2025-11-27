@@ -32,7 +32,7 @@ export const cssObj = {
     align-items: center;
     gap: 12px;
   `,
-  searchBox: (isFocused: boolean, hasAction: boolean) => css`
+  searchBox: (hasAction: boolean) => css`
     flex: 1 1 auto;
     min-width: 240px;
     display: flex;
@@ -40,8 +40,11 @@ export const cssObj = {
     position: relative;
     padding-right: ${hasAction ? 38 : 0}px;
     ${typography.bodySmallR};
-    ${isFocused ? `outline: 1px solid ${color.blue};` : ''};
     border-radius: 10px;
+
+    :focus {
+      outline: 1px solid ${color.blue};
+    }
   `,
   searchIcon: css`
     position: absolute;
@@ -72,9 +75,10 @@ export const cssObj = {
     background: ${color.white};
     font-size: 14px;
     color: ${color.cgrey700};
+
     &:focus {
       outline: none;
-      border: none;
+      border: 2px solid ${color.blue};
     }
   `,
   searchActionButton: (isDisabled: boolean) => css`
@@ -275,11 +279,13 @@ export const cssObj = {
     color: ${color.cgrey500};
     border-bottom: 1px solid ${color.cgrey100};
     background: ${color.white};
+
     &:first-of-type {
       width: 24px;
       padding-left: 0;
       padding-right: 8px;
     }
+
     &:nth-of-type(2) {
       padding-left: 0;
     }
@@ -322,11 +328,13 @@ export const cssObj = {
     ${typography.bodySmallR};
     color: ${color.black};
     background: ${color.white};
+
     &:first-of-type {
       width: 24px;
       padding-left: 0;
       padding-right: 8px;
     }
+
     &:nth-of-type(2) {
       padding-left: 0;
     }
@@ -334,12 +342,14 @@ export const cssObj = {
   tableRow: css`
     transition: background 0.2s ease;
     cursor: pointer;
+
     &:hover {
       background: ${color.white};
     }
   `,
   tableRowSelected: css`
     background: ${color.white};
+
     &:hover {
       background: ${color.white};
     }
@@ -356,7 +366,6 @@ export const cssObj = {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
     background: ${color.white};
   `,
 
@@ -365,33 +374,37 @@ export const cssObj = {
     align-items: center;
     gap: 8px;
   `,
+
   paginationPageList: css`
     display: flex;
     align-items: center;
     gap: 4px;
   `,
   paginationPageButton: css`
-    min-width: 28px;
-    height: 28px;
+    min-width: 32px;
+    height: 32px;
     padding: 0 6px;
     border-radius: 0;
     border: none;
     background: ${color.white};
-    font-size: 12px;
-    color: ${color.cgrey600};
+    color: ${color.cgrey300};
     cursor: pointer;
     transition: color 0.15s ease;
+    ${typography.captionB};
+
     &:hover {
       color: ${color.cgrey600};
     }
   `,
+
   paginationPageButtonActive: css`
     background: ${color.cgrey50};
     border-radius: 8px;
     border: none;
-    color: ${color.blue600};
-    font-weight: 600;
+    color: ${color.black};
+    ${typography.captionB};
   `,
+
   paginationMoreButton: css`
     min-width: 28px;
     height: 28px;
@@ -404,6 +417,7 @@ export const cssObj = {
     color: ${color.cgrey600};
     cursor: pointer;
     transition: color 0.15s ease;
+
     &:hover {
       color: ${color.cgrey600};
     }
@@ -419,9 +433,11 @@ export const cssObj = {
     color: ${color.cgrey600};
     cursor: pointer;
     transition: color 0.15s ease;
+
     &:hover:not(:disabled) {
       color: ${color.cgrey600};
     }
+
     &:disabled {
       cursor: default;
       color: ${color.cgrey200};
