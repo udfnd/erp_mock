@@ -66,6 +66,10 @@ export const css = {
     ${typography.bodySmallM};
     color: ${color.black};
   `,
+  emptyText: emotionCss`
+    ${typography.bodySmallR};
+    color: ${color.cgrey500};
+  `,
   statusList: emotionCss`
     display: flex;
     flex-direction: column;
@@ -116,5 +120,16 @@ export const css = {
     align-items: center;
     gap: 4px;
     margin-left: 8px;
+  `,
+  statusToggleGroup: emotionCss`
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  `,
+  statusToggleLabel: emotionCss`
+    ${typography.captionR};
+    color: ${color.cgrey600};
+    white-space: nowrap;
   `,
 } as const;
