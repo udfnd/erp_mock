@@ -1,23 +1,18 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { Button, Textfield } from '@/common/components';
-import { EditIcon, LocationIcon } from '@/common/icons';
-import {
-  inputSingleLine,
-  inputWrapperRecipe,
-  label,
-  labelWrapper,
-} from '@/common/components/Textfield.style';
+import { Button, JusoSelector, Textfield } from '@/common/components';
+import { label, labelWrapper } from '@/common/components/Textfield.style';
 import {
   useJojikQuery,
   useUpdateJojikMutation,
   useUpsertJojikAddressMutation,
   type JojikDetailResponse,
 } from '@/domain/jojik/api';
-import { useDaumPostcode } from '@/domain/juso/section/ListView/JusoRightsidePanels/components/useDaumPostcode';
+import type { JusoListItem } from '@/domain/juso/api';
+import { useAuth } from '@/global/auth';
 
 import { cssObj } from './styles';
 
@@ -29,8 +24,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const queryClient = useQueryClient();
   const updateJojikMutation = useUpdateJojikMutation(jojikNanoId);
   const upsertJojikAddressMutation = useUpsertJojikAddressMutation(jojikNanoId);
-  const { openPostcode } = useDaumPostcode();
-  const addressInputId = useId();
+  const { isAuthenticated } = useAuth();
 
   const jojikQuery = useJojikQuery(jojikNanoId, {
     enabled: Boolean(jojikNanoId),
@@ -94,18 +88,10 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const isSaving = updateJojikMutation.isPending;
   const isAddressSaving = upsertJojikAddressMutation.isPending;
 
-  const addressInputWrapperStyles = inputWrapperRecipe({
-    status: 'normal',
-    disabled: isAddressSaving,
-    singleLine: true,
-  });
-
-  const handleOpenPostcode = () => {
-    if (isAddressSaving) return;
-    openPostcode((result) => {
-      const buildingName = result.buildingName ? ` ${result.buildingName}` : '';
-      setAddressInput(`${result.address}${buildingName}`.trim());
-    });
+  const handleJusoSelectComplete = (selected: JusoListItem[]) => {
+    const formatted = formatSelectedJuso(selected[0]);
+    if (!formatted) return;
+    setAddressInput(formatted);
   };
 
   return (
@@ -150,30 +136,16 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           </Button>
         </div>
         <div css={cssObj.addressField}>
-          <label css={labelWrapper} htmlFor={addressInputId}>
+          <div css={labelWrapper}>
             <span css={label}>조직 주소</span>
-          </label>
-          <div css={[...addressInputWrapperStyles, cssObj.addressInputWrapper]}>
-            <LocationIcon width={20} height={20} />
-            <input
-              css={[inputSingleLine, cssObj.addressInput]}
-              id={addressInputId}
-              type="text"
-              value={currentAddress}
-              onChange={(event) => setAddressInput(event.target.value)}
-              placeholder="조직 주소를 입력하세요"
-              disabled
-            />
-            <button
-              type="button"
-              css={cssObj.addressEditButton}
-              onClick={handleOpenPostcode}
-              aria-label="주소 검색"
-              disabled={isAddressSaving}
-            >
-              <EditIcon width={20} height={20} />
-            </button>
           </div>
+          <JusoSelector
+            jojikNanoId={jojikNanoId}
+            isAuthenticated={isAuthenticated}
+            maxSelectable={1}
+            buttonLabel={currentAddress || '조직 주소를 입력하세요'}
+            onComplete={handleJusoSelectComplete}
+          />
         </div>
         <div css={cssObj.cardFooter}>
           <Button
@@ -196,4 +168,9 @@ const formatJojikAddress = (jojik?: JojikDetailResponse) => {
   const base = jojik?.juso?.juso ?? '';
   const detail = jojik?.juso?.jusoDetail ?? '';
   return [base, detail].filter(Boolean).join(' ').trim();
+};
+
+const formatSelectedJuso = (juso?: JusoListItem) => {
+  if (!juso) return '';
+  return [juso.juso, juso.jusoDetail].filter(Boolean).join(' ').trim();
 };
