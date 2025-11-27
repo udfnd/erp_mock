@@ -2,10 +2,10 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
-import { Button, IconButton } from '@/common/components';
-import { DeleteIcon, EditIcon, PlusIcon } from '@/common/icons';
+import { Button, IconButton, Toggle } from '@/common/components';
+import { DeleteIcon, PlusIcon } from '@/common/icons';
 import {
   gigwanQueryKeys,
   useEmploymentCategoriesQuery,
@@ -53,35 +53,6 @@ const mapCategoriesToFormValues = (
   })),
 });
 
-type EmploymentEditingState = Record<string, boolean>;
-
-type EmploymentEditingAction =
-  | { type: 'toggle'; localId: string }
-  | { type: 'remove'; localId: string }
-  | { type: 'reset' };
-
-const employmentEditingReducer = (
-  state: EmploymentEditingState,
-  action: EmploymentEditingAction,
-): EmploymentEditingState => {
-  switch (action.type) {
-    case 'toggle':
-      return { ...state, [action.localId]: !state[action.localId] };
-    case 'remove': {
-      if (!state[action.localId]) {
-        return state;
-      }
-      const nextState = { ...state };
-      delete nextState[action.localId];
-      return nextState;
-    }
-    case 'reset':
-      return {};
-    default:
-      return state;
-  }
-};
-
 const INITIAL_VALUES: EmploymentCategoriesFormValues = { categories: [] };
 
 export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategoriesSectionProps) {
@@ -93,7 +64,6 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
   const upsertEmploymentCategoriesMutation = useUpsertEmploymentCategoriesMutation(gigwanNanoId);
 
   const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
-  const [employmentEditing, dispatchEmploymentEditing] = useReducer(employmentEditingReducer, {});
 
   const form = useForm({
     defaultValues: INITIAL_VALUES,
@@ -128,7 +98,6 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         });
         const nextValues = mapCategoriesToFormValues(data.categories);
         form.reset(nextValues);
-        dispatchEmploymentEditing({ type: 'reset' });
         showSuccess('재직 카테고리 상태가 저장되었습니다.');
         await queryClient.invalidateQueries({
           queryKey: gigwanQueryKeys.employmentCategories(gigwanNanoId),
@@ -169,14 +138,6 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
     await form.handleSubmit();
   }, [clearFeedback, employmentHasEmptyStatus, form, isDirty]);
 
-  const toggleEditEmploymentStatus = useCallback(
-    (localId: string) => {
-      dispatchEmploymentEditing({ type: 'toggle', localId });
-      clearFeedback();
-    },
-    [clearFeedback],
-  );
-
   return (
     <section css={css.card}>
       <div css={css.cardHeader}>
@@ -194,97 +155,111 @@ export function EmploymentCategoriesSection({ gigwanNanoId }: EmploymentCategori
         <form.Field name="categories" mode="array">
           {(categoriesField) => (
             <>
-              {categoriesField.state.value.map((category, categoryIndex) => (
-                <div key={category.nanoId} css={css.categorySection}>
-                  <span css={css.categoryLabel}>{category.name}</span>
+              {categoriesField.state.value.length === 0 ? (
+                <p css={css.emptyText}>불러온 재직 카테고리가 없습니다.</p>
+              ) : (
+                categoriesField.state.value.map((category, categoryIndex) => (
+                  <div key={category.nanoId} css={css.categorySection}>
+                    <span css={css.categoryLabel}>{category.name}</span>
 
-                  <form.Field name={`categories[${categoryIndex}].statuses`} mode="array">
-                    {(statusesField) => (
-                      <div css={css.statusList}>
-                        {statusesField.state.value.map((status, statusIndex) => (
-                          <form.Field
-                            key={status.localId}
-                            name={`categories[${categoryIndex}].statuses[${statusIndex}].name`}
-                          >
-                            {(field) => {
-                              const currentStatus = statusesField.state.value[statusIndex];
-                              const localId =
-                                currentStatus?.localId ?? `${category.nanoId}-${statusIndex}`;
-                              const isEditing = Boolean(employmentEditing[localId]);
-                              const value = String(field.state.value ?? '');
-                              return (
-                                <div css={css.statusField} role="group">
-                                  {isEditing ? (
-                                    <input
-                                      css={css.statusInputField}
-                                      value={value}
-                                      onChange={(event) => {
-                                        clearFeedback();
-                                        field.handleChange(event.target.value);
-                                      }}
-                                      onBlur={field.handleBlur}
-                                      placeholder="상태 이름"
-                                      maxLength={20}
-                                      autoFocus
-                                    />
-                                  ) : (
-                                    <span css={css.statusValue}>{value.trim() || '새 상태'}</span>
-                                  )}
+                    <form.Field name={`categories[${categoryIndex}].statuses`} mode="array">
+                      {(statusesField) => (
+                        <div css={css.statusList}>
+                          {statusesField.state.value.map((status, statusIndex) => {
+                            const localId = status.localId ?? `${category.nanoId}-${statusIndex}`;
 
-                                  <div css={css.statusActions}>
-                                    <IconButton
-                                      styleType="normal"
-                                      size="small"
-                                      onClick={() => toggleEditEmploymentStatus(localId)}
-                                      aria-label={`${value || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
-                                      title={isEditing ? '편집 종료' : '수정'}
-                                    >
-                                      <EditIcon width={16} height={16} />
-                                    </IconButton>
-                                    <IconButton
-                                      styleType="normal"
-                                      size="small"
-                                      onClick={() => {
-                                        void statusesField.removeValue(statusIndex);
-                                        dispatchEmploymentEditing({ type: 'remove', localId });
-                                        clearFeedback();
-                                      }}
-                                      aria-label={`${value || '상태'} 삭제`}
-                                      title="삭제"
-                                    >
-                                      <DeleteIcon width={16} height={16} />
-                                    </IconButton>
-                                  </div>
+                            return (
+                              <div key={localId} css={css.statusField} role="group">
+                                <form.Field
+                                  name={`categories[${categoryIndex}].statuses[${statusIndex}].name`}
+                                >
+                                  {(field) => {
+                                    const value = String(field.state.value ?? '');
+                                    return (
+                                      <input
+                                        css={css.statusInputField}
+                                        value={value}
+                                        onChange={(event) => {
+                                          clearFeedback();
+                                          field.handleChange(event.target.value);
+                                        }}
+                                        onBlur={field.handleBlur}
+                                        placeholder="상태 이름"
+                                        maxLength={20}
+                                      />
+                                    );
+                                  }}
+                                </form.Field>
+
+                                <form.Field
+                                  name={`categories[${categoryIndex}].statuses[${statusIndex}].isHwalseong`}
+                                  validators={{}}
+                                >
+                                  {(field) => {
+                                    const isActive = Boolean(field.state.value);
+                                    return (
+                                      <div css={css.statusToggleGroup}>
+                                        <Toggle
+                                          size="sm"
+                                          active={isActive}
+                                          onChange={(checked) => {
+                                            clearFeedback();
+                                            field.handleChange(checked);
+                                          }}
+                                          aria-label={`${status.name || '상태'} ${
+                                            isActive ? '비활성' : '활성'
+                                          } 토글`}
+                                        />
+                                        <span css={css.statusToggleLabel}>
+                                          {isActive ? '활성' : '비활성'}
+                                        </span>
+                                      </div>
+                                    );
+                                  }}
+                                </form.Field>
+
+                                <div css={css.statusActions}>
+                                  <IconButton
+                                    styleType="normal"
+                                    size="small"
+                                    onClick={() => {
+                                      void statusesField.removeValue(statusIndex);
+                                      clearFeedback();
+                                    }}
+                                    aria-label={`${status.name || '상태'} 삭제`}
+                                    title="삭제"
+                                  >
+                                    <DeleteIcon width={16} height={16} />
+                                  </IconButton>
                                 </div>
-                              );
-                            }}
-                          </form.Field>
-                        ))}
+                              </div>
+                            );
+                          })}
 
-                        <Button
-                          size="medium"
-                          styleType="outlined"
-                          variant="secondary"
-                          iconRight={<PlusIcon width={16} height={16} />}
-                          onClick={() => {
-                            const localId = createLocalId();
-                            statusesField.pushValue({
-                              nanoId: null,
-                              name: '',
-                              isHwalseong: true,
-                              localId,
-                            });
-                            dispatchEmploymentEditing({ type: 'toggle', localId });
-                            clearFeedback();
-                          }}
-                        >
-                          추가
-                        </Button>
-                      </div>
-                    )}
-                  </form.Field>
-                </div>
-              ))}
+                          <Button
+                            size="medium"
+                            styleType="outlined"
+                            variant="secondary"
+                            iconRight={<PlusIcon width={16} height={16} />}
+                            onClick={() => {
+                              const localId = createLocalId();
+                              statusesField.pushValue({
+                                nanoId: null,
+                                name: '',
+                                isHwalseong: true,
+                                localId,
+                              });
+                              clearFeedback();
+                            }}
+                          >
+                            추가
+                          </Button>
+                        </div>
+                      )}
+                    </form.Field>
+                  </div>
+                ))
+              )}
             </>
           )}
         </form.Field>

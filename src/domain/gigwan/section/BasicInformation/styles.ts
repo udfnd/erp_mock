@@ -35,6 +35,31 @@ export const css = {
     flex-direction: column;
     gap: 20px;
   `,
+  loadedInfo: emotionCss`
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey200};
+  `,
+  loadedInfoItem: emotionCss`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  `,
+  loadedInfoLabel: emotionCss`
+    ${typography.captionR};
+    color: ${color.cgrey500};
+  `,
+  loadedInfoValue: emotionCss`
+    ${typography.bodyR};
+    color: ${color.black};
+    word-break: break-word;
+    white-space: pre-wrap;
+    margin: 0;
+  `,
   cardFooter: emotionCss`
     margin-top: auto;
     display: flex;
