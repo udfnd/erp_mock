@@ -7,14 +7,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { ListViewState, useListViewState } from '@/common/lv';
 import { type JusoListItem, useGetJusosQuery } from '@/domain/juso/api';
 
-import {
-  PAGE_SIZE_OPTIONS,
-  SORT_OPTIONS,
-  columnHelper,
-  formatDate,
-  getSortOptionFromState,
-  getSortStateFromOption,
-} from './constants';
+import { SORT_OPTIONS, columnHelper, formatDate, getSortOptionFromState, getSortStateFromOption } from './constants';
 
 export type JusoListViewHookParams = {
   jojikNanoId: string;
@@ -28,7 +21,6 @@ type JusoColumnDef = ColumnDef<JusoListItem, unknown>;
 export type JusoListSectionHandlers = {
   onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
-  onPageSizeChange: (size: number) => void;
   onSelectedJusosChange: (jusos: JusoListItem[]) => void;
   onAddClick: () => void;
   onStopCreate: () => void;
@@ -62,7 +54,6 @@ export type UseJusoListViewSectionsResult = {
   listSectionProps: JusoListSectionProps;
   settingsSectionProps: JusoRightsidePanelsProps;
   sortOptions: typeof SORT_OPTIONS;
-  pageSizeOptions: typeof PAGE_SIZE_OPTIONS;
 };
 
 export function useJusoListViewSections({
@@ -143,10 +134,6 @@ export function useJusoListViewSections({
     setSorting(getSortStateFromOption(value));
   };
 
-  const handlePageSizeChange = (size: number) => {
-    setPagination({ pageIndex: 0, pageSize: size });
-  };
-
   const clearSelection = () => {
     setRowSelection({});
   };
@@ -184,7 +171,6 @@ export function useJusoListViewSections({
     handlers: {
       onSearchChange: handleSearchChange,
       onSortChange: handleSortChange,
-      onPageSizeChange: handlePageSizeChange,
       onSelectedJusosChange: setSelectedJusos,
       onAddClick: handleAddClick,
       onStopCreate: stopCreate,
@@ -205,6 +191,5 @@ export function useJusoListViewSections({
     listSectionProps,
     settingsSectionProps,
     sortOptions: SORT_OPTIONS,
-    pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 }

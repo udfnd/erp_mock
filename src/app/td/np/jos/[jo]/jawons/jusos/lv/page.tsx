@@ -32,19 +32,17 @@ export default function NpJojikJawonJusoListViewPage() {
   const jojikNanoId = extractJojikNanoId(params?.jo);
   const { isAuthenticated } = useAuth();
 
-  const { listSectionProps, settingsSectionProps, sortOptions, pageSizeOptions } =
-    useJusoListViewSections({
-      jojikNanoId,
-      isAuthenticated,
-    });
+  const { listSectionProps, settingsSectionProps, sortOptions } = useJusoListViewSections({
+    jojikNanoId,
+    isAuthenticated,
+  });
 
   const listSectionAllProps = useMemo(
     () => ({
       ...listSectionProps,
       sortOptions,
-      pageSizeOptions,
     }),
-    [listSectionProps, pageSizeOptions, sortOptions],
+    [listSectionProps, sortOptions],
   );
 
   const pageKey = jojikNanoId || 'no-jo';
