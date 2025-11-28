@@ -42,6 +42,30 @@ export const cssObj = {
       height: 16px;
     }
   `,
+  triggerActions: css`
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  `,
+  clearIcon: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 50%;
+    color: ${color.cgrey400};
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: ${color.cgrey50};
+      color: ${color.cgrey600};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue};
+      outline-offset: 2px;
+    }
+  `,
   triggerLabel: css`
     ${typography.bodySmallR};
     color: inherit;
