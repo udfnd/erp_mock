@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { type KeyboardEvent, type MouseEvent, useCallback, useMemo, useState } from 'react';
 
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
 import { cssObj } from './JusoSelector.style';
-import { EditIcon, LocationIcon } from '@/common/icons';
+import { EditIcon, LocationIcon, XCircleBlackIcon } from '@/common/icons';
 import type { JusoListItem } from '@/domain/juso/api';
 import { useCreateJusoMutation } from '@/domain/juso/api';
 import {
@@ -22,6 +22,7 @@ export type JusoSelectorProps = {
   maxSelectable: number;
   onComplete: (selected: JusoListItem[]) => void;
   buttonLabel?: string;
+  onClear?: () => void;
 };
 
 const createSelectableJuso = (payload: {
@@ -128,6 +129,7 @@ export function JusoSelector({
   maxSelectable,
   onComplete,
   buttonLabel = '조직 주소를 입력하세요',
+  onClear,
 }: JusoSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -152,6 +154,30 @@ export function JusoSelector({
       listSectionProps.handlers.onSelectedJusosChange(limited);
     },
     [applyLimit, listSectionProps.handlers],
+  );
+
+  const handleClearSelection = useCallback(() => {
+    handleSelectedChange([]);
+    onClear?.();
+  }, [handleSelectedChange, onClear]);
+
+  const handleClearClick = useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      handleClearSelection();
+    },
+    [handleClearSelection],
+  );
+
+  const handleClearKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      event.stopPropagation();
+      handleClearSelection();
+    },
+    [handleClearSelection],
   );
 
   const handleModalComplete = () => {
@@ -240,8 +266,20 @@ export function JusoSelector({
           <LocationIcon width={20} height={20} />
         </span>
         <span css={cssObj.triggerLabel}>{buttonLabel}</span>
-        <span css={cssObj.triggerIcon}>
-          <EditIcon width={20} height={20} />
+        <span css={cssObj.triggerActions}>
+          <span css={cssObj.triggerIcon}>
+            <EditIcon width={20} height={20} />
+          </span>
+          <span
+            role="button"
+            tabIndex={0}
+            css={cssObj.clearIcon}
+            onClick={handleClearClick}
+            onKeyDown={handleClearKeyDown}
+            aria-label="주소 선택 초기화"
+          >
+            <XCircleBlackIcon width={20} height={20} />
+          </span>
         </span>
       </button>
 

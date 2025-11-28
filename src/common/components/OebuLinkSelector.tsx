@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { type KeyboardEvent, type MouseEvent, useCallback, useMemo, useState } from 'react';
 
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
 import { cssObj } from './OebuLinkSelector.style';
-import { EditIcon, LinkOnIcon } from '@/common/icons';
+import { EditIcon, LinkOnIcon, XCircleBlackIcon } from '@/common/icons';
 import type { OebuLinkListItem } from '@/domain/oebu-link/api';
 import { useCreateOebuLinkMutation } from '@/domain/oebu-link/api';
 import {
@@ -21,6 +21,7 @@ export type OebuLinkSelectorProps = {
   maxSelectable: number;
   onComplete: (selected: OebuLinkListItem[]) => void;
   buttonLabel?: string;
+  onClear?: () => void;
 };
 
 const createSelectableOebuLink = (payload: OebuLinkListItem): OebuLinkListItem => ({
@@ -153,6 +154,7 @@ export function OebuLinkSelector({
   maxSelectable,
   onComplete,
   buttonLabel = '외부 링크를 선택하세요',
+  onClear,
 }: OebuLinkSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -177,6 +179,30 @@ export function OebuLinkSelector({
       listSectionProps.handlers.onSelectedLinksChange(limited);
     },
     [applyLimit, listSectionProps.handlers],
+  );
+
+  const handleClearSelection = useCallback(() => {
+    handleSelectedChange([]);
+    onClear?.();
+  }, [handleSelectedChange, onClear]);
+
+  const handleClearClick = useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      handleClearSelection();
+    },
+    [handleClearSelection],
+  );
+
+  const handleClearKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      event.stopPropagation();
+      handleClearSelection();
+    },
+    [handleClearSelection],
   );
 
   const handleModalComplete = () => {
@@ -264,8 +290,20 @@ export function OebuLinkSelector({
           <LinkOnIcon width={20} height={20} />
         </span>
         <span css={cssObj.triggerLabel}>{buttonLabel}</span>
-        <span css={cssObj.triggerIcon}>
-          <EditIcon width={20} height={20} />
+        <span css={cssObj.triggerActions}>
+          <span css={cssObj.triggerIcon}>
+            <EditIcon width={20} height={20} />
+          </span>
+          <span
+            role="button"
+            tabIndex={0}
+            css={cssObj.clearIcon}
+            onClick={handleClearClick}
+            onKeyDown={handleClearKeyDown}
+            aria-label="외부 링크 선택 초기화"
+          >
+            <XCircleBlackIcon width={20} height={20} />
+          </span>
         </span>
       </button>
 

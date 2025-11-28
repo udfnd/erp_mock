@@ -5,13 +5,7 @@ import { useMemo, useState } from 'react';
 
 import { Button, JusoSelector, OebuLinkSelector, Textfield } from '@/common/components';
 import { label, labelWrapper } from '@/common/components/Textfield.style';
-import {
-  useJojikQuery,
-  useUpdateJojikMutation,
-  useUpsertJojikAddressMutation,
-  useUpsertJojikHomepageMutation,
-  type JojikDetailResponse,
-} from '@/domain/jojik/api';
+import { useJojikQuery, useUpdateJojikMutation, type JojikDetailResponse } from '@/domain/jojik/api';
 import type { JusoListItem } from '@/domain/juso/api';
 import type { OebuLinkListItem } from '@/domain/oebu-link/api';
 import { useAuth } from '@/global/auth';
@@ -25,8 +19,6 @@ type BasicSettingsSectionProps = {
 export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps) {
   const queryClient = useQueryClient();
   const updateJojikMutation = useUpdateJojikMutation(jojikNanoId);
-  const upsertJojikAddressMutation = useUpsertJojikAddressMutation(jojikNanoId);
-  const upsertHomepageMutation = useUpsertJojikHomepageMutation(jojikNanoId);
   const { isAuthenticated } = useAuth();
 
   const jojikQuery = useJojikQuery(jojikNanoId, {
@@ -37,6 +29,10 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const [introInput, setIntroInput] = useState<string | undefined>(undefined);
   const [addressInput, setAddressInput] = useState<string | undefined>(undefined);
   const [homepageInput, setHomepageInput] = useState<string | undefined>(undefined);
+  const [selectedJusoNanoId, setSelectedJusoNanoId] = useState<string | null | undefined>(undefined);
+  const [selectedHomepageNanoId, setSelectedHomepageNanoId] = useState<string | null | undefined>(
+    undefined,
+  );
   const [selectedHomepage, setSelectedHomepage] = useState<OebuLinkListItem | undefined>(undefined);
 
   const { data: jojik, isError } = jojikQuery;
@@ -45,6 +41,10 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const currentIntro = introInput ?? jojik?.intro ?? '';
   const currentAddress = addressInput ?? formatJojikAddress(jojik);
   const currentHomepage = homepageInput ?? formatJojikHomepage(jojik);
+  const initialAddressNanoId = jojik?.juso?.nanoId ?? null;
+  const initialHomepageNanoId = jojik?.homepageUrl?.nanoId ?? null;
+  const currentAddressNanoId = selectedJusoNanoId ?? initialAddressNanoId;
+  const currentHomepageNanoId = selectedHomepageNanoId ?? initialHomepageNanoId;
 
   const trimmedName = currentName.trim();
   const trimmedIntro = currentIntro.trim();
@@ -58,17 +58,22 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
 
   const isAddressDirty = useMemo(() => {
     if (!jojik) return false;
-    return trimmedAddress !== formatJojikAddress(jojik);
-  }, [jojik, trimmedAddress]);
+    return (
+      trimmedAddress !== formatJojikAddress(jojik) || currentAddressNanoId !== initialAddressNanoId
+    );
+  }, [currentAddressNanoId, initialAddressNanoId, jojik, trimmedAddress]);
 
   const isHomepageDirty = useMemo(() => {
     if (!jojik) return false;
-    return trimmedHomepage !== formatJojikHomepage(jojik);
-  }, [jojik, trimmedHomepage]);
+    return (
+      trimmedHomepage !== formatJojikHomepage(jojik) ||
+      currentHomepageNanoId !== initialHomepageNanoId
+    );
+  }, [currentHomepageNanoId, initialHomepageNanoId, jojik, trimmedHomepage]);
 
   const isValid = trimmedName.length > 0;
-  const isAddressValid = trimmedAddress.length > 0;
-  const isHomepageValid = trimmedHomepage.length > 0;
+  const isAddressValid = trimmedAddress.length > 0 || currentAddressNanoId === null;
+  const isHomepageValid = trimmedHomepage.length > 0 || currentHomepageNanoId === null;
 
   const handleSave = () => {
     if (!isDirty || !isValid) return;
@@ -87,11 +92,12 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const handleAddressSave = () => {
     if (!isAddressDirty || !isAddressValid) return;
 
-    upsertJojikAddressMutation.mutate(
-      { address: trimmedAddress },
+    updateJojikMutation.mutate(
+      { jusoNanoId: currentAddressNanoId },
       {
-        onSuccess: async () => {
-          setAddressInput(trimmedAddress);
+        onSuccess: async (data) => {
+          setAddressInput(formatJojikAddress(data));
+          setSelectedJusoNanoId(data.juso?.nanoId ?? null);
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
       },
@@ -99,30 +105,48 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   };
 
   const isSaving = updateJojikMutation.isPending;
-  const isAddressSaving = upsertJojikAddressMutation.isPending;
-  const isHomepageSaving = upsertHomepageMutation.isPending;
+  const isAddressSaving = updateJojikMutation.isPending;
+  const isHomepageSaving = updateJojikMutation.isPending;
 
   const handleJusoSelectComplete = (selected: JusoListItem[]) => {
-    const formatted = formatSelectedJuso(selected[0]);
+    const [juso] = selected;
+    const formatted = formatSelectedJuso(juso);
     if (!formatted) return;
+    setSelectedJusoNanoId(juso?.nanoId ?? null);
     setAddressInput(formatted);
+  };
+
+  const handleAddressClear = () => {
+    setSelectedJusoNanoId(null);
+    setAddressInput('');
   };
 
   const handleHomepageSelectComplete = (selected: OebuLinkListItem[]) => {
     const [homepage] = selected;
     if (!homepage) return;
     setSelectedHomepage(homepage);
+    setSelectedHomepageNanoId(homepage.nanoId);
     setHomepageInput(homepage.linkUrl);
   };
 
-  const handleHomepageSave = () => {
-    if (!isHomepageDirty || !isHomepageValid || !selectedHomepage) return;
+  const handleHomepageClear = () => {
+    setSelectedHomepage(undefined);
+    setSelectedHomepageNanoId(null);
+    setHomepageInput('');
+  };
 
-    upsertHomepageMutation.mutate(
-      { url: trimmedHomepage },
+  const handleHomepageSave = () => {
+    if (!isHomepageDirty || !isHomepageValid) return;
+
+    updateJojikMutation.mutate(
+      { homepageUrl: trimmedHomepage || null, homepageUrlNanoId: currentHomepageNanoId },
       {
-        onSuccess: async () => {
-          setHomepageInput(trimmedHomepage);
+        onSuccess: async (data) => {
+          setHomepageInput(formatJojikHomepage(data));
+          setSelectedHomepageNanoId(data.homepageUrl?.nanoId ?? null);
+          if (!data.homepageUrl) {
+            setSelectedHomepage(undefined);
+          }
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
       },
@@ -130,7 +154,9 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   };
 
   const homepageButtonLabel =
-    formatOebuLinkLabel(selectedHomepage) || formatJojikHomepageLabel(jojik) || '조직 홈페이지를 선택하세요';
+    formatOebuLinkLabel(selectedHomepage) ||
+    (homepageInput !== undefined ? homepageInput : formatJojikHomepageLabel(jojik)) ||
+    '조직 홈페이지를 선택하세요';
 
   return (
     <section css={cssObj.card}>
@@ -183,6 +209,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
             maxSelectable={1}
             buttonLabel={currentAddress || '조직 주소를 입력하세요'}
             onComplete={handleJusoSelectComplete}
+            onClear={handleAddressClear}
           />
         </div>
         <div css={cssObj.cardFooter}>
@@ -207,6 +234,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
             maxSelectable={1}
             buttonLabel={homepageButtonLabel}
             onComplete={handleHomepageSelectComplete}
+            onClear={handleHomepageClear}
           />
         </div>
         <div css={cssObj.cardFooter}>
@@ -214,7 +242,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
             size="small"
             variant="secondary"
             styleType="solid"
-            disabled={!isHomepageDirty || !isHomepageValid || isHomepageSaving || !selectedHomepage}
+            disabled={!isHomepageDirty || !isHomepageValid || isHomepageSaving}
             onClick={handleHomepageSave}
             isLoading={isHomepageSaving}
           >
