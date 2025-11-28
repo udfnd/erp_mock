@@ -210,6 +210,14 @@ export function OebuLinkSelector({
     setIsModalOpen(false);
   };
 
+  const handleRemoveSelected = useCallback(
+    (nanoId: string) => {
+      const filtered = selectedLinks.filter((link) => link.nanoId !== nanoId);
+      handleSelectedChange(filtered);
+    },
+    [handleSelectedChange, selectedLinks],
+  );
+
   const handleCreated = useCallback(
     async (created: OebuLinkListItem) => {
       await settingsSectionProps.onAfterMutation?.();
@@ -228,9 +236,19 @@ export function OebuLinkSelector({
         <div css={cssObj.selectionList}>
           {selectedLinks.map((link) => (
             <div key={link.nanoId} css={cssObj.selectionItem}>
-              <span css={cssObj.selectionName}>{link.name}</span>
-              <span css={cssObj.selectionDetail}>{link.titleName}</span>
-              <span css={cssObj.selectionDetail}>{link.linkUrl}</span>
+              <div css={cssObj.selectionTextGroup}>
+                <span css={cssObj.selectionName}>{link.name}</span>
+                <span css={cssObj.selectionDetail}>{link.titleName}</span>
+                <span css={cssObj.selectionDetail}>{link.linkUrl}</span>
+              </div>
+              <button
+                type="button"
+                css={cssObj.selectionRemoveButton}
+                onClick={() => handleRemoveSelected(link.nanoId)}
+                aria-label={`${link.name} 선택 해제`}
+              >
+                <XCircleBlackIcon width={20} height={20} />
+              </button>
             </div>
           ))}
         </div>
