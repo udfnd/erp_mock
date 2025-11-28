@@ -129,6 +129,7 @@ export function JusoSelector({
   maxSelectable,
   onComplete,
   buttonLabel = '조직 주소를 입력하세요',
+  onClear,
 }: JusoSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 

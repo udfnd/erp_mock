@@ -154,6 +154,7 @@ export function OebuLinkSelector({
   maxSelectable,
   onComplete,
   buttonLabel = '외부 링크를 선택하세요',
+  onClear,
 }: OebuLinkSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
