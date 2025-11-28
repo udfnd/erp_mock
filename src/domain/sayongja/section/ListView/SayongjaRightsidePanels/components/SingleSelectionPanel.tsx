@@ -322,7 +322,7 @@ export function SingleSelectionPanelContent({
     Math.ceil(permissionTotalCount / Math.max(permissionPagination.pageSize, 1)),
   );
 
-  const permissionColumns = useMemo<ColumnDef<Permission, unknown>[]>(
+  const permissionColumns = useMemo<ColumnDef<Permission, string>[]>(
     () => [
       permissionColumnHelper.accessor('name', {
         header: '권한명',

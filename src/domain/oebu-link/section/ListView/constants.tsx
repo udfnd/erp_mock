@@ -1,6 +1,6 @@
 import { createColumnHelper, type SortingState } from '@tanstack/react-table';
 
-import type { OebuLinkListItem } from '@/domain/oebu-link/api';
+import type { OebuLinkListItem, SortByOption } from '@/domain/oebu-link/api';
 
 export const columnHelper = createColumnHelper<OebuLinkListItem>();
 
@@ -9,9 +9,7 @@ export const SORT_OPTIONS = [
   { label: '이름 내림차순', value: 'nameDesc' },
   { label: '생성일 오름차순', value: 'createdAtAsc' },
   { label: '생성일 내림차순', value: 'createdAtDesc' },
-];
-
-export const PAGE_SIZE_OPTIONS = [10, 20, 50];
+] satisfies { label: string; value: SortByOption }[];
 
 export const formatDate = (value: string) => {
   const parsed = new Date(value);
@@ -28,7 +26,7 @@ export const formatDate = (value: string) => {
   }).format(parsed);
 };
 
-export const getSortStateFromOption = (option: string | undefined): SortingState => {
+export const getSortStateFromOption = (option: SortByOption | undefined): SortingState => {
   switch (option) {
     case 'createdAtDesc':
       return [{ id: 'createdAt', desc: true }];
@@ -43,7 +41,7 @@ export const getSortStateFromOption = (option: string | undefined): SortingState
   }
 };
 
-export const getSortOptionFromState = (sorting: SortingState): string | undefined => {
+export const getSortOptionFromState = (sorting: SortingState): SortByOption | undefined => {
   const current = sorting[0];
   if (!current) {
     return undefined;

@@ -7,7 +7,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { ListViewState, useListViewState } from '@/common/lv';
 import { useGetLinkIconsQuery } from '@/domain/system/api';
 import { useGetOebuLinksQuery } from '@/domain/oebu-link/api';
-import type { GetOebuLinksRequest, OebuLinkListItem } from '@/domain/oebu-link/api';
+import type { GetOebuLinksRequest, OebuLinkListItem, SortByOption } from '@/domain/oebu-link/api';
 
 import {
   SORT_OPTIONS,
@@ -26,7 +26,7 @@ export type ListSectionState = ListViewState<OebuLinkListItem>;
 
 export type OebuLinkListSectionHandlers = {
   onSearchChange: (value: string) => void;
-  onSortChange: (value: string) => void;
+  onSortChange: (value: SortByOption) => void;
   onIconFilterChange: (values: string[]) => void;
   onSelectedLinksChange: (links: OebuLinkListItem[]) => void;
   onAddClick: () => void;
@@ -40,7 +40,7 @@ export type OebuLinkListSectionProps = {
   isListLoading: boolean;
   pagination: ListSectionState['pagination'];
   searchTerm: string;
-  sortByOption?: string;
+  sortByOption?: SortByOption;
   iconFilters: string[];
   totalCount: number;
   totalPages: number;
@@ -72,7 +72,7 @@ export function useOebuLinkListViewSections({
 }: OebuLinkListViewHookParams): UseOebuLinkListViewSectionsResult {
   const [searchTerm, setSearchTerm] = useState('');
   const baseState = useListViewState<OebuLinkListItem>({
-    initialSorting: [],
+    initialSorting: getSortStateFromOption('createdAtDesc'),
     initialPagination: { pageIndex: 0, pageSize: 20 },
   });
 
@@ -152,7 +152,7 @@ export function useOebuLinkListViewSections({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
-  const handleSortChange = (value: string) => {
+  const handleSortChange = (value: SortByOption) => {
     setSorting(getSortStateFromOption(value));
   };
 

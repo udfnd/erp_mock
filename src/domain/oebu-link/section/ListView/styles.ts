@@ -30,7 +30,6 @@ export const cssObj = {
 
   panelHeader: css`
     padding: 16px;
-    border-bottom: 1px solid ${color.cgrey100};
   `,
 
   panelTitle: css`

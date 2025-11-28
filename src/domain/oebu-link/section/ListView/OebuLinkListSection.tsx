@@ -5,13 +5,13 @@ import type { Row } from '@tanstack/react-table';
 
 import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
 import { ToolbarLayout } from '@/common/lv/layout';
-import type { OebuLinkListItem } from '@/domain/oebu-link/api';
+import type { OebuLinkListItem, SortByOption } from '@/domain/oebu-link/api';
 
 import type { OebuLinkListSectionProps } from './useOebuLinkListViewSections';
 import { cssObj } from './styles';
 
 export type OebuLinkListSectionComponentProps = OebuLinkListSectionProps & {
-  sortOptions: { label: string; value: string }[];
+  sortOptions: { label: string; value: SortByOption }[];
   iconFilterOptions: { label: string; value: string }[];
 };
 
@@ -45,21 +45,18 @@ export function OebuLinkListSection({
   const sortValue = sortByOption ?? '';
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  const toolbarFilters = useMemo<ListViewFilter[]>(
-    () => {
-      const iconFilter: ListViewFilter = {
-        key: 'iconFilter',
-        label: '아이콘',
-        value: iconFilters,
-        defaultValue: [],
-        options: iconFilterOptions,
-        onChange: handlers.onIconFilterChange,
-      };
+  const toolbarFilters = useMemo<ListViewFilter[]>(() => {
+    const iconFilter: ListViewFilter = {
+      key: 'iconFilter',
+      label: '아이콘',
+      value: iconFilters,
+      defaultValue: [],
+      options: iconFilterOptions,
+      onChange: handlers.onIconFilterChange,
+    };
 
-      return [iconFilter];
-    },
-    [handlers, iconFilterOptions, iconFilters],
-  );
+    return [iconFilter];
+  }, [handlers, iconFilterOptions, iconFilters]);
 
   const sortProps: ListViewSortProps = useMemo(
     () => ({
@@ -67,9 +64,11 @@ export function OebuLinkListSection({
       value: sortValue,
       placeholder: '정렬 기준',
       options: sortOptions,
-      onChange: handlers.onSortChange,
+      onChange: (value: string) => {
+        handlers.onSortChange(value as SortByOption);
+      },
     }),
-    [handlers.onSortChange, sortOptions, sortValue],
+    [handlers, sortOptions, sortValue],
   );
 
   const handleSelectedRowsChange = (rows: Row<OebuLinkListItem>[]) => {
@@ -89,8 +88,11 @@ export function OebuLinkListSection({
   return (
     <section css={cssObj.listSection}>
       <ToolbarLayout
-        search={{ value: searchTerm, onChange: handlers.onSearchChange, placeholder: '외부 링크 이름 검색' }}
-        filters={toolbarFilters}
+        search={{
+          value: searchTerm,
+          onChange: handlers.onSearchChange,
+          placeholder: '외부 링크 이름 검색',
+        }}
         sort={sortProps}
         totalCount={totalCount}
         onSearchFocusChange={setIsSearchFocused}
@@ -99,7 +101,11 @@ export function OebuLinkListSection({
         data={data}
         columns={columns}
         state={state}
-        primaryAction={{ label: '새 외부 링크 추가', onClick: handlers.onAddClick, disabled: isCreating }}
+        primaryAction={{
+          label: '새 외부 링크 추가',
+          onClick: handlers.onAddClick,
+          disabled: isCreating,
+        }}
         manualPagination
         manualSorting
         pageCount={totalPages}

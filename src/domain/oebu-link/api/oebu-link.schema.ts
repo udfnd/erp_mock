@@ -1,11 +1,14 @@
 import { z } from 'zod';
 
+const SORT_BY_OPTIONS = ['createdAtAsc', 'createdAtDesc', 'nameAsc', 'nameDesc'] as const;
+export type SortByOption = (typeof SORT_BY_OPTIONS)[number];
+
 export const GetOebuLinksRequestSchema = z.object({
   jojikNanoId: z.string(),
   nameSearch: z.string().optional(),
   pageNumber: z.number().optional(),
   pageSize: z.number().optional(),
-  sortByOption: z.string().optional(),
+  sortByOption: z.enum(SORT_BY_OPTIONS).optional(),
   iconFilters: z.string().optional(),
 });
 export type GetOebuLinksRequest = z.infer<typeof GetOebuLinksRequestSchema>;
