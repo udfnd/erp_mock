@@ -102,16 +102,54 @@ export const cssObj = {
     border-radius: 10px;
     background: ${color.cgrey50};
     border: 1px solid ${color.cgrey100};
-    display: grid;
-    gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `,
+  selectionTextGroup: css`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
   `,
   selectionName: css`
     ${typography.bodyB};
     color: ${color.black};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   `,
   selectionAddress: css`
     ${typography.captionR};
     color: ${color.cgrey600};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `,
+  selectionRemoveButton: css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    color: ${color.cgrey400};
+    cursor: pointer;
+    border-radius: 50%;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+
+    &:hover {
+      background: ${color.cgrey100};
+      color: ${color.black};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue};
+      outline-offset: 2px;
+    }
   `,
   emptyState: css`
     ${typography.captionR};

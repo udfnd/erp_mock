@@ -185,6 +185,14 @@ export function JusoSelector({
     setIsModalOpen(false);
   };
 
+  const handleRemoveSelected = useCallback(
+    (nanoId: string) => {
+      const filtered = selectedJusos.filter((juso) => juso.nanoId !== nanoId);
+      handleSelectedChange(filtered);
+    },
+    [handleSelectedChange, selectedJusos],
+  );
+
   const handleCreated = useCallback(
     async (created: JusoListItem) => {
       await settingsSectionProps.onAfterMutation?.();
@@ -203,11 +211,21 @@ export function JusoSelector({
         <div css={cssObj.selectionList}>
           {selectedJusos.map((juso) => (
             <div key={juso.nanoId} css={cssObj.selectionItem}>
-              <span css={cssObj.selectionName}>{juso.jusoName}</span>
-              <span css={cssObj.selectionAddress}>{juso.juso}</span>
-              {juso.jusoDetail ? (
-                <span css={cssObj.selectionAddress}>{juso.jusoDetail}</span>
-              ) : null}
+              <div css={cssObj.selectionTextGroup}>
+                <span css={cssObj.selectionName}>{juso.jusoName}</span>
+                <span css={cssObj.selectionAddress}>{juso.juso}</span>
+                {juso.jusoDetail ? (
+                  <span css={cssObj.selectionAddress}>{juso.jusoDetail}</span>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                css={cssObj.selectionRemoveButton}
+                onClick={() => handleRemoveSelected(juso.nanoId)}
+                aria-label={`${juso.jusoName} 선택 해제`}
+              >
+                <XCircleBlackIcon width={20} height={20} />
+              </button>
             </div>
           ))}
         </div>
