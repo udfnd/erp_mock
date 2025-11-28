@@ -2,30 +2,44 @@
 
 import { useMemo } from 'react';
 
+import type { LinkIconOption } from '../../linkIconOptions';
 import { cssObj } from '../../styles';
 
 type IconSelectProps = {
   value: string;
   onChange: (value: string) => void;
-  options: { label: string; value: string }[];
+  options: LinkIconOption[];
 };
 
 export function IconSelect({ value, onChange, options }: IconSelectProps) {
   const normalizedOptions = useMemo(
     () => [
       { label: '아이콘 없음', value: 'none' },
-      ...options.filter((option) => option.value !== 'all'),
+      ...options,
     ],
     [options],
   );
 
   return (
-    <select css={cssObj.toolbarSelect} value={value} onChange={(event) => onChange(event.target.value)}>
-      {normalizedOptions.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    <div css={cssObj.iconSelectGrid}>
+      {normalizedOptions.map((option) => {
+        const Icon = option.Icon;
+        const isSelected = value === option.value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            css={[cssObj.iconSelectButton, isSelected && cssObj.iconSelectButtonSelected]}
+            onClick={() => onChange(option.value)}
+          >
+            <span css={cssObj.iconSelectIcon}>
+              {Icon ? <Icon width={24} height={24} /> : <span css={cssObj.iconPlaceholder}>-</span>}
+            </span>
+            <span css={cssObj.iconSelectLabel}>{option.label}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

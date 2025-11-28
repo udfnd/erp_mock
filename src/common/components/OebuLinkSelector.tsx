@@ -14,6 +14,7 @@ import {
   type UseOebuLinkListViewSectionsResult,
   useOebuLinkListViewSections,
 } from '@/domain/oebu-link/section';
+import type { LinkIconOption } from '@/domain/oebu-link/section/ListView/linkIconOptions';
 
 export type OebuLinkSelectorProps = {
   jojikNanoId: string;
@@ -30,7 +31,7 @@ const createSelectableOebuLink = (payload: OebuLinkListItem): OebuLinkListItem =
 
 type CreateFormProps = {
   jojikNanoId: string;
-  iconOptions: { label: string; value: string }[];
+  iconOptions: LinkIconOption[];
   onCreated: (link: OebuLinkListItem) => void;
   onAfterMutation?: () => Promise<unknown> | void;
 };

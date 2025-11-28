@@ -59,6 +59,56 @@ export const cssObj = {
     gap: 8px;
   `,
 
+  iconSelectGrid: css`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  `,
+
+  iconSelectButton: css`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
+    background: ${color.white};
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      border-color: ${color.cgrey400};
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+  `,
+
+  iconSelectButtonSelected: css`
+    border-color: ${color.blue600};
+    box-shadow: 0 0 0 3px rgba(10, 63, 255, 0.15);
+  `,
+
+  iconSelectIcon: css`
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: ${color.cgrey50};
+    color: ${color.cgrey500};
+    flex-shrink: 0;
+  `,
+
+  iconSelectLabel: css`
+    ${typography.bodyR};
+    color: ${color.cgrey700};
+  `,
+
+  iconPlaceholder: css`
+    color: ${color.cgrey400};
+    font-size: 13px;
+  `,
+
   panelLabel: css`
     font-size: 13px;
     font-weight: 600;

@@ -16,6 +16,8 @@ import {
   getSortOptionFromState,
   getSortStateFromOption,
 } from './constants';
+import { createLinkIconLookup, mapLinkIconsToOptions, type LinkIconOption } from './linkIconOptions';
+import { cssObj } from './styles';
 
 export type OebuLinkListViewHookParams = {
   jojikNanoId: string;
@@ -56,7 +58,7 @@ export type OebuLinkRightsidePanelsSectionProps = {
   onExitCreate: () => void;
   onAfterMutation: () => Promise<unknown> | void;
   isAuthenticated: boolean;
-  iconOptions: { label: string; value: string }[];
+  iconOptions: LinkIconOption[];
 };
 
 export type UseOebuLinkListViewSectionsResult = {
@@ -92,12 +94,19 @@ export function useOebuLinkListViewSections({
   const [iconFilters, setIconFilters] = useState<string[]>([]);
 
   const { data: linkIconsData } = useGetLinkIconsQuery({ enabled: isAuthenticated });
+  const iconOptions = useMemo(
+    () => mapLinkIconsToOptions(linkIconsData?.linkIcons),
+    [linkIconsData?.linkIcons],
+  );
+
+  const iconLookup = useMemo(() => createLinkIconLookup(iconOptions), [iconOptions]);
+
   const iconFilterOptions = useMemo(
     () => [
       { label: '전체 아이콘', value: 'all' },
-      ...(linkIconsData?.linkIcons.map((icon) => ({ label: icon.name, value: icon.nanoId })) ?? []),
+      ...iconOptions,
     ],
-    [linkIconsData?.linkIcons],
+    [iconOptions],
   );
 
   const queryParams: GetOebuLinksRequest = {
@@ -123,25 +132,43 @@ export function useOebuLinkListViewSections({
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
   const columns = useMemo(
-    () => [
-      columnHelper.accessor('name', {
-        header: '이름',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('titleName', {
-        header: '표시 이름',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('linkUrl', {
-        header: 'URL',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('createdAt', {
-        header: '생성일',
-        cell: (info) => formatDate(info.getValue()),
-      }),
-    ],
-    [],
+    () => {
+      const renderIcon = (nanoId: string | null): JSX.Element => {
+        const Icon = nanoId ? iconLookup.get(nanoId) : undefined;
+
+        if (!Icon) {
+          return <span css={cssObj.iconPlaceholder}>-</span>;
+        }
+
+        return <Icon width={20} height={20} />;
+      };
+
+      return [
+        columnHelper.accessor('linkIcon', {
+          id: 'linkIcon',
+          header: '아이콘',
+          cell: (info) => renderIcon(info.getValue()),
+          size: 80,
+        }),
+        columnHelper.accessor('name', {
+          header: '이름',
+          cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('titleName', {
+          header: '표시 이름',
+          cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('linkUrl', {
+          header: 'URL',
+          cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('createdAt', {
+          header: '생성일',
+          cell: (info) => formatDate(info.getValue()),
+        }),
+      ];
+    },
+    [iconLookup],
   ) as ColumnDef<OebuLinkListItem, unknown>[];
 
   const [isCreating, setIsCreating] = useState(false);
@@ -214,7 +241,7 @@ export function useOebuLinkListViewSections({
     onExitCreate: stopCreate,
     onAfterMutation: handleAfterMutation,
     isAuthenticated,
-    iconOptions: iconFilterOptions,
+    iconOptions,
   };
 
   return {

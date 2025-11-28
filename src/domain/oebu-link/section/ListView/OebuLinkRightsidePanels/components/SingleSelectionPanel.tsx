@@ -1,6 +1,6 @@
 'use client';
 
-import { type FormEvent, useMemo, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
 import {
@@ -9,24 +9,18 @@ import {
   useUpdateOebuLinkMutation,
 } from '@/domain/oebu-link/api';
 
+import type { LinkIconOption } from '../../linkIconOptions';
 import { cssObj } from '../../styles';
 import { IconSelect } from './IconSelect';
 
 export type SingleSelectionPanelProps = {
   oebuLinkNanoId: string;
   oebuLinkName: string;
-  iconOptions: { label: string; value: string }[];
+  iconOptions: LinkIconOption[];
   onAfterMutation: () => Promise<unknown> | void;
 };
 
 export type MultiSelectionPanelProps = { oebuLinks: { nanoId: string; name: string }[] };
-
-function useIconOptions(iconOptions: { label: string; value: string }[]) {
-  return useMemo(
-    () => iconOptions.filter((option) => option.value !== 'all'),
-    [iconOptions],
-  );
-}
 
 export function SingleSelectionPanel({
   oebuLinkNanoId,
@@ -39,8 +33,6 @@ export function SingleSelectionPanel({
   });
   const updateMutation = useUpdateOebuLinkMutation(oebuLinkNanoId);
   const deleteMutation = useDeleteOebuLinkMutation(oebuLinkNanoId);
-
-  const normalizedIconOptions = useIconOptions(iconOptions);
 
   const [nameInput, setNameInput] = useState<string | null>(null);
   const [titleNameInput, setTitleNameInput] = useState<string | null>(null);
@@ -131,7 +123,7 @@ export function SingleSelectionPanel({
         </div>
         <div css={cssObj.panelSection}>
           <label css={cssObj.panelLabel}>아이콘</label>
-          <IconSelect value={currentIcon} onChange={(v) => setLinkIconInput(v)} options={normalizedIconOptions} />
+          <IconSelect value={currentIcon} onChange={(v) => setLinkIconInput(v)} options={iconOptions} />
         </div>
         <div css={cssObj.buttonRow}>
           <Button type="submit" size="medium" disabled={isSaving || isLoading}>

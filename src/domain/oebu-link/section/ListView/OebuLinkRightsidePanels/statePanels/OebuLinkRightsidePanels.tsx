@@ -7,6 +7,7 @@ import { MultiSelectionPanel, type MultiSelectionPanelProps } from '../component
 import { QuickActionsPanel } from '../components/QuickActionsPanel';
 import { RightsidePanelsContainer } from '../components/RightsidePanelsContainer';
 import { SingleSelectionPanel, type SingleSelectionPanelProps } from '../components/SingleSelectionPanel';
+import type { LinkIconOption } from '../../linkIconOptions';
 
 export type OebuLinkRightsidePanelState = {
   noneSelected: ReactNode;
@@ -32,7 +33,7 @@ export const AuthenticationRequiredPanels = () => (
 
 export type CreatingPanelsProps = {
   jojikNanoId: string;
-  iconOptions: { label: string; value: string }[];
+  iconOptions: LinkIconOption[];
   onExit?: () => void;
   onAfterMutation: () => Promise<unknown> | void;
 };

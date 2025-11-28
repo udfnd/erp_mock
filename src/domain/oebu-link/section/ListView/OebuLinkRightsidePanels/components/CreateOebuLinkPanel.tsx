@@ -5,12 +5,13 @@ import { type FormEvent, useState } from 'react';
 import { Button, Textfield } from '@/common/components';
 import { useCreateOebuLinkMutation } from '@/domain/oebu-link/api';
 
+import type { LinkIconOption } from '../../linkIconOptions';
 import { cssObj } from '../../styles';
 import { IconSelect } from './IconSelect';
 
 type CreatePanelProps = {
   jojikNanoId: string;
-  iconOptions: { label: string; value: string }[];
+  iconOptions: LinkIconOption[];
   onAfterMutation: () => Promise<unknown> | void;
   onExit?: () => void;
 };
