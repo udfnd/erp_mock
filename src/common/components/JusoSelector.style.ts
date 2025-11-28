@@ -98,9 +98,8 @@ export const cssObj = {
     gap: 10px;
   `,
   selectionItem: css`
-    padding: 12px;
+    padding: 6px 12px;
     border-radius: 10px;
-    background: ${color.cgrey50};
     border: 1px solid ${color.cgrey100};
     display: flex;
     align-items: center;
@@ -114,15 +113,13 @@ export const cssObj = {
     min-width: 0;
   `,
   selectionName: css`
-    ${typography.bodyB};
+    ${typography.bodySmallM};
     color: ${color.black};
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   `,
   selectionAddress: css`
-    ${typography.captionR};
-    color: ${color.cgrey600};
+    ${typography.bodySmallR};
+    color: ${color.cgrey500};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -213,10 +213,9 @@ export function JusoSelector({
             <div key={juso.nanoId} css={cssObj.selectionItem}>
               <div css={cssObj.selectionTextGroup}>
                 <span css={cssObj.selectionName}>{juso.jusoName}</span>
-                <span css={cssObj.selectionAddress}>{juso.juso}</span>
-                {juso.jusoDetail ? (
-                  <span css={cssObj.selectionAddress}>{juso.jusoDetail}</span>
-                ) : null}
+                <span css={cssObj.selectionAddress}>
+                  {juso.juso} {juso.jusoDetail ? juso.jusoDetail : ''}
+                </span>
               </div>
               <button
                 type="button"
