@@ -6,7 +6,7 @@ export const cssObj = {
   card: css`
     background: ${color.cgrey10};
     padding: 16px;
-    min-width: 410px;
+    width: 410px;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -91,6 +91,7 @@ export const cssObj = {
   addressInputWrapper: css`
     gap: 8px;
     padding: 0 12px;
+
     > svg {
       color: ${color.cgrey500};
     }
@@ -112,10 +113,12 @@ export const cssObj = {
     cursor: pointer;
     padding: 4px;
     border-radius: 6px;
+
     &:hover {
       background: ${color.cgrey50};
       color: ${color.blue600};
     }
+
     &:disabled {
       cursor: not-allowed;
       color: ${color.cgrey300};
@@ -152,6 +155,7 @@ export const cssObj = {
     justify-content: space-between;
     gap: 8px;
     cursor: ${disabled ? 'not-allowed' : 'pointer'};
+
     &:focus-visible {
       outline: 2px solid ${color.blue100};
       border-color: ${color.blue600};
@@ -198,9 +202,11 @@ export const cssObj = {
     align-items: center;
     gap: 8px;
     cursor: pointer;
+
     &:hover {
       background: ${color.cgrey50};
     }
+
     &:disabled {
       color: ${color.cgrey300};
       cursor: not-allowed;

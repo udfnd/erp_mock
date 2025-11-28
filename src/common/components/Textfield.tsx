@@ -2,16 +2,9 @@
 
 import React, { ReactNode } from 'react';
 import {
-  actionButtonStyle,
-  container,
-  counter,
-  footer,
+  cssObj,
   helperTextRecipe,
   inputWrapperRecipe,
-  inputSingleLine,
-  label as labelStyle,
-  labelWrapper,
-  requiredAsterisk,
   textareaRecipe,
   type InputWrapperRecipeOptions,
   type TextareaRecipeOptions,
@@ -86,17 +79,17 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
       const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
 
       return (
-        <div css={[container]} className={className} style={width ? { width } : undefined}>
+        <div css={[cssObj.container]} className={className} style={width ? { width } : undefined}>
           {label &&
             (id ? (
-              <label htmlFor={id} css={labelWrapper}>
-                <span css={labelStyle}>{label}</span>
-                {required && <span css={requiredAsterisk}>*</span>}
+              <label htmlFor={id} css={cssObj.labelWrapper}>
+                <span css={cssObj.label}>{label}</span>
+                {required && <span css={cssObj.requiredAsterisk}>*</span>}
               </label>
             ) : (
-              <div css={labelWrapper}>
-                <span css={labelStyle}>{label}</span>
-                {required && <span css={requiredAsterisk}>*</span>}
+              <div css={cssObj.labelWrapper}>
+                <span css={cssObj.label}>{label}</span>
+                {required && <span css={cssObj.requiredAsterisk}>*</span>}
               </div>
             ))}
 
@@ -104,7 +97,7 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
             <input
               ref={ref as React.ForwardedRef<HTMLInputElement>}
               id={id}
-              css={inputSingleLine}
+              css={cssObj.inputSingleLine}
               value={safeValue}
               onChange={(e) => onValueChange?.(e.target.value)}
               placeholder={placeholder}
@@ -143,17 +136,17 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
     const helperTextStyles = helperText ? helperTextRecipe({ status }) : undefined;
 
     return (
-      <div css={[container]} className={className} style={width ? { width } : undefined}>
+      <div css={[cssObj.container]} className={className} style={width ? { width } : undefined}>
         {label &&
           (id ? (
-            <label htmlFor={id} css={labelWrapper}>
-              <span css={labelStyle}>{label}</span>
-              {required && <span css={requiredAsterisk}>*</span>}
+            <label htmlFor={id} css={cssObj.labelWrapper}>
+              <span css={cssObj.label}>{label}</span>
+              {required && <span css={cssObj.requiredAsterisk}>*</span>}
             </label>
           ) : (
-            <div css={labelWrapper}>
-              <span css={labelStyle}>{label}</span>
-              {required && <span css={requiredAsterisk}>*</span>}
+            <div css={cssObj.labelWrapper}>
+              <span css={cssObj.label}>{label}</span>
+              {required && <span css={cssObj.requiredAsterisk}>*</span>}
             </div>
           ))}
 
@@ -171,12 +164,14 @@ export const Textfield = React.forwardRef<HTMLTextAreaElement | HTMLInputElement
           />
 
           {(maxLength || actionButton) && (
-            <div css={footer}>
-              <span css={counter}>{maxLength ? `${safeValue.length}/${maxLength}` : null}</span>
+            <div css={cssObj.footer}>
+              <span css={cssObj.counter}>
+                {maxLength ? `${safeValue.length}/${maxLength}` : null}
+              </span>
               {actionButton && (
                 <button
                   type="button"
-                  css={actionButtonStyle}
+                  css={cssObj.actionButtonStyle}
                   onClick={onActionButtonClick}
                   disabled={disabled}
                 >

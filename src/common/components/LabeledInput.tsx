@@ -3,15 +3,7 @@
 import { clsx } from 'clsx';
 import React, { forwardRef, useId } from 'react';
 
-import {
-  container,
-  helperTextRecipe,
-  inputRecipe,
-  inputWrapperRecipe,
-  label as labelStyle,
-  labelWrapper,
-  requiredAsterisk,
-} from './Textfield.style';
+import { cssObj, helperTextRecipe, inputWrapperRecipe } from './Textfield.style';
 
 type InputWrapperOptions = Exclude<Parameters<typeof inputWrapperRecipe>[0], undefined>;
 type HelperTextOptions = Exclude<Parameters<typeof helperTextRecipe>[0], undefined>;
@@ -55,18 +47,18 @@ export const LabeledInput = forwardRef<HTMLInputElement, LabeledInputProps>(
     const helperTextClasses = helperTextRecipe({ status: status as HelperTextStatus });
 
     return (
-      <div css={clsx(container, containerClassName)}>
+      <div css={clsx(cssObj.container, containerClassName)}>
         {label ? (
-          <label htmlFor={id} css={labelWrapper}>
-            <span css={labelStyle}>{label}</span>
-            {required ? <span css={requiredAsterisk}>*</span> : null}
+          <label htmlFor={id} css={cssObj.labelWrapper}>
+            <span css={cssObj.label}>{label}</span>
+            {required ? <span css={cssObj.requiredAsterisk}>*</span> : null}
           </label>
         ) : null}
         <div css={clsx(inputWrapperClasses, className)}>
           <input
             id={id}
             ref={ref}
-            css={inputRecipe}
+            css={cssObj.inputSingleLine}
             value={value ?? ''}
             onChange={(e) => onValueChange?.(e.target.value)}
             disabled={disabled}

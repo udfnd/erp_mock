@@ -261,13 +261,13 @@ export function JusoSelector({
 
   return (
     <>
-      <button type="button" css={cssObj.triggerButton} onClick={() => setIsModalOpen(true)}>
+      <div css={cssObj.triggerButton}>
         <span css={cssObj.triggerIcon}>
           <LocationIcon width={20} height={20} />
         </span>
-        <span css={cssObj.triggerLabel}>{buttonLabel}</span>
+        <p css={cssObj.triggerLabel}>{buttonLabel}</p>
         <span css={cssObj.triggerActions}>
-          <span css={cssObj.triggerIcon}>
+          <span role="button" css={cssObj.triggerIcon} onClick={() => setIsModalOpen(true)}>
             <EditIcon width={20} height={20} />
           </span>
           <span
@@ -281,7 +281,7 @@ export function JusoSelector({
             <XCircleBlackIcon width={20} height={20} />
           </span>
         </span>
-      </button>
+      </div>
 
       <SelectorModal
         isOpen={isModalOpen}

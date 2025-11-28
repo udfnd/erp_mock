@@ -4,8 +4,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 import { Button, JusoSelector, OebuLinkSelector, Textfield } from '@/common/components';
-import { label, labelWrapper } from '@/common/components/Textfield.style';
-import { useJojikQuery, useUpdateJojikMutation, type JojikDetailResponse } from '@/domain/jojik/api';
+import { cssObj as textfieldCss } from '@/common/components/Textfield.style';
+import {
+  useJojikQuery,
+  useUpdateJojikMutation,
+  type JojikDetailResponse,
+} from '@/domain/jojik/api';
 import type { JusoListItem } from '@/domain/juso/api';
 import type { OebuLinkListItem } from '@/domain/oebu-link/api';
 import { useAuth } from '@/global/auth';
@@ -29,7 +33,9 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const [introInput, setIntroInput] = useState<string | undefined>(undefined);
   const [addressInput, setAddressInput] = useState<string | undefined>(undefined);
   const [homepageInput, setHomepageInput] = useState<string | undefined>(undefined);
-  const [selectedJusoNanoId, setSelectedJusoNanoId] = useState<string | null | undefined>(undefined);
+  const [selectedJusoNanoId, setSelectedJusoNanoId] = useState<string | null | undefined>(
+    undefined,
+  );
   const [selectedHomepageNanoId, setSelectedHomepageNanoId] = useState<string | null | undefined>(
     undefined,
   );
@@ -200,8 +206,8 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           </Button>
         </div>
         <div css={cssObj.addressField}>
-          <div css={labelWrapper}>
-            <span css={label}>조직 주소</span>
+          <div css={textfieldCss.labelWrapper}>
+            <span css={textfieldCss.label}>조직 주소</span>
           </div>
           <JusoSelector
             jojikNanoId={jojikNanoId}
@@ -225,8 +231,8 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           </Button>
         </div>
         <div css={cssObj.addressField}>
-          <div css={labelWrapper}>
-            <span css={label}>조직 홈페이지</span>
+          <div css={textfieldCss.labelWrapper}>
+            <span css={textfieldCss.label}>조직 홈페이지</span>
           </div>
           <OebuLinkSelector
             jojikNanoId={jojikNanoId}
@@ -265,7 +271,8 @@ const formatSelectedJuso = (juso?: JusoListItem) => {
   return [juso.juso, juso.jusoDetail].filter(Boolean).join(' ').trim();
 };
 
-const formatJojikHomepage = (jojik?: JojikDetailResponse) => jojik?.homepageUrl?.linkUrl?.trim() ?? '';
+const formatJojikHomepage = (jojik?: JojikDetailResponse) =>
+  jojik?.homepageUrl?.linkUrl?.trim() ?? '';
 
 const formatJojikHomepageLabel = (jojik?: JojikDetailResponse) => {
   const homepage = jojik?.homepageUrl;

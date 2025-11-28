@@ -3,200 +3,251 @@ import { color, radius, spacing, typography } from '@/style';
 
 type IT = Interpolation<Theme>;
 
-export const container = css({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-});
+export const cssObj = {
+  container: css`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  `,
 
-export const labelWrapper = css({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'flex-start',
-  marginBottom: '4px',
-  gap: spacing.xs,
-  width: '100%',
-});
+  labelWrapper: css`
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 4px;
+    gap: ${spacing.xs};
+    width: 100%;
+  `,
 
-export const label = css({
-  ...typography.bodySmallM,
-  color: color.cgrey600,
-});
+  label: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey600};
+  `,
 
-export const requiredAsterisk = css({
-  ...typography.bodySmallM,
-  color: color.red,
-});
+  requiredAsterisk: css`
+    ${typography.bodySmallM};
+    color: ${color.red};
+  `,
 
-const inputWrapperBase = css({
-  boxSizing: 'border-box',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: 10,
-  padding: `${spacing.md} ${spacing.base}`,
-  marginBottom: '2px',
-  width: '100%',
-  background: color.white,
-  borderRadius: radius.md,
-  borderWidth: '1px',
-  borderStyle: 'solid',
-  transition: 'border-color 0.2s, box-shadow 0.2s, background-color 0.2s',
-});
+  inputWrapperBase: css`
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: ${spacing.md} ${spacing.base};
+    margin-bottom: 2px;
+    width: 100%;
+    background: ${color.white};
+    border-radius: ${radius.md};
+    border-width: 1px;
+    border-style: solid;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s,
+      background-color 0.2s;
+  `,
 
-const inputWrapperStatusStyles = {
-  normal: css({
-    borderColor: color.cgrey200,
-    '&:focus-within': {
-      borderColor: color.blue,
-      boxShadow: `0 0 0 1px ${color.blue}`,
-    },
-  }),
-  negative: css({
-    borderColor: color.red,
-    '&:focus-within': {
-      borderColor: color.red,
-      boxShadow: `0 0 0 1px ${color.red}`,
-    },
-  }),
+  inputWrapperStatusStyles: {
+    normal: css`
+      border-color: ${color.cgrey200};
+
+      &:focus-within {
+        border-color: ${color.blue};
+        box-shadow: 0 0 0 1px ${color.blue};
+      }
+    `,
+    negative: css`
+      border-color: ${color.red};
+
+      &:focus-within {
+        border-color: ${color.red};
+        box-shadow: 0 0 0 1px ${color.red};
+      }
+    `,
+  },
+
+  inputWrapperDisabledStyles: {
+    enabled: css``,
+    disabled: css`
+      background: ${color.cgrey100};
+      border-color: ${color.cgrey100};
+    `,
+  },
+
+  inputWrapperSingleLineBase: css`
+    gap: 0;
+    padding: 0 ${spacing.base};
+    min-height: 44px;
+    height: 44px;
+    flex-direction: row;
+    align-items: center;
+  `,
+
+  textareaBase: css`
+    ${typography.bodyR};
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    resize: none;
+    color: ${color.black};
+
+    &::placeholder {
+      color: ${color.cgrey300};
+    }
+
+    &:disabled {
+      color: ${color.cgrey400};
+    }
+
+    &:disabled::placeholder {
+      color: ${color.cgrey300};
+    }
+  `,
+
+  textareaResizeStyles: {
+    normal: css`
+      height: auto;
+      min-height: 24px;
+    `,
+    limit: css`
+      height: 134px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: ${color.cgrey200} ${color.white};
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: ${color.white};
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: ${color.cgrey200};
+        border-radius: 2px;
+      }
+    `,
+  },
+
+  input: css`
+    ${typography.bodyR};
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    color: ${color.black};
+
+    &::placeholder {
+      color: ${color.cgrey300};
+    }
+
+    &:disabled {
+      color: ${color.cgrey400};
+    }
+
+    &:disabled::placeholder {
+      color: ${color.cgrey300};
+    }
+  `,
+
+  inputSingleLine: css`
+    ${typography.bodyR};
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 0;
+    background: transparent;
+    color: ${color.black};
+
+    &::placeholder {
+      color: ${color.cgrey300};
+    }
+
+    &:disabled {
+      color: ${color.cgrey400};
+    }
+
+    &:disabled::placeholder {
+      color: ${color.cgrey300};
+    }
+  `,
+
+  footer: css`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    gap: ${spacing.sm};
+    width: 100%;
+  `,
+
+  counter: css`
+    ${typography.captionR};
+    color: ${color.cgrey300};
+    flex-grow: 1;
+  `,
+
+  actionButtonStyle: css`
+    ${typography.captionB};
+    color: ${color.cgrey300};
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px 0;
+  `,
+
+  helperTextBase: css`
+    ${typography.captionR};
+    align-self: stretch;
+  `,
+
+  helperTextStatusStyles: {
+    normal: css`
+      color: ${color.cgrey400};
+    `,
+    negative: css`
+      color: ${color.red};
+    `,
+  },
 } as const;
-
-const inputWrapperDisabledStyles = {
-  enabled: css({}),
-  disabled: css({
-    background: color.cgrey100,
-    borderColor: color.cgrey100,
-  }),
-} as const;
-
-const inputWrapperSingleLineBase = css({
-  gap: 0,
-  padding: `0 ${spacing.base}`,
-  minHeight: 44,
-  height: 44,
-  flexDirection: 'row',
-  alignItems: 'center',
-});
 
 export type InputWrapperRecipeOptions = {
-  status?: keyof typeof inputWrapperStatusStyles;
+  status?: keyof typeof cssObj.inputWrapperStatusStyles;
   disabled?: boolean;
-  singleLine?: boolean; // ★ 추가
+  singleLine?: boolean;
 };
 
 export const inputWrapperRecipe = ({
   status = 'normal',
   disabled = false,
   singleLine = false,
-}: InputWrapperRecipeOptions = {}): IT[] => {
-  return [
-    inputWrapperBase,
-    inputWrapperStatusStyles[status],
-    disabled ? inputWrapperDisabledStyles.disabled : inputWrapperDisabledStyles.enabled,
-    singleLine && inputWrapperSingleLineBase,
-  ];
-};
-
-const textareaBase = css({
-  ...typography.bodyR,
-  width: '100%',
-  border: 'none',
-  outline: 'none',
-  padding: 0,
-  background: 'transparent',
-  resize: 'none',
-  color: color.black,
-  '&::placeholder': { color: color.cgrey300 },
-  '&:disabled': { color: color.cgrey400 },
-  '&:disabled::placeholder': { color: color.cgrey300 },
-});
-
-const textareaResizeStyles = {
-  normal: css({ height: 'auto', minHeight: 24 }),
-  limit: css({
-    height: 134,
-    overflowY: 'auto',
-    scrollbarWidth: 'thin',
-    scrollbarColor: `${color.cgrey200} ${color.white}`,
-    '&::-webkit-scrollbar': { width: 4 },
-    '&::-webkit-scrollbar-track': { background: color.white },
-    '&::-webkit-scrollbar-thumb': {
-      background: color.cgrey200,
-      borderRadius: 2,
-    },
-  }),
-} as const;
+}: InputWrapperRecipeOptions = {}): IT[] => [
+  cssObj.inputWrapperBase,
+  cssObj.inputWrapperStatusStyles[status],
+  disabled ? cssObj.inputWrapperDisabledStyles.disabled : cssObj.inputWrapperDisabledStyles.enabled,
+  singleLine && cssObj.inputWrapperSingleLineBase,
+];
 
 export type TextareaRecipeOptions = {
-  resize?: keyof typeof textareaResizeStyles;
+  resize?: keyof typeof cssObj.textareaResizeStyles;
 };
 
-export const textareaRecipe = ({ resize = 'normal' }: TextareaRecipeOptions = {}): IT[] => {
-  return [textareaBase, textareaResizeStyles[resize]];
-};
-
-/** 멀티라인 외에, singleLine용 인풋 기본 스타일 */
-export const inputRecipe = css({
-  ...typography.bodyR,
-  width: '100%',
-  border: 'none',
-  outline: 'none',
-  padding: 0,
-  background: 'transparent',
-  color: color.black,
-  '&::placeholder': { color: color.cgrey300 },
-  '&:disabled': { color: color.cgrey400 },
-  '&:disabled::placeholder': { color: color.cgrey300 },
-});
-
-/** ★ singleLine input의 고정 높이 48px (wrapper와 일치) */
-export const inputSingleLine = css([
-  inputRecipe,
-  css({
-    height: 48,
-    lineHeight: '48px',
-  }),
-]);
-
-export const footer = css({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: 0,
-  gap: spacing.sm,
-  width: '100%',
-});
-
-export const counter = css({
-  ...typography.captionR,
-  color: color.cgrey300,
-  flexGrow: 1,
-});
-
-export const actionButtonStyle = css({
-  ...typography.captionB,
-  color: color.cgrey300,
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  padding: '3px 0px',
-});
-
-const helperTextBase = css({
-  ...typography.captionR,
-  alignSelf: 'stretch',
-});
-
-const helperTextStatusStyles = {
-  normal: css({ color: color.cgrey400 }),
-  negative: css({ color: color.red }),
-} as const;
+export const textareaRecipe = ({ resize = 'normal' }: TextareaRecipeOptions = {}): IT[] => [
+  cssObj.textareaBase,
+  cssObj.textareaResizeStyles[resize],
+];
 
 export type HelperTextRecipeOptions = {
-  status?: keyof typeof helperTextStatusStyles;
+  status?: keyof typeof cssObj.helperTextStatusStyles;
 };
 
-export const helperTextRecipe = ({ status = 'normal' }: HelperTextRecipeOptions = {}): IT[] => {
-  return [helperTextBase, helperTextStatusStyles[status]];
-};
+export const helperTextRecipe = ({ status = 'normal' }: HelperTextRecipeOptions = {}): IT[] => [
+  cssObj.helperTextBase,
+  cssObj.helperTextStatusStyles[status],
+];

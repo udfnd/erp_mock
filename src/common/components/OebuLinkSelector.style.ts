@@ -9,56 +9,52 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
+    padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid ${color.cgrey200};
     background: ${color.white};
     color: ${color.cgrey700};
-    cursor: pointer;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      background-color 0.2s ease;
-
-    &:hover {
-      border-color: ${color.blue200};
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-      background: ${color.blue10};
-    }
-
-    &:focus-visible {
-      outline: 2px solid ${color.blue};
-      outline-offset: 3px;
-    }
   `,
   triggerIcon: css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: ${color.black};
+    border-radius: 4px;
+    color: ${color.cgrey500};
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
 
-    > svg {
-      width: 16px;
-      height: 16px;
+    &:hover {
+      background: ${color.cgrey50};
+      color: ${color.black};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue};
+      outline-offset: 2px;
     }
   `,
   triggerActions: css`
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 12px;
   `,
   clearIcon: css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2px;
     border-radius: 50%;
-    color: ${color.cgrey400};
-    transition: background-color 0.2s ease, color 0.2s ease;
+    color: ${color.cgrey300};
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
 
     &:hover {
       background: ${color.cgrey50};
-      color: ${color.cgrey600};
+      color: ${color.black};
     }
 
     &:focus-visible {
@@ -67,6 +63,7 @@ export const cssObj = {
     }
   `,
   triggerLabel: css`
+    flex: 1;
     ${typography.bodySmallR};
     color: inherit;
     display: inline-flex;
