@@ -35,10 +35,15 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: ${color.blue};
+    color: ${color.black};
+
+    > svg {
+      width: 16px;
+      height: 16px;
+    }
   `,
   triggerLabel: css`
-    ${typography.bodyB};
+    ${typography.bodySmallR};
     color: inherit;
     display: inline-flex;
     align-items: center;

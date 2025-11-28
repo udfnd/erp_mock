@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
-import { cssObj } from './jusoSelector.style';
+import { cssObj } from './JusoSelector.style';
 import { EditIcon, LocationIcon } from '@/common/icons';
 import type { JusoListItem } from '@/domain/juso/api';
 import { useCreateJusoMutation } from '@/domain/juso/api';

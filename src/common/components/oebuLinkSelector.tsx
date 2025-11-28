@@ -5,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
-import { cssObj } from './oebuLinkSelector.style';
+import { cssObj } from './OebuLinkSelector.style';
 import { EditIcon, LinkOnIcon } from '@/common/icons';
 import type { OebuLinkListItem } from '@/domain/oebu-link/api';
 import { useCreateOebuLinkMutation } from '@/domain/oebu-link/api';
@@ -123,13 +123,14 @@ const CreateOebuLinkForm = ({
               value={linkIconNanoId}
               onChange={(event) => setLinkIconNanoId(event.target.value)}
             >
-              {[{ label: '아이콘 없음', value: 'none' }, ...iconOptions.filter((option) => option.value !== 'all')].map(
-                (option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ),
-              )}
+              {[
+                { label: '아이콘 없음', value: 'none' },
+                ...iconOptions.filter((option) => option.value !== 'all'),
+              ].map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -156,8 +157,12 @@ export function OebuLinkSelector({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const listView = useOebuLinkListViewSections({ jojikNanoId, isAuthenticated });
-  const { listSectionProps, settingsSectionProps, sortOptions, iconFilterOptions }: UseOebuLinkListViewSectionsResult =
-    listView;
+  const {
+    listSectionProps,
+    settingsSectionProps,
+    sortOptions,
+    iconFilterOptions,
+  }: UseOebuLinkListViewSectionsResult = listView;
 
   const selectedLinks = settingsSectionProps.selectedLinks;
 
