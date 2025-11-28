@@ -138,7 +138,6 @@ export function JusoSelector({
     listSectionProps,
     settingsSectionProps,
     sortOptions,
-    pageSizeOptions,
   }: UseJusoListViewSectionsResult = listView;
 
   const selectedJusos = settingsSectionProps.selectedJusos;
@@ -259,7 +258,6 @@ export function JusoSelector({
                 onSelectedJusosChange: handleSelectedChange,
               }}
               sortOptions={sortOptions}
-              pageSizeOptions={pageSizeOptions}
             />
           </div>
         ),
@@ -270,7 +268,6 @@ export function JusoSelector({
       handleSelectedChange,
       jojikNanoId,
       listSectionProps,
-      pageSizeOptions,
       settingsSectionProps.onAfterMutation,
       sortOptions,
     ],
