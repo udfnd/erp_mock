@@ -1,9 +1,5 @@
 import { apiClient } from '@/global';
-import {
-  useAuthedQuery,
-  useAuthedMutation,
-  type UseAuthedQueryOptions,
-} from '@/global/auth';
+import { useAuthedQuery, useAuthedMutation, type UseAuthedQueryOptions } from '@/global/auth';
 
 import { parseOrThrow } from '../../util';
 import {
@@ -27,30 +23,10 @@ import {
   type GetJojikPermissionsResponse,
   GetJojikSettingSidebarResponseSchema,
   type GetJojikSettingSidebarResponse,
-  UpsertJojikAddressRequestSchema,
-  type UpsertJojikAddressRequest,
-  UpsertJojikAddressResponseSchema,
-  type UpsertJojikAddressResponse,
-  UpdateJojikNameRequestSchema,
-  type UpdateJojikNameRequest,
-  UpdateJojikNameResponseSchema,
-  type UpdateJojikNameResponse,
-  UpdateJojikIntroRequestSchema,
-  type UpdateJojikIntroRequest,
-  UpdateJojikIntroResponseSchema,
-  type UpdateJojikIntroResponse,
-  UpdateJojikSchoolsRequestSchema,
-  type UpdateJojikSchoolsRequest,
-  UpdateJojikSchoolsResponseSchema,
-  type UpdateJojikSchoolsResponse,
   UpdateJojikOpenSettingRequestSchema,
   type UpdateJojikOpenSettingRequest,
   UpdateJojikOpenSettingResponseSchema,
   type UpdateJojikOpenSettingResponse,
-  UpsertJojikHomepageRequestSchema,
-  type UpsertJojikHomepageRequest,
-  UpsertJojikHomepageResponseSchema,
-  type UpsertJojikHomepageResponse,
 } from './jojik.schema';
 
 export const getJojiks = async (params: GetJojiksRequest): Promise<GetJojiksResponse> => {
@@ -145,62 +121,6 @@ export const useJojikSettingSidebarQuery = (nanoId: string, options?: { enabled?
     enabled: !!nanoId && (options?.enabled ?? true),
   });
 
-export const upsertJojikAddress = async (
-  nanoId: string,
-  data: UpsertJojikAddressRequest,
-): Promise<UpsertJojikAddressResponse> => {
-  const body = UpsertJojikAddressRequestSchema.parse(data);
-  const res = await apiClient.put(`/T/dl/jojiks/${nanoId}/address`, body);
-  return parseOrThrow(UpsertJojikAddressResponseSchema, res.data);
-};
-
-export const useUpsertJojikAddressMutation = (nanoId: string) =>
-  useAuthedMutation<UpsertJojikAddressResponse, unknown, UpsertJojikAddressRequest>({
-    mutationFn: (d) => upsertJojikAddress(nanoId, d),
-  });
-
-export const updateJojikName = async (
-  nanoId: string,
-  data: UpdateJojikNameRequest,
-): Promise<UpdateJojikNameResponse> => {
-  const body = UpdateJojikNameRequestSchema.parse(data);
-  const res = await apiClient.put(`/T/dl/jojiks/${nanoId}/name`, body);
-  return parseOrThrow(UpdateJojikNameResponseSchema, res.data);
-};
-
-export const useUpdateJojikNameMutation = (nanoId: string) =>
-  useAuthedMutation<UpdateJojikNameResponse, unknown, UpdateJojikNameRequest>({
-    mutationFn: (d) => updateJojikName(nanoId, d),
-  });
-
-export const updateJojikIntro = async (
-  nanoId: string,
-  data: UpdateJojikIntroRequest,
-): Promise<UpdateJojikIntroResponse> => {
-  const body = UpdateJojikIntroRequestSchema.parse(data);
-  const res = await apiClient.put(`/T/dl/jojiks/${nanoId}/intro`, body);
-  return parseOrThrow(UpdateJojikIntroResponseSchema, res.data);
-};
-
-export const useUpdateJojikIntroMutation = (nanoId: string) =>
-  useAuthedMutation<UpdateJojikIntroResponse, unknown, UpdateJojikIntroRequest>({
-    mutationFn: (d) => updateJojikIntro(nanoId, d),
-  });
-
-export const updateJojikSchools = async (
-  nanoId: string,
-  data: UpdateJojikSchoolsRequest,
-): Promise<UpdateJojikSchoolsResponse> => {
-  const body = UpdateJojikSchoolsRequestSchema.parse(data);
-  const res = await apiClient.put(`/T/dl/jojiks/${nanoId}/schools`, body);
-  return parseOrThrow(UpdateJojikSchoolsResponseSchema, res.data);
-};
-
-export const useUpdateJojikSchoolsMutation = (nanoId: string) =>
-  useAuthedMutation<UpdateJojikSchoolsResponse, unknown, UpdateJojikSchoolsRequest>({
-    mutationFn: (d) => updateJojikSchools(nanoId, d),
-  });
-
 export const updateJojikOpenSetting = async (
   nanoId: string,
   data: UpdateJojikOpenSettingRequest,
@@ -213,18 +133,4 @@ export const updateJojikOpenSetting = async (
 export const useUpdateJojikOpenSettingMutation = (nanoId: string) =>
   useAuthedMutation<UpdateJojikOpenSettingResponse, unknown, UpdateJojikOpenSettingRequest>({
     mutationFn: (d) => updateJojikOpenSetting(nanoId, d),
-  });
-
-export const upsertJojikHomepage = async (
-  nanoId: string,
-  data: UpsertJojikHomepageRequest,
-): Promise<UpsertJojikHomepageResponse> => {
-  const body = UpsertJojikHomepageRequestSchema.parse(data);
-  const res = await apiClient.post(`/T/dl/jojiks/${nanoId}/homepage`, body);
-  return parseOrThrow(UpsertJojikHomepageResponseSchema, res.data);
-};
-
-export const useUpsertJojikHomepageMutation = (nanoId: string) =>
-  useAuthedMutation<UpsertJojikHomepageResponse, unknown, UpsertJojikHomepageRequest>({
-    mutationFn: (d) => upsertJojikHomepage(nanoId, d),
   });

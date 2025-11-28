@@ -128,52 +128,7 @@ export const GetJojikSettingSidebarResponseSchema = z.object({
   homepageUrl: z.string(),
   nanoId: z.string(),
 });
-export type GetJojikSettingSidebarResponse = z.infer<
-  typeof GetJojikSettingSidebarResponseSchema
->;
-
-export const UpsertJojikAddressRequestSchema = z.object({
-  address: z.string(),
-});
-export type UpsertJojikAddressRequest = z.infer<typeof UpsertJojikAddressRequestSchema>;
-
-export const UpsertJojikAddressResponseSchema = z.object({
-  address: z.string(),
-  nanoId: z.string(),
-});
-export type UpsertJojikAddressResponse = z.infer<typeof UpsertJojikAddressResponseSchema>;
-
-export const UpdateJojikNameRequestSchema = z.object({
-  name: z.string(),
-});
-export type UpdateJojikNameRequest = z.infer<typeof UpdateJojikNameRequestSchema>;
-
-export const UpdateJojikNameResponseSchema = z.object({
-  name: z.string(),
-  nanoId: z.string(),
-});
-export type UpdateJojikNameResponse = z.infer<typeof UpdateJojikNameResponseSchema>;
-
-export const UpdateJojikIntroRequestSchema = z.object({
-  intro: z.string(),
-});
-export type UpdateJojikIntroRequest = z.infer<typeof UpdateJojikIntroRequestSchema>;
-
-export const UpdateJojikIntroResponseSchema = z.object({
-  intro: z.string(),
-  nanoId: z.string(),
-});
-export type UpdateJojikIntroResponse = z.infer<typeof UpdateJojikIntroResponseSchema>;
-
-export const UpdateJojikSchoolsRequestSchema = z.object({
-  schools: z.array(z.string()),
-});
-export type UpdateJojikSchoolsRequest = z.infer<typeof UpdateJojikSchoolsRequestSchema>;
-
-export const UpdateJojikSchoolsResponseSchema = z.object({
-  schools: z.array(z.object({ name: z.string(), nanoId: z.string() })),
-});
-export type UpdateJojikSchoolsResponse = z.infer<typeof UpdateJojikSchoolsResponseSchema>;
+export type GetJojikSettingSidebarResponse = z.infer<typeof GetJojikSettingSidebarResponseSchema>;
 
 export const UpdateJojikOpenSettingRequestSchema = z.object({
   canAccessBasicInfoNanoId: z.string(),
@@ -188,17 +143,4 @@ export const UpdateJojikOpenSettingResponseSchema = z.object({
   canAccessHadaLinkRequest: z.object({ nanoId: z.string(), name: z.string() }),
   nanoId: z.string(),
 });
-export type UpdateJojikOpenSettingResponse = z.infer<
-  typeof UpdateJojikOpenSettingResponseSchema
->;
-
-export const UpsertJojikHomepageRequestSchema = z.object({
-  url: z.string(),
-});
-export type UpsertJojikHomepageRequest = z.infer<typeof UpsertJojikHomepageRequestSchema>;
-
-export const UpsertJojikHomepageResponseSchema = z.object({
-  nanoId: z.string(),
-  url: z.string(),
-});
-export type UpsertJojikHomepageResponse = z.infer<typeof UpsertJojikHomepageResponseSchema>;
+export type UpdateJojikOpenSettingResponse = z.infer<typeof UpdateJojikOpenSettingResponseSchema>;
