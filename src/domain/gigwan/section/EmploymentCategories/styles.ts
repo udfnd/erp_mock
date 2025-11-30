@@ -74,6 +74,7 @@ export const cssObj = {
 
   statusValue: css`
     ${typography.bodyR};
+    flex: 1;
     color: ${color.black};
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -84,7 +85,8 @@ export const cssObj = {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 4px 8px;
+    height: 40px;
+    padding: 0 12px;
     border: 1px solid ${color.cgrey200};
     border-radius: 8px;
     background: ${color.white};
