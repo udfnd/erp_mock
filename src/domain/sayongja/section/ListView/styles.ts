@@ -180,6 +180,7 @@ export const cssObj = {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    box-sizing: border-box;
     width: 400px;
     min-width: 400px;
     min-height: 0;
@@ -188,6 +189,16 @@ export const cssObj = {
     padding: 16px;
     background: ${color.white};
     overflow-y: auto;
+
+    @media (min-width: 960px) and (max-width: 1279px) {
+      width: 200px;
+      min-width: 200px;
+      max-width: 200px;
+
+      & * {
+        min-width: 0;
+      }
+    }
   `,
 
   panelHeader: css``,
