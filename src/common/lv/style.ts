@@ -275,6 +275,9 @@ export const cssObj = {
     z-index: 1;
     padding: 8px;
     text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     ${typography.bodySmallSB};
     color: ${color.cgrey500};
     border-bottom: 1px solid ${color.cgrey100};
@@ -325,6 +328,9 @@ export const cssObj = {
   tableCell: css`
     padding: 8px;
     border-bottom: 1px solid ${color.cgrey100};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     ${typography.bodySmallR};
     color: ${color.black};
     background: ${color.white};
