@@ -20,6 +20,40 @@ import type { ListViewTableProps } from './types';
 import { PaginationSection } from './PaginationSection';
 
 const DEFAULT_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
+const ALLOWED_COLUMN_WIDTHS = [56, 80, 112, 144, 168] as const;
+const DEFAULT_COLUMN_WIDTH = ALLOWED_COLUMN_WIDTHS[2];
+
+const getNearestAllowedWidth = (size: number | undefined) => {
+  if (!size || size <= 0) {
+    return DEFAULT_COLUMN_WIDTH;
+  }
+
+  return ALLOWED_COLUMN_WIDTHS.reduce((closest, current) => {
+    const currentDiff = Math.abs(current - size);
+    const closestDiff = Math.abs(closest - size);
+
+    if (currentDiff === closestDiff) {
+      return Math.max(closest, current);
+    }
+
+    return currentDiff < closestDiff ? current : closest;
+  }, ALLOWED_COLUMN_WIDTHS[0]);
+};
+
+const getColumnWidthStyle = (columnId: string, size: number | undefined) => {
+  if (columnId.startsWith('__')) {
+    return undefined;
+  }
+
+  const width = getNearestAllowedWidth(size);
+  const widthPx = `${width}px`;
+
+  return {
+    width: widthPx,
+    minWidth: widthPx,
+    maxWidth: widthPx,
+  } satisfies React.CSSProperties;
+};
 
 export function ListSection<TData>({
   data,
@@ -164,7 +198,12 @@ export function ListSection<TData>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} css={lvCss.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} colSpan={header.colSpan} css={lvCss.tableHeaderCell}>
+                    <th
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      css={lvCss.tableHeaderCell}
+                      style={getColumnWidthStyle(header.column.id, header.column.getSize())}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -198,7 +237,11 @@ export function ListSection<TData>({
                     }}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} css={lvCss.tableCell}>
+                      <td
+                        key={cell.id}
+                        css={lvCss.tableCell}
+                        style={getColumnWidthStyle(cell.column.id, cell.column.getSize())}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}

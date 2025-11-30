@@ -145,4 +145,27 @@ export const cssObj = {
     padding-left: 16px;
     list-style: disc;
   `,
+
+  metaSection: css`
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    padding: 12px 0;
+  `,
+
+  metaRow: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
+  metaLabel: css`
+    color: ${color.cgrey500};
+    ${typography.captionB};
+  `,
+
+  metaValue: css`
+    color: ${color.black};
+    ${typography.bodySmallR};
+  `,
 };

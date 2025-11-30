@@ -10,6 +10,7 @@ import {
 } from '@/domain/oebu-link/api';
 
 import type { LinkIconOption } from '../../linkIconOptions';
+import { formatDate } from '../../constants';
 import { cssObj } from '../../styles';
 import { IconSelect } from './IconSelect';
 
@@ -48,6 +49,11 @@ export function SingleSelectionPanel({
   const currentTitleName = titleNameInput ?? originalTitleName;
   const currentLinkUrl = linkUrlInput ?? originalLinkUrl;
   const currentIcon = linkIconInput ?? originalIcon;
+
+  const createdAt = detailData?.createdAt;
+  const createdBy = detailData?.createdBy;
+  const updatedAt = detailData?.updatedAt;
+  const updatedBy = detailData?.updatedBy;
 
   const isSaving = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
@@ -135,6 +141,24 @@ export function SingleSelectionPanel({
           <Button type="submit" size="small" variant="secondary" disabled={isSaving || isLoading}>
             저장
           </Button>
+        </div>
+        <div css={cssObj.metaSection}>
+          <div css={cssObj.metaRow}>
+            <span css={cssObj.metaLabel}>생성일</span>
+            <span css={cssObj.metaValue}>{createdAt ? formatDate(createdAt) : '-'}</span>
+          </div>
+          <div css={cssObj.metaRow}>
+            <span css={cssObj.metaLabel}>생성자</span>
+            <span css={cssObj.metaValue}>{createdBy || '-'}</span>
+          </div>
+          <div css={cssObj.metaRow}>
+            <span css={cssObj.metaLabel}>수정일</span>
+            <span css={cssObj.metaValue}>{updatedAt ? formatDate(updatedAt) : '-'}</span>
+          </div>
+          <div css={cssObj.metaRow}>
+            <span css={cssObj.metaLabel}>수정자</span>
+            <span css={cssObj.metaValue}>{updatedBy || '-'}</span>
+          </div>
         </div>
         <div css={cssObj.buttonRow}>
           <Button

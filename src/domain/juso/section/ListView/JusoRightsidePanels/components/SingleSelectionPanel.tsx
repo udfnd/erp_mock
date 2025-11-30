@@ -9,6 +9,7 @@ import {
   useUpdateJusoMutation,
 } from '@/domain/juso/api';
 import type { UpdateJusoRequest } from '@/domain/juso/api/juso.schema';
+import { formatDate } from '@/domain/juso/section/ListView/constants';
 
 import { cssObj } from '../../styles';
 import { useDaumPostcode } from './useDaumPostcode';
@@ -25,6 +26,10 @@ type SingleSelectionPanelContentProps = {
   jusoName: string;
   jusoDetail: string;
   juso: string;
+  createdAt?: string;
+  createdBy?: string | null;
+  updatedAt?: string;
+  updatedBy?: string | null;
   onAfterMutation: () => Promise<unknown> | void;
   updateMutation: ReturnType<typeof useUpdateJusoMutation>;
   deleteMutation: ReturnType<typeof useDeleteJusoMutation>;
@@ -58,6 +63,10 @@ export function SingleSelectionPanel({
   const effectiveName = jusoDetail?.jusoName ?? jusoName ?? '';
   const effectiveJuso = jusoDetail?.juso ?? '';
   const effectiveDetail = jusoDetail?.jusoDetail ?? '';
+  const createdAt = jusoDetail?.createdAt;
+  const createdBy = jusoDetail?.createdBy;
+  const updatedAt = jusoDetail?.updatedAt;
+  const updatedBy = jusoDetail?.updatedBy;
 
   return (
     <SingleSelectionPanelContent
@@ -66,6 +75,10 @@ export function SingleSelectionPanel({
       jusoName={effectiveName}
       juso={effectiveJuso}
       jusoDetail={effectiveDetail}
+      createdAt={createdAt}
+      createdBy={createdBy}
+      updatedAt={updatedAt}
+      updatedBy={updatedBy}
       onAfterMutation={onAfterMutation}
       updateMutation={updateMutation}
       deleteMutation={deleteMutation}
@@ -78,6 +91,10 @@ function SingleSelectionPanelContent({
   jusoName,
   jusoDetail,
   juso,
+  createdAt,
+  createdBy,
+  updatedAt,
+  updatedBy,
   onAfterMutation,
   updateMutation,
   deleteMutation,
@@ -175,9 +192,22 @@ function SingleSelectionPanelContent({
           </Button>
         </div>
       </form>
-      <div>
-        <div>
-          <p>생성일</p>asdf
+      <div css={cssObj.metaSection}>
+        <div css={cssObj.metaRow}>
+          <span css={cssObj.metaLabel}>생성일</span>
+          <span css={cssObj.metaValue}>{createdAt ? formatDate(createdAt) : '-'}</span>
+        </div>
+        <div css={cssObj.metaRow}>
+          <span css={cssObj.metaLabel}>생성자</span>
+          <span css={cssObj.metaValue}>{createdBy || '-'}</span>
+        </div>
+        <div css={cssObj.metaRow}>
+          <span css={cssObj.metaLabel}>수정일</span>
+          <span css={cssObj.metaValue}>{updatedAt ? formatDate(updatedAt) : '-'}</span>
+        </div>
+        <div css={cssObj.metaRow}>
+          <span css={cssObj.metaLabel}>수정자</span>
+          <span css={cssObj.metaValue}>{updatedBy || '-'}</span>
         </div>
       </div>
       <div css={cssObj.panelFooter}>
