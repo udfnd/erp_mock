@@ -55,6 +55,18 @@ export function FiltersDropdown({ filters }: Props) {
       .join(', ');
   };
 
+  const triggerLabel = useMemo(() => {
+    if (!hasActiveFilter) return '필터';
+
+    const filterSummaries = filterList
+      .map((filter) => getFilterSummary(filter))
+      .filter((summary) => summary.length > 0);
+
+    const selectedSummary = filterSummaries.join(' | ');
+
+    return selectedSummary.length > 0 ? selectedSummary : '필터';
+  }, [filterList, hasActiveFilter]);
+
   const handleToggleOption = (filter: ListViewFilter, value: string) => {
     const hasAllOption = filter.options.some((option) => option.value === 'all');
     const withoutAll = filter.value.filter((item) => item !== 'all');
@@ -85,7 +97,7 @@ export function FiltersDropdown({ filters }: Props) {
         css={lvCss.filterTrigger(isOpen, hasActiveFilter)}
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        <span>필터</span>
+        <span>{triggerLabel}</span>
         <ArrowLgDownIcon css={lvCss.filterTriggerCaret} />
       </button>
       {isOpen && (

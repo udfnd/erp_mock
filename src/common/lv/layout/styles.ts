@@ -33,5 +33,16 @@ export const cssObj = {
     position: relative;
     z-index: 1;
     overflow: visible;
+
+    @media (min-width: 960px) and (max-width: 1279px) {
+      width: 200px;
+      min-width: 200px;
+      max-width: 200px;
+
+      & > * {
+        max-width: 200px;
+        width: 100%;
+      }
+    }
   `,
 };
