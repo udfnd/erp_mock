@@ -1,4 +1,5 @@
 import { css } from '@emotion/react';
+import { color } from '@/style/color';
 
 export const globalStyles = css`
   *,
@@ -49,5 +50,23 @@ export const globalStyles = css`
     transition:
       background-color 9999s ease-out,
       color 9999s ease-out;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: ${color.cgrey200} transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background-color: ${color.cgrey200};
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: ${color.cgrey200};
   }
 `;
