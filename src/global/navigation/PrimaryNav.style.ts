@@ -22,7 +22,7 @@ const navContainerBase = css`
   background: ${color.cgrey10};
   border-right: 1px solid ${color.cgrey100};
   color: ${color.black};
-  gap: ${spacing.xl};
+  gap: 8px;
   height: 100vh;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -77,8 +77,9 @@ const navLinkBase = css`
 const navFooterBase = css`
   display: flex;
   flex-direction: column;
-  gap: ${spacing.sm};
-  margin-top: auto;
+  gap: 4px;
+  margin-top: 8px;
+
   width: 100%;
 `;
 
@@ -102,13 +103,13 @@ export const cssObj = {
     navContainerBase,
     css`
       max-width: 40px;
-      padding: 8px;
+      padding: 10px 8px;
       align-items: center;
       overflow-x: hidden;
 
       @media ${collapsedRange} {
         max-width: 40px;
-        padding: 8px;
+        padding: 10px 8px;
         align-items: center;
         overflow-x: hidden;
       }
@@ -300,6 +301,18 @@ export const cssObj = {
     hide: [navFooterBase, css({ display: 'none' })] as IT[],
   } as Record<'show' | 'hide', IT[]>,
 
+  navFooterLink: css`
+    display: flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 4px;
+  `,
+
+  navFooterLabel: css`
+    ${typography.captionM};
+    color: ${color.cgrey500};
+  `,
+
   footerVersion: css`
     margin-top: ${spacing.md};
     display: flex;
@@ -308,13 +321,13 @@ export const cssObj = {
   `,
 
   footerBrand: css`
-    ${typography.captionR};
-    color: ${color.blue600};
+    ${typography.bodySmallSB};
+    color: ${color.blue};
   `,
 
   footerVerText: css`
     ${typography.captionR};
-    color: ${color.cgrey600};
+    color: ${color.cgrey300};
   `,
 
   footerProfileSection: css`
@@ -323,6 +336,8 @@ export const cssObj = {
     justify-content: space-between;
     gap: ${spacing.sm};
     position: relative;
+    border-top: 1px solid ${color.cgrey100};
+    padding: 8px 0;
   `,
 
   footerVersionGroup: css`
@@ -332,8 +347,8 @@ export const cssObj = {
   `,
 
   profileTriggerButton: css`
-    width: 40px;
-    height: 40px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     border: 1px solid ${color.cgrey200};
     padding: 0;

@@ -204,7 +204,13 @@ export default function SignInPage() {
               disabled={isButtonDisabled}
               styleType="solid"
               variant="primary"
-              iconRight={<ArrowLgRightIcon width={16} height={16} color={`${color.cgrey300}`} />}
+              iconRight={
+                <ArrowLgRightIcon
+                  width={16}
+                  height={16}
+                  color={isButtonDisabled ? color.cgrey300 : color.white}
+                />
+              }
             >
               {isBusy ? <ProgressIcon css={cssObj.spinner} /> : '로그인'}
             </Button>

@@ -37,4 +37,17 @@ export const globalStyles = css`
     color: inherit;
     text-decoration: none;
   }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    -webkit-text-fill-color: #010821;
+    transition:
+      background-color 9999s ease-out,
+      color 9999s ease-out;
+  }
 `;

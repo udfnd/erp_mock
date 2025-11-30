@@ -12,13 +12,7 @@ type IconSelectProps = {
 };
 
 export function IconSelect({ value, onChange, options }: IconSelectProps) {
-  const normalizedOptions = useMemo(
-    () => [
-      { label: '아이콘 없음', value: 'none' },
-      ...options,
-    ],
-    [options],
-  );
+  const normalizedOptions = useMemo(() => [...options], [options]);
 
   return (
     <div css={cssObj.iconSelectGrid}>
@@ -36,7 +30,6 @@ export function IconSelect({ value, onChange, options }: IconSelectProps) {
             <span css={cssObj.iconSelectIcon}>
               {Icon ? <Icon width={24} height={24} /> : <span css={cssObj.iconPlaceholder}>-</span>}
             </span>
-            <span css={cssObj.iconSelectLabel}>{option.label}</span>
           </button>
         );
       })}

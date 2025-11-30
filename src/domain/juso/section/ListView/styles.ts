@@ -2,7 +2,7 @@
 
 import { css } from '@emotion/react';
 
-import { color } from '@/style';
+import { color, typography } from '@/style';
 
 export const cssObj = {
   listSection: css`
@@ -17,59 +17,79 @@ export const cssObj = {
     height: 100%;
     box-sizing: border-box;
   `,
+
   settingsPanel: css`
-    width: 400px;
-    min-width: 400px;
-    background: ${color.white};
     display: flex;
     flex-direction: column;
+    gap: 16px;
+    width: 400px;
+    min-width: 400px;
     min-height: 0;
     max-height: 100%;
     height: 100%;
+    padding: 16px;
+    background: ${color.white};
     overflow-y: auto;
   `,
-  panelHeader: css`
-    padding: 24px;
-    border-bottom: 1px solid ${color.cgrey100};
-  `,
+
+  panelHeader: css``,
+
   panelTitle: css`
     font-size: 18px;
     font-weight: 600;
     color: ${color.black};
+    ${typography.bodySB};
   `,
+
   panelSubtitle: css`
-    margin-top: 4px;
-    font-size: 13px;
-    color: ${color.cgrey500};
+    ${typography.bodySB};
+    color: ${color.black};
   `,
+
   panelBody: css`
-    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 24px;
+    gap: 8px;
   `,
+
+  quickActionText: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey600};
+  `,
+
   panelSection: css`
     display: flex;
     flex-direction: column;
     gap: 8px;
   `,
-  panelFooter: css`
-    padding: 16px 24px;
-    border-top: 1px solid ${color.cgrey100};
+
+  panelJusoInputSection: css`
     display: flex;
-    gap: 12px;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 4px;
   `,
+
+  saveButtonContainer: css`
+    margin-left: auto;
+  `,
+
+  panelFooter: css`
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+  `,
+
   helperText: css`
     font-size: 13px;
     color: ${color.cgrey400};
   `,
+
   chipList: css`
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
   `,
+
   chip: css`
     display: inline-flex;
     align-items: center;

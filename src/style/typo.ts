@@ -27,7 +27,6 @@ export const typography = {
   bodySmallM: { ...baseStyles, fontSize: '14px', fontWeight: typoWeights.M },
   bodySmallR: { ...baseStyles, fontSize: '14px', fontWeight: typoWeights.R },
   captionB: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.B },
+  captionM: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.M },
   captionR: { ...baseStyles, fontSize: '12px', fontWeight: typoWeights.R },
 } satisfies Record<string, CSSObject>;
-
-export type TypographyKey = keyof typeof typography; // "titleB" | "titleM" | ...

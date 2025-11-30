@@ -85,57 +85,67 @@ export function SingleSelectionPanel({
   return (
     <>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>외부 링크 상세</h2>
-        <p css={cssObj.panelSubtitle}>{oebuLinkName}</p>
+        <h2 css={cssObj.panelTitle}>{oebuLinkName} 설정</h2>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
+        <p css={cssObj.panelSubtitle}>링크 기본 속성</p>
         <div css={cssObj.panelSection}>
           <Textfield
             singleLine
-            required
-            label="외부 링크 이름"
+            label="링크 이름(별명) 입력"
+            placeholder="링크 이름(별명)을 입력해주세요"
+            helperText="30자 이내의 이름을 입력해 주세요."
             value={currentName}
             onValueChange={(v) => setNameInput(v)}
-            maxLength={100}
+            maxLength={30}
             disabled={isLoading}
           />
         </div>
         <div css={cssObj.panelSection}>
           <Textfield
             singleLine
-            required
-            label="표시 이름"
-            value={currentTitleName}
-            onValueChange={(v) => setTitleNameInput(v)}
-            maxLength={100}
-            disabled={isLoading}
-          />
-        </div>
-        <div css={cssObj.panelSection}>
-          <Textfield
-            singleLine
-            required
-            label="링크 URL"
+            label="링크 주소"
+            placeholder="링크 주소를 입력해주세요"
             value={currentLinkUrl}
             onValueChange={(v) => setLinkUrlInput(v)}
             disabled={isLoading}
           />
         </div>
         <div css={cssObj.panelSection}>
-          <label css={cssObj.panelLabel}>아이콘</label>
-          <IconSelect value={currentIcon} onChange={(v) => setLinkIconInput(v)} options={iconOptions} />
+          <Textfield
+            singleLine
+            label="링크 표기 제목 입력"
+            placeholder="링크를 표기할 제목을 입력해주세요"
+            helperText="30자 이내의 이름을 입력해 주세요."
+            value={currentTitleName}
+            onValueChange={(v) => setTitleNameInput(v)}
+            maxLength={30}
+            disabled={isLoading}
+          />
         </div>
-        <div css={cssObj.buttonRow}>
-          <Button type="submit" size="medium" disabled={isSaving || isLoading}>
+        <div css={cssObj.panelSection}>
+          <label css={cssObj.panelLabel}>아이콘</label>
+          <IconSelect
+            value={currentIcon}
+            onChange={(v) => setLinkIconInput(v)}
+            options={iconOptions}
+          />
+        </div>
+        <div css={cssObj.saveButtonContainer}>
+          <Button type="submit" size="small" variant="secondary" disabled={isSaving || isLoading}>
             저장
           </Button>
+        </div>
+        <div css={cssObj.buttonRow}>
           <Button
             type="button"
-            css={cssObj.destructiveButton}
+            variant="red"
+            size="small"
             onClick={handleDelete}
+            isFull
             disabled={isDeleting}
           >
-            삭제
+            링크 삭제
           </Button>
         </div>
       </form>

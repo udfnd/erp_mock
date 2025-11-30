@@ -46,11 +46,10 @@ export function SingleSelectionPanel({
     return (
       <div>
         <div css={cssObj.panelHeader}>
-          <h2 css={cssObj.panelTitle}>{jusoName}</h2>
-          <p css={cssObj.panelSubtitle}>선택한 주소 정보를 불러오는 중입니다...</p>
+          <h2 css={cssObj.panelTitle}>{jusoName} 설정</h2>
         </div>
         <div css={cssObj.panelBody}>
-          <p css={cssObj.helperText}>선택한 주소 정보를 불러오는 중입니다...</p>
+          <p css={cssObj.panelSubtitle}>선택한 주소 정보를 불러오는 중입니다...</p>
         </div>
       </div>
     );
@@ -130,29 +129,28 @@ function SingleSelectionPanelContent({
   );
 
   return (
-    <div>
+    <>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>{jusoName}</h2>
-        <p css={cssObj.panelSubtitle}>선택한 주소의 정보를 확인하고 수정할 수 있습니다.</p>
+        <h2 css={cssObj.panelTitle}>{jusoName} 설정</h2>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
+        <p css={cssObj.panelSubtitle}>주소 기본 속성</p>
         <div css={cssObj.panelSection}>
           <Textfield
             singleLine
-            required
-            label="주소 이름"
-            placeholder="주소 이름을 입력하세요"
+            label="주소 이름(별명)"
+            placeholder="주소 이름(별명)을 입력해 주세요"
+            helperText="이름은 최대 30자까지 입력 가능합니다."
             value={formState.jusoName}
             onValueChange={(value) => setFormState((prev) => ({ ...prev, jusoName: value }))}
-            maxLength={80}
+            maxLength={30}
           />
         </div>
-        <div css={cssObj.panelSection}>
+        <div css={cssObj.panelJusoInputSection}>
           <Textfield
             singleLine
-            required
-            label="주소"
-            placeholder="주소를 입력해 주세요"
+            label="주소 입력"
+            placeholder="주소를 검색해 주세요."
             value={formState.juso}
             onValueChange={(value) => setFormState((prev) => ({ ...prev, juso: value }))}
             onClick={openAddressSearch}
@@ -160,41 +158,40 @@ function SingleSelectionPanelContent({
           />
           <Textfield
             singleLine
-            label="상세 주소"
-            placeholder="상세 주소를 입력하세요"
+            placeholder="상세 주소를 입력해 주세요. (선택)"
             value={formState.jusoDetail}
             onValueChange={(value) => setFormState((prev) => ({ ...prev, jusoDetail: value }))}
           />
-          <p css={cssObj.helperText}>
-            주소 입력창을 클릭하면 카카오 주소 검색을 사용할 수 있습니다.
-          </p>
         </div>
-        {updateMutation.isError ? (
-          <p css={cssObj.helperText}>
-            주소 업데이트 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
-          </p>
-        ) : null}
-        {deleteMutation.isError ? (
-          <p css={cssObj.helperText}>주소 삭제 중 문제가 발생했습니다. 다시 시도해 주세요.</p>
-        ) : null}
+        <div css={cssObj.saveButtonContainer}>
+          <Button
+            type="submit"
+            variant="secondary"
+            size="small"
+            form={formId}
+            disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}
+          >
+            저장
+          </Button>
+        </div>
       </form>
+      <div>
+        <div>
+          <p>생성일</p>asdf
+        </div>
+      </div>
       <div css={cssObj.panelFooter}>
         <Button
-          styleType="text"
-          variant="secondary"
+          styleType="solid"
+          variant="red"
+          size="small"
           onClick={handleDelete}
           disabled={isSaving || isDeleting}
+          isFull
         >
           주소 삭제
         </Button>
-        <Button
-          type="submit"
-          form={formId}
-          disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}
-        >
-          변경 사항 저장
-        </Button>
       </div>
-    </div>
+    </>
   );
 }

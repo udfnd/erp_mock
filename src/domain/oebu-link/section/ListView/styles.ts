@@ -19,18 +19,20 @@ export const cssObj = {
   `,
 
   settingsPanel: css`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     width: 400px;
     min-width: 400px;
-    background: ${color.white};
     min-height: 0;
     max-height: 100%;
     height: 100%;
+    padding: 16px;
+    background: ${color.white};
     overflow-y: auto;
   `,
 
-  panelHeader: css`
-    padding: 16px;
-  `,
+  panelHeader: css``,
 
   panelTitle: css`
     font-size: 18px;
@@ -39,18 +41,20 @@ export const cssObj = {
     ${typography.bodySB};
   `,
 
+  quickActionText: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey600};
+  `,
+
   panelSubtitle: css`
-    margin-top: 4px;
-    ${typography.bodySmallSB};
-    color: ${color.cgrey500};
+    ${typography.bodySB};
   `,
 
   panelBody: css`
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
+    gap: 8px;
   `,
 
   panelSection: css`
@@ -60,8 +64,7 @@ export const cssObj = {
   `,
 
   iconSelectGrid: css`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    display: flex;
     gap: 8px;
   `,
 
@@ -69,22 +72,17 @@ export const cssObj = {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
     border: 1px solid ${color.cgrey200};
     border-radius: 8px;
     background: ${color.white};
     cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-    &:hover {
-      border-color: ${color.cgrey400};
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
   `,
 
   iconSelectButtonSelected: css`
-    border-color: ${color.blue600};
-    box-shadow: 0 0 0 3px rgba(10, 63, 255, 0.15);
+    border-color: ${color.blue};
   `,
 
   iconSelectIcon: css`
@@ -94,7 +92,6 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: ${color.cgrey50};
     color: ${color.cgrey500};
     flex-shrink: 0;
   `,
@@ -131,14 +128,14 @@ export const cssObj = {
     color: ${color.cgrey500};
   `,
 
-  buttonRow: css`
-    display: flex;
-    gap: 8px;
+  saveButtonContainer: css`
+    margin-left: auto;
   `,
 
-  destructiveButton: css`
-    background: ${color.red10};
-    color: ${color.white};
+  buttonRow: css`
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
   `,
 
   panelList: css`

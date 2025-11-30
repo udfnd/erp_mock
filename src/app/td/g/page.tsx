@@ -96,7 +96,13 @@ export default function EnterCodePage() {
               disabled={isButtonDisabled}
               styleType="solid"
               variant="primary"
-              iconRight={<ArrowLgRightIcon width={16} height={16} color={`${color.cgrey300}`} />}
+              iconRight={
+                <ArrowLgRightIcon
+                  width={16}
+                  height={16}
+                  color={isButtonDisabled ? color.cgrey300 : color.white}
+                />
+              }
             >
               {isLoading ? <ProgressIcon css={cssObj.spinner} /> : '확인'}
             </Button>

@@ -7,6 +7,7 @@ import { useCreateJusoMutation } from '@/domain/juso/api';
 
 import { cssObj } from '../../styles';
 import { useDaumPostcode } from './useDaumPostcode';
+import { PlusIcon } from '@/common/icons';
 
 type CreateJusoPanelProps = {
   jojikNanoId: string;
@@ -53,29 +54,28 @@ export function CreateJusoPanel({ jojikNanoId, onExit, onAfterMutation }: Create
   };
 
   return (
-    <div>
+    <>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>새 주소 추가</h2>
-        <p css={cssObj.panelSubtitle}>선택된 조직에 새로운 주소를 생성합니다.</p>
+        <h2 css={cssObj.panelTitle}>주소 생성</h2>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={handleSubmit}>
+        <p css={cssObj.panelSubtitle}>주소 기본 속성</p>
         <div css={cssObj.panelSection}>
           <Textfield
             singleLine
-            required
-            label="주소 이름"
-            placeholder="주소 이름을 입력하세요"
+            label="주소 이름(별명)"
+            placeholder="주소 이름(별명)을 입력해 주세요"
+            helperText="이름은 최대 30자까지 입력 가능합니다."
             value={jusoName}
             onValueChange={setJusoName}
-            maxLength={80}
+            maxLength={30}
           />
         </div>
-        <div css={cssObj.panelSection}>
+        <div css={cssObj.panelJusoInputSection}>
           <Textfield
             singleLine
-            required
-            label="주소"
-            placeholder="주소를 입력해 주세요"
+            label="주소 입력"
+            placeholder="주소를 검색해 주세요."
             value={juso}
             onValueChange={setJuso}
             onClick={handleOpenAddressSearch}
@@ -83,29 +83,24 @@ export function CreateJusoPanel({ jojikNanoId, onExit, onAfterMutation }: Create
           />
           <Textfield
             singleLine
-            label="상세 주소"
-            placeholder="상세 주소를 입력하세요"
+            placeholder="상세 주소를 입력해 주세요. (선택)"
             value={jusoDetail}
             onValueChange={setJusoDetail}
           />
-          <p css={cssObj.helperText}>
-            주소 입력창을 클릭하면 카카오 주소 검색을 사용할 수 있습니다.
-          </p>
         </div>
-        {createMutation.isError ? (
-          <p css={cssObj.helperText}>주소 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.</p>
-        ) : null}
       </form>
       <div css={cssObj.panelFooter}>
-        {onExit ? (
-          <Button styleType="text" variant="secondary" onClick={onExit} disabled={isSaving}>
-            취소
-          </Button>
-        ) : null}
-        <Button type="submit" form={formId} disabled={!jusoName.trim() || !juso.trim() || isSaving}>
-          주소 생성
+        <Button
+          size="small"
+          type="submit"
+          form={formId}
+          disabled={!jusoName.trim() || !juso.trim() || isSaving}
+          isFull
+          iconRight={<PlusIcon />}
+        >
+          주소 생성하기
         </Button>
       </div>
-    </div>
+    </>
   );
 }

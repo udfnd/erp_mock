@@ -85,7 +85,7 @@ const isWithinPath = (currentPath: string, target: string | null | undefined) =>
   );
 };
 
-const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
+const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/24x24';
 
 const useHydrated = (): boolean =>
   useSyncExternalStore(
@@ -789,27 +789,25 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
           href="https://example.com/purchase-strike"
           target="_blank"
           rel="noopener noreferrer"
-          css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1]]}
+          css={cssObj.navFooterLink}
         >
-          <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>
-            마법사 구매 및 파업 신고
-          </span>
+          <span css={cssObj.navFooterLabel}>마법사 구매 및 파업 신고</span>
         </a>
         <a
           href="https://example.com/feature-request"
           target="_blank"
           rel="noopener noreferrer"
-          css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1]]}
+          css={cssObj.navFooterLink}
         >
-          <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>기능 요청</span>
+          <span css={cssObj.navFooterLabel}>기능 요청</span>
         </a>
         <a
           href="https://example.com/contact-dada"
           target="_blank"
           rel="noopener noreferrer"
-          css={[...cssObj.navLink.inactive, cssObj.navLinkDepth[1]]}
+          css={cssObj.navFooterLink}
         >
-          <span css={[cssObj.navLabel, cssObj.navLabelWeight.inactive]}>다다팀에 문의하기</span>
+          <span css={cssObj.navFooterLabel}>다다팀에 문의하기</span>
         </a>
 
         <div css={cssObj.footerProfileSection}>
@@ -829,8 +827,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
             <Image
               src={profileImageUrl}
               alt="내 프로필"
-              width={40}
-              height={40}
+              width={24}
+              height={24}
               css={cssObj.profileTriggerImage}
               unoptimized
             />

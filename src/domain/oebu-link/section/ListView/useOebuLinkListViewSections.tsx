@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { JSX, useMemo, useState } from 'react';
 
 import { type ColumnDef } from '@tanstack/react-table';
 
@@ -16,7 +16,11 @@ import {
   getSortOptionFromState,
   getSortStateFromOption,
 } from './constants';
-import { createLinkIconLookup, mapLinkIconsToOptions, type LinkIconOption } from './linkIconOptions';
+import {
+  createLinkIconLookup,
+  mapLinkIconsToOptions,
+  type LinkIconOption,
+} from './linkIconOptions';
 import { cssObj } from './styles';
 
 export type OebuLinkListViewHookParams = {
@@ -102,10 +106,7 @@ export function useOebuLinkListViewSections({
   const iconLookup = useMemo(() => createLinkIconLookup(iconOptions), [iconOptions]);
 
   const iconFilterOptions = useMemo(
-    () => [
-      { label: '전체 아이콘', value: 'all' },
-      ...iconOptions,
-    ],
+    () => [{ label: '전체 아이콘', value: 'all' }, ...iconOptions],
     [iconOptions],
   );
 
@@ -131,45 +132,42 @@ export function useOebuLinkListViewSections({
     (oebuLinksData?.paginationData?.totalItemCount as number | undefined) ?? data.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  const columns = useMemo(
-    () => {
-      const renderIcon = (nanoId: string | null): JSX.Element => {
-        const Icon = nanoId ? iconLookup.get(nanoId) : undefined;
+  const columns = useMemo(() => {
+    const renderIcon = (nanoId: string | null): JSX.Element => {
+      const Icon = nanoId ? iconLookup.get(nanoId) : undefined;
 
-        if (!Icon) {
-          return <span css={cssObj.iconPlaceholder}>-</span>;
-        }
+      if (!Icon) {
+        return <span css={cssObj.iconPlaceholder}>-</span>;
+      }
 
-        return <Icon width={20} height={20} />;
-      };
+      return <Icon width={20} height={20} />;
+    };
 
-      return [
-        columnHelper.accessor('linkIcon', {
-          id: 'linkIcon',
-          header: '아이콘',
-          cell: (info) => renderIcon(info.getValue()),
-          size: 80,
-        }),
-        columnHelper.accessor('name', {
-          header: '이름',
-          cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('titleName', {
-          header: '표시 이름',
-          cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('linkUrl', {
-          header: 'URL',
-          cell: (info) => info.getValue(),
-        }),
-        columnHelper.accessor('createdAt', {
-          header: '생성일',
-          cell: (info) => formatDate(info.getValue()),
-        }),
-      ];
-    },
-    [iconLookup],
-  ) as ColumnDef<OebuLinkListItem, unknown>[];
+    return [
+      columnHelper.accessor('linkIcon', {
+        id: 'linkIcon',
+        header: '아이콘',
+        cell: (info) => renderIcon(info.getValue()),
+        size: 80,
+      }),
+      columnHelper.accessor('name', {
+        header: '이름',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('titleName', {
+        header: '표시 이름',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('linkUrl', {
+        header: 'URL',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('createdAt', {
+        header: '생성일',
+        cell: (info) => formatDate(info.getValue()),
+      }),
+    ];
+  }, [iconLookup]) as ColumnDef<OebuLinkListItem, unknown>[];
 
   const [isCreating, setIsCreating] = useState(false);
   const [selectedLinks, setSelectedLinks] = useState<OebuLinkListItem[]>([]);
