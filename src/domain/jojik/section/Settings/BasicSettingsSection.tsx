@@ -54,7 +54,6 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const trimmedName = currentName.trim();
   const trimmedIntro = currentIntro.trim();
   const trimmedAddress = currentAddress.trim();
-  const trimmedHomepage = currentHomepage.trim();
 
   const isDirty = useMemo(() => {
     if (!jojik) return false;
@@ -70,15 +69,12 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
 
   const isHomepageDirty = useMemo(() => {
     if (!jojik) return false;
-    return (
-      trimmedHomepage !== formatJojikHomepage(jojik) ||
-      currentHomepageNanoId !== initialHomepageNanoId
-    );
-  }, [currentHomepageNanoId, initialHomepageNanoId, jojik, trimmedHomepage]);
+    return currentHomepageNanoId !== initialHomepageNanoId;
+  }, [currentHomepageNanoId, initialHomepageNanoId, jojik]);
 
   const isValid = trimmedName.length > 0;
   const isAddressValid = trimmedAddress.length > 0 || currentAddressNanoId === null;
-  const isHomepageValid = trimmedHomepage.length > 0 || currentHomepageNanoId === null;
+  const isHomepageValid = currentHomepageNanoId !== undefined;
 
   const handleSave = () => {
     if (!isDirty || !isValid) return;
@@ -147,7 +143,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
     if (!isHomepageDirty || !isHomepageValid) return;
 
     updateJojikMutation.mutate(
-      { homepageUrl: trimmedHomepage || null, homepageUrlNanoId: currentHomepageNanoId },
+      { homepageNanoId: currentHomepageNanoId },
       {
         onSuccess: async (data) => {
           setHomepageInput(formatJojikHomepage(data));

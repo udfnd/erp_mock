@@ -13,7 +13,7 @@ import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
 import { cssObj } from './JusoSelector.style';
-import { EditIcon, LocationIcon, XCircleBlackIcon } from '@/common/icons';
+import { LocationIcon, XCircleBlackIcon } from '@/common/icons';
 import type { JusoListItem } from '@/domain/juso/api';
 import { useCreateJusoMutation } from '@/domain/juso/api';
 import {
@@ -293,26 +293,28 @@ export function JusoSelector({
 
   return (
     <>
-      <div css={cssObj.triggerButton}>
-        <span css={cssObj.triggerIcon}>
-          <LocationIcon width={20} height={20} />
-        </span>
-        <p css={cssObj.triggerLabel}>{buttonLabel}</p>
-        <span css={cssObj.triggerActions}>
-          <span role="button" css={cssObj.triggerIcon} onClick={() => setIsModalOpen(true)}>
-            <EditIcon width={20} height={20} />
+      <div css={cssObj.triggerRow}>
+        <div css={cssObj.triggerButton}>
+          <span css={cssObj.triggerIcon}>
+            <LocationIcon width={20} height={20} />
           </span>
-          <span
-            role="button"
-            tabIndex={0}
-            css={cssObj.clearIcon}
-            onClick={handleClearClick}
-            onKeyDown={handleClearKeyDown}
-            aria-label="주소 선택 초기화"
-          >
-            <XCircleBlackIcon width={20} height={20} />
+          <p css={cssObj.triggerLabel}>{buttonLabel}</p>
+          <span css={cssObj.triggerActions}>
+            <span
+              role="button"
+              tabIndex={0}
+              css={cssObj.clearIcon}
+              onClick={handleClearClick}
+              onKeyDown={handleClearKeyDown}
+              aria-label="주소 선택 초기화"
+            >
+              <XCircleBlackIcon width={20} height={20} />
+            </span>
           </span>
-        </span>
+        </div>
+        <button type="button" css={cssObj.searchButton} onClick={() => setIsModalOpen(true)}>
+          주소 검색
+        </button>
       </div>
 
       <SelectorModal

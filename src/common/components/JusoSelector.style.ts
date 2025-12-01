@@ -5,6 +5,11 @@ import { css } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const cssObj = {
+  triggerRow: css`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `,
   triggerButton: css`
     display: inline-flex;
     align-items: center;
@@ -40,6 +45,24 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     gap: 12px;
+  `,
+  searchButton: css`
+    ${typography.bodySmallB};
+    color: ${color.blue600};
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+
+    &:hover {
+      background: ${color.blue50};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue};
+      outline-offset: 2px;
+    }
   `,
   clearIcon: css`
     display: inline-flex;
