@@ -689,7 +689,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     setIsProfileMenuOpen(false);
 
     if (activeGigwanNanoId) {
-      router.replace(`/td/g/${activeGigwanNanoId}/login`);
+      router.replace(`/td/g/${activeGigwanNanoId}/login?code=${activeGigwanNanoId}`);
     } else {
       router.replace('/td/g');
     }

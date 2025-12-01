@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { useSignInMutation } from '@/domain/auth/api';
@@ -15,7 +15,17 @@ import { color } from '@/style';
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const gigwanCode = searchParams.get('code') ?? '';
+  const params = useParams();
+
+  const gigwanCode = useMemo(() => {
+    const codeParam = searchParams.get('code');
+    if (codeParam) return codeParam;
+
+    const giParam = (params as { gi?: string | string[] }).gi;
+    if (!giParam) return '';
+
+    return typeof giParam === 'string' ? giParam : giParam[0] ?? '';
+  }, [params, searchParams]);
 
   const { state, isReady, isAuthenticated, setAuthState, setActiveUserId } = useAuth();
 
