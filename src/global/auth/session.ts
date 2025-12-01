@@ -145,14 +145,14 @@ const requestRefresh = async (userId: string, token?: string | null): Promise<st
     throw new Error('No accessToken from refresh');
   }
 
-  const token = data.accessToken;
+  const refreshedToken = data.accessToken;
 
   // store에 저장
-  setAccessTokenFor(userId, token, 'refresh');
+  setAccessTokenFor(userId, refreshedToken, 'refresh');
   // axios authContext도 동기화
-  setApiClientAuthContext({ userId, token });
+  setApiClientAuthContext({ userId, token: refreshedToken });
 
-  return token;
+  return refreshedToken;
 };
 
 export const refreshAccessTokenFor = (
