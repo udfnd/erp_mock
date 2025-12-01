@@ -120,7 +120,6 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     state: authState,
     accessToken,
     setAuthState,
-    clearAll,
     setActiveUserId,
   } = useAuth();
 
@@ -716,14 +715,35 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
 
   const handleLogout = useCallback(() => {
     try {
-      clearAll();
+      if (authState.sayongjaNanoId) {
+        upsertHistory({
+          sayongjaNanoId: authState.sayongjaNanoId,
+          sayongjaName: authState.sayongjaName ?? myProfileData?.name ?? '',
+          gigwanName: gigwanDisplayName,
+          gigwanNanoId,
+          lastUsedAt: Date.now(),
+        });
+      }
+
+      setActiveUserId(null);
+      setApiClientAuthContext({ token: null, userId: null });
+
       storedProfileKeyRef.current = null;
       setIsProfileMenuOpen(false);
       router.replace('/td/g');
     } catch (error) {
       console.error('Failed to logout', error);
     }
-  }, [clearAll, router]);
+  }, [
+    authState.sayongjaName,
+    authState.sayongjaNanoId,
+    gigwanDisplayName,
+    gigwanNanoId,
+    myProfileData?.name,
+    router,
+    setActiveUserId,
+    upsertHistory,
+  ]);
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
   const hydrated = useHydrated();
