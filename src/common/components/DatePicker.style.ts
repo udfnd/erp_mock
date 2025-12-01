@@ -23,41 +23,65 @@ export const cssObj = {
   trigger: (disabled?: boolean) =>
     css`
       width: 100%;
-      padding: 10px 12px;
+      padding: 8px 12px;
       border: 1px solid ${color.cgrey200};
       border-radius: 8px;
       background: ${color.white};
-      ${typography.bodyR};
-      color: ${color.black};
-      text-align: left;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 8px;
-      cursor: ${disabled ? 'not-allowed' : 'pointer'};
+      cursor: ${disabled ? 'not-allowed' : 'text'};
 
-      &:focus {
-        outline: none;
+      &:focus-within {
         border-color: ${color.blue600};
         box-shadow: 0 0 0 2px ${color.blue100};
       }
 
       &:disabled {
         background: ${color.cgrey100};
-        color: ${color.cgrey400};
         border-color: ${color.cgrey200};
       }
     `,
-  triggerLabel: css`
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  `,
-  placeholder: css`
-    color: ${color.cgrey300};
-  `,
+  iconButton: (disabled?: boolean) =>
+    css`
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid ${color.cgrey100};
+      background: ${color.white};
+      color: ${color.blue600};
+      cursor: ${disabled ? 'not-allowed' : 'pointer'};
+
+      &:hover {
+        background: ${disabled ? color.white : color.blue50};
+      }
+
+      &:disabled {
+        color: ${color.cgrey300};
+      }
+    `,
+  input: (disabled?: boolean) =>
+    css`
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      ${typography.bodyR};
+      color: ${color.black};
+      outline: none;
+      cursor: ${disabled ? 'not-allowed' : 'pointer'};
+
+      &::placeholder {
+        color: ${color.cgrey300};
+      }
+
+      &:disabled {
+        color: ${color.cgrey400};
+      }
+    `,
   pickerPanel: css`
     position: absolute;
     top: calc(100% + 8px);
