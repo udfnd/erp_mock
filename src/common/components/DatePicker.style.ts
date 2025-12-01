@@ -29,34 +29,66 @@ export const cssObj = {
     border: 1px solid ${color.cgrey200};
     border-radius: 8px;
     background: ${color.white};
-    ${typography.bodyR};
-    color: ${color.black};
-    text-align: left;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 8px;
-    cursor: ${disabled ? 'not-allowed' : 'pointer'};
+    cursor: ${disabled ? 'not-allowed' : 'default'};
 
-    &:focus {
+    &:focus-within {
       outline: none;
       border-color: ${color.blue600};
       box-shadow: 0 0 0 2px ${color.blue100};
     }
 
-    &:disabled {
+    &:has(button:disabled),
+    &:has(input:disabled) {
       background: ${color.cgrey100};
       color: ${color.cgrey400};
       border-color: ${color.cgrey200};
     }
   `,
 
-  triggerLabel: css`
+  iconButton: (disabled?: boolean) => css`
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 50%;
+    background: ${color.white};
+    cursor: ${disabled ? 'not-allowed' : 'pointer'};
+    color: ${disabled ? color.cgrey300 : color.black};
+
+    &:hover {
+      background: ${disabled ? color.white : color.blue50};
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  `,
+
+  triggerInput: css`
     flex: 1;
     min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    border: none;
+    background: transparent;
+    ${typography.bodyR};
+    color: ${color.black};
+    outline: none;
+
+    &::placeholder {
+      color: ${color.cgrey300};
+    }
+
+    &:disabled {
+      background: transparent;
+      color: ${color.cgrey400};
+      cursor: not-allowed;
+    }
   `,
 
   placeholder: css`
