@@ -135,9 +135,11 @@ const refreshClient: AxiosInstance = axios.create({
 
 const refreshInflight = new Map<string, Promise<string>>();
 
-const requestRefresh = async (userId: string): Promise<string> => {
+const requestRefresh = async (userId: string, token?: string | null): Promise<string> => {
   const endpoint = `/T/dl/sayongjas/${encodeURIComponent(userId)}/${REFRESH_SEGMENT}`;
-  const { data } = await refreshClient.post<AccessTokenPayload>(endpoint);
+  const headers = withAuth(undefined, token ?? getAccessTokenForUser(userId));
+
+  const { data } = await refreshClient.post<AccessTokenPayload>(endpoint, {}, { headers });
 
   if (!hasAccessToken(data)) {
     throw new Error('No accessToken from refresh');
@@ -153,11 +155,14 @@ const requestRefresh = async (userId: string): Promise<string> => {
   return token;
 };
 
-export const refreshAccessTokenFor = (userId: string): Promise<string> => {
+export const refreshAccessTokenFor = (
+  userId: string,
+  opts?: { tokenHint?: string | null },
+): Promise<string> => {
   const existing = refreshInflight.get(userId);
   if (existing) return existing;
 
-  const p = requestRefresh(userId)
+  const p = requestRefresh(userId, opts?.tokenHint)
     .finally(() => {
       refreshInflight.delete(userId);
     })
@@ -226,7 +231,7 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
     if (!isCloseToExpiry) return;
 
     try {
-      const refreshed = await refreshAccessTokenFor(userId);
+      const refreshed = await refreshAccessTokenFor(userId, { tokenHint: cached });
       setAccessTokenFor(userId, refreshed, 'refresh');
       setApiClientAuthContext({ userId, token: refreshed });
       return;
@@ -241,7 +246,7 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
   }
 
   try {
-    const newToken = await refreshAccessTokenFor(userId);
+    const newToken = await refreshAccessTokenFor(userId, { tokenHint: cached ?? null });
     setActiveUserId(userId);
     setAccessTokenFor(userId, newToken, 'refresh');
     setApiClientAuthContext({ userId, token: newToken });
@@ -302,7 +307,8 @@ export const handleAuthError = async (
 
   try {
     // 첫 번째 401 → refresh 시도
-    const newToken = await refreshAccessTokenFor(uid);
+    const currentToken = getAccessTokenForUser(uid);
+    const newToken = await refreshAccessTokenFor(uid, { tokenHint: cfg._authOverrideToken ?? currentToken });
 
     cfg._retry = true;
     cfg.headers = withAuth(cfg.headers, newToken);
