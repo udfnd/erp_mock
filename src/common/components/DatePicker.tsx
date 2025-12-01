@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowMdLeftSingleIcon,
   ArrowMdRightSingleIcon,
+  CalendarIcon,
   StateDownIcon,
   StateUpIcon,
 } from '@/common/icons';
@@ -164,6 +165,20 @@ export function DatePicker({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, parsedValue, today]);
 
+  const handleOpen = () => {
+    if (disabled) return;
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        const base = parsedValue ?? today;
+        setMode('month');
+        setViewDate(base);
+        setDraftDate(parsedValue ?? null);
+      }
+      return next;
+    });
+  };
+
   return (
     <div css={cssObj.container} ref={pickerRef}>
       {label ? (
@@ -172,28 +187,21 @@ export function DatePicker({
           {required ? <span css={cssObj.required}>*</span> : null}
         </label>
       ) : null}
-      <button
-        type="button"
-        css={cssObj.trigger(disabled)}
-        onClick={() => {
-          if (disabled) return;
-          setIsOpen((prev) => {
-            const next = !prev;
-            if (next) {
-              const base = parsedValue ?? today;
-              setMode('month');
-              setViewDate(base);
-              setDraftDate(parsedValue ?? null);
-            }
-            return next;
-          });
-        }}
-        disabled={disabled}
-      >
-        <span css={[cssObj.triggerLabel, !displayValue && cssObj.placeholder]}>
-          {displayValue || placeholder}
-        </span>
-      </button>
+      <div css={cssObj.trigger(disabled)}>
+        <button type="button" css={cssObj.iconButton(disabled)} onClick={handleOpen} disabled={disabled}>
+          <CalendarIcon />
+        </button>
+        <input
+          type="text"
+          css={[cssObj.triggerInput, !displayValue && cssObj.placeholder]}
+          placeholder={placeholder}
+          value={displayValue}
+          onClick={handleOpen}
+          onFocus={handleOpen}
+          readOnly
+          disabled={disabled}
+        />
+      </div>
       {isOpen ? (
         <div css={cssObj.pickerPanel}>
           <div css={cssObj.header}>
