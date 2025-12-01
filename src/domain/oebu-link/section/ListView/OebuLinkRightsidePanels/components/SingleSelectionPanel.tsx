@@ -137,28 +137,29 @@ export function SingleSelectionPanel({
             options={iconOptions}
           />
         </div>
-        <div css={cssObj.saveButtonContainer}>
-          <Button type="submit" size="small" variant="secondary" disabled={isSaving || isLoading}>
-            저장
-          </Button>
-        </div>
         <div css={cssObj.metaSection}>
-          <div css={cssObj.metaRow}>
-            <span css={cssObj.metaLabel}>생성일</span>
-            <span css={cssObj.metaValue}>{createdAt ? formatDate(createdAt) : '-'}</span>
-          </div>
           <div css={cssObj.metaRow}>
             <span css={cssObj.metaLabel}>생성자</span>
             <span css={cssObj.metaValue}>{createdBy || '-'}</span>
           </div>
           <div css={cssObj.metaRow}>
-            <span css={cssObj.metaLabel}>수정일</span>
-            <span css={cssObj.metaValue}>{updatedAt ? formatDate(updatedAt) : '-'}</span>
-          </div>
-          <div css={cssObj.metaRow}>
             <span css={cssObj.metaLabel}>수정자</span>
             <span css={cssObj.metaValue}>{updatedBy || '-'}</span>
           </div>
+          <div css={cssObj.metaRow}>
+            <span css={cssObj.metaLabel}>생성일</span>
+            <span css={cssObj.metaValue}>{createdAt ? formatDate(createdAt) : '-'}</span>
+          </div>
+
+          <div css={cssObj.metaRow}>
+            <span css={cssObj.metaLabel}>수정일</span>
+            <span css={cssObj.metaValue}>{updatedAt ? formatDate(updatedAt) : '-'}</span>
+          </div>
+        </div>
+        <div css={cssObj.saveButtonContainer}>
+          <Button type="submit" size="small" variant="secondary" disabled={isSaving || isLoading}>
+            저장
+          </Button>
         </div>
         <div css={cssObj.buttonRow}>
           <Button

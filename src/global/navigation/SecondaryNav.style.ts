@@ -41,6 +41,15 @@ export const cssObj = {
     ${typography.bodySmallSB};
     background-color: transparent;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
+
+    &:not(:disabled):hover {
+      background-color: ${color.cgrey500}0D;
+    }
+
+    &:not(:disabled):active {
+      background-color: ${color.cgrey500}1A;
+    }
   `,
 };

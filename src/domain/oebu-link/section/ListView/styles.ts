@@ -76,6 +76,7 @@ export const cssObj = {
 
   iconSelectGrid: css`
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   `,
 
@@ -158,25 +159,40 @@ export const cssObj = {
   `,
 
   metaSection: css`
+    padding: 8px;
+    background-color: ${color.cgrey10};
+    border-radius: 8px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 12px;
-    padding: 12px 0;
+    column-gap: 16px;
+    row-gap: 8px;
   `,
 
   metaRow: css`
+    width: 100%;
     display: flex;
-    flex-direction: column;
     gap: 4px;
+    position: relative;
+
+    &:nth-of-type(odd)::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: -8px;
+      width: 1px;
+      background: ${color.cgrey100};
+    }
   `,
 
   metaLabel: css`
-    color: ${color.cgrey500};
     ${typography.captionB};
+    color: ${color.cgrey400};
   `,
 
   metaValue: css`
-    color: ${color.black};
-    ${typography.bodySmallR};
+    ${typography.captionR};
+    color: ${color.cgrey400};
+    text-overflow: ellipsis;
   `,
 };

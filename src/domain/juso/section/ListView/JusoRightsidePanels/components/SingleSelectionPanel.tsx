@@ -180,35 +180,36 @@ function SingleSelectionPanelContent({
             onValueChange={(value) => setFormState((prev) => ({ ...prev, jusoDetail: value }))}
           />
         </div>
-        <div css={cssObj.saveButtonContainer}>
-          <Button
-            type="submit"
-            variant="secondary"
-            size="small"
-            form={formId}
-            disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}
-          >
-            저장
-          </Button>
-        </div>
       </form>
       <div css={cssObj.metaSection}>
-        <div css={cssObj.metaRow}>
-          <span css={cssObj.metaLabel}>생성일</span>
-          <span css={cssObj.metaValue}>{createdAt ? formatDate(createdAt) : '-'}</span>
-        </div>
         <div css={cssObj.metaRow}>
           <span css={cssObj.metaLabel}>생성자</span>
           <span css={cssObj.metaValue}>{createdBy || '-'}</span>
         </div>
         <div css={cssObj.metaRow}>
-          <span css={cssObj.metaLabel}>수정일</span>
-          <span css={cssObj.metaValue}>{updatedAt ? formatDate(updatedAt) : '-'}</span>
-        </div>
-        <div css={cssObj.metaRow}>
           <span css={cssObj.metaLabel}>수정자</span>
           <span css={cssObj.metaValue}>{updatedBy || '-'}</span>
         </div>
+        <div css={cssObj.metaRow}>
+          <span css={cssObj.metaLabel}>생성일</span>
+          <span css={cssObj.metaValue}>{createdAt ? formatDate(createdAt) : '-'}</span>
+        </div>
+
+        <div css={cssObj.metaRow}>
+          <span css={cssObj.metaLabel}>수정일</span>
+          <span css={cssObj.metaValue}>{updatedAt ? formatDate(updatedAt) : '-'}</span>
+        </div>
+      </div>
+      <div css={cssObj.saveButtonContainer}>
+        <Button
+          type="submit"
+          variant="secondary"
+          size="small"
+          form={formId}
+          disabled={(!hasChanges && !updateMutation.isError) || isSaving || isDeleting}
+        >
+          저장
+        </Button>
       </div>
       <div css={cssObj.panelFooter}>
         <Button

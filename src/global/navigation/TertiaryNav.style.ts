@@ -93,6 +93,15 @@ export const cssObj = {
     ${isActive ? typography.bodySmallSB : typography.bodySmallM};
     background-color: transparent;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
+
+    &:not(:disabled):hover {
+      background-color: ${color.black}0D;
+    }
+
+    &:not(:disabled):active {
+      background-color: ${color.black}1A;
+    }
   `,
 };

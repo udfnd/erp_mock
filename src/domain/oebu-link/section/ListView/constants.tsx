@@ -23,6 +23,7 @@ export const formatDate = (value: string) => {
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   }).format(parsed);
 };
 

@@ -110,7 +110,6 @@ export function SinglePermissionPanel({
     Math.ceil(addUserTotalCount / Math.max(addUserPagination.pageSize, 1)),
   );
 
-  // 🔧 TS2322 해결: TValue를 unknown 대신 any로 맞춰서 columnHelper의 string TValue와 호환되게 함
   const addUserColumns = useMemo<ColumnDef<SayongjaListItem, any>[]>(
     () => [
       sayongjaColumnHelper.accessor('name', {

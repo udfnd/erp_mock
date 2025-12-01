@@ -100,7 +100,6 @@ const outlinedVariantStyles = {
     '&:not(:disabled):hover': { background: color.cgrey50 },
     '&:not(:disabled):active': { background: color.cgrey100 },
   }),
-  // ✅ red variant (outlined)
   red: css({
     color: color.red,
     borderColor: color.red,
@@ -125,7 +124,6 @@ const textVariantStyles = {
     '&:not(:disabled):hover': { background: color.cgrey50 },
     '&:not(:disabled):active': { background: color.cgrey100 },
   }),
-  // ✅ red variant (text)
   red: css({
     color: color.red,
     '&:not(:disabled):hover': { background: color.red10 },

@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
-import { cssObj as lvCss } from '@/common/lv/style';
+import { cssObj } from '@/common/lv/style';
 import { Checkbox } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
 import { color } from '@/style';
@@ -21,19 +21,21 @@ import { PaginationSection } from './PaginationSection';
 
 const DEFAULT_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
 const ALLOWED_COLUMN_WIDTHS = [56, 80, 112, 144, 168] as const;
-const DEFAULT_COLUMN_WIDTH = ALLOWED_COLUMN_WIDTHS[2];
+type AllowedWidth = (typeof ALLOWED_COLUMN_WIDTHS)[number];
 
-const getNearestAllowedWidth = (size: number | undefined) => {
+const DEFAULT_COLUMN_WIDTH: AllowedWidth = ALLOWED_COLUMN_WIDTHS[2];
+
+const getNearestAllowedWidth = (size: number | undefined): AllowedWidth => {
   if (!size || size <= 0) {
     return DEFAULT_COLUMN_WIDTH;
   }
 
-  return ALLOWED_COLUMN_WIDTHS.reduce((closest, current) => {
+  return ALLOWED_COLUMN_WIDTHS.reduce<AllowedWidth>((closest, current) => {
     const currentDiff = Math.abs(current - size);
     const closestDiff = Math.abs(closest - size);
 
     if (currentDiff === closestDiff) {
-      return Math.max(closest, current);
+      return current > closest ? current : closest;
     }
 
     return currentDiff < closestDiff ? current : closest;
@@ -75,7 +77,7 @@ export function ListSection<TData>({
     () => ({
       id: '__row_selection__',
       header: ({ table }) => (
-        <div css={lvCss.selectionCell}>
+        <div css={cssObj.selectionCell}>
           {(() => {
             const isAllRowsSelected = table.getIsAllRowsSelected();
             const isSomeRowsSelected =
@@ -94,7 +96,7 @@ export function ListSection<TData>({
         </div>
       ),
       cell: ({ row }) => (
-        <div css={lvCss.selectionCell}>
+        <div css={cssObj.selectionCell}>
           <Checkbox
             checked={row.getIsSelected()}
             indeterminate={row.getIsSomeSelected()}
@@ -117,10 +119,10 @@ export function ListSection<TData>({
         ? {
             id: '__primary_action__',
             header: () => (
-              <div css={lvCss.headerActionCell}>
+              <div css={cssObj.headerActionCell}>
                 <button
                   type="button"
-                  css={lvCss.addElementButton}
+                  css={cssObj.addElementButton}
                   onClick={primaryAction.onClick}
                   disabled={primaryAction.disabled}
                 >
@@ -182,26 +184,26 @@ export function ListSection<TData>({
   };
 
   return (
-    <div css={lvCss.tableContainer}>
-      <div css={lvCss.tableWrapperContainer}>
+    <div css={cssObj.tableContainer}>
+      <div css={cssObj.tableWrapperContainer}>
         {isDimmed ? (
           <button
             type="button"
-            css={lvCss.tableDimmer}
+            css={cssObj.tableDimmer}
             onClick={onDimmerClick}
             aria-label="검색창 포커스 해제"
           />
         ) : null}
-        <div css={lvCss.tableWrapper}>
-          <table css={lvCss.table}>
+        <div css={cssObj.tableWrapper}>
+          <table css={cssObj.table}>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} css={lvCss.tableHeadRow}>
+                <tr key={headerGroup.id} css={cssObj.tableHeadRow}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
                       colSpan={header.colSpan}
-                      css={lvCss.tableHeaderCell}
+                      css={cssObj.tableHeaderCell}
                       style={getColumnWidthStyle(header.column.id, header.column.getSize())}
                     >
                       {header.isPlaceholder
@@ -215,7 +217,7 @@ export function ListSection<TData>({
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={visibleColumnsLength} css={lvCss.stateCell}>
+                  <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
                     {loadingMessage}
                   </td>
                 </tr>
@@ -223,7 +225,7 @@ export function ListSection<TData>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    css={[lvCss.tableRow, row.getIsSelected() && lvCss.tableRowSelected]}
+                    css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
                     onClick={(event) => {
                       if (shouldIgnoreRowClick(event)) {
                         return;
@@ -239,7 +241,7 @@ export function ListSection<TData>({
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        css={lvCss.tableCell}
+                        css={cssObj.tableCell}
                         style={getColumnWidthStyle(cell.column.id, cell.column.getSize())}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -249,7 +251,7 @@ export function ListSection<TData>({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={visibleColumnsLength} css={lvCss.stateCell}>
+                  <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>
                     {emptyMessage}
                   </td>
                 </tr>

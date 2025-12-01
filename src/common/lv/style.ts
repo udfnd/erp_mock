@@ -325,6 +325,7 @@ export const cssObj = {
     ${typography.captionB};
     cursor: pointer;
   `,
+
   tableCell: css`
     padding: 8px;
     border-bottom: 1px solid ${color.cgrey100};
@@ -333,7 +334,7 @@ export const cssObj = {
     white-space: nowrap;
     ${typography.bodySmallR};
     color: ${color.black};
-    background: ${color.white};
+    background: transparent;
 
     &:first-of-type {
       width: 24px;
@@ -349,8 +350,12 @@ export const cssObj = {
     transition: background 0.2s ease;
     cursor: pointer;
 
-    &:hover {
-      background: ${color.white};
+    &:not(:disabled):hover {
+      background-color: ${color.black}0D;
+    }
+
+    &:not(:disabled):active {
+      background-color: ${color.black}1A;
     }
   `,
   tableRowSelected: css`
