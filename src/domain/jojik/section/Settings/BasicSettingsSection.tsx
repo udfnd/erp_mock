@@ -143,7 +143,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
     if (!isHomepageDirty || !isHomepageValid) return;
 
     updateJojikMutation.mutate(
-      { homepageNanoId: currentHomepageNanoId },
+      { hompageUrlNanoId: currentHomepageNanoId },
       {
         onSuccess: async (data) => {
           setHomepageInput(formatJojikHomepage(data));

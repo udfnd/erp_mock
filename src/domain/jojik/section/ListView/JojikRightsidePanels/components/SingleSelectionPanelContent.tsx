@@ -61,7 +61,7 @@ export function SingleSelectionPanelContent({
     }
 
     if (hasHomepageChange) {
-      payload.homepageNanoId = trimmedHomepage || null;
+      payload.hompageUrlNanoId = trimmedHomepage || null;
     }
 
     await updateMutation.mutateAsync(payload);
