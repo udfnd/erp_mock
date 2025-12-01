@@ -256,8 +256,7 @@ export function OebuLinkSelector({
           {selectedLinks.map((link) => (
             <div key={link.nanoId} css={cssObj.selectionItem}>
               <div css={cssObj.selectionTextGroup}>
-                <span css={cssObj.selectionName}>{link.name}</span>
-                <span css={cssObj.selectionDetail}>{link.titleName}</span>
+                <span css={cssObj.selectionName}>{link.titleName}</span>
                 <span css={cssObj.selectionDetail}>{link.linkUrl}</span>
               </div>
               <button

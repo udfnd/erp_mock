@@ -8,7 +8,7 @@ export const cssObj = {
   triggerRow: css`
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
   `,
   triggerButton: css`
     display: inline-flex;
@@ -49,13 +49,17 @@ export const cssObj = {
     gap: 12px;
   `,
   searchButton: css`
-    ${typography.bodySmallB};
-    color: ${color.blue600};
+    ${typography.captionB};
+    color: ${color.blue};
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 4px;
     border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 
     &:hover {
       background: ${color.blue50};

@@ -13,7 +13,7 @@ import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
 import { cssObj } from './JusoSelector.style';
-import { LocationIcon, XCircleBlackIcon } from '@/common/icons';
+import { LocationIcon, SearchIcon, XCircleBlackIcon } from '@/common/icons';
 import type { JusoListItem } from '@/domain/juso/api';
 import { useCreateJusoMutation } from '@/domain/juso/api';
 import {
@@ -145,11 +145,8 @@ export function JusoSelector({
 
   const { isAuthenticated } = useAuth();
   const listView = useJusoListViewSections({ jojikNanoId, isAuthenticated });
-  const {
-    listSectionProps,
-    settingsSectionProps,
-    sortOptions,
-  }: UseJusoListViewSectionsResult = listView;
+  const { listSectionProps, settingsSectionProps, sortOptions }: UseJusoListViewSectionsResult =
+    listView;
 
   const selectedJusos = settingsSectionProps.selectedJusos;
 
@@ -314,6 +311,7 @@ export function JusoSelector({
         </div>
         <button type="button" css={cssObj.searchButton} onClick={() => setIsModalOpen(true)}>
           주소 검색
+          <SearchIcon width={12} height={12} />
         </button>
       </div>
 
