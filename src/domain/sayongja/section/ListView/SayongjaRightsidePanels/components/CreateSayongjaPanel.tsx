@@ -116,7 +116,12 @@ export function CreateSayongjaPanel({
             value={loginId}
             onValueChange={setLoginId}
           />
-          <DatePicker label="입사일" required value={employedAt} onChange={setEmployedAt} />
+          <DatePicker
+            label="입사일"
+            placeholder="입사일을 선택해 주세요"
+            value={employedAt}
+            onChange={setEmployedAt}
+          />
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>재직 상태</label>
             <Dropdown
@@ -127,7 +132,11 @@ export function CreateSayongjaPanel({
           </div>
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>근무 형태</label>
-            <Dropdown value={workTypeNanoId} options={workTypeOptions} onChange={setWorkTypeNanoId} />
+            <Dropdown
+              value={workTypeNanoId}
+              options={workTypeOptions}
+              onChange={setWorkTypeNanoId}
+            />
           </div>
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>활성 상태</label>

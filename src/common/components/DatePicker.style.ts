@@ -25,9 +25,6 @@ export const cssObj = {
 
   trigger: (disabled?: boolean) => css`
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid ${color.cgrey200};
-    border-radius: 8px;
     background: ${color.white};
     display: flex;
     align-items: center;
@@ -49,13 +46,13 @@ export const cssObj = {
   `,
 
   iconButton: (disabled?: boolean) => css`
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid ${color.cgrey100};
+    border: 1px solid ${color.cgrey200};
     border-radius: 50%;
     background: ${color.white};
     cursor: ${disabled ? 'not-allowed' : 'pointer'};
@@ -66,15 +63,18 @@ export const cssObj = {
     }
 
     svg {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
     }
   `,
 
   triggerInput: css`
     flex: 1;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
     min-width: 0;
-    border: none;
     background: transparent;
     ${typography.bodyR};
     color: ${color.black};
@@ -194,10 +194,10 @@ export const cssObj = {
   `,
 
   dayCell: ({
-              selected,
-              inCurrentMonth,
-              disabled,
-            }: {
+    selected,
+    inCurrentMonth,
+    disabled,
+  }: {
     selected: boolean;
     inCurrentMonth: boolean;
     disabled: boolean;
@@ -213,8 +213,8 @@ export const cssObj = {
 
     ${disabled
       ? css`
-        color: ${color.cgrey200};
-      `
+          color: ${color.cgrey200};
+        `
       : ''};
 
     &:hover {

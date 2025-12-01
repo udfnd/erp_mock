@@ -612,7 +612,12 @@ export function SingleSelectionPanelContent({
             value={loginIdValue}
             onValueChange={setLoginIdValue}
           />
-          <DatePicker label="입사일" required value={employedAtValue} onChange={setEmployedAtValue} />
+          <DatePicker
+            label="입사일"
+            placeholder="입사일을 선택해 주세요"
+            value={employedAtValue}
+            onChange={setEmployedAtValue}
+          />
 
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>재직 상태</label>
