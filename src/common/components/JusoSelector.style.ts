@@ -14,6 +14,8 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    min-width: 0;
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid ${color.cgrey200};
@@ -92,6 +94,10 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   `,
   selectionSummary: css`
     display: flex;
