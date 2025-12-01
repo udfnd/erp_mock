@@ -2,7 +2,7 @@
 
 import { type FormEvent, useState } from 'react';
 
-import { Button, Textfield } from '@/common/components';
+import { Button, DatePicker, Dropdown, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
 import { useCreateSayongjaMutation } from '@/domain/sayongja/api';
 import { cssObj } from '../../styles';
@@ -116,54 +116,26 @@ export function CreateSayongjaPanel({
             value={loginId}
             onValueChange={setLoginId}
           />
-          <Textfield
-            singleLine
-            type="date"
-            label="입사일"
-            value={employedAt}
-            onValueChange={setEmployedAt}
-          />
+          <DatePicker label="입사일" required value={employedAt} onChange={setEmployedAt} />
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>재직 상태</label>
-            <select
-              css={cssObj.toolbarSelect}
+            <Dropdown
               value={employmentNanoId}
-              onChange={(e) => setEmploymentNanoId(e.target.value)}
-            >
-              {employmentCategoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={employmentCategoryOptions}
+              onChange={setEmploymentNanoId}
+            />
           </div>
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>근무 형태</label>
-            <select
-              css={cssObj.toolbarSelect}
-              value={workTypeNanoId}
-              onChange={(e) => setWorkTypeNanoId(e.target.value)}
-            >
-              {workTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <Dropdown value={workTypeNanoId} options={workTypeOptions} onChange={setWorkTypeNanoId} />
           </div>
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>활성 상태</label>
-            <select
-              css={cssObj.toolbarSelect}
+            <Dropdown
               value={isHwalseongValue}
-              onChange={(e) => setIsHwalseongValue(e.target.value)}
-            >
-              {HWALSEONG_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={HWALSEONG_OPTIONS}
+              onChange={setIsHwalseongValue}
+            />
           </div>
         </div>
         <div css={cssObj.panelSection}>

@@ -1,7 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ColumnDef, Row } from '@tanstack/react-table';
 
-import { Button, Textfield } from '@/common/components';
+import { Button, DatePicker, Dropdown, Textfield } from '@/common/components';
 import { PlusIcon } from '@/common/icons';
 import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
 import { ToolbarLayout } from '@/common/lv/layout';
@@ -612,56 +612,27 @@ export function SingleSelectionPanelContent({
             value={loginIdValue}
             onValueChange={setLoginIdValue}
           />
-          <Textfield
-            singleLine
-            required
-            type="date"
-            label="입사일"
-            value={employedAtValue}
-            onValueChange={setEmployedAtValue}
-          />
+          <DatePicker label="입사일" required value={employedAtValue} onChange={setEmployedAtValue} />
 
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>재직 상태</label>
-            <select
-              css={cssObj.toolbarSelect}
+            <Dropdown
               value={employmentValue}
-              onChange={(e) => setEmploymentValue(e.target.value)}
-            >
-              {employmentCategoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={employmentCategoryOptions}
+              onChange={setEmploymentValue}
+            />
           </div>
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>근무 형태</label>
-            <select
-              css={cssObj.toolbarSelect}
-              value={workTypeValue}
-              onChange={(e) => setWorkTypeValue(e.target.value)}
-            >
-              {workTypeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <Dropdown value={workTypeValue} options={workTypeOptions} onChange={setWorkTypeValue} />
           </div>
           <div css={cssObj.panelLabelSection}>
             <label css={cssObj.panelLabel}>활성 상태</label>
-            <select
-              css={cssObj.toolbarSelect}
+            <Dropdown
               value={isHwalseongValue}
-              onChange={(e) => setIsHwalseongValue(e.target.value)}
-            >
-              {HWALSEONG_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={HWALSEONG_OPTIONS}
+              onChange={setIsHwalseongValue}
+            />
           </div>
           <div css={cssObj.sectionActions}>
             <Button type="submit" size="small" disabled={isAttributeSaveDisabled}>
