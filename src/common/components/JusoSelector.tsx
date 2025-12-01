@@ -1,6 +1,13 @@
 'use client';
 
-import { type KeyboardEvent, type MouseEvent, useCallback, useMemo, useState } from 'react';
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
@@ -15,14 +22,16 @@ import {
   useJusoListViewSections,
 } from '@/domain/juso/section';
 import { useDaumPostcode } from '@/domain/juso/section/ListView/JusoRightsidePanels/components/useDaumPostcode';
+import { useAuth } from '@/global/auth';
 
 export type JusoSelectorProps = {
   jojikNanoId: string;
-  isAuthenticated: boolean;
   maxSelectable: number;
   onComplete: (selected: JusoListItem[]) => void;
   buttonLabel?: string;
   onClear?: () => void;
+  value?: JusoListItem[];
+  onValueChange?: (selected: JusoListItem[]) => void;
 };
 
 const createSelectableJuso = (payload: {
@@ -125,14 +134,16 @@ const CreateJusoForm = ({ jojikNanoId, onCreated, onAfterMutation }: CreateFormP
 
 export function JusoSelector({
   jojikNanoId,
-  isAuthenticated,
   maxSelectable,
   onComplete,
   buttonLabel = '조직 주소를 입력하세요',
   onClear,
+  value,
+  onValueChange,
 }: JusoSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { isAuthenticated } = useAuth();
   const listView = useJusoListViewSections({ jojikNanoId, isAuthenticated });
   const {
     listSectionProps,
@@ -147,12 +158,19 @@ export function JusoSelector({
     [maxSelectable],
   );
 
+  useEffect(() => {
+    if (value === undefined) return;
+    const limited = applyLimit(value);
+    listSectionProps.handlers.onSelectedJusosChange(limited);
+  }, [applyLimit, listSectionProps.handlers, value]);
+
   const handleSelectedChange = useCallback(
     (jusos: JusoListItem[]) => {
       const limited = applyLimit(jusos);
       listSectionProps.handlers.onSelectedJusosChange(limited);
+      onValueChange?.(limited);
     },
-    [applyLimit, listSectionProps.handlers],
+    [applyLimit, listSectionProps.handlers, onValueChange],
   );
 
   const handleClearSelection = useCallback(() => {

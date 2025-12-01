@@ -12,7 +12,6 @@ import {
 } from '@/domain/jojik/api';
 import type { JusoListItem } from '@/domain/juso/api';
 import type { OebuLinkListItem } from '@/domain/oebu-link/api';
-import { useAuth } from '@/global/auth';
 
 import { cssObj } from './styles';
 
@@ -23,7 +22,6 @@ type BasicSettingsSectionProps = {
 export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps) {
   const queryClient = useQueryClient();
   const updateJojikMutation = useUpdateJojikMutation(jojikNanoId);
-  const { isAuthenticated } = useAuth();
 
   const jojikQuery = useJojikQuery(jojikNanoId, {
     enabled: Boolean(jojikNanoId),
@@ -39,6 +37,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
   const [selectedHomepageNanoId, setSelectedHomepageNanoId] = useState<string | null | undefined>(
     undefined,
   );
+  const [selectedJuso, setSelectedJuso] = useState<JusoListItem | undefined>(undefined);
   const [selectedHomepage, setSelectedHomepage] = useState<OebuLinkListItem | undefined>(undefined);
 
   const { data: jojik, isError } = jojikQuery;
@@ -104,6 +103,7 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
         onSuccess: async (data) => {
           setAddressInput(formatJojikAddress(data));
           setSelectedJusoNanoId(data.juso?.nanoId ?? null);
+          setSelectedJuso(mapJojikJusoToListItem(data.juso));
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
       },
@@ -118,12 +118,14 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
     const [juso] = selected;
     const formatted = formatSelectedJuso(juso);
     if (!formatted) return;
+    setSelectedJuso(juso);
     setSelectedJusoNanoId(juso?.nanoId ?? null);
     setAddressInput(formatted);
   };
 
   const handleAddressClear = () => {
     setSelectedJusoNanoId(null);
+    setSelectedJuso(undefined);
     setAddressInput('');
   };
 
@@ -150,17 +152,24 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
         onSuccess: async (data) => {
           setHomepageInput(formatJojikHomepage(data));
           setSelectedHomepageNanoId(data.homepageUrl?.nanoId ?? null);
-          if (!data.homepageUrl) {
-            setSelectedHomepage(undefined);
-          }
+          setSelectedHomepage(mapHomepageToOebuLinkListItem(data.homepageUrl));
           await queryClient.invalidateQueries({ queryKey: ['jojik', jojikNanoId] });
         },
       },
     );
   };
 
+  const selectedJusoValue =
+    selectedJuso ??
+    (selectedJusoNanoId === undefined ? mapJojikJusoToListItem(jojik?.juso) : undefined);
+  const selectedHomepageValue =
+    selectedHomepage ??
+    (selectedHomepageNanoId === undefined
+      ? mapHomepageToOebuLinkListItem(jojik?.homepageUrl)
+      : undefined);
+
   const homepageButtonLabel =
-    formatOebuLinkLabel(selectedHomepage) ||
+    formatOebuLinkLabel(selectedHomepageValue) ||
     (homepageInput !== undefined ? homepageInput : formatJojikHomepageLabel(jojik)) ||
     '조직 홈페이지를 선택하세요';
 
@@ -211,11 +220,16 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           </div>
           <JusoSelector
             jojikNanoId={jojikNanoId}
-            isAuthenticated={isAuthenticated}
             maxSelectable={1}
             buttonLabel={currentAddress || '조직 주소를 입력하세요'}
             onComplete={handleJusoSelectComplete}
             onClear={handleAddressClear}
+            value={selectedJusoValue ? [selectedJusoValue] : undefined}
+            onValueChange={(jusos) => {
+              const [juso] = jusos;
+              setSelectedJuso(juso);
+              setSelectedJusoNanoId(juso?.nanoId ?? null);
+            }}
           />
         </div>
         <div css={cssObj.cardFooter}>
@@ -236,11 +250,16 @@ export function BasicSettingsSection({ jojikNanoId }: BasicSettingsSectionProps)
           </div>
           <OebuLinkSelector
             jojikNanoId={jojikNanoId}
-            isAuthenticated={isAuthenticated}
             maxSelectable={1}
             buttonLabel={homepageButtonLabel}
             onComplete={handleHomepageSelectComplete}
             onClear={handleHomepageClear}
+            value={selectedHomepageValue ? [selectedHomepageValue] : undefined}
+            onValueChange={(links) => {
+              const [link] = links;
+              setSelectedHomepage(link);
+              setSelectedHomepageNanoId(link?.nanoId ?? null);
+            }}
           />
         </div>
         <div css={cssObj.cardFooter}>
@@ -266,6 +285,20 @@ const formatJojikAddress = (jojik?: JojikDetailResponse) => {
   return [base, detail].filter(Boolean).join(' ').trim();
 };
 
+const mapJojikJusoToListItem = (juso?: JojikDetailResponse['juso']) => {
+  if (!juso) return undefined;
+  return {
+    nanoId: juso.nanoId,
+    jusoName: juso.name,
+    juso: juso.juso,
+    jusoDetail: juso.jusoDetail,
+    createdAt: '',
+    updatedAt: '',
+    createdBy: '',
+    updatedBy: '',
+  } satisfies JusoListItem;
+};
+
 const formatSelectedJuso = (juso?: JusoListItem) => {
   if (!juso) return '';
   return [juso.juso, juso.jusoDetail].filter(Boolean).join(' ').trim();
@@ -273,6 +306,21 @@ const formatSelectedJuso = (juso?: JusoListItem) => {
 
 const formatJojikHomepage = (jojik?: JojikDetailResponse) =>
   jojik?.homepageUrl?.linkUrl?.trim() ?? '';
+
+const mapHomepageToOebuLinkListItem = (
+  homepage?: JojikDetailResponse['homepageUrl'],
+) => {
+  if (!homepage) return undefined;
+  return {
+    nanoId: homepage.nanoId,
+    name: homepage.name,
+    titleName: homepage.titleName,
+    linkUrl: homepage.linkUrl,
+    linkIcon: homepage.icon?.nanoId ?? null,
+    createdAt: '',
+    createdBy: '',
+  } satisfies OebuLinkListItem;
+};
 
 const formatJojikHomepageLabel = (jojik?: JojikDetailResponse) => {
   const homepage = jojik?.homepageUrl;
