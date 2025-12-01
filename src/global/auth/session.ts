@@ -82,12 +82,16 @@ const b64Decode = (input: string): string => {
 export const isTokenExpiring = (token: string, skewSec = 60): boolean => {
   try {
     const [, payload] = token.split('.');
-    if (!payload) return true;
 
-    const exp = (JSON.parse(b64Decode(payload)) as { exp?: number }).exp ?? 0;
+    if (!payload) return false;
+
+    const exp = (JSON.parse(b64Decode(payload)) as { exp?: number | undefined }).exp;
+
+    if (!exp) return false;
+
     return Date.now() >= exp * 1000 - skewSec * 1000;
   } catch {
-    return true;
+    return false;
   }
 };
 

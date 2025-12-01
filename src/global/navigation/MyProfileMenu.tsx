@@ -112,7 +112,7 @@ export default function MyProfileMenu({
             ))
           )}
         </div>
-        <Button variant="assistive" iconRight={<PlusIcon />}>
+        <Button variant="assistive" iconRight={<PlusIcon />} onClick={onAddUser}>
           사용자 추가
         </Button>
       </div>

@@ -115,7 +115,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const [activeItemKey, setActiveItemKey] = useState<string | null>(null);
   const [isGigwanExpanded, setIsGigwanExpanded] = useState(true);
 
-  const { state: authState, accessToken, setAuthState, clearAll } = useAuth();
+  const { state: authState, accessToken, setAuthState, clearAll, setAccessTokenFor } = useAuth();
 
   const history = useAuthStore((s) => s.history);
   const upsertHistory = useCallback(
@@ -653,9 +653,40 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   );
 
   const handleAddUser = useCallback(() => {
-    setIsProfileModalOpen(true);
+    if (authState.sayongjaNanoId) {
+      upsertHistory({
+        sayongjaNanoId: authState.sayongjaNanoId,
+        sayongjaName: authState.sayongjaName ?? myProfileData?.name ?? '',
+        gigwanName: gigwanDisplayName,
+        gigwanNanoId,
+        lastUsedAt: Date.now(),
+      });
+
+      setAccessTokenFor(authState.sayongjaNanoId, null, 'clear');
+    }
+
     setIsProfileMenuOpen(false);
-  }, []);
+
+    const targetGigwanNanoId = gigwanNanoId ?? resolvedGigwanNanoId ?? authState.gigwanNanoId;
+
+    if (targetGigwanNanoId) {
+      router.replace(`/td/g/${targetGigwanNanoId}/login`);
+    } else {
+      router.replace('/td/g');
+    }
+  }, [
+    authState.gigwanNanoId,
+    authState.sayongjaNanoId,
+    authState.sayongjaName,
+    gigwanDisplayName,
+    gigwanNanoId,
+    myProfileData?.name,
+    resolvedGigwanNanoId,
+    router,
+    setAccessTokenFor,
+    setIsProfileMenuOpen,
+    upsertHistory,
+  ]);
 
   const handleLogout = useCallback(() => {
     try {
