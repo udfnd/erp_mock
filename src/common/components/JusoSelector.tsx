@@ -1,12 +1,19 @@
 'use client';
 
-import { type KeyboardEvent, type MouseEvent, useCallback, useMemo, useState } from 'react';
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
 import { Textfield } from './Textfield';
 import { cssObj } from './JusoSelector.style';
-import { EditIcon, LocationIcon, XCircleBlackIcon } from '@/common/icons';
+import { LocationIcon, XCircleBlackIcon } from '@/common/icons';
 import type { JusoListItem } from '@/domain/juso/api';
 import { useCreateJusoMutation } from '@/domain/juso/api';
 import {
@@ -15,14 +22,16 @@ import {
   useJusoListViewSections,
 } from '@/domain/juso/section';
 import { useDaumPostcode } from '@/domain/juso/section/ListView/JusoRightsidePanels/components/useDaumPostcode';
+import { useAuth } from '@/global/auth';
 
 export type JusoSelectorProps = {
   jojikNanoId: string;
-  isAuthenticated: boolean;
   maxSelectable: number;
   onComplete: (selected: JusoListItem[]) => void;
   buttonLabel?: string;
   onClear?: () => void;
+  value?: JusoListItem[];
+  onValueChange?: (selected: JusoListItem[]) => void;
 };
 
 const createSelectableJuso = (payload: {
@@ -125,14 +134,16 @@ const CreateJusoForm = ({ jojikNanoId, onCreated, onAfterMutation }: CreateFormP
 
 export function JusoSelector({
   jojikNanoId,
-  isAuthenticated,
   maxSelectable,
   onComplete,
   buttonLabel = '조직 주소를 입력하세요',
   onClear,
+  value,
+  onValueChange,
 }: JusoSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { isAuthenticated } = useAuth();
   const listView = useJusoListViewSections({ jojikNanoId, isAuthenticated });
   const {
     listSectionProps,
@@ -147,12 +158,19 @@ export function JusoSelector({
     [maxSelectable],
   );
 
+  useEffect(() => {
+    if (value === undefined) return;
+    const limited = applyLimit(value);
+    listSectionProps.handlers.onSelectedJusosChange(limited);
+  }, [applyLimit, listSectionProps.handlers, value]);
+
   const handleSelectedChange = useCallback(
     (jusos: JusoListItem[]) => {
       const limited = applyLimit(jusos);
       listSectionProps.handlers.onSelectedJusosChange(limited);
+      onValueChange?.(limited);
     },
-    [applyLimit, listSectionProps.handlers],
+    [applyLimit, listSectionProps.handlers, onValueChange],
   );
 
   const handleClearSelection = useCallback(() => {
@@ -275,26 +293,28 @@ export function JusoSelector({
 
   return (
     <>
-      <div css={cssObj.triggerButton}>
-        <span css={cssObj.triggerIcon}>
-          <LocationIcon width={20} height={20} />
-        </span>
-        <p css={cssObj.triggerLabel}>{buttonLabel}</p>
-        <span css={cssObj.triggerActions}>
-          <span role="button" css={cssObj.triggerIcon} onClick={() => setIsModalOpen(true)}>
-            <EditIcon width={20} height={20} />
+      <div css={cssObj.triggerRow}>
+        <div css={cssObj.triggerButton}>
+          <span css={cssObj.triggerIcon}>
+            <LocationIcon width={20} height={20} />
           </span>
-          <span
-            role="button"
-            tabIndex={0}
-            css={cssObj.clearIcon}
-            onClick={handleClearClick}
-            onKeyDown={handleClearKeyDown}
-            aria-label="주소 선택 초기화"
-          >
-            <XCircleBlackIcon width={20} height={20} />
+          <p css={cssObj.triggerLabel}>{buttonLabel}</p>
+          <span css={cssObj.triggerActions}>
+            <span
+              role="button"
+              tabIndex={0}
+              css={cssObj.clearIcon}
+              onClick={handleClearClick}
+              onKeyDown={handleClearKeyDown}
+              aria-label="주소 선택 초기화"
+            >
+              <XCircleBlackIcon width={20} height={20} />
+            </span>
           </span>
-        </span>
+        </div>
+        <button type="button" css={cssObj.searchButton} onClick={() => setIsModalOpen(true)}>
+          주소 검색
+        </button>
       </div>
 
       <SelectorModal

@@ -34,18 +34,21 @@ export function SingleSelectionPanelContent({
   deleteMutation,
 }: SingleSelectionPanelContentProps) {
   const [name, setName] = useState(jojikName);
-  const [homepage, setHomepage] = useState(homepageUrl?.linkUrl ?? '');
+  const [homepageNanoId, setHomepageNanoId] = useState(homepageUrl?.nanoId ?? '');
   const isUpdating = updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
 
-  const initialHomepageUrl = useMemo(() => homepageUrl?.linkUrl ?? '', [homepageUrl?.linkUrl]);
+  const initialHomepageNanoId = useMemo(
+    () => homepageUrl?.nanoId ?? '',
+    [homepageUrl?.nanoId],
+  );
 
   const handleSubmitName = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedName = name.trim();
-    const trimmedHomepage = homepage.trim();
+    const trimmedHomepage = homepageNanoId.trim();
     const hasNameChange = trimmedName && trimmedName !== (jojikName ?? '').trim();
-    const hasHomepageChange = trimmedHomepage !== initialHomepageUrl.trim();
+    const hasHomepageChange = trimmedHomepage !== initialHomepageNanoId.trim();
 
     if (!hasNameChange && !hasHomepageChange) {
       return;
@@ -58,7 +61,7 @@ export function SingleSelectionPanelContent({
     }
 
     if (hasHomepageChange) {
-      payload.homepageUrl = trimmedHomepage || null;
+      payload.hompageUrlNanoId = trimmedHomepage || null;
     }
 
     await updateMutation.mutateAsync(payload);
@@ -104,12 +107,17 @@ export function SingleSelectionPanelContent({
 
           <div css={cssObj.panelSection}>
             <h3 css={cssObj.panelSubtitle}>조직 홈페이지</h3>
-            <Textfield singleLine value={homepage} onValueChange={setHomepage} placeholder="-" />
+            <Textfield
+              singleLine
+              value={homepageNanoId}
+              onValueChange={setHomepageNanoId}
+              placeholder="홈페이지 링크 ID를 입력하세요"
+            />
             <div css={cssObj.sectionActions}>
               <Button
                 type="submit"
                 size="small"
-                disabled={isUpdating || homepage.trim() === initialHomepageUrl.trim()}
+                disabled={isUpdating || homepageNanoId.trim() === initialHomepageNanoId.trim()}
               >
                 저장
               </Button>

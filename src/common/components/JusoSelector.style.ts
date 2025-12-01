@@ -5,10 +5,17 @@ import { css } from '@emotion/react';
 import { color, typography } from '@/style';
 
 export const cssObj = {
+  triggerRow: css`
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  `,
   triggerButton: css`
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    min-width: 0;
     padding: 10px 12px;
     border-radius: 12px;
     border: 1px solid ${color.cgrey200};
@@ -41,6 +48,24 @@ export const cssObj = {
     align-items: center;
     gap: 12px;
   `,
+  searchButton: css`
+    ${typography.bodySmallB};
+    color: ${color.blue600};
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+
+    &:hover {
+      background: ${color.blue50};
+    }
+
+    &:focus-visible {
+      outline: 2px solid ${color.blue};
+      outline-offset: 2px;
+    }
+  `,
   clearIcon: css`
     display: inline-flex;
     align-items: center;
@@ -69,6 +94,10 @@ export const cssObj = {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   `,
   selectionSummary: css`
     display: flex;

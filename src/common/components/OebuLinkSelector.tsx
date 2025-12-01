@@ -1,6 +1,13 @@
 'use client';
 
-import { type KeyboardEvent, type MouseEvent, useCallback, useMemo, useState } from 'react';
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { Button } from './Button';
 import { SelectorModal, type SelectorModalMenu } from './selectorModal';
@@ -15,14 +22,16 @@ import {
   useOebuLinkListViewSections,
 } from '@/domain/oebu-link/section';
 import type { LinkIconOption } from '@/domain/oebu-link/section/ListView/linkIconOptions';
+import { useAuth } from '@/global/auth';
 
 export type OebuLinkSelectorProps = {
   jojikNanoId: string;
-  isAuthenticated: boolean;
   maxSelectable: number;
   onComplete: (selected: OebuLinkListItem[]) => void;
   buttonLabel?: string;
   onClear?: () => void;
+  value?: OebuLinkListItem[];
+  onValueChange?: (selected: OebuLinkListItem[]) => void;
 };
 
 const createSelectableOebuLink = (payload: OebuLinkListItem): OebuLinkListItem => ({
@@ -151,14 +160,16 @@ const CreateOebuLinkForm = ({
 
 export function OebuLinkSelector({
   jojikNanoId,
-  isAuthenticated,
   maxSelectable,
   onComplete,
   buttonLabel = '외부 링크를 선택하세요',
   onClear,
+  value,
+  onValueChange,
 }: OebuLinkSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { isAuthenticated } = useAuth();
   const listView = useOebuLinkListViewSections({ jojikNanoId, isAuthenticated });
   const {
     listSectionProps,
@@ -174,12 +185,19 @@ export function OebuLinkSelector({
     [maxSelectable],
   );
 
+  useEffect(() => {
+    if (value === undefined) return;
+    const limited = applyLimit(value);
+    listSectionProps.handlers.onSelectedLinksChange(limited);
+  }, [applyLimit, listSectionProps.handlers, value]);
+
   const handleSelectedChange = useCallback(
     (links: OebuLinkListItem[]) => {
       const limited = applyLimit(links);
       listSectionProps.handlers.onSelectedLinksChange(limited);
+      onValueChange?.(limited);
     },
-    [applyLimit, listSectionProps.handlers],
+    [applyLimit, listSectionProps.handlers, onValueChange],
   );
 
   const handleClearSelection = useCallback(() => {
