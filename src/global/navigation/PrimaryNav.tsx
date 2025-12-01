@@ -652,6 +652,27 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     ],
   );
 
+  const activeGigwanNanoId = useMemo(() => {
+    const activeHistoryEntry = history.find(
+      (entry) => entry.sayongjaNanoId === authState.sayongjaNanoId,
+    );
+
+    return (
+      authState.gigwanNanoId ??
+      resolvedGigwanNanoId ??
+      gigwanNanoIdFromParams ??
+      activeHistoryEntry?.gigwanNanoId ??
+      history[0]?.gigwanNanoId ??
+      null
+    );
+  }, [
+    authState.gigwanNanoId,
+    authState.sayongjaNanoId,
+    gigwanNanoIdFromParams,
+    history,
+    resolvedGigwanNanoId,
+  ]);
+
   const handleAddUser = useCallback(() => {
     if (authState.sayongjaNanoId) {
       upsertHistory({
@@ -667,21 +688,18 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
 
     setIsProfileMenuOpen(false);
 
-    const targetGigwanNanoId = gigwanNanoId ?? resolvedGigwanNanoId ?? authState.gigwanNanoId;
-
-    if (targetGigwanNanoId) {
-      router.replace(`/td/g/${targetGigwanNanoId}/login`);
+    if (activeGigwanNanoId) {
+      router.replace(`/td/g/${activeGigwanNanoId}/login`);
     } else {
       router.replace('/td/g');
     }
   }, [
-    authState.gigwanNanoId,
     authState.sayongjaNanoId,
     authState.sayongjaName,
+    activeGigwanNanoId,
     gigwanDisplayName,
     gigwanNanoId,
     myProfileData?.name,
-    resolvedGigwanNanoId,
     router,
     setAccessTokenFor,
     setIsProfileMenuOpen,
