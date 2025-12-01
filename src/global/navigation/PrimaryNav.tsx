@@ -23,6 +23,7 @@ import {
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthStore, switchUser } from '@/global/auth';
+import { setApiClientAuthContext } from '@/global/apiClient';
 
 import { cssObj } from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
@@ -115,7 +116,13 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const [activeItemKey, setActiveItemKey] = useState<string | null>(null);
   const [isGigwanExpanded, setIsGigwanExpanded] = useState(true);
 
-  const { state: authState, accessToken, setAuthState, clearAll, setAccessTokenFor } = useAuth();
+  const {
+    state: authState,
+    accessToken,
+    setAuthState,
+    clearAll,
+    setActiveUserId,
+  } = useAuth();
 
   const history = useAuthStore((s) => s.history);
   const upsertHistory = useCallback(
@@ -683,7 +690,8 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
         lastUsedAt: Date.now(),
       });
 
-      setAccessTokenFor(authState.sayongjaNanoId, null, 'clear');
+      setActiveUserId(null);
+      setApiClientAuthContext({ token: null, userId: null });
     }
 
     setIsProfileMenuOpen(false);
@@ -701,7 +709,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     gigwanNanoId,
     myProfileData?.name,
     router,
-    setAccessTokenFor,
+    setActiveUserId,
     setIsProfileMenuOpen,
     upsertHistory,
   ]);
