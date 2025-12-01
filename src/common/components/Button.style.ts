@@ -29,8 +29,26 @@ const styleTypeStyles = {
 
 const sizeStyles = {
   large: css({ height: 48, paddingLeft: 24, paddingRight: 24, gap: 8 }),
-  medium: css({ height: 43, paddingLeft: 20, paddingRight: 20, gap: 8 }),
+  medium: css({ height: 40, paddingLeft: 20, paddingRight: 20, gap: 8 }),
   small: css({ height: 32, paddingLeft: 12, paddingRight: 12, gap: 4 }),
+} as const;
+
+const textSizeOverrides = {
+  large: css({
+    height: 32,
+    paddingLeft: 8,
+    paddingRight: 8,
+  }),
+  medium: css({
+    height: 28,
+    paddingLeft: 6,
+    paddingRight: 6,
+  }),
+  small: css({
+    height: 24,
+    paddingLeft: 4,
+    paddingRight: 4,
+  }),
 } as const;
 
 const iconOnlyBase = css({ paddingLeft: 0, paddingRight: 0, aspectRatio: '1 / 1' });
@@ -145,7 +163,7 @@ const variantStyles = {
 
 export type ButtonRecipeOptions = {
   styleType?: keyof typeof styleTypeStyles;
-  variant?: keyof typeof solidVariantStyles; // 'red' 포함
+  variant?: keyof typeof solidVariantStyles;
   size?: keyof typeof sizeStyles;
   iconOnly?: boolean;
   disabled?: boolean;
@@ -164,6 +182,7 @@ export const buttonRecipe = ({
     sizeTypographyStyles[size],
     styleTypeStyles[styleType],
     sizeStyles[size],
+    styleType === 'text' && textSizeOverrides[size],
     !isFull && iconOnly && iconOnlyBase,
     !isFull && iconOnly && iconOnlySizeStyles[size],
     isFull && fullWidthStyle,

@@ -2,9 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { ArrowMdLeftSingleIcon, ArrowMdRightSingleIcon } from '@/common/icons';
+import {
+  ArrowMdLeftSingleIcon,
+  ArrowMdRightSingleIcon,
+  StateDownIcon,
+  StateUpIcon,
+} from '@/common/icons';
 
 import { cssObj } from './DatePicker.style';
+import { Button } from '@/common/components/Button';
 
 export type DatePickerProps = {
   label?: string;
@@ -50,7 +56,11 @@ function startOfDay(date: Date) {
 
 function isSameDay(a: Date | null, b: Date | null) {
   if (!a || !b) return false;
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 function buildMonthDays(viewDate: Date) {
@@ -97,16 +107,45 @@ export function DatePicker({
   const today = useMemo(() => startOfDay(new Date()), []);
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<'month' | 'year'>('month');
-  const parsedValue = useMemo(() => parseDate(value), [value]);
-  const [draftDate, setDraftDate] = useState<Date | null>(parsedValue);
-  const [viewDate, setViewDate] = useState<Date>(() => parsedValue ?? today);
 
-  useEffect(() => {
-    setDraftDate(parsedValue);
-    if (parsedValue) {
-      setViewDate(parsedValue);
-    }
-  }, [parsedValue]);
+  const parsedValue = useMemo(() => parseDate(value), [value]);
+  const [draftDate, setDraftDate] = useState<Date | null>(null);
+  const [viewDate, setViewDate] = useState<Date>(() => parsedValue ?? today);
+  const effectiveDraft = draftDate ?? parsedValue;
+
+  const days = useMemo(() => buildMonthDays(viewDate), [viewDate]);
+
+  const headerLabel = `${viewDate.getFullYear()}년 ${String(viewDate.getMonth() + 1).padStart(
+    2,
+    '0',
+  )}월`;
+
+  const displayValue = displayDate(parsedValue);
+
+  const isFutureDate = (date: Date) =>
+    !allowFutureDates && startOfDay(date).getTime() > today.getTime();
+
+  const yearGrid = useMemo(() => {
+    const startYear = viewDate.getFullYear() - (viewDate.getFullYear() % 12);
+    return Array.from({ length: 21 }, (_, index) => startYear + index);
+  }, [viewDate]);
+
+  const handleApply = () => {
+    const appliedDate = draftDate ?? parsedValue;
+    onChange(formatDate(appliedDate ?? null));
+    setIsOpen(false);
+    setMode('month');
+    setDraftDate(null);
+  };
+
+  const handleCancel = () => {
+    setIsOpen(false);
+    setMode('month');
+    setDraftDate(null);
+    setViewDate(parsedValue ?? today);
+  };
+
+  const isFutureYearDisabled = (year: number) => isFutureDate(new Date(year, 0, 1));
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -116,7 +155,7 @@ export function DatePicker({
       if (target && pickerRef.current && !pickerRef.current.contains(target)) {
         setIsOpen(false);
         setMode('month');
-        setDraftDate(parsedValue);
+        setDraftDate(null);
         setViewDate(parsedValue ?? today);
       }
     };
@@ -124,34 +163,6 @@ export function DatePicker({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, parsedValue, today]);
-
-  const days = useMemo(() => buildMonthDays(viewDate), [viewDate]);
-
-  const headerLabel = `${viewDate.getFullYear()}년 ${String(viewDate.getMonth() + 1).padStart(2, '0')}월`;
-
-  const displayValue = displayDate(parsedValue);
-
-  const isFutureDate = (date: Date) => !allowFutureDates && startOfDay(date).getTime() > today.getTime();
-
-  const yearGrid = useMemo(() => {
-    const startYear = viewDate.getFullYear() - (viewDate.getFullYear() % 12);
-    return Array.from({ length: 12 }, (_, index) => startYear + index);
-  }, [viewDate]);
-
-  const handleApply = () => {
-    onChange(formatDate(draftDate));
-    setIsOpen(false);
-    setMode('month');
-  };
-
-  const handleCancel = () => {
-    setIsOpen(false);
-    setMode('month');
-    setDraftDate(parsedValue);
-    setViewDate(parsedValue ?? today);
-  };
-
-  const isFutureYearDisabled = (year: number) => isFutureDate(new Date(year, 0, 1));
 
   return (
     <div css={cssObj.container} ref={pickerRef}>
@@ -166,10 +177,16 @@ export function DatePicker({
         css={cssObj.trigger(disabled)}
         onClick={() => {
           if (disabled) return;
-          setIsOpen((prev) => !prev);
-          setMode('month');
-          setViewDate(parsedValue ?? today);
-          setDraftDate(parsedValue);
+          setIsOpen((prev) => {
+            const next = !prev;
+            if (next) {
+              const base = parsedValue ?? today;
+              setMode('month');
+              setViewDate(base);
+              setDraftDate(parsedValue ?? null);
+            }
+            return next;
+          });
         }}
         disabled={disabled}
       >
@@ -182,47 +199,50 @@ export function DatePicker({
           <div css={cssObj.header}>
             <button
               type="button"
-              css={cssObj.navButton(disabled)}
-              onClick={() => {
-                if (disabled) return;
-                setViewDate((prev) =>
-                  mode === 'year'
-                    ? new Date(prev.getFullYear() - 12, prev.getMonth(), 1)
-                    : new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
-                );
-              }}
-              disabled={disabled}
-            >
-              <ArrowMdLeftSingleIcon />
-            </button>
-            <button
-              type="button"
               css={cssObj.headerLabel}
               onClick={() => setMode((prev) => (prev === 'month' ? 'year' : 'month'))}
             >
               {headerLabel}
+              <span>{mode === 'year' ? <StateUpIcon /> : <StateDownIcon />}</span>
             </button>
-            <button
-              type="button"
-              css={cssObj.navButton(disabled)}
-              onClick={() => {
-                if (disabled) return;
-                setViewDate((prev) =>
-                  mode === 'year'
-                    ? new Date(prev.getFullYear() + 12, prev.getMonth(), 1)
-                    : new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
-                );
-              }}
-              disabled={disabled}
-            >
-              <ArrowMdRightSingleIcon />
-            </button>
+            <div css={cssObj.moveButtonContainer}>
+              <button
+                type="button"
+                css={cssObj.navButton(disabled)}
+                onClick={() => {
+                  if (disabled) return;
+                  setViewDate((prev) =>
+                    mode === 'year'
+                      ? new Date(prev.getFullYear() - 12, prev.getMonth(), 1)
+                      : new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
+                  );
+                }}
+                disabled={disabled}
+              >
+                <ArrowMdLeftSingleIcon />
+              </button>
+              <button
+                type="button"
+                css={cssObj.navButton(disabled)}
+                onClick={() => {
+                  if (disabled) return;
+                  setViewDate((prev) =>
+                    mode === 'year'
+                      ? new Date(prev.getFullYear() + 12, prev.getMonth(), 1)
+                      : new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
+                  );
+                }}
+                disabled={disabled}
+              >
+                <ArrowMdRightSingleIcon />
+              </button>
+            </div>
           </div>
 
           {mode === 'year' ? (
             <div css={cssObj.yearGrid}>
               {yearGrid.map((year) => {
-                const isSelected = draftDate ? draftDate.getFullYear() === year : false;
+                const isSelected = effectiveDraft ? effectiveDraft.getFullYear() === year : false;
                 const futureDisabled = isFutureYearDisabled(year);
                 return (
                   <button
@@ -238,7 +258,7 @@ export function DatePicker({
                     }}
                     disabled={futureDisabled}
                   >
-                    {year}년
+                    {year}
                   </button>
                 );
               })}
@@ -254,17 +274,17 @@ export function DatePicker({
               </div>
               <div css={cssObj.calendarGrid}>
                 {days.map(({ date, inCurrentMonth }) => {
-                  const selected = isSameDay(date, draftDate);
+                  const selected = isSameDay(date, effectiveDraft);
                   const futureDisabled = isFutureDate(date);
                   return (
                     <button
-                    key={date.toISOString()}
-                    type="button"
-                    css={cssObj.dayCell({
-                      selected,
-                      inCurrentMonth,
-                      disabled: futureDisabled,
-                    })}
+                      key={date.toISOString()}
+                      type="button"
+                      css={cssObj.dayCell({
+                        selected,
+                        inCurrentMonth,
+                        disabled: futureDisabled,
+                      })}
                       onClick={() => {
                         if (futureDisabled) return;
                         setDraftDate(date);
@@ -281,12 +301,12 @@ export function DatePicker({
           )}
 
           <div css={cssObj.footer}>
-            <button type="button" css={cssObj.cancelButton} onClick={handleCancel}>
-              취소
-            </button>
-            <button type="button" css={cssObj.applyButton} onClick={handleApply}>
+            <Button styleType="text" variant="assistive" size="medium" onClick={handleCancel}>
+              닫기
+            </Button>
+            <Button styleType="text" variant="primary" size="medium" onClick={handleApply}>
               적용
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
