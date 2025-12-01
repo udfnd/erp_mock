@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { ArrowMdLeftSingleIcon, ArrowMdRightSingleIcon } from '@/common/icons';
+import { ArrowMdLeftSingleIcon, ArrowMdRightSingleIcon, CalendarIcon } from '@/common/icons';
 
 import { cssObj } from './DatePicker.style';
 
@@ -153,6 +153,22 @@ export function DatePicker({
 
   const isFutureYearDisabled = (year: number) => isFutureDate(new Date(year, 0, 1));
 
+  const handleToggle = () => {
+    if (disabled) return;
+    setIsOpen((prev) => !prev);
+    setMode('month');
+    setViewDate(parsedValue ?? today);
+    setDraftDate(parsedValue);
+  };
+
+  const handleOpen = () => {
+    if (disabled) return;
+    setIsOpen(true);
+    setMode('month');
+    setViewDate(parsedValue ?? today);
+    setDraftDate(parsedValue);
+  };
+
   return (
     <div css={cssObj.container} ref={pickerRef}>
       {label ? (
@@ -161,22 +177,26 @@ export function DatePicker({
           {required ? <span css={cssObj.required}>*</span> : null}
         </label>
       ) : null}
-      <button
-        type="button"
-        css={cssObj.trigger(disabled)}
-        onClick={() => {
-          if (disabled) return;
-          setIsOpen((prev) => !prev);
-          setMode('month');
-          setViewDate(parsedValue ?? today);
-          setDraftDate(parsedValue);
-        }}
-        disabled={disabled}
-      >
-        <span css={[cssObj.triggerLabel, !displayValue && cssObj.placeholder]}>
-          {displayValue || placeholder}
-        </span>
-      </button>
+      <div css={cssObj.trigger(disabled)}>
+        <button
+          type="button"
+          css={cssObj.iconButton(disabled)}
+          onClick={handleToggle}
+          disabled={disabled}
+          aria-label="날짜 선택"
+        >
+          <CalendarIcon />
+        </button>
+        <input
+          css={cssObj.input(disabled)}
+          placeholder={placeholder}
+          value={displayValue}
+          readOnly
+          onFocus={handleOpen}
+          onClick={handleOpen}
+          disabled={disabled}
+        />
+      </div>
       {isOpen ? (
         <div css={cssObj.pickerPanel}>
           <div css={cssObj.header}>
@@ -258,13 +278,13 @@ export function DatePicker({
                   const futureDisabled = isFutureDate(date);
                   return (
                     <button
-                    key={date.toISOString()}
-                    type="button"
-                    css={cssObj.dayCell({
-                      selected,
-                      inCurrentMonth,
-                      disabled: futureDisabled,
-                    })}
+                      key={date.toISOString()}
+                      type="button"
+                      css={cssObj.dayCell({
+                        selected,
+                        inCurrentMonth,
+                        disabled: futureDisabled,
+                      })}
                       onClick={() => {
                         if (futureDisabled) return;
                         setDraftDate(date);
