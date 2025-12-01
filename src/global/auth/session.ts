@@ -82,12 +82,16 @@ const b64Decode = (input: string): string => {
 export const isTokenExpiring = (token: string, skewSec = 60): boolean => {
   try {
     const [, payload] = token.split('.');
-    if (!payload) return true;
 
-    const exp = (JSON.parse(b64Decode(payload)) as { exp?: number }).exp ?? 0;
+    if (!payload) return false;
+
+    const exp = (JSON.parse(b64Decode(payload)) as { exp?: number | undefined }).exp;
+
+    if (!exp) return false;
+
     return Date.now() >= exp * 1000 - skewSec * 1000;
   } catch {
-    return true;
+    return false;
   }
 };
 
@@ -131,29 +135,34 @@ const refreshClient: AxiosInstance = axios.create({
 
 const refreshInflight = new Map<string, Promise<string>>();
 
-const requestRefresh = async (userId: string): Promise<string> => {
+const requestRefresh = async (userId: string, token?: string | null): Promise<string> => {
   const endpoint = `/T/dl/sayongjas/${encodeURIComponent(userId)}/${REFRESH_SEGMENT}`;
-  const { data } = await refreshClient.post<AccessTokenPayload>(endpoint);
+  const headers = withAuth(undefined, token ?? getAccessTokenForUser(userId));
+
+  const { data } = await refreshClient.post<AccessTokenPayload>(endpoint, {}, { headers });
 
   if (!hasAccessToken(data)) {
     throw new Error('No accessToken from refresh');
   }
 
-  const token = data.accessToken;
+  const refreshedToken = data.accessToken;
 
   // store에 저장
-  setAccessTokenFor(userId, token, 'refresh');
+  setAccessTokenFor(userId, refreshedToken, 'refresh');
   // axios authContext도 동기화
-  setApiClientAuthContext({ userId, token });
+  setApiClientAuthContext({ userId, token: refreshedToken });
 
-  return token;
+  return refreshedToken;
 };
 
-export const refreshAccessTokenFor = (userId: string): Promise<string> => {
+export const refreshAccessTokenFor = (
+  userId: string,
+  opts?: { tokenHint?: string | null },
+): Promise<string> => {
   const existing = refreshInflight.get(userId);
   if (existing) return existing;
 
-  const p = requestRefresh(userId)
+  const p = requestRefresh(userId, opts?.tokenHint)
     .finally(() => {
       refreshInflight.delete(userId);
     })
@@ -222,7 +231,7 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
     if (!isCloseToExpiry) return;
 
     try {
-      const refreshed = await refreshAccessTokenFor(userId);
+      const refreshed = await refreshAccessTokenFor(userId, { tokenHint: cached });
       setAccessTokenFor(userId, refreshed, 'refresh');
       setApiClientAuthContext({ userId, token: refreshed });
       return;
@@ -237,7 +246,7 @@ export async function switchUser(userId: string, onNeedLogin?: (id: string) => v
   }
 
   try {
-    const newToken = await refreshAccessTokenFor(userId);
+    const newToken = await refreshAccessTokenFor(userId, { tokenHint: cached ?? null });
     setActiveUserId(userId);
     setAccessTokenFor(userId, newToken, 'refresh');
     setApiClientAuthContext({ userId, token: newToken });
@@ -298,7 +307,8 @@ export const handleAuthError = async (
 
   try {
     // 첫 번째 401 → refresh 시도
-    const newToken = await refreshAccessTokenFor(uid);
+    const currentToken = getAccessTokenForUser(uid);
+    const newToken = await refreshAccessTokenFor(uid, { tokenHint: cfg._authOverrideToken ?? currentToken });
 
     cfg._retry = true;
     cfg.headers = withAuth(cfg.headers, newToken);

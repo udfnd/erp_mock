@@ -23,6 +23,7 @@ import {
 import { useGetMyProfileQuery } from '@/domain/auth/api';
 import { useGigwanNameQuery, useGigwanSidebarQuery } from '@/domain/gigwan/api';
 import { useAuth, useAuthStore, switchUser } from '@/global/auth';
+import { setApiClientAuthContext } from '@/global/apiClient';
 
 import { cssObj } from './PrimaryNav.style';
 import MyProfileMenu from './MyProfileMenu';
@@ -115,7 +116,12 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const [activeItemKey, setActiveItemKey] = useState<string | null>(null);
   const [isGigwanExpanded, setIsGigwanExpanded] = useState(true);
 
-  const { state: authState, accessToken, setAuthState, clearAll } = useAuth();
+  const {
+    state: authState,
+    accessToken,
+    setAuthState,
+    setActiveUserId,
+  } = useAuth();
 
   const history = useAuthStore((s) => s.history);
   const upsertHistory = useCallback(
@@ -652,21 +658,92 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
     ],
   );
 
+  const activeGigwanNanoId = useMemo(() => {
+    const activeHistoryEntry = history.find(
+      (entry) => entry.sayongjaNanoId === authState.sayongjaNanoId,
+    );
+
+    return (
+      authState.gigwanNanoId ??
+      resolvedGigwanNanoId ??
+      gigwanNanoIdFromParams ??
+      activeHistoryEntry?.gigwanNanoId ??
+      history[0]?.gigwanNanoId ??
+      null
+    );
+  }, [
+    authState.gigwanNanoId,
+    authState.sayongjaNanoId,
+    gigwanNanoIdFromParams,
+    history,
+    resolvedGigwanNanoId,
+  ]);
+
   const handleAddUser = useCallback(() => {
-    setIsProfileModalOpen(true);
+    if (authState.sayongjaNanoId) {
+      upsertHistory({
+        sayongjaNanoId: authState.sayongjaNanoId,
+        sayongjaName: authState.sayongjaName ?? myProfileData?.name ?? '',
+        gigwanName: gigwanDisplayName,
+        gigwanNanoId,
+        lastUsedAt: Date.now(),
+      });
+
+      setActiveUserId(null);
+      setApiClientAuthContext({ token: null, userId: null });
+    }
+
     setIsProfileMenuOpen(false);
-  }, []);
+
+    if (activeGigwanNanoId) {
+      router.replace(`/td/g/${activeGigwanNanoId}/login?code=${activeGigwanNanoId}`);
+    } else {
+      router.replace('/td/g');
+    }
+  }, [
+    authState.sayongjaNanoId,
+    authState.sayongjaName,
+    activeGigwanNanoId,
+    gigwanDisplayName,
+    gigwanNanoId,
+    myProfileData?.name,
+    router,
+    setActiveUserId,
+    setIsProfileMenuOpen,
+    upsertHistory,
+  ]);
 
   const handleLogout = useCallback(() => {
     try {
-      clearAll();
+      if (authState.sayongjaNanoId) {
+        upsertHistory({
+          sayongjaNanoId: authState.sayongjaNanoId,
+          sayongjaName: authState.sayongjaName ?? myProfileData?.name ?? '',
+          gigwanName: gigwanDisplayName,
+          gigwanNanoId,
+          lastUsedAt: Date.now(),
+        });
+      }
+
+      setActiveUserId(null);
+      setApiClientAuthContext({ token: null, userId: null });
+
       storedProfileKeyRef.current = null;
       setIsProfileMenuOpen(false);
       router.replace('/td/g');
     } catch (error) {
       console.error('Failed to logout', error);
     }
-  }, [clearAll, router]);
+  }, [
+    authState.sayongjaName,
+    authState.sayongjaNanoId,
+    gigwanDisplayName,
+    gigwanNanoId,
+    myProfileData?.name,
+    router,
+    setActiveUserId,
+    upsertHistory,
+  ]);
 
   const profileImageUrl = PROFILE_PLACEHOLDER_IMAGE;
   const hydrated = useHydrated();
