@@ -2,10 +2,10 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { Button, IconButton } from '@/common/components';
-import { DeleteIcon, PlusIcon } from '@/common/icons';
+import { DeleteIcon, EditIcon, PlusIcon } from '@/common/icons';
 import {
   gigwanQueryKeys,
   useUpsertWorkTypeCustomSangtaesMutation,
@@ -42,17 +42,46 @@ const mapWorkTypeSangtaesToFormValues = (sangtaes: WorkTypeSangtae[]): WorkTypeF
 
 const INITIAL_VALUES: WorkTypeFormValues = { statuses: [] };
 
-export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectionProps) {
-  const queryClient = useQueryClient();
+type WorkTypeEditingState = Record<string, boolean>;
 
-  const { data: workTypeStatusesData, error: workTypeError } = useWorkTypeCustomSangtaesQuery(
-    gigwanNanoId,
-    { enabled: Boolean(gigwanNanoId) },
-  );
+type WorkTypeEditingAction =
+  | { type: 'toggle'; localId: string }
+  | { type: 'remove'; localId: string }
+  | { type: 'reset' };
+
+const workTypeEditingReducer = (
+  state: WorkTypeEditingState,
+  action: WorkTypeEditingAction,
+): WorkTypeEditingState => {
+  switch (action.type) {
+    case 'toggle':
+      return { ...state, [action.localId]: !state[action.localId] };
+    case 'remove': {
+      if (!state[action.localId]) return state;
+      const nextState = { ...state };
+      delete nextState[action.localId];
+      return nextState;
+    }
+    case 'reset':
+      return {};
+    default:
+      return state;
+  }
+};
+
+type WorkTypeStatusesFormProps = {
+  gigwanNanoId: string;
+  initialValues: WorkTypeFormValues;
+  workTypeError: unknown;
+};
+
+function WorkTypeStatusesForm({ gigwanNanoId, initialValues, workTypeError }: WorkTypeStatusesFormProps) {
+  const queryClient = useQueryClient();
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
+  const [editingState, dispatchEditingState] = useReducer(workTypeEditingReducer, {});
 
   const form = useForm({
-    defaultValues: INITIAL_VALUES,
+    defaultValues: initialValues,
     onSubmit: async ({ value }) => {
       const seen = new Set<string>();
       const sangtaes: Array<
@@ -77,18 +106,13 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         const data = await upsertWorkTypeStatusesMutation.mutateAsync({ sangtaes });
         const nextValues = mapWorkTypeSangtaesToFormValues(data.sangtaes);
         form.reset(nextValues);
+        dispatchEditingState({ type: 'reset' });
         await queryClient.invalidateQueries({
           queryKey: gigwanQueryKeys.workTypeCustomSangtaes(gigwanNanoId),
         });
       } catch {}
     },
   });
-
-  useEffect(() => {
-    if (!workTypeStatusesData) return;
-    const nextValues = mapWorkTypeSangtaesToFormValues(workTypeStatusesData.sangtaes);
-    form.reset(nextValues);
-  }, [workTypeStatusesData, form]);
 
   const { statuses, isDirty } = useStore(form.store, (state) => {
     const v = state.values as WorkTypeFormValues;
@@ -97,6 +121,11 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
       isDirty: state.isDirty,
     };
   });
+
+  useEffect(() => {
+    form.reset(initialValues);
+    dispatchEditingState({ type: 'reset' });
+  }, [form, initialValues]);
 
   const workTypeHasEmptyStatus = useMemo(
     () => statuses.some((s) => s.name.trim().length === 0),
@@ -110,8 +139,12 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
     await form.handleSubmit();
   }, [form, isDirty, workTypeHasEmptyStatus]);
 
+  const toggleEditWorkTypeStatus = (localId: string) => {
+    dispatchEditingState({ type: 'toggle', localId });
+  };
+
   return (
-    <section css={cssObj.card}>
+    <>
       <div css={cssObj.cardHeader}>
         <div css={cssObj.cardTitleGroup}>
           <h2 css={cssObj.cardTitle}>근무 형태 커스텀 상태</h2>
@@ -130,30 +163,50 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                 {statusesField.state.value.map((status, statusIndex) => (
                   <form.Field key={status.localId} name={`statuses[${statusIndex}].name`}>
                     {(field) => {
+                      const currentStatus = statusesField.state.value[statusIndex];
+                      const localId = currentStatus?.localId ?? `${statusIndex}`;
+                      const isEditing = Boolean(editingState[localId]);
                       const value = String(field.state.value ?? '');
                       return (
-                        <div css={cssObj.statusField}>
-                          <input
-                            css={cssObj.statusInputField}
-                            placeholder="근무 형태 상태 이름"
-                            value={value}
-                            onChange={(v) => {
-                              field.handleChange(v.target.value);
-                            }}
-                            onBlur={field.handleBlur}
-                            maxLength={20}
-                            autoFocus
-                          />
-                          <IconButton
-                            styleType="normal"
-                            size="small"
-                            onClick={() => {
-                              void statusesField.removeValue(statusIndex);
-                            }}
-                            aria-label={`${value || '상태'} 삭제`}
-                          >
-                            <DeleteIcon width={16} height={16} />
-                          </IconButton>
+                        <div css={cssObj.statusField} role="group">
+                          {isEditing ? (
+                            <input
+                              css={cssObj.statusInputField}
+                              placeholder="근무 형태 상태 이름"
+                              value={value}
+                              onChange={(event) => {
+                                field.handleChange(event.target.value);
+                              }}
+                              onBlur={field.handleBlur}
+                              maxLength={20}
+                              autoFocus
+                            />
+                          ) : (
+                            <span css={cssObj.statusValue}>{value.trim() || '새 상태'}</span>
+                          )}
+                          <div css={cssObj.statusActions}>
+                            <IconButton
+                              styleType="normal"
+                              size="small"
+                              onClick={() => toggleEditWorkTypeStatus(localId)}
+                              aria-label={`${value || '상태'} ${isEditing ? '편집 종료' : '수정'}`}
+                              title={isEditing ? '편집 종료' : '수정'}
+                            >
+                              <EditIcon width={16} height={16} />
+                            </IconButton>
+                            <IconButton
+                              styleType="normal"
+                              size="small"
+                              onClick={() => {
+                                void statusesField.removeValue(statusIndex);
+                                dispatchEditingState({ type: 'remove', localId });
+                              }}
+                              aria-label={`${value || '상태'} 삭제`}
+                              title="삭제"
+                            >
+                              <DeleteIcon width={16} height={16} />
+                            </IconButton>
+                          </div>
                         </div>
                       );
                     }}
@@ -166,12 +219,14 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                 variant="secondary"
                 iconRight={<PlusIcon width={16} height={16} />}
                 onClick={() => {
+                  const localId = createLocalId();
                   statusesField.pushValue({
                     nanoId: null,
                     name: '',
-                    localId: createLocalId(),
+                    localId,
                     isHwalseong: true,
                   });
+                  dispatchEditingState({ type: 'toggle', localId });
                 }}
               >
                 추가
@@ -192,6 +247,33 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
           {workTypeIsSaving ? '저장 중...' : '저장'}
         </Button>
       </footer>
+    </>
+  );
+}
+
+export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectionProps) {
+  const { data: workTypeStatusesData, error: workTypeError } = useWorkTypeCustomSangtaesQuery(
+    gigwanNanoId,
+    { enabled: Boolean(gigwanNanoId) },
+  );
+
+  const initialValues = useMemo<WorkTypeFormValues>(() => {
+    if (!workTypeStatusesData) return INITIAL_VALUES;
+    return mapWorkTypeSangtaesToFormValues(workTypeStatusesData.sangtaes);
+  }, [workTypeStatusesData]);
+
+  const formKey = `${gigwanNanoId}:${
+    workTypeStatusesData?.sangtaes?.map((sangtae) => sangtae.nanoId).join('|') ?? 'empty'
+  }`;
+
+  return (
+    <section css={cssObj.card}>
+      <WorkTypeStatusesForm
+        key={formKey}
+        gigwanNanoId={gigwanNanoId}
+        initialValues={initialValues}
+        workTypeError={workTypeError}
+      />
     </section>
   );
 }
