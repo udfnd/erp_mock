@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useForm, useStore } from '@tanstack/react-form';
+import { useEffect, useMemo } from 'react';
 
-import { Button, Textfield } from '@/common/components';
+import { Button, DatePicker, Textfield } from '@/common/components';
 import {
+  createJaewonsaengBohoja,
   deleteJaewonsaengBohoja,
   updateJaewonsaengBohoja,
   useDeleteJaewonsaengMutation,
@@ -11,6 +13,7 @@ import {
   useUpdateJaewonsaengBoninMutation,
   useUpdateJaewonsaengMutation,
 } from '@/domain/jaewonsaeng/api';
+import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
 
@@ -25,6 +28,7 @@ export type SingleSelectionPanelProps = {
 export const SingleSelectionPanel = ({
   jaewonsaengNanoId,
   jaewonsaengName,
+  jojikNanoId: _jojikNanoId,
   onAfterMutation,
   isAuthenticated,
 }: SingleSelectionPanelProps) => {
@@ -36,31 +40,92 @@ export const SingleSelectionPanel = ({
   const updateBonin = useUpdateJaewonsaengBoninMutation(jaewonsaengNanoId);
   const deleteJaewonsaeng = useDeleteJaewonsaengMutation(jaewonsaengNanoId);
 
-  const [name, setName] = useState(jaewonsaengName);
-  const [nickname, setNickname] = useState('');
-  const [jaewonCategorySangtaeNanoId, setJaewonCategorySangtaeNanoId] = useState('');
-  const [isHwalseong, setIsHwalseong] = useState(true);
-  const [boninName, setBoninName] = useState('');
-  const [boninPhone, setBoninPhone] = useState('');
-  const [boninEmail, setBoninEmail] = useState('');
-  const [boninBigo, setBoninBigo] = useState('');
-  const [bohojas, setBohojas] = useState(
-    () => data?.jaewonsaengBohojas.map((b) => ({ ...b })) ?? [],
+  const initialValues = useMemo(
+    () => ({
+      jaewonsaeng: {
+        name: data?.jaewonsaeng.name ?? jaewonsaengName,
+        nickname: data?.jaewonsaeng.nickname ?? '',
+        jaewonCategorySangtaeNanoId: data?.jaewonsaeng.jaewonCategorySangtaeNanoId ?? '',
+        isHwalseong: data?.jaewonsaeng.isHwalseong ?? true,
+      },
+      bonin: {
+        name: data?.jaewonsaengBonin.name ?? '',
+        birthDate: data?.jaewonsaengBonin.birthDate ?? '',
+        genderNanoId: data?.jaewonsaengBonin.genderNanoId ?? '',
+        phoneNumber: data?.jaewonsaengBonin.phoneNumber ?? '',
+        emailAddress: data?.jaewonsaengBonin.email ?? '',
+        bigo: data?.jaewonsaengBonin.bigo ?? '',
+      },
+      bohojas: data?.jaewonsaengBohojas.map((bohoja) => ({
+        localId: bohoja.nanoId,
+        nanoId: bohoja.nanoId,
+        gwangye: bohoja.gwangye ?? '',
+        phoneNumber: bohoja.phoneNumber ?? '',
+        emailAddress: bohoja.email ?? '',
+        bigo: bohoja.bigo ?? '',
+      })) ?? [],
+    }),
+    [data, jaewonsaengName],
   );
+
+  const form = useForm({
+    defaultValues: initialValues,
+    onSubmit: async ({ value }) => {
+      await updateJaewonsaeng.mutateAsync({
+        name: value.jaewonsaeng.name.trim(),
+        nickname: value.jaewonsaeng.nickname.trim() || null,
+        jaewonCategorySangtaeNanoId: value.jaewonsaeng.jaewonCategorySangtaeNanoId,
+        isHwalseong: value.jaewonsaeng.isHwalseong,
+      });
+
+      await updateBonin.mutateAsync({
+        name: value.bonin.name.trim(),
+        birthDate: value.bonin.birthDate || null,
+        genderNanoId: value.bonin.genderNanoId,
+        phoneNumber: value.bonin.phoneNumber || null,
+        emailAddress: value.bonin.emailAddress || null,
+        bigo: value.bonin.bigo || null,
+      });
+
+      for (const bohoja of value.bohojas) {
+        const payload = {
+          gwangye: bohoja.gwangye.trim(),
+          phoneNumber: bohoja.phoneNumber || null,
+          emailAddress: bohoja.emailAddress || null,
+          bigo: bohoja.bigo || null,
+        };
+
+        if (!payload.gwangye) continue;
+        if (bohoja.nanoId?.startsWith('local-')) {
+          await createJaewonsaengBohoja(jaewonsaengNanoId, payload);
+        } else if (bohoja.nanoId) {
+          await updateJaewonsaengBohoja(bohoja.nanoId, payload);
+        }
+      }
+
+      form.reset({
+        ...value,
+        jaewonsaeng: { ...value.jaewonsaeng },
+        bohojas: value.bohojas.map((bohoja) => ({
+          ...bohoja,
+          nanoId: bohoja.nanoId && !bohoja.nanoId.startsWith('local-') ? bohoja.nanoId : bohoja.localId,
+        })),
+      });
+
+      await onAfterMutation();
+    },
+  });
+
+  const { values, isDirty } = useStore(form.store, (state) => ({
+    values: state.values as typeof initialValues,
+    isDirty: state.isDirty,
+  }));
 
   useEffect(() => {
     if (data) {
-      setName(data.jaewonsaeng.name ?? jaewonsaengName);
-      setNickname(data.jaewonsaeng.nickname ?? '');
-      setJaewonCategorySangtaeNanoId(data.jaewonsaeng.jaewonCategorySangtaeNanoId ?? '');
-      setIsHwalseong(data.jaewonsaeng.isHwalseong);
-      setBoninName(data.jaewonsaengBonin.name ?? '');
-      setBoninPhone(data.jaewonsaengBonin.phoneNumber ?? '');
-      setBoninEmail(data.jaewonsaengBonin.email ?? '');
-      setBoninBigo(data.jaewonsaengBonin.bigo ?? '');
-      setBohojas(data.jaewonsaengBohojas.map((b) => ({ ...b })));
+      form.reset(initialValues);
     }
-  }, [data, jaewonsaengName]);
+  }, [data, form, initialValues]);
 
   if (isLoading && !data) {
     return (
@@ -73,34 +138,11 @@ export const SingleSelectionPanel = ({
     );
   }
 
-  const handleSaveBasic = async () => {
-    await updateJaewonsaeng.mutateAsync({
-      name,
-      nickname: nickname || null,
-      jaewonCategorySangtaeNanoId,
-      isHwalseong,
-    });
-    await onAfterMutation();
-  };
-
-  const handleSaveBonin = async () => {
-    await updateBonin.mutateAsync({
-      name: boninName,
-      phoneNumber: boninPhone,
-      emailAddress: boninEmail,
-      bigo: boninBigo,
-    });
-    await onAfterMutation();
-  };
-
-  const handleSaveBohoja = async (bohojaId: string, updates: Record<string, unknown>) => {
-    await updateJaewonsaengBohoja(bohojaId, updates as any);
-    await onAfterMutation();
-  };
-
-  const handleDeleteBohoja = async (bohojaId: string) => {
-    await deleteJaewonsaengBohoja(bohojaId);
-    await onAfterMutation();
+  const handleDeleteBohoja = async (index: number, nanoId?: string) => {
+    if (nanoId && !nanoId.startsWith('local-')) {
+      await deleteJaewonsaengBohoja(nanoId);
+    }
+    form.setFieldValue('bohojas', (prev = []) => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteJaewonsaeng = async () => {
@@ -108,132 +150,224 @@ export const SingleSelectionPanel = ({
     await onAfterMutation();
   };
 
-  const handleDeactivate = async () => {
-    setIsHwalseong(false);
-    await updateJaewonsaeng.mutateAsync({
-      name,
-      nickname: nickname || null,
-      jaewonCategorySangtaeNanoId,
-      isHwalseong: false,
-    });
-    await onAfterMutation();
-  };
-
   return (
     <div css={cssObj.panelBody}>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>{name}</h2>
+        <h2 css={cssObj.panelTitle}>{values.jaewonsaeng.name}</h2>
       </div>
 
-      <div css={cssObj.panelSection}>
-        <span css={cssObj.panelSubtitle}>재원생 기본 속성</span>
-        <Textfield value={name} onValueChange={setName} placeholder="이름" />
-        <Textfield
-          value={nickname}
-          onValueChange={setNickname}
-          placeholder="별명"
-        />
-        <Textfield
-          value={jaewonCategorySangtaeNanoId}
-          onValueChange={setJaewonCategorySangtaeNanoId}
-          placeholder="재원 상태 카테고리 상태 nanoId"
-        />
-        <label css={cssObj.panelLabel} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input
-            type="checkbox"
-            checked={isHwalseong}
-            onChange={(e) => setIsHwalseong(e.target.checked)}
-          />
-          활성화
-        </label>
-        <div css={cssObj.sectionActions}>
-          <Button variant="primary" styleType="solid" onClick={handleSaveBasic}>
-            저장
-          </Button>
+      <form onSubmit={(event) => void form.handleSubmit(event)}>
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelSubtitle}>재원생 기본 속성</span>
+          <form.Field name="jaewonsaeng.name">
+            {(field) => (
+              <Textfield
+                singleLine
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="이름"
+              />
+            )}
+          </form.Field>
+          <form.Field name="jaewonsaeng.nickname">
+            {(field) => (
+              <Textfield
+                singleLine
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="별명"
+              />
+            )}
+          </form.Field>
+          <form.Field name="jaewonsaeng.jaewonCategorySangtaeNanoId">
+            {(field) => (
+              <Textfield
+                singleLine
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="재원 상태 카테고리 상태 nanoId"
+              />
+            )}
+          </form.Field>
+          <label css={cssObj.panelLabel} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="checkbox"
+              checked={values.jaewonsaeng.isHwalseong}
+              onChange={(e) =>
+                form.setFieldValue('jaewonsaeng.isHwalseong', () => e.target.checked)
+              }
+            />
+            활성화
+          </label>
         </div>
-      </div>
 
-      <div css={cssObj.panelSection}>
-        <span css={cssObj.panelSubtitle}>재원생 본인 속성</span>
-        <Textfield value={boninName} onValueChange={setBoninName} placeholder="이름" />
-        <Textfield value={boninPhone} onValueChange={setBoninPhone} placeholder="전화번호" />
-        <Textfield value={boninEmail} onValueChange={setBoninEmail} placeholder="이메일" />
-        <Textfield value={boninBigo} onValueChange={setBoninBigo} placeholder="비고" />
-        <div css={cssObj.sectionActions}>
-          <Button variant="primary" styleType="solid" onClick={handleSaveBonin}>
-            저장
-          </Button>
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelSubtitle}>재원생 본인 속성</span>
+          <form.Field name="bonin.name">
+            {(field) => (
+              <Textfield value={field.state.value} onValueChange={field.handleChange} placeholder="이름" />
+            )}
+          </form.Field>
+          <form.Field name="bonin.birthDate">
+            {(field) => (
+              <DatePicker
+                label="생년월일"
+                placeholder="생년월일을 선택해 주세요"
+                value={field.state.value}
+                onChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.genderNanoId">
+            {(field) => (
+              <Textfield
+                singleLine
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="성별 nanoId"
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.phoneNumber">
+            {(field) => (
+              <Textfield
+                singleLine
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="전화번호"
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.emailAddress">
+            {(field) => (
+              <Textfield
+                singleLine
+                value={field.state.value}
+                onValueChange={field.handleChange}
+                placeholder="이메일"
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.bigo">
+            {(field) => (
+              <Textfield value={field.state.value} onValueChange={field.handleChange} placeholder="비고" />
+            )}
+          </form.Field>
         </div>
-      </div>
 
-      <div css={cssObj.panelSection}>
-        <span css={cssObj.panelSubtitle}>보호자 속성</span>
-        {bohojas.map((bohoja) => (
-          <div key={bohoja.nanoId} css={cssObj.panelLabelSection}>
-            <Textfield
-              value={bohoja.gwangye}
-              onValueChange={(value) =>
-                setBohojas((prev) =>
-                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, gwangye: value } : b)),
-                )
+        <div css={cssObj.panelSection}>
+          <div css={cssObj.sectionActions}>
+            <span css={cssObj.panelSubtitle}>보호자 속성</span>
+            <Button
+              size="small"
+              styleType="outlined"
+              variant="secondary"
+              onClick={() =>
+                form.setFieldValue('bohojas', (prev = []) => [
+                  ...prev,
+                  {
+                    localId: createLocalId(),
+                    nanoId: createLocalId(),
+                    gwangye: '',
+                    phoneNumber: '',
+                    emailAddress: '',
+                    bigo: '',
+                  },
+                ])
               }
-              placeholder="관계"
-            />
-            <Textfield
-              value={bohoja.phoneNumber ?? ''}
-              onValueChange={(value) =>
-                setBohojas((prev) =>
-                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, phoneNumber: value } : b)),
-                )
-              }
-              placeholder="전화번호"
-            />
-            <Textfield
-              value={bohoja.email ?? ''}
-              onValueChange={(value) =>
-                setBohojas((prev) =>
-                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, email: value } : b)),
-                )
-              }
-              placeholder="이메일"
-            />
-            <div css={cssObj.sectionActions}>
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  handleSaveBohoja(bohoja.nanoId, {
-                    nanoId: bohoja.nanoId,
-                    gwangye: bohoja.gwangye,
-                    phoneNumber: bohoja.phoneNumber,
-                    emailAddress: bohoja.email,
-                    bigo: bohoja.bigo,
-                  })
-                }
-              >
-                수정
-              </Button>
-              <Button variant="secondary" onClick={() => handleDeleteBohoja(bohoja.nanoId)}>
-                삭제
-              </Button>
-            </div>
+            >
+              보호자 추가
+            </Button>
           </div>
-        ))}
-      </div>
+          <form.Field name="bohojas" mode="array">
+            {(bohojasField) => (
+              <>
+                {bohojasField.state.value.map((bohoja, index) => (
+                  <div key={bohoja.localId} css={cssObj.panelLabelSection}>
+                    <form.Field name={`bohojas[${index}].gwangye`}>
+                      {(field) => (
+                        <Textfield
+                          singleLine
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                          placeholder="관계"
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name={`bohojas[${index}].phoneNumber`}>
+                      {(field) => (
+                        <Textfield
+                          singleLine
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                          placeholder="전화번호"
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name={`bohojas[${index}].emailAddress`}>
+                      {(field) => (
+                        <Textfield
+                          singleLine
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                          placeholder="이메일"
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name={`bohojas[${index}].bigo`}>
+                      {(field) => (
+                        <Textfield
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                          placeholder="비고"
+                        />
+                      )}
+                    </form.Field>
+                    <div css={cssObj.sectionActions}>
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        onClick={() => void handleDeleteBohoja(index, bohoja.nanoId)}
+                      >
+                        삭제
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </form.Field>
+        </div>
 
-      <div css={cssObj.panelFooter}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary" onClick={handleDeactivate}>
+        <div css={cssObj.sectionActions}>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              form.setFieldValue('jaewonsaeng.isHwalseong', () => false)
+            }
+          >
             재원생 비활성화
           </Button>
           <Button
-            variant="red"
+            type="submit"
+            variant="primary"
             styleType="solid"
-            disabled={isHwalseong}
-            onClick={handleDeleteJaewonsaeng}
+            disabled={!isDirty || updateJaewonsaeng.isPending || updateBonin.isPending}
           >
-            재원생 삭제
+            저장
           </Button>
         </div>
+      </form>
+
+      <div css={cssObj.panelFooter}>
+        <Button
+          variant="red"
+          styleType="solid"
+          disabled={values.jaewonsaeng.isHwalseong}
+          onClick={handleDeleteJaewonsaeng}
+        >
+          재원생 삭제
+        </Button>
       </div>
     </div>
   );

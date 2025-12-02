@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm, useStore } from '@tanstack/react-form';
 
-import { Button, Textfield } from '@/common/components';
+import { Button, DatePicker, Textfield } from '@/common/components';
 import { useCreateJaewonsaengMutation } from '@/domain/jaewonsaeng/api';
+import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
 
@@ -13,73 +14,325 @@ export type CreateJaewonsaengPanelProps = {
   onAfterMutation: () => Promise<unknown> | void;
 };
 
+type CreateBoninFormValue = {
+  name: string;
+  birthDate: string;
+  genderNanoId: string;
+  phoneNumber: string;
+  email: string;
+  bigo: string;
+};
+
+type CreateBohojaFormValue = {
+  localId: string;
+  gwangye: string;
+  phoneNumber: string;
+  email: string;
+  bigo: string;
+};
+
+type CreateJaewonsaengFormValues = {
+  jaewonsaeng: {
+    name: string;
+    nickname: string;
+    jaewonCategorySangtaeNanoId: string;
+  };
+  bonin: CreateBoninFormValue;
+  bohojas: CreateBohojaFormValue[];
+};
+
+const INITIAL_VALUES: CreateJaewonsaengFormValues = {
+  jaewonsaeng: {
+    name: '',
+    nickname: '',
+    jaewonCategorySangtaeNanoId: '',
+  },
+  bonin: {
+    name: '',
+    birthDate: '',
+    genderNanoId: '',
+    phoneNumber: '',
+    email: '',
+    bigo: '',
+  },
+  bohojas: [
+    {
+      localId: createLocalId(),
+      gwangye: '',
+      phoneNumber: '',
+      email: '',
+      bigo: '',
+    },
+  ],
+};
+
 export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }: CreateJaewonsaengPanelProps) => {
   const createMutation = useCreateJaewonsaengMutation();
-  const [name, setName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [jaewonCategorySangtaeNanoId, setJaewonCategorySangtaeNanoId] = useState('');
-  const [boninName, setBoninName] = useState('');
 
-  const handleSubmit = async () => {
-    await createMutation.mutateAsync({
-      jojikNanoId,
-      jaewonsaengBonin: {
-        name: boninName || name,
-        birthDate: null,
-        genderNanoId: '',
-        phoneNumber: null,
-        email: '',
-        bigo: null,
-      },
-      jaewonsaengBohojas: [],
-      jaewonsaeng: {
-        jaewonCategorySangtaeNanoId,
-        name,
-        nickname: nickname || null,
-      },
-    });
-    await onAfterMutation();
-  };
+  const form = useForm({
+    defaultValues: INITIAL_VALUES,
+    onSubmit: async ({ value }) => {
+      const name = value.jaewonsaeng.name.trim();
+      const boninName = value.bonin.name.trim() || name;
+      if (!name || !jojikNanoId || !value.jaewonsaeng.jaewonCategorySangtaeNanoId) return;
+
+      await createMutation.mutateAsync({
+        jojikNanoId,
+        jaewonsaengBonin: {
+          name: boninName,
+          birthDate: value.bonin.birthDate || null,
+          genderNanoId: value.bonin.genderNanoId,
+          phoneNumber: value.bonin.phoneNumber || null,
+          email: value.bonin.email,
+          bigo: value.bonin.bigo || null,
+        },
+        jaewonsaengBohojas:
+          value.bohojas
+            .map((bohoja) => ({
+              gwangye: bohoja.gwangye.trim(),
+              phoneNumber: bohoja.phoneNumber || null,
+              email: bohoja.email || null,
+              bigo: bohoja.bigo || null,
+            }))
+            .filter((bohoja) => bohoja.gwangye) ?? [],
+        jaewonsaeng: {
+          jaewonCategorySangtaeNanoId: value.jaewonsaeng.jaewonCategorySangtaeNanoId,
+          name,
+          nickname: value.jaewonsaeng.nickname.trim() || null,
+        },
+      });
+
+      form.reset(INITIAL_VALUES);
+      await onAfterMutation();
+      onExit?.();
+    },
+  });
+
+  const { values, isSubmitting } = useStore(form.store, (state) => ({
+    values: state.values as CreateJaewonsaengFormValues,
+    isSubmitting: state.isSubmitting,
+  }));
+
+  const formId = 'jaewonsaeng-create-form';
+  const isDisabled =
+    !values.jaewonsaeng.name.trim() ||
+    !values.jaewonsaeng.jaewonCategorySangtaeNanoId.trim() ||
+    createMutation.isPending ||
+    isSubmitting;
 
   return (
-    <div css={cssObj.panelBody}>
+    <>
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>재원생 생성</h2>
-        <p css={cssObj.helperText}>새로운 재원생을 등록합니다.</p>
+        <p css={cssObj.helperText}>재원생과 본인/보호자 정보를 함께 등록합니다.</p>
       </div>
-      <div css={cssObj.panelSection}>
-        <span css={cssObj.panelLabel}>재원생 기본 정보</span>
-        <Textfield value={name} placeholder="이름" onValueChange={setName} />
-        <Textfield
-          value={nickname}
-          placeholder="별명"
-          onValueChange={setNickname}
-        />
-        <Textfield
-          value={jaewonCategorySangtaeNanoId}
-          placeholder="재원 상태 카테고리 상태 nanoId"
-          onValueChange={setJaewonCategorySangtaeNanoId}
-        />
-      </div>
-      <div css={cssObj.panelSection}>
-        <span css={cssObj.panelLabel}>재원생 본인 정보</span>
-        <Textfield
-          value={boninName}
-          placeholder="본인 이름"
-          onValueChange={setBoninName}
-        />
-      </div>
-      <div css={cssObj.sectionActions}>
-        <Button variant="secondary" onClick={onExit}>취소</Button>
+      <form id={formId} css={cssObj.panelBody} onSubmit={(event) => void form.handleSubmit(event)}>
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelSubtitle}>재원생 기본 정보</span>
+          <form.Field name="jaewonsaeng.name">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="이름"
+                placeholder="이름을 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="jaewonsaeng.nickname">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="별명"
+                placeholder="별명을 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="jaewonsaeng.jaewonCategorySangtaeNanoId">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="재원 상태 카테고리 상태"
+                placeholder="재원 상태 카테고리 상태 nanoId"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+        </div>
+
+        <div css={cssObj.panelSection}>
+          <span css={cssObj.panelSubtitle}>본인 정보</span>
+          <form.Field name="bonin.name">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="본인 이름"
+                placeholder="본인 이름을 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.birthDate">
+            {(field) => (
+              <DatePicker
+                label="생년월일"
+                placeholder="생년월일을 선택해 주세요"
+                value={field.state.value}
+                onChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.genderNanoId">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="성별 nanoId"
+                placeholder="성별 nanoId를 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.phoneNumber">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="전화번호"
+                placeholder="전화번호를 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.email">
+            {(field) => (
+              <Textfield
+                singleLine
+                label="이메일"
+                placeholder="이메일을 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+          <form.Field name="bonin.bigo">
+            {(field) => (
+              <Textfield
+                label="비고"
+                placeholder="비고를 입력해 주세요"
+                value={field.state.value}
+                onValueChange={field.handleChange}
+              />
+            )}
+          </form.Field>
+        </div>
+
+        <div css={cssObj.panelSection}>
+          <div css={cssObj.sectionActions}>
+            <span css={cssObj.panelSubtitle}>보호자 정보</span>
+            <Button
+              size="small"
+              styleType="outlined"
+              variant="secondary"
+              onClick={() =>
+                form.setFieldValue('bohojas', (prev = []) => [
+                  ...prev,
+                  {
+                    localId: createLocalId(),
+                    gwangye: '',
+                    phoneNumber: '',
+                    email: '',
+                    bigo: '',
+                  },
+                ])
+              }
+            >
+              보호자 추가
+            </Button>
+          </div>
+          <form.Field name="bohojas" mode="array">
+            {(bohojasField) => (
+              <>
+                {bohojasField.state.value.map((bohoja, index) => (
+                  <div key={bohoja.localId} css={cssObj.panelLabelSection}>
+                    <form.Field name={`bohojas[${index}].gwangye`}>
+                      {(field) => (
+                        <Textfield
+                          singleLine
+                          label="관계"
+                          placeholder="보호자 관계를 입력해 주세요"
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name={`bohojas[${index}].phoneNumber`}>
+                      {(field) => (
+                        <Textfield
+                          singleLine
+                          label="전화번호"
+                          placeholder="전화번호"
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name={`bohojas[${index}].email`}>
+                      {(field) => (
+                        <Textfield
+                          singleLine
+                          label="이메일"
+                          placeholder="이메일"
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                        />
+                      )}
+                    </form.Field>
+                    <form.Field name={`bohojas[${index}].bigo`}>
+                      {(field) => (
+                        <Textfield
+                          label="비고"
+                          placeholder="비고"
+                          value={field.state.value}
+                          onValueChange={field.handleChange}
+                        />
+                      )}
+                    </form.Field>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => bohojasField.removeValue(index)}
+                    >
+                      제거
+                    </Button>
+                  </div>
+                ))}
+              </>
+            )}
+          </form.Field>
+        </div>
+      </form>
+
+      <div css={cssObj.panelFooter}>
+        <Button variant="secondary" size="small" onClick={onExit}>
+          취소
+        </Button>
         <Button
-          variant="primary"
+          type="submit"
+          size="small"
           styleType="solid"
-          onClick={handleSubmit}
-          disabled={!name || !jojikNanoId || createMutation.isPending}
+          variant="primary"
+          form={formId}
+          disabled={isDisabled}
         >
-          {createMutation.isPending ? '생성 중...' : '생성하기'}
+          {createMutation.isPending ? '생성 중...' : '재원생 생성'}
         </Button>
       </div>
-    </div>
+    </>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useEffect } from 'react';
+import { useForm, useStore } from '@tanstack/react-form';
+import { useEffect, useMemo, useReducer } from 'react';
 
 import { Button, IconButton, Textfield } from '@/common/components';
 import { DeleteIcon, EditIcon, PlusIcon } from '@/common/icons';
@@ -10,6 +10,7 @@ import {
   useGetJaewonCategorySangtaesQuery,
   useUpsertJaewonCategorySangtaesMutation,
 } from '@/domain/jaewonsaeng/api';
+import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
 
@@ -19,26 +20,83 @@ type JaewonCategorySangtaeSectionProps = {
 
 type EditableSangtae = JaewonCategorySangtae & { localId: string };
 
+type JaewonCategorySangtaeFormValues = {
+  sangtaes: EditableSangtae[];
+};
+
 const toEditable = (sangtaes: JaewonCategorySangtae[] = []): EditableSangtae[] =>
-  sangtaes.map((item) => ({ ...item, localId: item.nanoId }));
+  sangtaes.map((item) => ({ ...item, localId: item.nanoId ?? createLocalId() }));
 
 const createEmptySangtae = (): EditableSangtae => ({
   name: '',
   nanoId: '',
   isHwalseong: true,
-  localId: `local-${crypto.randomUUID?.() ?? Math.random()}`,
+  localId: createLocalId(),
 });
+
+type EditingState = Record<string, boolean>;
+
+type EditingAction =
+  | { type: 'toggle'; localId: string }
+  | { type: 'remove'; localId: string }
+  | { type: 'reset' };
+
+const editingReducer = (state: EditingState, action: EditingAction): EditingState => {
+  switch (action.type) {
+    case 'toggle':
+      return { ...state, [action.localId]: !state[action.localId] };
+    case 'remove': {
+      if (!state[action.localId]) return state;
+      const nextState = { ...state };
+      delete nextState[action.localId];
+      return nextState;
+    }
+    case 'reset':
+      return {};
+    default:
+      return state;
+  }
+};
 
 export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySangtaeSectionProps) {
   const { data } = useGetJaewonCategorySangtaesQuery(jojikNanoId, { enabled: Boolean(jojikNanoId) });
   const upsertMutation = useUpsertJaewonCategorySangtaesMutation(jojikNanoId);
 
-  const [editingMap, setEditingMap] = useState<Record<string, boolean>>({});
-  const [sangtaes, setSangtaes] = useState<EditableSangtae[]>(() => toEditable(data?.sangtaes));
+  const initialValues: JaewonCategorySangtaeFormValues = useMemo(
+    () => ({ sangtaes: toEditable(data?.sangtaes) }),
+    [data?.sangtaes],
+  );
+
+  const [editingMap, dispatchEditing] = useReducer(editingReducer, {});
+
+  const form = useForm({
+    defaultValues: initialValues,
+    onSubmit: async ({ value }) => {
+      const payload = {
+        sangtaes: value.sangtaes
+          .map((item) => ({
+            nanoId: item.nanoId || undefined,
+            name: item.name.trim(),
+            isHwalseong: item.isHwalseong,
+          }))
+          .filter((item) => item.name.length > 0),
+      };
+
+      await upsertMutation.mutateAsync(payload);
+      dispatchEditing({ type: 'reset' });
+      form.reset({ sangtaes: toEditable(data?.sangtaes) });
+    },
+  });
 
   useEffect(() => {
-    setSangtaes(toEditable(data?.sangtaes));
-  }, [data?.sangtaes]);
+    form.reset(initialValues);
+    dispatchEditing({ type: 'reset' });
+  }, [form, initialValues]);
+
+  const { sangtaes, isDirty } = useStore(form.store, (state) => {
+    const values = state.values as JaewonCategorySangtaeFormValues;
+    return { sangtaes: values.sangtaes ?? [], isDirty: state.isDirty };
+  });
 
   const initialKey = useMemo(
     () => data?.sangtaes.map((s) => `${s.nanoId}:${s.name}:${s.isHwalseong}`).join('|') ?? 'empty',
@@ -46,41 +104,20 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
   );
 
   const handleAdd = () => {
-    setSangtaes((prev) => [...prev, createEmptySangtae()]);
+    form.setFieldValue('sangtaes', (prev = []) => [...prev, createEmptySangtae()]);
   };
 
   const toggleEdit = (localId: string) => {
-    setEditingMap((prev) => ({ ...prev, [localId]: !prev[localId] }));
-  };
-
-  const handleChange = (localId: string, field: keyof EditableSangtae, value: string | boolean) => {
-    setSangtaes((prev) =>
-      prev.map((item) => (item.localId === localId ? { ...item, [field]: value } : item)),
-    );
+    dispatchEditing({ type: 'toggle', localId });
   };
 
   const handleDelete = (localId: string) => {
-    setSangtaes((prev) => prev.filter((item) => item.localId !== localId));
+    form.setFieldValue('sangtaes', (prev = []) => prev.filter((item) => item.localId !== localId));
+    dispatchEditing({ type: 'remove', localId });
   };
-
-  const handleSave = async () => {
-    const payload = {
-      sangtaes: sangtaes.map((item) => ({
-        nanoId: item.nanoId || undefined,
-        name: item.name.trim(),
-        isHwalseong: item.isHwalseong,
-      })),
-    };
-
-    await upsertMutation.mutateAsync(payload);
-    setEditingMap({});
-  };
-
-  const isDirty = initialKey !==
-    (sangtaes.map((s) => `${s.nanoId}:${s.name}:${s.isHwalseong}`).join('|') ?? '');
 
   return (
-    <div css={cssObj.panelBody}>
+    <div key={initialKey} css={cssObj.panelBody}>
       <span css={cssObj.panelSubtitle}>재원 상태 카테고리상태 설정</span>
       <div css={cssObj.panelSection}>
         <div css={cssObj.sectionActions}>
@@ -95,22 +132,32 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
           </Button>
         </div>
         {sangtaes.length === 0 && <p css={cssObj.helperText}>추가된 상태가 없습니다.</p>}
-        {sangtaes.map((item) => {
+        {sangtaes.map((item, index) => {
           const isEditing = editingMap[item.localId] ?? false;
           return (
             <div key={item.localId} css={cssObj.panelLabelSection}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <Textfield
-                  value={item.name}
-                  disabled={!isEditing}
-                  placeholder="상태 이름"
-                  onValueChange={(value) => handleChange(item.localId, 'name', value)}
-                />
+                <form.Field name={`sangtaes[${index}].name`}>
+                  {(field) => (
+                    <Textfield
+                      value={field.state.value}
+                      disabled={!isEditing}
+                      placeholder="상태 이름"
+                      onValueChange={field.handleChange}
+                    />
+                  )}
+                </form.Field>
                 <label css={cssObj.panelLabel} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                   <input
                     type="checkbox"
                     checked={item.isHwalseong}
-                    onChange={(e) => handleChange(item.localId, 'isHwalseong', e.target.checked)}
+                    onChange={(e) =>
+                      form.setFieldValue('sangtaes', (prev = []) =>
+                        prev.map((s) =>
+                          s.localId === item.localId ? { ...s, isHwalseong: e.target.checked } : s,
+                        ),
+                      )
+                    }
                   />
                   활성
                 </label>
@@ -140,7 +187,7 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
             styleType="solid"
             variant="primary"
             disabled={!isDirty || upsertMutation.isPending}
-            onClick={handleSave}
+            onClick={() => void form.handleSubmit()}
           >
             {upsertMutation.isPending ? '저장 중...' : '저장'}
           </Button>
