@@ -104,7 +104,7 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
                   value={item.name}
                   disabled={!isEditing}
                   placeholder="상태 이름"
-                  onChange={(e) => handleChange(item.localId, 'name', e.target.value)}
+                  onValueChange={(value) => handleChange(item.localId, 'name', value)}
                 />
                 <label css={cssObj.panelLabel} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                   <input
@@ -116,18 +116,20 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
                 </label>
                 <IconButton
                   size="small"
-                  variant="secondary"
-                  icon={isEditing ? <PlusIcon /> : <EditIcon />}
+                  styleType="background"
                   aria-label="edit"
                   onClick={() => toggleEdit(item.localId)}
-                />
+                >
+                  {isEditing ? <PlusIcon /> : <EditIcon />}
+                </IconButton>
                 <IconButton
                   size="small"
-                  variant="secondary"
-                  icon={<DeleteIcon />}
+                  styleType="background"
                   aria-label="delete"
                   onClick={() => handleDelete(item.localId)}
-                />
+                >
+                  <DeleteIcon />
+                </IconButton>
               </div>
             </div>
           );

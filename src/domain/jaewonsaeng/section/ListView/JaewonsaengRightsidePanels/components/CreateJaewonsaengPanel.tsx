@@ -49,16 +49,16 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
       </div>
       <div css={cssObj.panelSection}>
         <span css={cssObj.panelLabel}>재원생 기본 정보</span>
-        <Textfield value={name} placeholder="이름" onChange={(e) => setName(e.target.value)} />
+        <Textfield value={name} placeholder="이름" onValueChange={setName} />
         <Textfield
           value={nickname}
           placeholder="별명"
-          onChange={(e) => setNickname(e.target.value)}
+          onValueChange={setNickname}
         />
         <Textfield
           value={jaewonCategorySangtaeNanoId}
           placeholder="재원 상태 카테고리 상태 nanoId"
-          onChange={(e) => setJaewonCategorySangtaeNanoId(e.target.value)}
+          onValueChange={setJaewonCategorySangtaeNanoId}
         />
       </div>
       <div css={cssObj.panelSection}>
@@ -66,7 +66,7 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
         <Textfield
           value={boninName}
           placeholder="본인 이름"
-          onChange={(e) => setBoninName(e.target.value)}
+          onValueChange={setBoninName}
         />
       </div>
       <div css={cssObj.sectionActions}>

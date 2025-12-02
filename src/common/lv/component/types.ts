@@ -55,6 +55,7 @@ export type ListViewTableProps<TData> = {
   loadingMessage?: string;
   emptyMessage?: string;
   isDimmed?: boolean;
+  rowProps?: (row: Row<TData>) => React.HTMLAttributes<HTMLTableRowElement>;
   rowEventHandlers?: {
     selectOnClick?: boolean;
     shouldIgnoreRowClick?: (event: React.MouseEvent<HTMLElement>) => boolean;

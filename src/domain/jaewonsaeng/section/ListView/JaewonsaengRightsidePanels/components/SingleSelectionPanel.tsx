@@ -56,7 +56,7 @@ export const SingleSelectionPanel = ({
       setIsHwalseong(data.jaewonsaeng.isHwalseong);
       setBoninName(data.jaewonsaengBonin.name ?? '');
       setBoninPhone(data.jaewonsaengBonin.phoneNumber ?? '');
-      setBoninEmail(data.jaewonsaengBonin.emailAddress ?? '');
+      setBoninEmail(data.jaewonsaengBonin.email ?? '');
       setBoninBigo(data.jaewonsaengBonin.bigo ?? '');
       setBohojas(data.jaewonsaengBohojas.map((b) => ({ ...b })));
     }
@@ -127,15 +127,15 @@ export const SingleSelectionPanel = ({
 
       <div css={cssObj.panelSection}>
         <span css={cssObj.panelSubtitle}>재원생 기본 속성</span>
-        <Textfield value={name} onChange={(e) => setName(e.target.value)} placeholder="이름" />
+        <Textfield value={name} onValueChange={setName} placeholder="이름" />
         <Textfield
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onValueChange={setNickname}
           placeholder="별명"
         />
         <Textfield
           value={jaewonCategorySangtaeNanoId}
-          onChange={(e) => setJaewonCategorySangtaeNanoId(e.target.value)}
+          onValueChange={setJaewonCategorySangtaeNanoId}
           placeholder="재원 상태 카테고리 상태 nanoId"
         />
         <label css={cssObj.panelLabel} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -155,10 +155,10 @@ export const SingleSelectionPanel = ({
 
       <div css={cssObj.panelSection}>
         <span css={cssObj.panelSubtitle}>재원생 본인 속성</span>
-        <Textfield value={boninName} onChange={(e) => setBoninName(e.target.value)} placeholder="이름" />
-        <Textfield value={boninPhone} onChange={(e) => setBoninPhone(e.target.value)} placeholder="전화번호" />
-        <Textfield value={boninEmail} onChange={(e) => setBoninEmail(e.target.value)} placeholder="이메일" />
-        <Textfield value={boninBigo} onChange={(e) => setBoninBigo(e.target.value)} placeholder="비고" />
+        <Textfield value={boninName} onValueChange={setBoninName} placeholder="이름" />
+        <Textfield value={boninPhone} onValueChange={setBoninPhone} placeholder="전화번호" />
+        <Textfield value={boninEmail} onValueChange={setBoninEmail} placeholder="이메일" />
+        <Textfield value={boninBigo} onValueChange={setBoninBigo} placeholder="비고" />
         <div css={cssObj.sectionActions}>
           <Button variant="primary" styleType="solid" onClick={handleSaveBonin}>
             저장
@@ -172,31 +172,27 @@ export const SingleSelectionPanel = ({
           <div key={bohoja.nanoId} css={cssObj.panelLabelSection}>
             <Textfield
               value={bohoja.gwangye}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setBohojas((prev) =>
-                  prev.map((b) =>
-                    b.nanoId === bohoja.nanoId ? { ...b, gwangye: e.target.value } : b,
-                  ),
+                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, gwangye: value } : b)),
                 )
               }
               placeholder="관계"
             />
             <Textfield
               value={bohoja.phoneNumber ?? ''}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setBohojas((prev) =>
-                  prev.map((b) =>
-                    b.nanoId === bohoja.nanoId ? { ...b, phoneNumber: e.target.value } : b,
-                  ),
+                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, phoneNumber: value } : b)),
                 )
               }
               placeholder="전화번호"
             />
             <Textfield
               value={bohoja.email ?? ''}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setBohojas((prev) =>
-                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, email: e.target.value } : b)),
+                  prev.map((b) => (b.nanoId === bohoja.nanoId ? { ...b, email: value } : b)),
                 )
               }
               placeholder="이메일"
@@ -226,14 +222,11 @@ export const SingleSelectionPanel = ({
 
       <div css={cssObj.panelFooter}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button
-            variant="secondary"
-            onClick={handleDeactivate}
-          >
+          <Button variant="secondary" onClick={handleDeactivate}>
             재원생 비활성화
           </Button>
           <Button
-            variant="danger"
+            variant="red"
             styleType="solid"
             disabled={isHwalseong}
             onClick={handleDeleteJaewonsaeng}

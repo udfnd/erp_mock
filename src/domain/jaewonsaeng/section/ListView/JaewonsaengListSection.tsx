@@ -75,7 +75,7 @@ export function JaewonsaengListSection({
     }
   };
 
-  const columns: ColumnDef<JaewonsaengListItem, unknown>[] = useMemo(
+  const columns: ColumnDef<JaewonsaengListItem, any>[] = useMemo(
     () => [
       columnHelper.accessor('name', {
         header: createSortableHeader('이름'),
