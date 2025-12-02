@@ -88,6 +88,9 @@ export const cssObj = {
   `,
 
   panelLabelSection: css`
+    background-color: ${color.cgrey10};
+    padding: 8px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -96,6 +99,16 @@ export const cssObj = {
   panelLabel: css`
     ${typography.bodySmallM};
     color: ${color.cgrey500};
+  `,
+
+  parentTitle: css`
+    display: flex;
+    align-items: center;
+  `,
+
+  parentDeleteButtonWrapper: css`
+    display: flex;
+    justify-content: flex-end;
   `,
 
   sectionActions: css`
@@ -107,6 +120,7 @@ export const cssObj = {
   panelFooter: css`
     margin-top: auto;
     display: flex;
+    flex-direction: column;
     gap: 8px;
   `,
 
@@ -118,5 +132,25 @@ export const cssObj = {
   sectionFooter: css`
     display: flex;
     justify-content: flex-end;
+  `,
+
+  hadaLinkSection: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+  `,
+
+  hadaLinkText: css`
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+    > p {
+      ${typography.bodySmallM};
+      color: ${color.black};
+    }
+    > span {
+      ${typography.bodyM};
+      color: ${color.black};
+    }
   `,
 };

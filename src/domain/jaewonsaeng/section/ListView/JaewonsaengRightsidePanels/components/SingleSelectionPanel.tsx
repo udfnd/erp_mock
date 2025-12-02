@@ -3,7 +3,7 @@
 import { useForm, useStore } from '@tanstack/react-form';
 import { useEffect, useMemo, useState } from 'react';
 
-import { Button, DatePicker, Modal, Textfield } from '@/common/components';
+import { Button, DatePicker, Dropdown, Modal, Textfield } from '@/common/components';
 import {
   createJaewonsaengBohoja,
   deleteJaewonsaengBohoja,
@@ -15,10 +15,13 @@ import {
   useIssueJaewonsaengHadaLinkCodeMutation,
   useUpdateJaewonsaengBoninMutation,
   useUpdateJaewonsaengMutation,
+  useGetJaewonCategorySangtaesQuery,
 } from '@/domain/jaewonsaeng/api';
+import { useGetGendersQuery } from '@/domain/system/api';
 import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
+import { ArrowMdRightSingleIcon, PlusIcon } from '@/common/icons';
 
 export type SingleSelectionPanelProps = {
   jaewonsaengNanoId: string;
@@ -32,7 +35,7 @@ export type SingleSelectionPanelProps = {
 export const SingleSelectionPanel = ({
   jaewonsaengNanoId,
   jaewonsaengName,
-  jojikNanoId: _jojikNanoId,
+  jojikNanoId,
   onAfterMutation,
   isAuthenticated,
   isHadaLinked: isHadaLinkedFromList,
@@ -45,19 +48,25 @@ export const SingleSelectionPanel = ({
     enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
   });
 
-  const [isHadaLinkModalOpen, setIsHadaLinkModalOpen] = useState(false);
-  const [issuedLinkCode, setIssuedLinkCode] = useState<string | null>(null);
+  const [hadaLinkModalFor, setHadaLinkModalFor] = useState<string | null>(null);
+  const isHadaLinkModalOpen = hadaLinkModalFor === jaewonsaengNanoId;
 
   const { data: hadaLinkCodeData, refetch: refetchHadaLinkCode } =
     useGetJaewonsaengHadaLinkCodeQuery(jaewonsaengNanoId, {
       enabled: isAuthenticated && isHadaLinkModalOpen,
     });
 
-  const issueHadaLinkCodeMutation = useIssueJaewonsaengHadaLinkCodeMutation();
+  const issuedLinkCode = hadaLinkCodeData?.linkCode ?? null;
 
+  const issueHadaLinkCodeMutation = useIssueJaewonsaengHadaLinkCodeMutation();
   const updateJaewonsaeng = useUpdateJaewonsaengMutation(jaewonsaengNanoId);
   const updateBonin = useUpdateJaewonsaengBoninMutation(jaewonsaengNanoId);
   const deleteJaewonsaeng = useDeleteJaewonsaengMutation(jaewonsaengNanoId);
+
+  const { data: jaewonCategorySangtaes } = useGetJaewonCategorySangtaesQuery(jojikNanoId, {
+    enabled: Boolean(jojikNanoId),
+  });
+  const { data: gendersData } = useGetGendersQuery({ enabled: true });
 
   const initialValues = useMemo(
     () => ({
@@ -149,15 +158,6 @@ export const SingleSelectionPanel = ({
     form.reset(initialValues);
   }, [form, initialValues]);
 
-  useEffect(() => {
-    setIssuedLinkCode(hadaLinkCodeData?.linkCode ?? null);
-  }, [hadaLinkCodeData]);
-
-  useEffect(() => {
-    setIsHadaLinkModalOpen(false);
-    setIssuedLinkCode(null);
-  }, [jaewonsaengNanoId]);
-
   const isHadaLinked = detailData?.isHadaLinked ?? isHadaLinkedFromList;
 
   if (isLoading && !data) {
@@ -183,29 +183,26 @@ export const SingleSelectionPanel = ({
     await onAfterMutation();
   };
 
+  const jaewonCategoryOptions =
+    jaewonCategorySangtaes?.categories.flatMap((category) =>
+      category.sangtaes.map((sangtae) => ({
+        value: sangtae.nanoId,
+        label: sangtae.name,
+        disabled: !sangtae.isHwalseong,
+      })),
+    ) ?? [];
+
+  const genderOptions =
+    gendersData?.genders.map((gender) => ({
+      value: gender.nanoId,
+      label: gender.genderName,
+    })) ?? [];
+
   return (
     <div css={cssObj.panelBody}>
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>{values.jaewonsaeng.name}</h2>
       </div>
-
-      {!isHadaLinked && (
-        <div css={cssObj.panelSection}>
-          <p css={cssObj.helperText}>
-            하다를 연동하지 않은 계정입니다. 하다를 연동해 본인 정보를 확인해 보세요.
-          </p>
-          <div css={cssObj.sectionActions}>
-            <Button
-              variant="primary"
-              styleType="outlined"
-              onClick={() => setIsHadaLinkModalOpen(true)}
-            >
-              하다 연동하러 가기 &gt;
-            </Button>
-          </div>
-        </div>
-      )}
-
       <form onSubmit={(event) => void form.handleSubmit(event)}>
         <div css={cssObj.panelSection}>
           <span css={cssObj.panelSubtitle}>재원생 기본 속성</span>
@@ -213,9 +210,12 @@ export const SingleSelectionPanel = ({
             {(field) => (
               <Textfield
                 singleLine
+                required
+                label="학원 내부 이름"
+                placeholder="학원 내부 이름을 입력해 주세요"
+                helperText="학원 내부에서 사용하는 이름을 입력해 주세요. (ex. 김다다A)"
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="이름"
               />
             )}
           </form.Field>
@@ -223,19 +223,22 @@ export const SingleSelectionPanel = ({
             {(field) => (
               <Textfield
                 singleLine
+                required
+                label="학원 내부 식별자"
+                placeholder="학원 내부 식별자를 입력해 주세요"
+                helperText="학원 내부에서 식별자를 입력해 주세요. (ex. 경기북 21기)"
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="별명"
               />
             )}
           </form.Field>
           <form.Field name="jaewonsaeng.jaewonCategorySangtaeNanoId">
             {(field) => (
-              <Textfield
-                singleLine
+              <Dropdown
                 value={field.state.value}
-                onValueChange={field.handleChange}
-                placeholder="재원 상태 카테고리 상태 nanoId"
+                onChange={field.handleChange}
+                placeholder="재원 상태 카테고리 상태를 선택해 주세요"
+                options={jaewonCategoryOptions}
               />
             )}
           </form.Field>
@@ -250,15 +253,17 @@ export const SingleSelectionPanel = ({
             활성화
           </label>
         </div>
-
         <div css={cssObj.panelSection}>
           <span css={cssObj.panelSubtitle}>재원생 본인 속성</span>
           <form.Field name="bonin.name">
             {(field) => (
               <Textfield
+                singleLine
+                required
+                label="학생 본명"
+                placeholder="이름을 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="이름"
               />
             )}
           </form.Field>
@@ -274,11 +279,11 @@ export const SingleSelectionPanel = ({
           </form.Field>
           <form.Field name="bonin.genderNanoId">
             {(field) => (
-              <Textfield
-                singleLine
+              <Dropdown
                 value={field.state.value}
-                onValueChange={field.handleChange}
-                placeholder="성별 nanoId"
+                onChange={field.handleChange}
+                placeholder="성별을 선택해 주세요"
+                options={genderOptions}
               />
             )}
           </form.Field>
@@ -286,9 +291,10 @@ export const SingleSelectionPanel = ({
             {(field) => (
               <Textfield
                 singleLine
+                label="학생 전화번호"
+                placeholder="학생 전화번호를 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="전화번호"
               />
             )}
           </form.Field>
@@ -296,46 +302,47 @@ export const SingleSelectionPanel = ({
             {(field) => (
               <Textfield
                 singleLine
+                label="학생 이메일"
+                placeholder="학생 이메일을 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="이메일"
               />
             )}
           </form.Field>
           <form.Field name="bonin.bigo">
             {(field) => (
               <Textfield
+                label="학생 비고"
+                placeholder="비고 사항을 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
-                placeholder="비고"
               />
             )}
           </form.Field>
+          {!isHadaLinked && (
+            <div css={cssObj.hadaLinkSection}>
+              <div css={cssObj.hadaLinkText}>
+                <p>하다를 연동하지 않은 계정입니다.</p>
+                <span>하다를 연동해 본인 정보를 확인해 보세요.</span>
+              </div>
+              <div css={cssObj.parentTitle}>
+                <Button
+                  variant="assistive"
+                  styleType="solid"
+                  size="small"
+                  isFull
+                  onClick={() => setHadaLinkModalFor(jaewonsaengNanoId)}
+                  iconRight={<ArrowMdRightSingleIcon />}
+                >
+                  하다 연동하러 가기
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-
         <div css={cssObj.panelSection}>
-          <div css={cssObj.sectionActions}>
+          <div css={cssObj.parentTitle}>
             <span css={cssObj.panelSubtitle}>보호자 속성</span>
-            <Button
-              size="small"
-              styleType="outlined"
-              variant="secondary"
-              onClick={() =>
-                form.setFieldValue('bohojas', (prev = []) => [
-                  ...prev,
-                  {
-                    localId: createLocalId(),
-                    nanoId: createLocalId(),
-                    gwangye: '',
-                    phoneNumber: '',
-                    emailAddress: '',
-                    bigo: '',
-                  },
-                ])
-              }
-            >
-              보호자 추가
-            </Button>
           </div>
           <form.Field name="bohojas" mode="array">
             {(bohojasField) => (
@@ -346,48 +353,58 @@ export const SingleSelectionPanel = ({
                       {(field) => (
                         <Textfield
                           singleLine
+                          required
+                          label="보호자-관계"
+                          placeholder="보호자와 학생의 관계를 선택해 주세요."
                           value={field.state.value}
                           onValueChange={field.handleChange}
-                          placeholder="관계"
                         />
                       )}
                     </form.Field>
+
                     <form.Field name={`bohojas[${index}].phoneNumber`}>
                       {(field) => (
                         <Textfield
                           singleLine
+                          required
+                          label="보호자 전화번호"
+                          placeholder="보호자 전화번호를 입력해 주세요"
                           value={field.state.value}
                           onValueChange={field.handleChange}
-                          placeholder="전화번호"
                         />
                       )}
                     </form.Field>
+
                     <form.Field name={`bohojas[${index}].emailAddress`}>
                       {(field) => (
                         <Textfield
                           singleLine
+                          label="보호자 이메일"
+                          placeholder="보호자 이메일을 입력해 주세요"
                           value={field.state.value}
                           onValueChange={field.handleChange}
-                          placeholder="이메일"
                         />
                       )}
                     </form.Field>
+
                     <form.Field name={`bohojas[${index}].bigo`}>
                       {(field) => (
                         <Textfield
+                          label="보호자 비고"
+                          placeholder="비고 사항을 입력해 주세요"
                           value={field.state.value}
                           onValueChange={field.handleChange}
-                          placeholder="비고"
                         />
                       )}
                     </form.Field>
-                    <div css={cssObj.sectionActions}>
+                    <div css={cssObj.parentDeleteButtonWrapper}>
                       <Button
+                        styleType="text"
                         variant="secondary"
                         size="small"
                         onClick={() => void handleDeleteBohoja(index, bohoja.nanoId)}
                       >
-                        삭제
+                        보호자 삭제
                       </Button>
                     </div>
                   </div>
@@ -395,40 +412,63 @@ export const SingleSelectionPanel = ({
               </>
             )}
           </form.Field>
-        </div>
-
-        <div css={cssObj.sectionActions}>
           <Button
-            variant="secondary"
-            onClick={() => form.setFieldValue('jaewonsaeng.isHwalseong', () => false)}
+            size="small"
+            styleType="outlined"
+            variant="assistive"
+            iconRight={<PlusIcon />}
+            onClick={() =>
+              form.setFieldValue('bohojas', (prev = []) => [
+                ...prev,
+                {
+                  localId: createLocalId(),
+                  nanoId: createLocalId(),
+                  gwangye: '',
+                  phoneNumber: '',
+                  emailAddress: '',
+                  bigo: '',
+                },
+              ])
+            }
           >
-            재원생 비활성화
+            보호자 추가
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            styleType="solid"
-            disabled={!isDirty || updateJaewonsaeng.isPending || updateBonin.isPending}
-          >
-            저장
-          </Button>
+          <div css={cssObj.sectionActions}>
+            <Button
+              size="small"
+              type="submit"
+              variant="primary"
+              styleType="solid"
+              disabled={!isDirty || updateJaewonsaeng.isPending || updateBonin.isPending}
+            >
+              저장
+            </Button>
+          </div>
         </div>
       </form>
-
       <div css={cssObj.panelFooter}>
         <Button
+          size="small"
           variant="red"
           styleType="solid"
+          onClick={() => form.setFieldValue('jaewonsaeng.isHwalseong', () => false)}
+        >
+          재원생 비활성화
+        </Button>
+        <Button
+          size="small"
+          variant="red"
+          styleType="solid"
+          isFull
           disabled={values.jaewonsaeng.isHwalseong}
           onClick={handleDeleteJaewonsaeng}
         >
           재원생 삭제
         </Button>
       </div>
-
       <Modal
         isOpen={isHadaLinkModalOpen}
-        onClose={() => setIsHadaLinkModalOpen(false)}
+        onClose={() => setHadaLinkModalFor(null)}
         title="하다 연동"
         menus={[
           {
@@ -442,8 +482,7 @@ export const SingleSelectionPanel = ({
                     variant="primary"
                     styleType="solid"
                     onClick={async () => {
-                      const result = await issueHadaLinkCodeMutation.mutateAsync(jaewonsaengNanoId);
-                      setIssuedLinkCode(result.linkCode);
+                      await issueHadaLinkCodeMutation.mutateAsync(jaewonsaengNanoId);
                       await refetchHadaLinkCode();
                     }}
                     disabled={issueHadaLinkCodeMutation.isPending}

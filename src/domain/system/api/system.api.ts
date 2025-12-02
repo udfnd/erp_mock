@@ -13,6 +13,8 @@ import {
   GetOpenSangtaesResponseSchema,
   GetPermissionTypesResponse,
   GetPermissionTypesResponseSchema,
+  GetGendersResponse,
+  GetGendersResponseSchema,
 } from './system.schema';
 
 export const getHadaJaewonsangLinkRequestPermissions =
@@ -73,5 +75,17 @@ export const useGetLinkIconsQuery = (options?: { enabled?: boolean }) =>
   useAuthedQuery<GetLinkIconsResponse, unknown>({
     queryKey: ['linkIcons'],
     queryFn: getLinkIcons,
+    enabled: options?.enabled ?? true,
+  });
+
+export const getGenders = async (): Promise<GetGendersResponse> => {
+  const res = await apiClient.get('/T/dl/genders');
+  return parseOrThrow(GetGendersResponseSchema, res.data);
+};
+
+export const useGetGendersQuery = (options?: { enabled?: boolean }) =>
+  useAuthedQuery<GetGendersResponse, unknown>({
+    queryKey: ['genders'],
+    queryFn: getGenders,
     enabled: options?.enabled ?? true,
   });

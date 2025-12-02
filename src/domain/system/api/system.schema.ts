@@ -34,3 +34,14 @@ export const GetLinkIconsResponseSchema = z.object({
   linkIcons: z.array(SystemItemSchema),
 });
 export type GetLinkIconsResponse = z.infer<typeof GetLinkIconsResponseSchema>;
+
+const GenderItemSchema = z.object({
+  nanoId: z.string(),
+  genderName: z.string(),
+});
+export type GenderItem = z.infer<typeof GenderItemSchema>;
+
+export const GetGendersResponseSchema = z.object({
+  genders: z.array(GenderItemSchema),
+});
+export type GetGendersResponse = z.infer<typeof GetGendersResponseSchema>;

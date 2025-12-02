@@ -7,9 +7,12 @@ import {
   useCreateJaewonsaengMutation,
   useGetJaewonCategorySangtaesQuery,
 } from '@/domain/jaewonsaeng/api';
+
 import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
+import { useGetGendersQuery } from '@/domain/system/api';
+import { PlusIcon } from '@/common/icons';
 
 export type CreateJaewonsaengPanelProps = {
   jojikNanoId: string;
@@ -78,6 +81,7 @@ export const CreateJaewonsaengPanel = ({
   const { data: jaewonCategorySangtaes } = useGetJaewonCategorySangtaesQuery(jojikNanoId, {
     enabled: Boolean(jojikNanoId),
   });
+  const { data: gendersData } = useGetGendersQuery({ enabled: true });
 
   const form = useForm({
     defaultValues: INITIAL_VALUES,
@@ -211,16 +215,24 @@ export const CreateJaewonsaengPanel = ({
             )}
           </form.Field>
           <form.Field name="bonin.genderNanoId">
-            {(field) => (
-              <Textfield
-                singleLine
-                label="학생 성별"
-                placeholder="성별 nanoId를 입력해 주세요"
-                value={field.state.value}
-                onValueChange={field.handleChange}
-              />
-            )}
+            {(field) => {
+              const options =
+                gendersData?.genders.map((gender) => ({
+                  value: gender.nanoId,
+                  label: gender.genderName,
+                })) ?? [];
+
+              return (
+                <Dropdown
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  placeholder="성별을 선택해 주세요"
+                  options={options}
+                />
+              );
+            }}
           </form.Field>
+
           <form.Field name="bonin.phoneNumber">
             {(field) => (
               <Textfield
@@ -256,27 +268,8 @@ export const CreateJaewonsaengPanel = ({
         </div>
 
         <div css={cssObj.panelSection}>
-          <div css={cssObj.sectionActions}>
+          <div css={cssObj.parentTitle}>
             <span css={cssObj.panelSubtitle}>보호자 속성</span>
-            <Button
-              size="small"
-              styleType="outlined"
-              variant="secondary"
-              onClick={() =>
-                form.setFieldValue('bohojas', (prev = []) => [
-                  ...prev,
-                  {
-                    localId: createLocalId(),
-                    gwangye: '',
-                    phoneNumber: '',
-                    email: '',
-                    bigo: '',
-                  },
-                ])
-              }
-            >
-              보호자 추가
-            </Button>
           </div>
           <form.Field name="bohojas" mode="array">
             {(bohojasField) => (
@@ -287,8 +280,9 @@ export const CreateJaewonsaengPanel = ({
                       {(field) => (
                         <Textfield
                           singleLine
-                          label="관계"
-                          placeholder="보호자 관계를 입력해 주세요"
+                          required
+                          label="보호자-관계"
+                          placeholder="보호자와 학생의 관계를 선택해 주세요."
                           value={field.state.value}
                           onValueChange={field.handleChange}
                         />
@@ -298,8 +292,9 @@ export const CreateJaewonsaengPanel = ({
                       {(field) => (
                         <Textfield
                           singleLine
-                          label="전화번호"
-                          placeholder="전화번호"
+                          required
+                          label="보호자 전화번호"
+                          placeholder="보호자 전화번호를 입력해 주세요"
                           value={field.state.value}
                           onValueChange={field.handleChange}
                         />
@@ -309,8 +304,8 @@ export const CreateJaewonsaengPanel = ({
                       {(field) => (
                         <Textfield
                           singleLine
-                          label="이메일"
-                          placeholder="이메일"
+                          label="보호자 이메일"
+                          placeholder="보호자 이메일을 입력해 주세요"
                           value={field.state.value}
                           onValueChange={field.handleChange}
                         />
@@ -319,32 +314,52 @@ export const CreateJaewonsaengPanel = ({
                     <form.Field name={`bohojas[${index}].bigo`}>
                       {(field) => (
                         <Textfield
-                          label="비고"
-                          placeholder="비고"
+                          label="보호자 비고"
+                          placeholder="비고 사항을 입력해 주세요"
                           value={field.state.value}
                           onValueChange={field.handleChange}
                         />
                       )}
                     </form.Field>
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => bohojasField.removeValue(index)}
-                    >
-                      제거
-                    </Button>
+                    <div css={cssObj.parentDeleteButtonWrapper}>
+                      <Button
+                        styleType="text"
+                        variant="secondary"
+                        size="small"
+                        onClick={() => bohojasField.removeValue(index)}
+                      >
+                        보호자 삭제
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </>
             )}
           </form.Field>
+          <Button
+            size="small"
+            styleType="outlined"
+            variant="assistive"
+            iconRight={<PlusIcon />}
+            onClick={() =>
+              form.setFieldValue('bohojas', (prev = []) => [
+                ...prev,
+                {
+                  localId: createLocalId(),
+                  gwangye: '',
+                  phoneNumber: '',
+                  email: '',
+                  bigo: '',
+                },
+              ])
+            }
+          >
+            보호자 추가
+          </Button>
         </div>
       </form>
 
       <div css={cssObj.panelFooter}>
-        <Button variant="secondary" size="small" onClick={onExit}>
-          취소
-        </Button>
         <Button
           type="submit"
           size="small"
@@ -352,8 +367,10 @@ export const CreateJaewonsaengPanel = ({
           variant="primary"
           form={formId}
           disabled={isDisabled}
+          iconRight={<PlusIcon />}
+          isFull
         >
-          {createMutation.isPending ? '생성 중...' : '재원생 생성'}
+          재원생 생성하기
         </Button>
       </div>
     </>
