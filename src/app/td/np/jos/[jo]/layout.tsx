@@ -24,6 +24,16 @@ const NAV_ITEMS = [
     basePath: MANAGE_BASE,
   },
   {
+    name: '수업들',
+    href: join(JAWONS_BASE, 'sueops', 'lv'),
+    basePath: JAWONS_BASE,
+  },
+  {
+    name: '재원생들',
+    href: join(JAWONS_BASE, 'jaewonsaengs', 'lv'),
+    basePath: JAWONS_BASE,
+  },
+  {
     name: '자원들',
     href: join(JAWONS_BASE, 'memos', 'lv'),
     basePath: JAWONS_BASE,
