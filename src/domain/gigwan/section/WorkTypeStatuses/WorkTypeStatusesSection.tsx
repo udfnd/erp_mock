@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
-import { useCallback, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { Button, IconButton } from '@/common/components';
 import { DeleteIcon, EditIcon, PlusIcon } from '@/common/icons';
@@ -121,6 +121,11 @@ function WorkTypeStatusesForm({ gigwanNanoId, initialValues, workTypeError }: Wo
       isDirty: state.isDirty,
     };
   });
+
+  useEffect(() => {
+    form.reset(initialValues);
+    dispatchEditingState({ type: 'reset' });
+  }, [form, initialValues]);
 
   const workTypeHasEmptyStatus = useMemo(
     () => statuses.some((s) => s.name.trim().length === 0),
@@ -252,9 +257,10 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
     { enabled: Boolean(gigwanNanoId) },
   );
 
-  const initialValues: WorkTypeFormValues = workTypeStatusesData
-    ? mapWorkTypeSangtaesToFormValues(workTypeStatusesData.sangtaes)
-    : INITIAL_VALUES;
+  const initialValues = useMemo<WorkTypeFormValues>(() => {
+    if (!workTypeStatusesData) return INITIAL_VALUES;
+    return mapWorkTypeSangtaesToFormValues(workTypeStatusesData.sangtaes);
+  }, [workTypeStatusesData]);
 
   const formKey = `${gigwanNanoId}:${
     workTypeStatusesData?.sangtaes?.map((sangtae) => sangtae.nanoId).join('|') ?? 'empty'
