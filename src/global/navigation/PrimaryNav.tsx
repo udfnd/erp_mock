@@ -116,12 +116,7 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
   const [activeItemKey, setActiveItemKey] = useState<string | null>(null);
   const [isGigwanExpanded, setIsGigwanExpanded] = useState(true);
 
-  const {
-    state: authState,
-    accessToken,
-    setAuthState,
-    setActiveUserId,
-  } = useAuth();
+  const { state: authState, accessToken, setAuthState, setActiveUserId } = useAuth();
 
   const history = useAuthStore((s) => s.history);
   const upsertHistory = useCallback(
@@ -917,6 +912,9 @@ export const PrimaryNav = ({ onHierarchyChange }: Props) => {
               onClose={() => setIsProfileMenuOpen(false)}
               history={filteredHistory}
               onSelectHistory={handleSelectHistory}
+              onProfileModalOpen={() => {
+                setIsProfileModalOpen(true);
+              }}
               onAddUser={handleAddUser}
               onLogout={handleLogout}
               anchorRef={profileButtonRef}

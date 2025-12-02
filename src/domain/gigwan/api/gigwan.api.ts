@@ -114,9 +114,7 @@ export const useUpsertEmploymentCategoriesMutation = (nanoId: string) =>
 export const getWorkTypeCustomSangtaes = async (
   nanoId: string,
 ): Promise<GetWorkTypeSangtaesResponse> => {
-  const res = await apiClient.get(`/T/dl/gigwans/${nanoId}/work-type-custom-sangtaes`, {
-    headers: { 'Cache-Control': 'no-cache' },
-  });
+  const res = await apiClient.get(`/T/dl/gigwans/${nanoId}/work-type-custom-sangtaes`);
   return parseOrThrow(GetWorkTypeSangtaesResponseSchema, res.data);
 };
 

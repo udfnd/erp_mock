@@ -18,6 +18,7 @@ type MyProfileMenuProps = {
   anchorRef: RefObject<HTMLElement | null>;
   onClose: () => void;
   onSelectHistory: (entry: AuthHistoryEntry) => void;
+  onProfileModalOpen: () => void;
   onAddUser: () => void;
   onLogout: () => void;
 };
@@ -30,6 +31,7 @@ export default function MyProfileMenu({
   anchorRef,
   onClose,
   onSelectHistory,
+  onProfileModalOpen,
   onAddUser,
   onLogout,
 }: MyProfileMenuProps) {
@@ -85,7 +87,12 @@ export default function MyProfileMenu({
           </div>
         </div>
       </div>
-      <Button variant="secondary" size="small" iconLeft={<InfoBlackIcon />} onClick={onAddUser}>
+      <Button
+        variant="secondary"
+        size="small"
+        iconLeft={<InfoBlackIcon />}
+        onClick={onProfileModalOpen}
+      >
         사용자 설정
       </Button>
       <Button variant="assistive" size="small" iconLeft={<XCircleBlackIcon />} onClick={onLogout}>

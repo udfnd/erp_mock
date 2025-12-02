@@ -75,7 +75,7 @@ type WorkTypeStatusesFormProps = {
   workTypeError: unknown;
 };
 
-function WorkTypeStatusesForm({ gigwanNanoId, initialValues, workTypeError }: WorkTypeStatusesFormProps) {
+function WorkTypeStatusesForm({ gigwanNanoId, initialValues }: WorkTypeStatusesFormProps) {
   const queryClient = useQueryClient();
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
   const [editingState, dispatchEditingState] = useReducer(workTypeEditingReducer, {});
@@ -153,8 +153,6 @@ function WorkTypeStatusesForm({ gigwanNanoId, initialValues, workTypeError }: Wo
       </div>
 
       <div css={cssObj.cardBody}>
-        {workTypeError ? <p css={cssObj.errorText}>근무 형태 상태를 불러오지 못했습니다.</p> : null}
-
         <form.Field name="statuses" mode="array">
           {(statusesField) => (
             <>
