@@ -24,6 +24,12 @@ import { createLocalId } from '@/domain/gigwan/section/local-id';
 import { cssObj } from '../../styles';
 import { ArrowMdRightSingleIcon, PlusIcon } from '@/common/icons';
 
+const getFirstNonEmptyString = (...values: (string | null | undefined)[]) =>
+  values.find((value) => value !== undefined && value !== null && value !== '') ?? '';
+
+const getFirstDefined = <T,>(...values: (T | null | undefined)[]) =>
+  values.find((value) => value !== undefined && value !== null);
+
 export type SingleSelectionPanelProps = {
   jaewonsaengNanoId: string;
   jaewonsaengName: string;
@@ -71,12 +77,7 @@ export const SingleSelectionPanel = ({
       enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
     });
 
-  const getFirstNonEmptyString = (...values: (string | null | undefined)[]) =>
-    values.find((value) => value !== undefined && value !== null && value !== '') ?? '';
-
-  const getFirstDefined = <T,>(...values: (T | null | undefined)[]) =>
-    values.find((value) => value !== undefined && value !== null);
-
+  // 🔹 getFirst* 함수들은 이제 top-level 이라 dependency에 넣을 필요 없음
   const initialValues = useMemo(
     () => ({
       jaewonsaeng: {
@@ -88,8 +89,11 @@ export const SingleSelectionPanel = ({
           '',
         ),
         isHwalseong:
-          (getFirstDefined(data?.jaewonsaeng.isHwalseong, detailData?.isHwalseong, true) as boolean) ??
-          true,
+          (getFirstDefined(
+            data?.jaewonsaeng.isHwalseong,
+            detailData?.isHwalseong,
+            true,
+          ) as boolean) ?? true,
       },
       bonin: {
         name: getFirstNonEmptyString(data?.jaewonsaengBonin.name, ''),
@@ -109,7 +113,7 @@ export const SingleSelectionPanel = ({
           bigo: bohoja.bigo ?? '',
         })) ?? [],
     }),
-    [data, detailData, getFirstDefined, getFirstNonEmptyString, jaewonsaengName],
+    [data, detailData, jaewonsaengName],
   );
 
   const form = useForm({
@@ -166,15 +170,17 @@ export const SingleSelectionPanel = ({
     isDirty: state.isDirty,
   }));
 
+  // 🔹 이제 initialValues 참조가 안정적이라 이 effect가 무한히 돌지 않음
   useEffect(() => {
     form.reset(initialValues);
   }, [form, initialValues]);
 
   const [isHadaLinkTooltipOpen, setIsHadaLinkTooltipOpen] = useState(false);
   const hadaLinkActionRef = useRef<HTMLDivElement>(null);
-  const [hadaLinkTooltipPosition, setHadaLinkTooltipPosition] = useState<{ left: number; top: number } | null>(
-    null,
-  );
+  const [hadaLinkTooltipPosition, setHadaLinkTooltipPosition] = useState<{
+    left: number;
+    top: number;
+  } | null>(null);
   const [activeLinkedTab, setActiveLinkedTab] = useState('sugangsaengs');
 
   useEffect(() => {
@@ -263,7 +269,7 @@ export const SingleSelectionPanel = ({
   const resolvedActiveLinkedTab = useMemo(() => {
     const hasActiveTab = linkedObjectTabs.some((tab) => tab.key === activeLinkedTab);
 
-    return hasActiveTab ? activeLinkedTab : linkedObjectTabs[0]?.key ?? '';
+    return hasActiveTab ? activeLinkedTab : (linkedObjectTabs[0]?.key ?? '');
   }, [activeLinkedTab, linkedObjectTabs]);
 
   if (isLoading && !data) {
@@ -431,7 +437,10 @@ export const SingleSelectionPanel = ({
                 <p>하다를 연동하지 않은 계정입니다.</p>
                 <span>하다를 연동해 본인 정보를 확인해 보세요.</span>
               </div>
-              <div css={[cssObj.parentTitle, cssObj.permissionActionContainer]} ref={hadaLinkActionRef}>
+              <div
+                css={[cssObj.parentTitle, cssObj.permissionActionContainer]}
+                ref={hadaLinkActionRef}
+              >
                 <Button
                   variant="assistive"
                   styleType="solid"
@@ -479,7 +488,9 @@ export const SingleSelectionPanel = ({
                           />
                         </div>
                       ) : (
-                        <p css={cssObj.helperText}>아직 생성된 코드가 없습니다. 코드를 생성해 주세요.</p>
+                        <p css={cssObj.helperText}>
+                          아직 생성된 코드가 없습니다. 코드를 생성해 주세요.
+                        </p>
                       )}
                     </div>
                   </div>
