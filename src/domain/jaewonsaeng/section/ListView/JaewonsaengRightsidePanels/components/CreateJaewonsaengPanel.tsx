@@ -66,7 +66,11 @@ const INITIAL_VALUES: CreateJaewonsaengFormValues = {
   ],
 };
 
-export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }: CreateJaewonsaengPanelProps) => {
+export const CreateJaewonsaengPanel = ({
+  jojikNanoId,
+  onExit,
+  onAfterMutation,
+}: CreateJaewonsaengPanelProps) => {
   const createMutation = useCreateJaewonsaengMutation();
 
   const form = useForm({
@@ -124,17 +128,18 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
     <>
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>재원생 생성</h2>
-        <p css={cssObj.helperText}>재원생과 본인/보호자 정보를 함께 등록합니다.</p>
       </div>
       <form id={formId} css={cssObj.panelBody} onSubmit={(event) => void form.handleSubmit(event)}>
         <div css={cssObj.panelSection}>
-          <span css={cssObj.panelSubtitle}>재원생 기본 정보</span>
+          <span css={cssObj.panelSubtitle}>재원생 기본 속성</span>
           <form.Field name="jaewonsaeng.name">
             {(field) => (
               <Textfield
                 singleLine
-                label="이름"
-                placeholder="이름을 입력해 주세요"
+                required
+                label="학원 내부 이름"
+                placeholder="학원 내부 이름을 입력해 주세요"
+                helperText="학원 내부에서 사용하는 이름을 입력해 주세요. (ex. 김다다A)"
                 value={field.state.value}
                 onValueChange={field.handleChange}
               />
@@ -144,8 +149,10 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
             {(field) => (
               <Textfield
                 singleLine
-                label="별명"
-                placeholder="별명을 입력해 주세요"
+                required
+                label="학원 내부 식별자"
+                placeholder="학원 내부 식별자를 입력해 주세요"
+                helperText="학원 내부에서 식별자를 입력해 주세요. (ex. 경기북 21기)"
                 value={field.state.value}
                 onValueChange={field.handleChange}
               />
@@ -163,15 +170,15 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
             )}
           </form.Field>
         </div>
-
         <div css={cssObj.panelSection}>
-          <span css={cssObj.panelSubtitle}>본인 정보</span>
+          <span css={cssObj.panelSubtitle}>재원생 본인 속성</span>
           <form.Field name="bonin.name">
             {(field) => (
               <Textfield
                 singleLine
-                label="본인 이름"
-                placeholder="본인 이름을 입력해 주세요"
+                required
+                label="학생 본명"
+                placeholder="이름을 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
               />
@@ -191,7 +198,7 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
             {(field) => (
               <Textfield
                 singleLine
-                label="성별 nanoId"
+                label="학생 성별"
                 placeholder="성별 nanoId를 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
@@ -202,8 +209,8 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
             {(field) => (
               <Textfield
                 singleLine
-                label="전화번호"
-                placeholder="전화번호를 입력해 주세요"
+                label="학생 전화번호"
+                placeholder="학생 전화번호를 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
               />
@@ -213,8 +220,8 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
             {(field) => (
               <Textfield
                 singleLine
-                label="이메일"
-                placeholder="이메일을 입력해 주세요"
+                label="학생 이메일"
+                placeholder="학생 이메일을 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
               />
@@ -223,8 +230,8 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
           <form.Field name="bonin.bigo">
             {(field) => (
               <Textfield
-                label="비고"
-                placeholder="비고를 입력해 주세요"
+                label="학생 비고"
+                placeholder="비고 사항을 입력해 주세요"
                 value={field.state.value}
                 onValueChange={field.handleChange}
               />
@@ -234,7 +241,7 @@ export const CreateJaewonsaengPanel = ({ jojikNanoId, onExit, onAfterMutation }:
 
         <div css={cssObj.panelSection}>
           <div css={cssObj.sectionActions}>
-            <span css={cssObj.panelSubtitle}>보호자 정보</span>
+            <span css={cssObj.panelSubtitle}>보호자 속성</span>
             <Button
               size="small"
               styleType="outlined"
