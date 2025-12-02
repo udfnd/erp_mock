@@ -49,7 +49,6 @@ export const cssObj = {
   `,
 
   categorySection: css`
-    border-radius: 8px;
     display: flex;
     flex-direction: column;
   `,
@@ -63,7 +62,7 @@ export const cssObj = {
   statusList: css`
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
   `,
 
   statusItem: css`

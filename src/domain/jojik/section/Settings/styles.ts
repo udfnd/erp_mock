@@ -7,9 +7,12 @@ export const cssObj = {
     background: ${color.cgrey10};
     padding: 16px;
     width: 410px;
+    min-width: 410px;
+    min-height: 720px;
     display: flex;
     flex-direction: column;
     gap: 24px;
+    border-radius: 8px;
   `,
 
   cardHeader: css`

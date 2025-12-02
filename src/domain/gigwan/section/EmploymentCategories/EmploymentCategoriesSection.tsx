@@ -183,7 +183,6 @@ function EmploymentCategoriesForm({
               {categoriesField.state.value.map((category, categoryIndex) => (
                 <div key={category.nanoId} css={cssObj.categorySection}>
                   <span css={cssObj.categoryLabel}>{category.name}</span>
-
                   <form.Field name={`categories[${categoryIndex}].statuses`} mode="array">
                     {(statusesField) => (
                       <div css={cssObj.statusList}>

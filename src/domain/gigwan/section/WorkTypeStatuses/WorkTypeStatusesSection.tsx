@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { Button, IconButton, LabeledInput } from '@/common/components';
+import { Button, IconButton } from '@/common/components';
 import { DeleteIcon, PlusIcon } from '@/common/icons';
 import {
   gigwanQueryKeys,
@@ -13,9 +13,8 @@ import {
 } from '@/domain/gigwan/api';
 import type { WorkTypeSangtae } from '@/domain/gigwan/api';
 
-import { css } from './styles';
+import { cssObj } from './styles';
 import { createLocalId } from '../local-id';
-import { useFeedback } from '../useFeedback';
 
 type WorkTypeStatusesSectionProps = {
   gigwanNanoId: string;
@@ -52,8 +51,6 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
   );
   const upsertWorkTypeStatusesMutation = useUpsertWorkTypeCustomSangtaesMutation(gigwanNanoId);
 
-  const { feedback, showError, showSuccess, clearFeedback } = useFeedback();
-
   const form = useForm({
     defaultValues: INITIAL_VALUES,
     onSubmit: async ({ value }) => {
@@ -80,13 +77,10 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         const data = await upsertWorkTypeStatusesMutation.mutateAsync({ sangtaes });
         const nextValues = mapWorkTypeSangtaesToFormValues(data.sangtaes);
         form.reset(nextValues);
-        showSuccess('근무 형태 커스텀 상태가 저장되었습니다.');
         await queryClient.invalidateQueries({
           queryKey: gigwanQueryKeys.workTypeCustomSangtaes(gigwanNanoId),
         });
-      } catch {
-        showError('근무 형태 상태 저장에 실패했습니다.');
-      }
+      } catch {}
     },
   });
 
@@ -113,49 +107,48 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
 
   const handleSaveWorkTypeStatuses = useCallback(async () => {
     if (!isDirty || workTypeHasEmptyStatus) return;
-    clearFeedback();
     await form.handleSubmit();
-  }, [clearFeedback, form, isDirty, workTypeHasEmptyStatus]);
+  }, [form, isDirty, workTypeHasEmptyStatus]);
 
   return (
-    <section css={css.card}>
-      <div css={css.cardHeader}>
-        <div css={css.cardTitleGroup}>
-          <h2 css={css.cardTitle}>근무 형태 커스텀 상태</h2>
-          <p css={css.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
+    <section css={cssObj.card}>
+      <div css={cssObj.cardHeader}>
+        <div css={cssObj.cardTitleGroup}>
+          <h2 css={cssObj.cardTitle}>근무 형태 커스텀 상태</h2>
+          <p css={cssObj.cardSubtitle}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
         </div>
       </div>
 
-      <div css={css.cardBody}>
-        {workTypeError ? <p css={css.errorText}>근무 형태 상태를 불러오지 못했습니다.</p> : null}
+      <div css={cssObj.cardBody}>
+        {workTypeError ? <p css={cssObj.errorText}>근무 형태 상태를 불러오지 못했습니다.</p> : null}
 
         <form.Field name="statuses" mode="array">
           {(statusesField) => (
             <>
-              <span css={css.categoryLabel}>재직상태</span>
-              <div css={css.statusList}>
+              <span css={cssObj.categoryLabel}>근무 형태</span>
+              <div css={cssObj.statusList}>
                 {statusesField.state.value.map((status, statusIndex) => (
                   <form.Field key={status.localId} name={`statuses[${statusIndex}].name`}>
                     {(field) => {
                       const value = String(field.state.value ?? '');
                       return (
-                        <div css={css.statusItem}>
-                          <LabeledInput
+                        <div css={cssObj.statusField}>
+                          <input
+                            css={cssObj.statusInputField}
                             placeholder="근무 형태 상태 이름"
                             value={value}
-                            onValueChange={(v) => {
-                              clearFeedback();
-                              field.handleChange(v);
+                            onChange={(v) => {
+                              field.handleChange(v.target.value);
                             }}
                             onBlur={field.handleBlur}
                             maxLength={20}
+                            autoFocus
                           />
                           <IconButton
                             styleType="normal"
                             size="small"
                             onClick={() => {
                               void statusesField.removeValue(statusIndex);
-                              clearFeedback();
                             }}
                             aria-label={`${value || '상태'} 삭제`}
                           >
@@ -167,7 +160,6 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                   </form.Field>
                 ))}
               </div>
-
               <Button
                 size="medium"
                 styleType="outlined"
@@ -180,7 +172,6 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
                     localId: createLocalId(),
                     isHwalseong: true,
                   });
-                  clearFeedback();
                 }}
               >
                 추가
@@ -190,8 +181,7 @@ export function WorkTypeStatusesSection({ gigwanNanoId }: WorkTypeStatusesSectio
         </form.Field>
       </div>
 
-      <footer css={css.cardFooter}>
-        {feedback ? <span css={css.feedback[feedback.type]}>{feedback.message}</span> : null}
+      <footer css={cssObj.cardFooter}>
         <Button
           size="small"
           styleType="solid"
