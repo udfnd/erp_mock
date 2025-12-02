@@ -57,6 +57,14 @@ export {
   type BatchLinkJaewonsaengGroupsResponse,
   UnlinkJaewonsaengHadaResponseSchema,
   type UnlinkJaewonsaengHadaResponse,
+  JaewonCategorySangtaeSchema,
+  type JaewonCategorySangtae,
+  GetJaewonCategorySangtaesResponseSchema,
+  type GetJaewonCategorySangtaesResponse,
+  UpsertJaewonCategorySangtaesRequestSchema,
+  type UpsertJaewonCategorySangtaesRequest,
+  UpsertJaewonCategorySangtaesResponseSchema,
+  type UpsertJaewonCategorySangtaesResponse,
 } from './jaewonsaeng.schema';
 
 // ============================================================================
@@ -97,4 +105,8 @@ export {
   useBatchLinkJaewonsaengGroupsMutation,
   unlinkJaewonsaengHada,
   useUnlinkJaewonsaengHadaMutation,
+  getJaewonCategorySangtaes,
+  useGetJaewonCategorySangtaesQuery,
+  upsertJaewonCategorySangtaes,
+  useUpsertJaewonCategorySangtaesMutation,
 } from './jaewonsaeng.api';
