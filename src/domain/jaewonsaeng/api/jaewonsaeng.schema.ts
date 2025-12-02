@@ -31,6 +31,15 @@ export const JaewonsaengListItemSchema = z.object({
   daepyoJaewonsaengGroupName: z.string().nullable(),
   daepyoJaewonsaengGroupNanoId: z.string().nullable(),
   isHwalseong: z.boolean(),
+  memo: z.string().nullable().optional(),
+  sueops: z
+    .array(
+      z.object({
+        name: z.string(),
+        startedAt: z.string().nullable().optional(),
+      }),
+    )
+    .optional(),
 });
 export type JaewonsaengListItem = z.infer<typeof JaewonsaengListItemSchema>;
 
@@ -254,3 +263,35 @@ export type BatchLinkJaewonsaengGroupsResponse = z.infer<
 
 export const UnlinkJaewonsaengHadaResponseSchema = z.object({});
 export type UnlinkJaewonsaengHadaResponse = z.infer<typeof UnlinkJaewonsaengHadaResponseSchema>;
+
+export const JaewonCategorySangtaeSchema = z.object({
+  nanoId: z.string(),
+  name: z.string(),
+  isHwalseong: z.boolean(),
+});
+export type JaewonCategorySangtae = z.infer<typeof JaewonCategorySangtaeSchema>;
+
+export const GetJaewonCategorySangtaesResponseSchema = z.object({
+  sangtaes: z.array(JaewonCategorySangtaeSchema),
+});
+export type GetJaewonCategorySangtaesResponse = z.infer<
+  typeof GetJaewonCategorySangtaesResponseSchema
+>;
+
+export const UpsertJaewonCategorySangtaesRequestSchema = z.object({
+  sangtaes: z.array(
+    z.object({
+      nanoId: z.string().optional(),
+      name: z.string(),
+      isHwalseong: z.boolean(),
+    }),
+  ),
+});
+export type UpsertJaewonCategorySangtaesRequest = z.infer<
+  typeof UpsertJaewonCategorySangtaesRequestSchema
+>;
+
+export const UpsertJaewonCategorySangtaesResponseSchema = z.object({});
+export type UpsertJaewonCategorySangtaesResponse = z.infer<
+  typeof UpsertJaewonCategorySangtaesResponseSchema
+>;

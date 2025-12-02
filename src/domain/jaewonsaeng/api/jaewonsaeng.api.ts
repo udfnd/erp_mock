@@ -52,6 +52,13 @@ import {
   BatchLinkJaewonsaengGroupsResponseSchema,
   UnlinkJaewonsaengHadaResponse,
   UnlinkJaewonsaengHadaResponseSchema,
+  JaewonCategorySangtae,
+  GetJaewonCategorySangtaesResponse,
+  GetJaewonCategorySangtaesResponseSchema,
+  UpsertJaewonCategorySangtaesRequest,
+  UpsertJaewonCategorySangtaesRequestSchema,
+  UpsertJaewonCategorySangtaesResponse,
+  UpsertJaewonCategorySangtaesResponseSchema,
 } from './jaewonsaeng.schema';
 
 export const getJaewonsaengs = async (
@@ -288,3 +295,33 @@ export const useUnlinkJaewonsaengHadaMutation = () =>
   useAuthedMutation<UnlinkJaewonsaengHadaResponse, unknown, string>({
     mutationFn: unlinkJaewonsaengHada,
   });
+
+export const getJaewonCategorySangtaes = async (
+  jojikNanoId: string,
+): Promise<GetJaewonCategorySangtaesResponse> => {
+  const res = await apiClient.get(`/T/dl/jojiks/${jojikNanoId}/jaewon-category-sangtaes`);
+  return parseOrThrow(GetJaewonCategorySangtaesResponseSchema, res.data);
+};
+
+export const useGetJaewonCategorySangtaesQuery = (nanoId: string, options?: { enabled?: boolean }) =>
+  useAuthedQuery<GetJaewonCategorySangtaesResponse, unknown>({
+    queryKey: ['jaewonCategorySangtaes', nanoId],
+    queryFn: () => getJaewonCategorySangtaes(nanoId),
+    enabled: options?.enabled ?? true,
+  });
+
+export const upsertJaewonCategorySangtaes = async (
+  jojikNanoId: string,
+  data: UpsertJaewonCategorySangtaesRequest,
+): Promise<UpsertJaewonCategorySangtaesResponse> => {
+  const body = UpsertJaewonCategorySangtaesRequestSchema.parse(data);
+  const res = await apiClient.post(`/T/dl/jojiks/${jojikNanoId}/jaewon-category-sangtaes`, body);
+  return parseOrThrow(UpsertJaewonCategorySangtaesResponseSchema, res.data);
+};
+
+export const useUpsertJaewonCategorySangtaesMutation = (nanoId: string) =>
+  useAuthedMutation<UpsertJaewonCategorySangtaesResponse, unknown, UpsertJaewonCategorySangtaesRequest>(
+    {
+      mutationFn: (data) => upsertJaewonCategorySangtaes(nanoId, data),
+    },
+  );
