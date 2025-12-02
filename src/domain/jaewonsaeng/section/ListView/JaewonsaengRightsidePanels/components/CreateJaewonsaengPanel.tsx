@@ -2,8 +2,8 @@
 
 import { useForm, useStore } from '@tanstack/react-form';
 
-import { Button, DatePicker, Textfield } from '@/common/components';
-import { useCreateJaewonsaengMutation } from '@/domain/jaewonsaeng/api';
+import { Button, DatePicker, Dropdown, Textfield } from '@/common/components';
+import { useCreateJaewonsaengMutation, useGetJaewonCategorySangtaesQuery } from '@/domain/jaewonsaeng/api';
 import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
@@ -72,6 +72,9 @@ export const CreateJaewonsaengPanel = ({
   onAfterMutation,
 }: CreateJaewonsaengPanelProps) => {
   const createMutation = useCreateJaewonsaengMutation();
+  const { data: jaewonCategorySangtaes } = useGetJaewonCategorySangtaesQuery(jojikNanoId, {
+    enabled: Boolean(jojikNanoId),
+  });
 
   const form = useForm({
     defaultValues: INITIAL_VALUES,
@@ -160,12 +163,17 @@ export const CreateJaewonsaengPanel = ({
           </form.Field>
           <form.Field name="jaewonsaeng.jaewonCategorySangtaeNanoId">
             {(field) => (
-              <Textfield
-                singleLine
-                label="재원 상태 카테고리 상태"
-                placeholder="재원 상태 카테고리 상태 nanoId"
+              <Dropdown
                 value={field.state.value}
-                onValueChange={field.handleChange}
+                onChange={field.handleChange}
+                placeholder="재원 상태 카테고리 상태를 선택해 주세요"
+                options={
+                  jaewonCategorySangtaes?.sangtaes.map((sangtae) => ({
+                    value: sangtae.nanoId,
+                    label: sangtae.name,
+                    disabled: !sangtae.isHwalseong,
+                  })) ?? []
+                }
               />
             )}
           </form.Field>

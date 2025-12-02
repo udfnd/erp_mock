@@ -72,6 +72,7 @@ export default function NpJojikJaewonsaengListViewPage() {
         jojikNanoId: props.jojikNanoId,
         onAfterMutation: props.onAfterMutation,
         isAuthenticated: props.isAuthenticated,
+        isHadaLinked: selectedItem.isHadaLinked,
       })}
       getMultipleSelectedProps={(jaewonsaengs) => ({ jaewonsaengs })}
     >

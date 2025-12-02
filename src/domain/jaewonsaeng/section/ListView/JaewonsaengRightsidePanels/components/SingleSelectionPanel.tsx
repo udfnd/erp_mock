@@ -1,15 +1,18 @@
 'use client';
 
 import { useForm, useStore } from '@tanstack/react-form';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Button, DatePicker, Textfield } from '@/common/components';
+import { Button, DatePicker, Modal, Textfield } from '@/common/components';
 import {
   createJaewonsaengBohoja,
   deleteJaewonsaengBohoja,
   updateJaewonsaengBohoja,
   useDeleteJaewonsaengMutation,
+  useGetJaewonsaengDetailQuery,
+  useGetJaewonsaengHadaLinkCodeQuery,
   useGetJaewonsaengOverallQuery,
+  useIssueJaewonsaengHadaLinkCodeMutation,
   useUpdateJaewonsaengBoninMutation,
   useUpdateJaewonsaengMutation,
 } from '@/domain/jaewonsaeng/api';
@@ -23,6 +26,7 @@ export type SingleSelectionPanelProps = {
   jojikNanoId: string;
   onAfterMutation: () => Promise<unknown> | void;
   isAuthenticated: boolean;
+  isHadaLinked: boolean;
 };
 
 export const SingleSelectionPanel = ({
@@ -31,10 +35,27 @@ export const SingleSelectionPanel = ({
   jojikNanoId: _jojikNanoId,
   onAfterMutation,
   isAuthenticated,
+  isHadaLinked: isHadaLinkedFromList,
 }: SingleSelectionPanelProps) => {
   const { data, isLoading } = useGetJaewonsaengOverallQuery(jaewonsaengNanoId, {
     enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
   });
+
+  const { data: detailData } = useGetJaewonsaengDetailQuery(jaewonsaengNanoId, {
+    enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
+  });
+
+  const [isHadaLinkModalOpen, setIsHadaLinkModalOpen] = useState(false);
+  const [issuedLinkCode, setIssuedLinkCode] = useState<string | null>(null);
+
+  const { data: hadaLinkCodeData, refetch: refetchHadaLinkCode } = useGetJaewonsaengHadaLinkCodeQuery(
+    jaewonsaengNanoId,
+    {
+      enabled: isAuthenticated && isHadaLinkModalOpen,
+    },
+  );
+
+  const issueHadaLinkCodeMutation = useIssueJaewonsaengHadaLinkCodeMutation();
 
   const updateJaewonsaeng = useUpdateJaewonsaengMutation(jaewonsaengNanoId);
   const updateBonin = useUpdateJaewonsaengBoninMutation(jaewonsaengNanoId);
@@ -43,10 +64,11 @@ export const SingleSelectionPanel = ({
   const initialValues = useMemo(
     () => ({
       jaewonsaeng: {
-        name: data?.jaewonsaeng.name ?? jaewonsaengName,
-        nickname: data?.jaewonsaeng.nickname ?? '',
-        jaewonCategorySangtaeNanoId: data?.jaewonsaeng.jaewonCategorySangtaeNanoId ?? '',
-        isHwalseong: data?.jaewonsaeng.isHwalseong ?? true,
+        name: detailData?.name ?? data?.jaewonsaeng.name ?? jaewonsaengName,
+        nickname: detailData?.nickname ?? data?.jaewonsaeng.nickname ?? '',
+        jaewonCategorySangtaeNanoId:
+          detailData?.jaewonCategorySangtaeNanoId ?? data?.jaewonsaeng.jaewonCategorySangtaeNanoId ?? '',
+        isHwalseong: detailData?.isHwalseong ?? data?.jaewonsaeng.isHwalseong ?? true,
       },
       bonin: {
         name: data?.jaewonsaengBonin.name ?? '',
@@ -65,7 +87,7 @@ export const SingleSelectionPanel = ({
         bigo: bohoja.bigo ?? '',
       })) ?? [],
     }),
-    [data, jaewonsaengName],
+    [data, detailData, jaewonsaengName],
   );
 
   const form = useForm({
@@ -122,10 +144,19 @@ export const SingleSelectionPanel = ({
   }));
 
   useEffect(() => {
-    if (data) {
-      form.reset(initialValues);
-    }
-  }, [data, form, initialValues]);
+    form.reset(initialValues);
+  }, [form, initialValues]);
+
+  useEffect(() => {
+    setIssuedLinkCode(hadaLinkCodeData?.linkCode ?? null);
+  }, [hadaLinkCodeData]);
+
+  useEffect(() => {
+    setIsHadaLinkModalOpen(false);
+    setIssuedLinkCode(null);
+  }, [jaewonsaengNanoId]);
+
+  const isHadaLinked = detailData?.isHadaLinked ?? isHadaLinkedFromList;
 
   if (isLoading && !data) {
     return (
@@ -155,6 +186,19 @@ export const SingleSelectionPanel = ({
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>{values.jaewonsaeng.name}</h2>
       </div>
+
+      {!isHadaLinked && (
+        <div css={cssObj.panelSection}>
+          <p css={cssObj.helperText}>
+            하다를 연동하지 않은 계정입니다. 하다를 연동해 본인 정보를 확인해 보세요.
+          </p>
+          <div css={cssObj.sectionActions}>
+            <Button variant="primary" styleType="outlined" onClick={() => setIsHadaLinkModalOpen(true)}>
+              하다 연동하러 가기 &gt;
+            </Button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={(event) => void form.handleSubmit(event)}>
         <div css={cssObj.panelSection}>
@@ -369,6 +413,43 @@ export const SingleSelectionPanel = ({
           재원생 삭제
         </Button>
       </div>
+
+      <Modal
+        isOpen={isHadaLinkModalOpen}
+        onClose={() => setIsHadaLinkModalOpen(false)}
+        title="하다 연동"
+        menus={[
+          {
+            id: 'issue-code',
+            label: '코드 생성',
+            content: (
+              <div css={cssObj.panelBody}>
+                <p css={cssObj.helperText}>하다 앱에서 사용할 연동 코드를 생성해 주세요.</p>
+                <div css={cssObj.sectionActions}>
+                  <Button
+                    variant="primary"
+                    styleType="solid"
+                    onClick={async () => {
+                      const result = await issueHadaLinkCodeMutation.mutateAsync(jaewonsaengNanoId);
+                      setIssuedLinkCode(result.linkCode);
+                      await refetchHadaLinkCode();
+                    }}
+                    disabled={issueHadaLinkCodeMutation.isPending}
+                  >
+                    코드 생성
+                  </Button>
+                </div>
+                {issuedLinkCode && (
+                  <div css={cssObj.panelSection}>
+                    <span css={cssObj.panelSubtitle}>발급된 코드</span>
+                    <Textfield singleLine readOnly value={issuedLinkCode} onValueChange={() => {}} />
+                  </div>
+                )}
+              </div>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 };
