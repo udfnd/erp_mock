@@ -268,22 +268,40 @@ export const JaewonCategorySangtaeSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
   isHwalseong: z.boolean(),
+  isGibon: z.boolean().optional(),
 });
 export type JaewonCategorySangtae = z.infer<typeof JaewonCategorySangtaeSchema>;
 
-export const GetJaewonCategorySangtaesResponseSchema = z.object({
+export const JaewonCategorySangtaeCategorySchema = z.object({
+  nanoId: z.string(),
+  name: z.string(),
   sangtaes: z.array(JaewonCategorySangtaeSchema),
+});
+export type JaewonCategorySangtaeCategory = z.infer<
+  typeof JaewonCategorySangtaeCategorySchema
+>;
+
+export const GetJaewonCategorySangtaesResponseSchema = z.object({
+  categories: z.array(JaewonCategorySangtaeCategorySchema),
 });
 export type GetJaewonCategorySangtaesResponse = z.infer<
   typeof GetJaewonCategorySangtaesResponseSchema
 >;
 
 export const UpsertJaewonCategorySangtaesRequestSchema = z.object({
-  sangtaes: z.array(
+  categories: z.array(
     z.object({
-      nanoId: z.string().optional(),
-      name: z.string(),
-      isHwalseong: z.boolean(),
+      nanoId: z.string(),
+      sangtaes: z.array(
+        z
+          .object({
+            nanoId: z.string().optional(),
+            name: z.string(),
+            isHwalseong: z.boolean(),
+            isGibon: z.boolean().optional(),
+          })
+          .strict(),
+      ),
     }),
   ),
 });
@@ -291,7 +309,9 @@ export type UpsertJaewonCategorySangtaesRequest = z.infer<
   typeof UpsertJaewonCategorySangtaesRequestSchema
 >;
 
-export const UpsertJaewonCategorySangtaesResponseSchema = z.object({});
+export const UpsertJaewonCategorySangtaesResponseSchema = z.object({
+  categories: z.array(JaewonCategorySangtaeCategorySchema),
+});
 export type UpsertJaewonCategorySangtaesResponse = z.infer<
   typeof UpsertJaewonCategorySangtaesResponseSchema
 >;
