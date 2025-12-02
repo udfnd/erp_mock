@@ -16,6 +16,8 @@ const join = (...parts: string[]) =>
 
 const MANAGE_BASE = join(ROOT, ID_SEG, 'manage');
 const JAWONS_BASE = join(ROOT, ID_SEG, 'jawons');
+const SUEOPS_BASE = join(ROOT, ID_SEG, 'sueops');
+const JAEWONSAENGS_BASE = join(ROOT, ID_SEG, 'jaewonsaengs');
 
 const NAV_ITEMS = [
   {
@@ -25,13 +27,13 @@ const NAV_ITEMS = [
   },
   {
     name: '수업들',
-    href: join(JAWONS_BASE, 'sueops', 'lv'),
-    basePath: JAWONS_BASE,
+    href: join(SUEOPS_BASE, 'sueops', 'lv'),
+    basePath: SUEOPS_BASE,
   },
   {
     name: '재원생들',
-    href: join(JAWONS_BASE, 'jaewonsaengs', 'lv'),
-    basePath: JAWONS_BASE,
+    href: join(JAEWONSAENGS_BASE, 'home', 'lv'),
+    basePath: JAEWONSAENGS_BASE,
   },
   {
     name: '자원들',
