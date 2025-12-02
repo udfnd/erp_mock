@@ -8,7 +8,6 @@ import { useAuth } from '@/global/auth';
 import {
   CreatingPanels,
   JusoListSection,
-  MissingJojikPanels,
   MultipleSelectedPanels,
   NoneSelectedPanels,
   OneSelectedPanels,

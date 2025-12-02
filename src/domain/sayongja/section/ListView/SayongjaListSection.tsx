@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { ColumnDef, Row } from '@tanstack/react-table';
+import type { Row } from '@tanstack/react-table';
 
 import { ListSection, type ListViewFilter, type ListViewSortProps } from '@/common/lv/component';
 import { ToolbarLayout } from '@/common/lv/layout';
