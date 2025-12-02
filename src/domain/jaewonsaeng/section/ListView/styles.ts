@@ -129,6 +129,32 @@ export const cssObj = {
     color: ${color.cgrey400};
   `,
 
+  panelText: css`
+    font-size: 14px;
+    color: ${color.cgrey700};
+  `,
+
+  permissionList: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+
+  permissionItem: css`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    background: ${color.blue10};
+  `,
+
+  permissionName: css`
+    font-size: 14px;
+    color: ${color.cgrey700};
+  `,
+
   sectionFooter: css`
     display: flex;
     justify-content: flex-end;
@@ -152,5 +178,63 @@ export const cssObj = {
       ${typography.bodyM};
       color: ${color.black};
     }
+  `,
+
+  permissionActionContainer: css`
+    position: relative;
+    align-items: center;
+    z-index: 2;
+  `,
+
+  permissionTooltip: css`
+    position: fixed;
+    width: 420px;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey100};
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+  `,
+
+  permissionTooltipHeader: css`
+    border-bottom: 1px solid ${color.cgrey50};
+    padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
+  linkedNav: css`
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+  `,
+  linkedNavButton: css`
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    color: ${color.cgrey600};
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    ${typography.bodySmallM};
+
+    &:hover {
+      color: ${color.cgrey700};
+    }
+  `,
+  linkedNavButtonActive: css`
+    color: ${color.black};
+    font-weight: 700;
+    border-bottom-color: ${color.black};
+  `,
+  linkedContent: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   `,
 };

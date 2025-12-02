@@ -46,6 +46,8 @@ import {
   IssueJaewonsaengHadaLinkCodeResponseSchema,
   IssueJaewonsaengHadaDeepLinkResponse,
   IssueJaewonsaengHadaDeepLinkResponseSchema,
+  GetJaewonsaengLinkedGroupsResponse,
+  GetJaewonsaengLinkedGroupsResponseSchema,
   BatchLinkJaewonsaengGroupsRequest,
   BatchLinkJaewonsaengGroupsRequestSchema,
   BatchLinkJaewonsaengGroupsResponse,
@@ -263,6 +265,20 @@ export const issueJaewonsaengHadaDeepLink = async (
 export const useIssueJaewonsaengHadaDeepLinkMutation = () =>
   useAuthedMutation<IssueJaewonsaengHadaDeepLinkResponse, unknown, string>({
     mutationFn: issueJaewonsaengHadaDeepLink,
+  });
+
+export const getJaewonsaengLinkedGroups = async (
+  nanoId: string,
+): Promise<GetJaewonsaengLinkedGroupsResponse> => {
+  const res = await apiClient.get(`/T/feat/jaewonsaengs/${nanoId}/jaewonsaeng-groups`);
+  return parseOrThrow(GetJaewonsaengLinkedGroupsResponseSchema, res.data);
+};
+
+export const useGetJaewonsaengLinkedGroupsQuery = (nanoId: string, options?: { enabled?: boolean }) =>
+  useAuthedQuery<GetJaewonsaengLinkedGroupsResponse, unknown>({
+    queryKey: ['jaewonsaengLinkedGroups', nanoId],
+    queryFn: () => getJaewonsaengLinkedGroups(nanoId),
+    enabled: !!nanoId && (options?.enabled ?? true),
   });
 
 export const batchLinkJaewonsaengGroups = async (
