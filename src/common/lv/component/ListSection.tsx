@@ -70,6 +70,7 @@ export function ListSection<TData>({
   emptyMessage,
   isDimmed,
   rowEventHandlers,
+  rowProps,
   onSelectedRowsChange,
   onDimmerClick,
 }: ListViewTableProps<TData>) {
@@ -222,33 +223,40 @@ export function ListSection<TData>({
                   </td>
                 </tr>
               ) : hasRows ? (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
-                    onClick={(event) => {
-                      if (shouldIgnoreRowClick(event)) {
-                        return;
-                      }
+                table.getRowModel().rows.map((row) => {
+                  const userRowProps = rowProps?.(row) ?? {};
+                  const { onClick: userOnClick, ...restRowProps } = userRowProps;
 
-                      if (rowEventHandlers?.selectOnClick) {
-                        row.toggleSelected();
-                      }
+                  return (
+                    <tr
+                      key={row.id}
+                      css={[cssObj.tableRow, row.getIsSelected() && cssObj.tableRowSelected]}
+                      onClick={(event) => {
+                        if (shouldIgnoreRowClick(event)) {
+                          return;
+                        }
 
-                      rowEventHandlers?.onClick?.({ row, event, table });
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        css={cssObj.tableCell}
-                        style={getColumnWidthStyle(cell.column.id, cell.column.getSize())}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                        if (rowEventHandlers?.selectOnClick) {
+                          row.toggleSelected();
+                        }
+
+                        rowEventHandlers?.onClick?.({ row, event, table });
+                        userOnClick?.(event);
+                      }}
+                      {...restRowProps}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          css={cssObj.tableCell}
+                          style={getColumnWidthStyle(cell.column.id, cell.column.getSize())}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={visibleColumnsLength} css={cssObj.stateCell}>

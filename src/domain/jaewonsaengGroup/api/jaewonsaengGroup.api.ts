@@ -1,6 +1,6 @@
-import { apiClient } from '@/lib/api-client';
-import { useAuthedMutation, useAuthedQuery } from '@/lib/react-query';
-import { parseOrThrow } from '@/lib/zod';
+import { apiClient } from '@/global';
+import { useAuthedMutation, useAuthedQuery } from '@/global/auth';
+import { parseOrThrow } from '../../util';
 import {
   GetJaewonsaengGroupsRequestSchema,
   GetJaewonsaengGroupsResponseSchema,
@@ -113,7 +113,8 @@ export const useUpdateJaewonsaengGroupMutation = () =>
     unknown,
     { nanoId: string; data: UpdateJaewonsaengGroupRequest }
   >({
-    mutationFn: (params) => updateJaewonsaengGroup(params.nanoId, params.data),
+    mutationFn: (params: { nanoId: string; data: UpdateJaewonsaengGroupRequest }) =>
+      updateJaewonsaengGroup(params.nanoId, params.data),
   });
 
 // ============================================================================
@@ -194,7 +195,8 @@ export const useBatchLinkJaewonsaengsMutation = () =>
     unknown,
     { nanoId: string; data: BatchLinkJaewonsaengsRequest }
   >({
-    mutationFn: (params) => batchLinkJaewonsaengs(params.nanoId, params.data),
+    mutationFn: (params: { nanoId: string; data: BatchLinkJaewonsaengsRequest }) =>
+      batchLinkJaewonsaengs(params.nanoId, params.data),
   });
 
 // ============================================================================
@@ -220,7 +222,11 @@ export const useUpdateJaewonsaengGroupMemberMutation = () =>
     unknown,
     { groupNanoId: string; jaewonsaengNanoId: string; data: UpdateJaewonsaengGroupMemberRequest }
   >({
-    mutationFn: (params) =>
+    mutationFn: (params: {
+      groupNanoId: string;
+      jaewonsaengNanoId: string;
+      data: UpdateJaewonsaengGroupMemberRequest;
+    }) =>
       updateJaewonsaengGroupMember(params.groupNanoId, params.jaewonsaengNanoId, params.data),
   });
 
@@ -244,6 +250,6 @@ export const useDeleteJaewonsaengGroupMemberMutation = () =>
     unknown,
     { groupNanoId: string; jaewonsaengNanoId: string }
   >({
-    mutationFn: (params) =>
+    mutationFn: (params: { groupNanoId: string; jaewonsaengNanoId: string }) =>
       deleteJaewonsaengGroupMember(params.groupNanoId, params.jaewonsaengNanoId),
   });

@@ -1,4 +1,9 @@
-import { createColumnHelper, type HeaderContext, type SortingState } from '@tanstack/react-table';
+import {
+  createColumnHelper,
+  type ColumnDefTemplate,
+  type HeaderContext,
+  type SortingState,
+} from '@tanstack/react-table';
 
 import type { JaewonsaengListItem } from '@/domain/jaewonsaeng/api';
 
@@ -33,8 +38,8 @@ export const getSortOptionFromState = (sorting: SortingState): string | undefine
   return undefined;
 };
 
-export const createSortableHeader = (label: string) => {
-  const Header = (_: HeaderContext<JaewonsaengListItem, unknown>) => <span>{label}</span>;
+export const createSortableHeader = (label: string): ColumnDefTemplate<HeaderContext<JaewonsaengListItem, any>> => {
+  const Header = (_: HeaderContext<JaewonsaengListItem, any>) => <span>{label}</span>;
   Header.displayName = `Header(${label})`;
   return Header;
 };
