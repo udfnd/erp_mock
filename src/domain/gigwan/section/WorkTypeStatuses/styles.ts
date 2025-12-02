@@ -80,6 +80,7 @@ export const cssObj = {
   `,
 
   statusValue: css`
+    flex: 1;
     ${typography.bodyR};
     color: ${color.black};
     white-space: nowrap;

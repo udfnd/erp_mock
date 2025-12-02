@@ -1,0 +1,63 @@
+// ============================================================================
+// Schemas
+// ============================================================================
+export {
+  GetJaewonsaengGroupsRequestSchema,
+  type GetJaewonsaengGroupsRequest,
+  JaewonsaengGroupListItemSchema,
+  type JaewonsaengGroupListItem,
+  GetJaewonsaengGroupsResponseSchema,
+  type GetJaewonsaengGroupsResponse,
+  CreateJaewonsaengGroupRequestSchema,
+  type CreateJaewonsaengGroupRequest,
+  CreateJaewonsaengGroupResponseSchema,
+  type CreateJaewonsaengGroupResponse,
+  GetJaewonsaengGroupDetailResponseSchema,
+  type GetJaewonsaengGroupDetailResponse,
+  UpdateJaewonsaengGroupRequestSchema,
+  type UpdateJaewonsaengGroupRequest,
+  UpdateJaewonsaengGroupResponseSchema,
+  type UpdateJaewonsaengGroupResponse,
+  DeleteJaewonsaengGroupResponseSchema,
+  type DeleteJaewonsaengGroupResponse,
+  GetJaewonsaengGroupMembersResponseSchema,
+  type GetJaewonsaengGroupMembersResponse,
+  GetJaewonsaengGroupReferencesResponseSchema,
+  type GetJaewonsaengGroupReferencesResponse,
+  BatchLinkJaewonsaengsRequestSchema,
+  type BatchLinkJaewonsaengsRequest,
+  BatchLinkJaewonsaengsResponseSchema,
+  type BatchLinkJaewonsaengsResponse,
+  UpdateJaewonsaengGroupMemberRequestSchema,
+  type UpdateJaewonsaengGroupMemberRequest,
+  UpdateJaewonsaengGroupMemberResponseSchema,
+  type UpdateJaewonsaengGroupMemberResponse,
+  DeleteJaewonsaengGroupMemberResponseSchema,
+  type DeleteJaewonsaengGroupMemberResponse,
+} from './jaewonsaengGroup.schema';
+
+// ============================================================================
+// API Functions
+// ============================================================================
+export {
+  getJaewonsaengGroups,
+  useGetJaewonsaengGroupsQuery,
+  createJaewonsaengGroup,
+  useCreateJaewonsaengGroupMutation,
+  getJaewonsaengGroupDetail,
+  useGetJaewonsaengGroupDetailQuery,
+  updateJaewonsaengGroup,
+  useUpdateJaewonsaengGroupMutation,
+  deleteJaewonsaengGroup,
+  useDeleteJaewonsaengGroupMutation,
+  getJaewonsaengGroupMembers,
+  useGetJaewonsaengGroupMembersQuery,
+  getJaewonsaengGroupReferences,
+  useGetJaewonsaengGroupReferencesQuery,
+  batchLinkJaewonsaengs,
+  useBatchLinkJaewonsaengsMutation,
+  updateJaewonsaengGroupMember,
+  useUpdateJaewonsaengGroupMemberMutation,
+  deleteJaewonsaengGroupMember,
+  useDeleteJaewonsaengGroupMemberMutation,
+} from './jaewonsaengGroup.api';
