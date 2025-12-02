@@ -59,7 +59,9 @@ const editingReducer = (state: EditingState, action: EditingAction): EditingStat
 };
 
 export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySangtaeSectionProps) {
-  const { data } = useGetJaewonCategorySangtaesQuery(jojikNanoId, { enabled: Boolean(jojikNanoId) });
+  const { data } = useGetJaewonCategorySangtaesQuery(jojikNanoId, {
+    enabled: Boolean(jojikNanoId),
+  });
   const upsertMutation = useUpsertJaewonCategorySangtaesMutation(jojikNanoId);
 
   const initialValues: JaewonCategorySangtaeFormValues = useMemo(
@@ -117,8 +119,9 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
   };
 
   return (
-    <div key={initialKey} css={cssObj.panelBody}>
+    <div key={initialKey}>
       <span css={cssObj.panelSubtitle}>재원 상태 카테고리상태 설정</span>
+      <p css={cssObj.desc}>사용중인 카테고리는 수정하거나 삭제할 수 없어요</p>
       <div css={cssObj.panelSection}>
         <div css={cssObj.sectionActions}>
           <Button
@@ -131,7 +134,6 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
             상태 추가
           </Button>
         </div>
-        {sangtaes.length === 0 && <p css={cssObj.helperText}>추가된 상태가 없습니다.</p>}
         {sangtaes.map((item, index) => {
           const isEditing = editingMap[item.localId] ?? false;
           return (
@@ -147,7 +149,10 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
                     />
                   )}
                 </form.Field>
-                <label css={cssObj.panelLabel} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                <label
+                  css={cssObj.panelLabel}
+                  style={{ display: 'flex', gap: 4, alignItems: 'center' }}
+                >
                   <input
                     type="checkbox"
                     checked={item.isHwalseong}
@@ -181,7 +186,7 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
             </div>
           );
         })}
-        <div css={cssObj.panelFooter}>
+        <div css={cssObj.sectionFooter}>
           <Button
             size="small"
             styleType="solid"

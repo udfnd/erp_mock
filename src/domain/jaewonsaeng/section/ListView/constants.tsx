@@ -14,8 +14,6 @@ export const SORT_OPTIONS = [
   { label: '이름 내림차순', value: 'nameDesc' },
 ];
 
-export const PAGE_SIZE_OPTIONS = [10, 20, 50];
-
 export const getSortStateFromOption = (option: string | undefined): SortingState => {
   switch (option) {
     case 'nameAsc':
@@ -38,7 +36,9 @@ export const getSortOptionFromState = (sorting: SortingState): string | undefine
   return undefined;
 };
 
-export const createSortableHeader = (label: string): ColumnDefTemplate<HeaderContext<JaewonsaengListItem, any>> => {
+export const createSortableHeader = (
+  label: string,
+): ColumnDefTemplate<HeaderContext<JaewonsaengListItem, any>> => {
   const Header = (_: HeaderContext<JaewonsaengListItem, any>) => <span>{label}</span>;
   Header.displayName = `Header(${label})`;
   return Header;

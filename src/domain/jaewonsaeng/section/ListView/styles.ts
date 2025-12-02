@@ -18,6 +18,31 @@ export const cssObj = {
     box-sizing: border-box;
   `,
 
+  settingsPanel: css`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-sizing: border-box;
+    width: 400px;
+    min-width: 400px;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+    padding: 16px;
+    background: ${color.white};
+    overflow-y: auto;
+
+    @media (min-width: 960px) and (max-width: 1279px) {
+      width: 200px;
+      min-width: 200px;
+      max-width: 200px;
+
+      & * {
+        min-width: 0;
+      }
+    }
+  `,
+
   panelHeader: css``,
 
   panelTitle: css`
@@ -32,12 +57,21 @@ export const cssObj = {
     color: ${color.black};
   `,
 
+  desc: css`
+    ${typography.captionR};
+    color: ${color.cgrey500};
+  `,
+
+  divider: css`
+    border-bottom: 1px solid ${color.cgrey100};
+    margin: 16px 0;
+  `,
+
   panelBody: css`
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 16px;
   `,
 
   panelSection: css`
@@ -81,11 +115,8 @@ export const cssObj = {
     color: ${color.cgrey400};
   `,
 
-  rightPanel: css`
-    width: 420px;
-    max-width: 100%;
-    height: 100%;
-    overflow: auto;
-    background: ${color.white};
+  sectionFooter: css`
+    display: flex;
+    justify-content: flex-end;
   `,
 };

@@ -12,7 +12,7 @@ type QuickActionsPanelProps = {
 export const QuickActionsPanel = ({ onStartCreate, jojikNanoId }: QuickActionsPanelProps) => (
   <>
     <div css={cssObj.panelHeader}>
-      <h2 css={cssObj.panelTitle}>재원생들 설정</h2>
+      <h2 css={cssObj.panelTitle}>재원생들 관리</h2>
     </div>
     <div css={cssObj.panelBody}>
       <span css={cssObj.panelSubtitle}>빠른 액션</span>
@@ -21,7 +21,8 @@ export const QuickActionsPanel = ({ onStartCreate, jojikNanoId }: QuickActionsPa
           재원생 생성 마법사
         </Button>
       </div>
+      <div css={cssObj.divider} />
+      <JaewonCategorySangtaeSection jojikNanoId={jojikNanoId} />
     </div>
-    <JaewonCategorySangtaeSection jojikNanoId={jojikNanoId} />
   </>
 );
