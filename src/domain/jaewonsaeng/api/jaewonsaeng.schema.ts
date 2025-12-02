@@ -118,16 +118,18 @@ export type UpdateJaewonsaengResponse = z.infer<typeof UpdateJaewonsaengResponse
 export const DeleteJaewonsaengResponseSchema = z.object({});
 export type DeleteJaewonsaengResponse = z.infer<typeof DeleteJaewonsaengResponseSchema>;
 
-export const GetJaewonsaengBoninResponseSchema = z.object({
-  name: z.string(),
-  nanoId: z.string(),
-  birthDate: z.string().nullable(),
-  genderName: z.string(),
-  genderNanoId: z.string(),
-  phoneNumber: z.string().nullable(),
-  email: z.string().nullable(),
-  bigo: z.string().nullable(),
-}).passthrough();
+export const GetJaewonsaengBoninResponseSchema = z
+  .object({
+    name: z.string(),
+    nanoId: z.string(),
+    birthDate: z.string().nullable(),
+    genderName: z.string(),
+    genderNanoId: z.string(),
+    phoneNumber: z.string().nullable(),
+    email: z.string().nullable(),
+    bigo: z.string().nullable(),
+  })
+  .passthrough();
 export type GetJaewonsaengBoninResponse = z.infer<typeof GetJaewonsaengBoninResponseSchema>;
 
 export const UpdateJaewonsaengBoninRequestSchema = z.object({
@@ -151,13 +153,15 @@ export const UpdateJaewonsaengBoninResponseSchema = z.object({
 });
 export type UpdateJaewonsaengBoninResponse = z.infer<typeof UpdateJaewonsaengBoninResponseSchema>;
 
-export const JaewonsaengBohojaSchema = z.object({
-  nanoId: z.string(),
-  gwangye: z.string(),
-  phoneNumber: z.string().nullable(),
-  email: z.string().nullable(),
-  bigo: z.string().nullable(),
-}).passthrough();
+export const JaewonsaengBohojaSchema = z
+  .object({
+    nanoId: z.string(),
+    gwangye: z.string(),
+    phoneNumber: z.string().nullable(),
+    email: z.string().nullable(),
+    bigo: z.string().nullable(),
+  })
+  .passthrough();
 export type JaewonsaengBohoja = z.infer<typeof JaewonsaengBohojaSchema>;
 
 export const GetJaewonsaengBohojasResponseSchema = z.object({
@@ -249,13 +253,15 @@ export type BatchLinkJaewonsaengGroupsRequest = z.infer<
 >;
 
 export const BatchLinkJaewonsaengGroupsResponseSchema = z.object({
-  jaewonsaengGroups: z.array(z.object({
-    nanoId: z.string(),
-    name: z.string(),
-    groupTypeName: z.string(),
-    groupTypeNanoId: z.string(),
-    isHwalseong: z.boolean(),
-  })),
+  jaewonsaengGroups: z.array(
+    z.object({
+      nanoId: z.string(),
+      name: z.string(),
+      groupTypeName: z.string(),
+      groupTypeNanoId: z.string(),
+      isHwalseong: z.boolean(),
+    }),
+  ),
 });
 export type BatchLinkJaewonsaengGroupsResponse = z.infer<
   typeof BatchLinkJaewonsaengGroupsResponseSchema
@@ -268,22 +274,38 @@ export const JaewonCategorySangtaeSchema = z.object({
   nanoId: z.string(),
   name: z.string(),
   isHwalseong: z.boolean(),
+  isGibon: z.boolean().optional(),
 });
 export type JaewonCategorySangtae = z.infer<typeof JaewonCategorySangtaeSchema>;
 
-export const GetJaewonCategorySangtaesResponseSchema = z.object({
+export const JaewonCategorySangtaeCategorySchema = z.object({
+  nanoId: z.string(),
+  name: z.string(),
   sangtaes: z.array(JaewonCategorySangtaeSchema),
+});
+export type JaewonCategorySangtaeCategory = z.infer<typeof JaewonCategorySangtaeCategorySchema>;
+
+export const GetJaewonCategorySangtaesResponseSchema = z.object({
+  categories: z.array(JaewonCategorySangtaeCategorySchema),
 });
 export type GetJaewonCategorySangtaesResponse = z.infer<
   typeof GetJaewonCategorySangtaesResponseSchema
 >;
 
 export const UpsertJaewonCategorySangtaesRequestSchema = z.object({
-  sangtaes: z.array(
+  categories: z.array(
     z.object({
-      nanoId: z.string().optional(),
-      name: z.string(),
-      isHwalseong: z.boolean(),
+      nanoId: z.string(),
+      sangtaes: z.array(
+        z
+          .object({
+            nanoId: z.string().optional(),
+            name: z.string(),
+            isHwalseong: z.boolean(),
+            isGibon: z.boolean().optional(),
+          })
+          .strict(),
+      ),
     }),
   ),
 });
@@ -291,7 +313,9 @@ export type UpsertJaewonCategorySangtaesRequest = z.infer<
   typeof UpsertJaewonCategorySangtaesRequestSchema
 >;
 
-export const UpsertJaewonCategorySangtaesResponseSchema = z.object({});
+export const UpsertJaewonCategorySangtaesResponseSchema = z.object({
+  categories: z.array(JaewonCategorySangtaeCategorySchema),
+});
 export type UpsertJaewonCategorySangtaesResponse = z.infer<
   typeof UpsertJaewonCategorySangtaesResponseSchema
 >;

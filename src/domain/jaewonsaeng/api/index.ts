@@ -59,6 +59,8 @@ export {
   type UnlinkJaewonsaengHadaResponse,
   JaewonCategorySangtaeSchema,
   type JaewonCategorySangtae,
+  JaewonCategorySangtaeCategorySchema,
+  type JaewonCategorySangtaeCategory,
   GetJaewonCategorySangtaesResponseSchema,
   type GetJaewonCategorySangtaesResponse,
   UpsertJaewonCategorySangtaesRequestSchema,
@@ -67,9 +69,6 @@ export {
   type UpsertJaewonCategorySangtaesResponse,
 } from './jaewonsaeng.schema';
 
-// ============================================================================
-// API Functions
-// ============================================================================
 export {
   getJaewonsaengs,
   useGetJaewonsaengsQuery,
