@@ -245,6 +245,21 @@ export type IssueJaewonsaengHadaDeepLinkResponse = z.infer<
   typeof IssueJaewonsaengHadaDeepLinkResponseSchema
 >;
 
+export const GetJaewonsaengLinkedGroupsResponseSchema = z.object({
+  jaewonsaengGroups: z.array(
+    z.object({
+      nanoId: z.string(),
+      name: z.string(),
+      groupTypeName: z.string(),
+      groupTypeNanoId: z.string(),
+      isHwalseong: z.boolean(),
+    }),
+  ),
+});
+export type GetJaewonsaengLinkedGroupsResponse = z.infer<
+  typeof GetJaewonsaengLinkedGroupsResponseSchema
+>;
+
 export const BatchLinkJaewonsaengGroupsRequestSchema = z.object({
   jaewonsaengGroupNanoIds: z.array(z.string()),
 });

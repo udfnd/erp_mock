@@ -1,9 +1,9 @@
 'use client';
 
 import { useForm, useStore } from '@tanstack/react-form';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Button, DatePicker, Dropdown, Modal, Textfield } from '@/common/components';
+import { Button, DatePicker, Dropdown, Textfield } from '@/common/components';
 import {
   createJaewonsaengBohoja,
   deleteJaewonsaengBohoja,
@@ -16,6 +16,7 @@ import {
   useUpdateJaewonsaengBoninMutation,
   useUpdateJaewonsaengMutation,
   useGetJaewonCategorySangtaesQuery,
+  useGetJaewonsaengLinkedGroupsQuery,
 } from '@/domain/jaewonsaeng/api';
 import { useGetGendersQuery } from '@/domain/system/api';
 import { createLocalId } from '@/domain/gigwan/section/local-id';
@@ -48,12 +49,9 @@ export const SingleSelectionPanel = ({
     enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
   });
 
-  const [hadaLinkModalFor, setHadaLinkModalFor] = useState<string | null>(null);
-  const isHadaLinkModalOpen = hadaLinkModalFor === jaewonsaengNanoId;
-
   const { data: hadaLinkCodeData, refetch: refetchHadaLinkCode } =
     useGetJaewonsaengHadaLinkCodeQuery(jaewonsaengNanoId, {
-      enabled: isAuthenticated && isHadaLinkModalOpen,
+      enabled: isAuthenticated,
     });
 
   const issuedLinkCode = hadaLinkCodeData?.linkCode ?? null;
@@ -68,24 +66,38 @@ export const SingleSelectionPanel = ({
   });
   const { data: gendersData } = useGetGendersQuery({ enabled: true });
 
+  const { data: linkedGroupsData, isLoading: isLinkedGroupsLoading } =
+    useGetJaewonsaengLinkedGroupsQuery(jaewonsaengNanoId, {
+      enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
+    });
+
+  const getFirstNonEmptyString = (...values: (string | null | undefined)[]) =>
+    values.find((value) => value !== undefined && value !== null && value !== '') ?? '';
+
+  const getFirstDefined = <T,>(...values: (T | null | undefined)[]) =>
+    values.find((value) => value !== undefined && value !== null);
+
   const initialValues = useMemo(
     () => ({
       jaewonsaeng: {
-        name: detailData?.name ?? data?.jaewonsaeng.name ?? jaewonsaengName,
-        nickname: detailData?.nickname ?? data?.jaewonsaeng.nickname ?? '',
-        jaewonCategorySangtaeNanoId:
-          detailData?.jaewonCategorySangtaeNanoId ??
-          data?.jaewonsaeng.jaewonCategorySangtaeNanoId ??
+        name: getFirstNonEmptyString(data?.jaewonsaeng.name, detailData?.name, jaewonsaengName),
+        nickname: getFirstNonEmptyString(data?.jaewonsaeng.nickname, detailData?.nickname, ''),
+        jaewonCategorySangtaeNanoId: getFirstNonEmptyString(
+          data?.jaewonsaeng.jaewonCategorySangtaeNanoId,
+          detailData?.jaewonCategorySangtaeNanoId,
           '',
-        isHwalseong: detailData?.isHwalseong ?? data?.jaewonsaeng.isHwalseong ?? true,
+        ),
+        isHwalseong:
+          (getFirstDefined(data?.jaewonsaeng.isHwalseong, detailData?.isHwalseong, true) as boolean) ??
+          true,
       },
       bonin: {
-        name: data?.jaewonsaengBonin.name ?? '',
-        birthDate: data?.jaewonsaengBonin.birthDate ?? '',
-        genderNanoId: data?.jaewonsaengBonin.genderNanoId ?? '',
-        phoneNumber: data?.jaewonsaengBonin.phoneNumber ?? '',
-        emailAddress: data?.jaewonsaengBonin.email ?? '',
-        bigo: data?.jaewonsaengBonin.bigo ?? '',
+        name: getFirstNonEmptyString(data?.jaewonsaengBonin.name, ''),
+        birthDate: getFirstNonEmptyString(data?.jaewonsaengBonin.birthDate, ''),
+        genderNanoId: getFirstNonEmptyString(data?.jaewonsaengBonin.genderNanoId, ''),
+        phoneNumber: getFirstNonEmptyString(data?.jaewonsaengBonin.phoneNumber, ''),
+        emailAddress: getFirstNonEmptyString(data?.jaewonsaengBonin.email, ''),
+        bigo: getFirstNonEmptyString(data?.jaewonsaengBonin.bigo, ''),
       },
       bohojas:
         data?.jaewonsaengBohojas.map((bohoja) => ({
@@ -97,7 +109,7 @@ export const SingleSelectionPanel = ({
           bigo: bohoja.bigo ?? '',
         })) ?? [],
     }),
-    [data, detailData, jaewonsaengName],
+    [data, detailData, getFirstDefined, getFirstNonEmptyString, jaewonsaengName],
   );
 
   const form = useForm({
@@ -158,7 +170,101 @@ export const SingleSelectionPanel = ({
     form.reset(initialValues);
   }, [form, initialValues]);
 
+  const [isHadaLinkTooltipOpen, setIsHadaLinkTooltipOpen] = useState(false);
+  const hadaLinkActionRef = useRef<HTMLDivElement>(null);
+  const [hadaLinkTooltipPosition, setHadaLinkTooltipPosition] = useState<{ left: number; top: number } | null>(
+    null,
+  );
+  const [activeLinkedTab, setActiveLinkedTab] = useState('sugangsaengs');
+
+  useEffect(() => {
+    if (!isHadaLinkTooltipOpen) {
+      return;
+    }
+
+    const updatePosition = () => {
+      const container = hadaLinkActionRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const tooltipWidth = 420;
+      const left = rect.left - tooltipWidth - 12;
+      const top = Math.max(rect.top - 260, 12);
+
+      setHadaLinkTooltipPosition({ left, top });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isHadaLinkTooltipOpen]);
+
+  const toggleHadaLinkTooltip = useCallback(() => {
+    setIsHadaLinkTooltipOpen((prev) => {
+      const next = !prev;
+
+      if (!next) {
+        setHadaLinkTooltipPosition(null);
+      }
+
+      return next;
+    });
+  }, []);
+
+  const closeHadaLinkTooltip = useCallback(() => {
+    setIsHadaLinkTooltipOpen(false);
+    setHadaLinkTooltipPosition(null);
+  }, []);
+
+  const handleIssueHadaLinkCode = useCallback(async () => {
+    await issueHadaLinkCodeMutation.mutateAsync(jaewonsaengNanoId);
+    await refetchHadaLinkCode();
+  }, [issueHadaLinkCodeMutation, jaewonsaengNanoId, refetchHadaLinkCode]);
+
   const isHadaLinked = detailData?.isHadaLinked ?? isHadaLinkedFromList;
+  const linkedGroups = linkedGroupsData?.jaewonsaengGroups ?? [];
+
+  const linkedObjectTabs = useMemo(
+    () => [
+      {
+        key: 'sugangsaengs',
+        label: '수강생(수업)',
+        content: <p css={cssObj.helperText}>연결된 수강생(수업)이 없습니다.</p>,
+      },
+      {
+        key: 'groups',
+        label: '재원생 그룹',
+        content: (
+          <div css={cssObj.permissionList}>
+            {isLinkedGroupsLoading ? (
+              <p css={cssObj.helperText}>재원생 그룹 정보를 불러오는 중입니다...</p>
+            ) : linkedGroups.length ? (
+              linkedGroups.map((group) => (
+                <div key={group.nanoId} css={cssObj.permissionItem}>
+                  <span css={cssObj.permissionName}>{group.name}</span>
+                  <span css={cssObj.panelText}>{group.groupTypeName}</span>
+                </div>
+              ))
+            ) : (
+              <p css={cssObj.helperText}>연결된 재원생 그룹이 없습니다.</p>
+            )}
+          </div>
+        ),
+      },
+    ],
+    [isLinkedGroupsLoading, linkedGroups],
+  );
+
+  const resolvedActiveLinkedTab = useMemo(() => {
+    const hasActiveTab = linkedObjectTabs.some((tab) => tab.key === activeLinkedTab);
+
+    return hasActiveTab ? activeLinkedTab : linkedObjectTabs[0]?.key ?? '';
+  }, [activeLinkedTab, linkedObjectTabs]);
 
   if (isLoading && !data) {
     return (
@@ -325,17 +431,59 @@ export const SingleSelectionPanel = ({
                 <p>하다를 연동하지 않은 계정입니다.</p>
                 <span>하다를 연동해 본인 정보를 확인해 보세요.</span>
               </div>
-              <div css={cssObj.parentTitle}>
+              <div css={[cssObj.parentTitle, cssObj.permissionActionContainer]} ref={hadaLinkActionRef}>
                 <Button
                   variant="assistive"
                   styleType="solid"
                   size="small"
                   isFull
-                  onClick={() => setHadaLinkModalFor(jaewonsaengNanoId)}
+                  onClick={toggleHadaLinkTooltip}
+                  aria-expanded={isHadaLinkTooltipOpen}
                   iconRight={<ArrowMdRightSingleIcon />}
                 >
                   하다 연동하러 가기
                 </Button>
+                {isHadaLinkTooltipOpen && hadaLinkTooltipPosition ? (
+                  <div css={cssObj.permissionTooltip} style={hadaLinkTooltipPosition}>
+                    <div css={cssObj.permissionTooltipHeader}>
+                      <p css={cssObj.panelSubtitle}>하다 연동</p>
+                      <p css={cssObj.helperText}>하다 앱에서 사용할 연동 코드를 생성해 주세요.</p>
+                    </div>
+                    <div css={cssObj.linkedContent}>
+                      <div css={cssObj.sectionActions}>
+                        <Button
+                          variant="primary"
+                          styleType="solid"
+                          onClick={handleIssueHadaLinkCode}
+                          disabled={issueHadaLinkCodeMutation.isPending}
+                        >
+                          코드 생성
+                        </Button>
+                        <Button
+                          styleType="outlined"
+                          variant="assistive"
+                          size="small"
+                          onClick={closeHadaLinkTooltip}
+                        >
+                          닫기
+                        </Button>
+                      </div>
+                      {issuedLinkCode ? (
+                        <div css={cssObj.panelSection}>
+                          <span css={cssObj.panelSubtitle}>발급된 코드</span>
+                          <Textfield
+                            singleLine
+                            readOnly
+                            value={issuedLinkCode}
+                            onValueChange={() => {}}
+                          />
+                        </div>
+                      ) : (
+                        <p css={cssObj.helperText}>아직 생성된 코드가 없습니다. 코드를 생성해 주세요.</p>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           )}
@@ -446,6 +594,29 @@ export const SingleSelectionPanel = ({
           </div>
         </div>
       </form>
+      <div css={cssObj.panelSection}>
+        <h3 css={cssObj.panelSubtitle}>재원생 연결 객체들</h3>
+        <div css={cssObj.linkedNav}>
+          {linkedObjectTabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              css={[
+                cssObj.linkedNavButton,
+                tab.key === resolvedActiveLinkedTab ? cssObj.linkedNavButtonActive : null,
+              ]}
+              onClick={() => setActiveLinkedTab(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div css={cssObj.linkedContent}>
+          {linkedObjectTabs.find((tab) => tab.key === resolvedActiveLinkedTab)?.content ?? (
+            <p css={cssObj.helperText}>연결된 객체가 없습니다.</p>
+          )}
+        </div>
+      </div>
       <div css={cssObj.panelFooter}>
         <Button
           size="small"
@@ -466,46 +637,6 @@ export const SingleSelectionPanel = ({
           재원생 삭제
         </Button>
       </div>
-      <Modal
-        isOpen={isHadaLinkModalOpen}
-        onClose={() => setHadaLinkModalFor(null)}
-        title="하다 연동"
-        menus={[
-          {
-            id: 'issue-code',
-            label: '코드 생성',
-            content: (
-              <div css={cssObj.panelBody}>
-                <p css={cssObj.helperText}>하다 앱에서 사용할 연동 코드를 생성해 주세요.</p>
-                <div css={cssObj.sectionActions}>
-                  <Button
-                    variant="primary"
-                    styleType="solid"
-                    onClick={async () => {
-                      await issueHadaLinkCodeMutation.mutateAsync(jaewonsaengNanoId);
-                      await refetchHadaLinkCode();
-                    }}
-                    disabled={issueHadaLinkCodeMutation.isPending}
-                  >
-                    코드 생성
-                  </Button>
-                </div>
-                {issuedLinkCode && (
-                  <div css={cssObj.panelSection}>
-                    <span css={cssObj.panelSubtitle}>발급된 코드</span>
-                    <Textfield
-                      singleLine
-                      readOnly
-                      value={issuedLinkCode}
-                      onValueChange={() => {}}
-                    />
-                  </div>
-                )}
-              </div>
-            ),
-          },
-        ]}
-      />
     </div>
   );
 };
