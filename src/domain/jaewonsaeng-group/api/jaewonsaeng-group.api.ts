@@ -32,7 +32,7 @@ import {
   UpdateJaewonsaengGroupMemberRequest,
   DeleteJaewonsaengGroupMemberResponseSchema,
   DeleteJaewonsaengGroupMemberResponse,
-} from './jaewonsaengGroup.schema';
+} from './jaewonsaeng-group.schema';
 
 // ============================================================================
 // GET /T/dl/jaewonsaeng-groups - List
@@ -121,7 +121,9 @@ export const useUpdateJaewonsaengGroupMutation = () =>
 // DELETE /T/dl/jaewonsaeng-groups/{nano-id} - Delete
 // ============================================================================
 
-export const deleteJaewonsaengGroup = async (nanoId: string): Promise<DeleteJaewonsaengGroupResponse> => {
+export const deleteJaewonsaengGroup = async (
+  nanoId: string,
+): Promise<DeleteJaewonsaengGroupResponse> => {
   const res = await apiClient.delete(`/T/dl/jaewonsaeng-groups/${nanoId}`);
   return parseOrThrow(DeleteJaewonsaengGroupResponseSchema, res.data);
 };
@@ -226,8 +228,7 @@ export const useUpdateJaewonsaengGroupMemberMutation = () =>
       groupNanoId: string;
       jaewonsaengNanoId: string;
       data: UpdateJaewonsaengGroupMemberRequest;
-    }) =>
-      updateJaewonsaengGroupMember(params.groupNanoId, params.jaewonsaengNanoId, params.data),
+    }) => updateJaewonsaengGroupMember(params.groupNanoId, params.jaewonsaengNanoId, params.data),
   });
 
 // ============================================================================

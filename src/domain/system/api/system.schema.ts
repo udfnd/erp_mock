@@ -45,3 +45,10 @@ export const GetGendersResponseSchema = z.object({
   genders: z.array(GenderItemSchema),
 });
 export type GetGendersResponse = z.infer<typeof GetGendersResponseSchema>;
+
+export const GetJaewonsaengGroupTypesResponseSchema = z.object({
+  jaewonsaengGroupTypes: z.array(SystemItemSchema),
+});
+export type GetJaewonsaengGroupTypesResponse = z.infer<
+  typeof GetJaewonsaengGroupTypesResponseSchema
+>;

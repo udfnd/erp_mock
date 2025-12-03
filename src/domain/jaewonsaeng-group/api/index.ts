@@ -34,7 +34,7 @@ export {
   type UpdateJaewonsaengGroupMemberResponse,
   DeleteJaewonsaengGroupMemberResponseSchema,
   type DeleteJaewonsaengGroupMemberResponse,
-} from './jaewonsaengGroup.schema';
+} from './jaewonsaeng-group.schema';
 
 // ============================================================================
 // API Functions
@@ -60,4 +60,4 @@ export {
   useUpdateJaewonsaengGroupMemberMutation,
   deleteJaewonsaengGroupMember,
   useDeleteJaewonsaengGroupMemberMutation,
-} from './jaewonsaengGroup.api';
+} from './jaewonsaeng-group.api';

@@ -15,6 +15,8 @@ import {
   GetPermissionTypesResponseSchema,
   GetGendersResponse,
   GetGendersResponseSchema,
+  GetJaewonsaengGroupTypesResponse,
+  GetJaewonsaengGroupTypesResponseSchema,
 } from './system.schema';
 
 export const getHadaJaewonsangLinkRequestPermissions =
@@ -87,5 +89,17 @@ export const useGetGendersQuery = (options?: { enabled?: boolean }) =>
   useAuthedQuery<GetGendersResponse, unknown>({
     queryKey: ['genders'],
     queryFn: getGenders,
+    enabled: options?.enabled ?? true,
+  });
+
+export const getJaewonsaengGroupTypes = async (): Promise<GetJaewonsaengGroupTypesResponse> => {
+  const res = await apiClient.get('/T/dl/jaewonsaeng-group-types');
+  return parseOrThrow(GetJaewonsaengGroupTypesResponseSchema, res.data);
+};
+
+export const useGetJaewonsaengGroupTypesQuery = (options?: { enabled?: boolean }) =>
+  useAuthedQuery<GetJaewonsaengGroupTypesResponse, unknown>({
+    queryKey: ['jaewonsaengGroupTypes'],
+    queryFn: getJaewonsaengGroupTypes,
     enabled: options?.enabled ?? true,
   });
