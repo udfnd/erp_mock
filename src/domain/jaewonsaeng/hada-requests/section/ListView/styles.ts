@@ -175,7 +175,7 @@ export const cssObj = {
 
   tooltip: css`
     position: fixed;
-    width: 320px;
+    width: 680px;
     background: ${color.white};
     border: 1px solid ${color.cgrey100};
     border-radius: 10px;
@@ -193,13 +193,19 @@ export const cssObj = {
   `,
 
   tooltipContent: css`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    align-items: start;
+  `,
+
+  tooltipListSection: css`
+    overflow: hidden;
+    background: ${color.white};
   `,
 
   tooltipList: css`
-    max-height: 200px;
+    max-height: 240px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -212,6 +218,37 @@ export const cssObj = {
     gap: 8px;
     ${typography.bodySmallM};
     color: ${color.cgrey700};
+  `,
+
+  tooltipSelectedSection: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: ${color.white};
+  `,
+
+  selectedItemLabel: css`
+    ${typography.bodySmallSB};
+    color: ${color.black};
+  `,
+
+  selectedItemBox: css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
+  selectedItemName: css`
+    ${typography.bodyM};
+    color: ${color.cgrey700};
+  `,
+
+  selectedItemMeta: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey500};
   `,
 
   tooltipActions: css`

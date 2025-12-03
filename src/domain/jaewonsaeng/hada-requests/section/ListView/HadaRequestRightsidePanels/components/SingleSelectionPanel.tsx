@@ -61,6 +61,11 @@ export function SingleSelectionPanel({
     { enabled: isTooltipOpen && isAuthenticated && Boolean(jojikNanoId) },
   );
 
+  const selectedJaewonsaengDetail = useMemo(
+    () => jaewonsaengList?.jaewonsaengs.find((item) => item.nanoId === selectedJaewonsaeng),
+    [jaewonsaengList?.jaewonsaengs, selectedJaewonsaeng],
+  );
+
   const handleApprove = async () => {
     if (!selectedJaewonsaeng) return;
     await updateMutation.mutateAsync({ jaewonsaengNanoId: selectedJaewonsaeng });
@@ -189,6 +194,8 @@ export function SingleSelectionPanel({
         <div css={cssObj.panelActions}>
           <div css={cssObj.tooltipTrigger} ref={tooltipTriggerRef}>
             <Button
+              styleType="outlined"
+              variant="assistive"
               size="small"
               onClick={toggleTooltip}
               disabled={!isAuthenticated}
@@ -200,41 +207,58 @@ export function SingleSelectionPanel({
               <div css={cssObj.tooltip} style={tooltipPosition}>
                 <div css={cssObj.tooltipHeader}>
                   <Textfield
+                    singleLine
                     placeholder="재원생 이름 검색"
                     value={searchValue}
                     onChange={(event) => setSearchValue(event.target.value)}
                   />
                 </div>
                 <div css={cssObj.tooltipContent}>
-                  <div css={cssObj.tooltipList}>
-                    {jaewonsaengList?.jaewonsaengs?.length ? (
-                      jaewonsaengList.jaewonsaengs.map((item) => (
-                        <label key={item.nanoId} css={cssObj.tooltipListItem}>
-                          <input
-                            type="radio"
-                            name="jaewonsaeng"
-                            value={item.nanoId}
-                            checked={selectedJaewonsaeng === item.nanoId}
-                            onChange={() => setSelectedJaewonsaeng(item.nanoId)}
-                          />
-                          <span>{item.name}</span>
-                        </label>
-                      ))
-                    ) : (
-                      <p css={cssObj.helperText}>재원생을 불러오는 중입니다...</p>
-                    )}
+                  <div css={cssObj.tooltipListSection}>
+                    <div css={cssObj.tooltipList}>
+                      {jaewonsaengList?.jaewonsaengs?.length ? (
+                        jaewonsaengList.jaewonsaengs.map((item) => (
+                          <label key={item.nanoId} css={cssObj.tooltipListItem}>
+                            <input
+                              type="radio"
+                              name="jaewonsaeng"
+                              value={item.nanoId}
+                              checked={selectedJaewonsaeng === item.nanoId}
+                              onChange={() => setSelectedJaewonsaeng(item.nanoId)}
+                            />
+                            <span>{item.name}</span>
+                          </label>
+                        ))
+                      ) : (
+                        <p css={cssObj.helperText}>재원생을 불러오는 중입니다...</p>
+                      )}
+                    </div>
+                  </div>
+                  <div css={cssObj.tooltipSelectedSection}>
+                    <span css={cssObj.selectedItemLabel}>선택된 재원생</span>
+                    <div css={cssObj.selectedItemBox}>
+                      {selectedJaewonsaengDetail ? (
+                        <>
+                          <span css={cssObj.selectedItemName}>{selectedJaewonsaengDetail.name}</span>
+                          <span css={cssObj.selectedItemMeta}>{selectedJaewonsaengDetail.phoneNumber}</span>
+                        </>
+                      ) : (
+                        <p css={cssObj.helperText}>선택된 재원생이 없습니다.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div css={cssObj.tooltipActions}>
                   <Button
+                    styleType="solid"
+                    variant="secondary"
                     size="small"
-                    variant="primary"
                     onClick={handleApprove}
                     disabled={!selectedJaewonsaeng || updateMutation.isPending}
                   >
                     연결
                   </Button>
-                  <Button size="small" variant="secondary" onClick={toggleTooltip}>
+                  <Button styleType="outlined" variant="assistive" size="small" onClick={toggleTooltip}>
                     닫기
                   </Button>
                 </div>
