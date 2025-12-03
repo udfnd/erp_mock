@@ -173,6 +173,7 @@ export const cssObj = {
     > p {
       ${typography.bodySmallM};
       color: ${color.black};
+      margin-bottom: 4px;
     }
     > span {
       ${typography.bodyM};
@@ -188,24 +189,41 @@ export const cssObj = {
 
   permissionTooltip: css`
     position: fixed;
-    width: 420px;
-    background: ${color.white};
-    border: 1px solid ${color.cgrey100};
-    border-radius: 10px;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    width: 280px;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey200};
+    box-shadow: 0 0 15px 0 rgba(1, 8, 33, 0.1);
+    border-radius: 8px;
+    padding: 12px;
     z-index: 100;
   `,
 
   permissionTooltipHeader: css`
-    border-bottom: 1px solid ${color.cgrey50};
-    padding-bottom: 8px;
+    ${typography.bodySmallSB};
+  `,
+
+  issuedCodeWrapper: css`
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+  `,
+
+  issuedCode: css`
+    ${typography.titleSmallB};
+    color: ${color.blue600};
+  `,
+
+  issuedDate: css`
+    ${typography.captionR};
+    color: ${color.cgrey500};
+  `,
+
+  issueButtonWrapper: css`
+    margin-top: 16px;
   `,
 
   linkedNav: css`
@@ -213,6 +231,7 @@ export const cssObj = {
     gap: 8px;
     margin-bottom: 4px;
   `,
+
   linkedNavButton: css`
     padding: 6px 4px;
     border: none;
@@ -232,6 +251,7 @@ export const cssObj = {
     font-weight: 700;
     border-bottom-color: ${color.black};
   `,
+
   linkedContent: css`
     display: flex;
     flex-direction: column;

@@ -3,6 +3,7 @@ import { CreateJaewonsaengPanel } from '../components/CreateJaewonsaengPanel';
 import { QuickActionsPanel } from '../components/QuickActionsPanel';
 import { SingleSelectionPanel } from '../components/SingleSelectionPanel';
 import type { SingleSelectionPanelProps } from '../components/SingleSelectionPanel';
+import { cssObj } from '@/domain/sayongja/section';
 
 export type MissingJojikPanelsProps = Record<string, unknown>;
 
@@ -20,7 +21,11 @@ export type CreatingPanelsProps = {
 
 export const CreatingPanels = ({ jojikNanoId, onExit, onAfterMutation }: CreatingPanelsProps) => (
   <RightsidePanelsContainer>
-    <CreateJaewonsaengPanel jojikNanoId={jojikNanoId} onExit={onExit} onAfterMutation={onAfterMutation} />
+    <CreateJaewonsaengPanel
+      jojikNanoId={jojikNanoId}
+      onExit={onExit}
+      onAfterMutation={onAfterMutation}
+    />
   </RightsidePanelsContainer>
 );
 
@@ -44,13 +49,15 @@ export type MultipleSelectedPanelsProps = { jaewonsaengs: { name: string }[] };
 
 export const MultipleSelectedPanels = ({ jaewonsaengs }: MultipleSelectedPanelsProps) => (
   <RightsidePanelsContainer>
-    <div css={{ padding: 16 }}>
-      <h3>여러 재원생 선택됨</h3>
-      <ul>
-        {jaewonsaengs.map((item) => (
-          <li key={item.name}>{item.name}</li>
-        ))}
-      </ul>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>
+        {jaewonsaengs[0].name} 외 {jaewonsaengs.length - 1}개 설정
+      </h2>
+    </div>
+    <div css={cssObj.panelBody}>
+      <div css={cssObj.salesDiv}>
+        <span>준비중입니다.</span>
+      </div>
     </div>
   </RightsidePanelsContainer>
 );

@@ -150,6 +150,7 @@ export function useJaewonsaengListViewSections({
         id: 'divider',
         header: '',
         cell: () => <div style={{ borderLeft: `1px solid ${color.cgrey100}`, height: '100%' }} />,
+        size: 56,
       }),
       columnHelper.accessor('daepyoJaewonsaengGroupName', {
         header: '대표 재원생 그룹',

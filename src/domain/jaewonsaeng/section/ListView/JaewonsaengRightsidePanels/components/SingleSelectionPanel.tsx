@@ -22,7 +22,7 @@ import { useGetGendersQuery } from '@/domain/system/api';
 import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
-import { ArrowMdRightSingleIcon, PlusIcon } from '@/common/icons';
+import { ArrowMdRightSingleIcon, PlusIcon, PhoneIcon } from '@/common/icons';
 
 const getFirstNonEmptyString = (...values: (string | null | undefined)[]) =>
   values.find((value) => value !== undefined && value !== null && value !== '') ?? '';
@@ -77,7 +77,6 @@ export const SingleSelectionPanel = ({
       enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
     });
 
-  // 🔹 getFirst* 함수들은 이제 top-level 이라 dependency에 넣을 필요 없음
   const initialValues = useMemo(
     () => ({
       jaewonsaeng: {
@@ -170,7 +169,6 @@ export const SingleSelectionPanel = ({
     isDirty: state.isDirty,
   }));
 
-  // 🔹 이제 initialValues 참조가 안정적이라 이 effect가 무한히 돌지 않음
   useEffect(() => {
     form.reset(initialValues);
   }, [form, initialValues]);
@@ -193,9 +191,9 @@ export const SingleSelectionPanel = ({
       if (!container) return;
 
       const rect = container.getBoundingClientRect();
-      const tooltipWidth = 420;
+      const tooltipWidth = 280;
       const left = rect.left - tooltipWidth - 12;
-      const top = Math.max(rect.top - 260, 12);
+      const top = Math.max(rect.top - 50, 12);
 
       setHadaLinkTooltipPosition({ left, top });
     };
@@ -455,43 +453,28 @@ export const SingleSelectionPanel = ({
                 {isHadaLinkTooltipOpen && hadaLinkTooltipPosition ? (
                   <div css={cssObj.permissionTooltip} style={hadaLinkTooltipPosition}>
                     <div css={cssObj.permissionTooltipHeader}>
-                      <p css={cssObj.panelSubtitle}>하다 연동</p>
-                      <p css={cssObj.helperText}>하다 앱에서 사용할 연동 코드를 생성해 주세요.</p>
+                      <p css={cssObj.panelSubtitle}>연결 코드</p>
                     </div>
-                    <div css={cssObj.linkedContent}>
-                      <div css={cssObj.sectionActions}>
-                        <Button
-                          variant="primary"
-                          styleType="solid"
-                          onClick={handleIssueHadaLinkCode}
-                          disabled={issueHadaLinkCodeMutation.isPending}
-                        >
-                          코드 생성
-                        </Button>
-                        <Button
-                          styleType="outlined"
-                          variant="assistive"
-                          size="small"
-                          onClick={closeHadaLinkTooltip}
-                        >
-                          닫기
-                        </Button>
-                      </div>
-                      {issuedLinkCode ? (
-                        <div css={cssObj.panelSection}>
-                          <span css={cssObj.panelSubtitle}>발급된 코드</span>
-                          <Textfield
-                            singleLine
-                            readOnly
-                            value={issuedLinkCode}
-                            onValueChange={() => {}}
-                          />
-                        </div>
-                      ) : (
-                        <p css={cssObj.helperText}>
-                          아직 생성된 코드가 없습니다. 코드를 생성해 주세요.
+                    {hadaLinkCodeData && issuedLinkCode && (
+                      <div css={cssObj.issuedCodeWrapper}>
+                        <p css={cssObj.issuedCode}>{hadaLinkCodeData.linkCode}</p>
+                        <p css={cssObj.issuedDate}>
+                          {hadaLinkCodeData.issuedAt} {hadaLinkCodeData.issuedByName}
                         </p>
-                      )}
+                      </div>
+                    )}
+                    <div css={cssObj.issueButtonWrapper}>
+                      <Button
+                        variant="assistive"
+                        size="small"
+                        styleType="solid"
+                        isFull
+                        onClick={handleIssueHadaLinkCode}
+                        disabled={issueHadaLinkCodeMutation.isPending}
+                        iconRight={issuedLinkCode ? <PhoneIcon /> : <PlusIcon />}
+                      >
+                        {issuedLinkCode ? '새 연결 코드 생성' : '코드 생성'}
+                      </Button>
                     </div>
                   </div>
                 ) : null}
