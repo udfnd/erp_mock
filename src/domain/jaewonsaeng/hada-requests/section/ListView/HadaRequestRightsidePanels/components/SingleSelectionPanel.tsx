@@ -69,15 +69,19 @@ export function SingleSelectionPanel({
 
   const effectiveTitle = detail?.jaewonSincheongName ?? requestName;
   const bohojaText = useMemo(
-    () => detail?.bohojaProfiles.map((profile) => `${profile.name} (${profile.gwangye})`).join(', ') ?? '-',
+    () =>
+      detail?.bohojaProfiles.map((profile) => `${profile.name} (${profile.gwangye})`).join(', ') ??
+      '-',
     [detail?.bohojaProfiles],
   );
 
   return (
     <section css={cssObj.panel}>
       <div css={cssObj.panelHeader}>
-        <h2 css={cssObj.panelTitle}>{effectiveTitle}</h2>
-        <p css={cssObj.panelSubtitle}>{detail?.jaewonSincheongSangtaeName ?? '재원 신청 상태를 확인하세요.'}</p>
+        <h2 css={cssObj.panelTitle}>{effectiveTitle} 학생 재원생 신청</h2>
+        <p css={cssObj.panelSubtitle}>
+          {detail?.jaewonSincheongSangtaeName ?? '재원 신청 상태를 확인하세요.'}
+        </p>
       </div>
       <div css={contentStyle}>
         {isLoading && <p css={cssObj.helperText}>재원 신청 정보를 불러오는 중입니다...</p>}
@@ -99,16 +103,16 @@ export function SingleSelectionPanel({
         )}
         <div css={actionsStyle}>
           <div css={tooltipTriggerStyle}>
-            <Button size="sm" onClick={() => setIsTooltipOpen((prev) => !prev)} disabled={!isAuthenticated}>
+            <Button
+              size="small"
+              onClick={() => setIsTooltipOpen((prev) => !prev)}
+              disabled={!isAuthenticated}
+            >
               재원생 선택
             </Button>
             {isTooltipOpen && (
               <div css={tooltipStyle}>
-                <Textfield
-                  placeholder="재원생 이름 검색"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
+                <Textfield placeholder="재원생 이름 검색" value={searchValue} />
                 <div css={listStyle}>
                   {jaewonsaengList?.jaewonsaengs.map((item) => (
                     <label key={item.nanoId} css={listItemStyle}>
@@ -124,7 +128,7 @@ export function SingleSelectionPanel({
                   )) ?? <p css={cssObj.helperText}>재원생을 불러오는 중입니다...</p>}
                 </div>
                 <Button
-                  size="sm"
+                  size="small"
                   variant="primary"
                   onClick={handleApprove}
                   disabled={!selectedJaewonsaeng || updateMutation.isPending}
@@ -143,7 +147,7 @@ export function SingleSelectionPanel({
               재원생 연결 및 승인
             </Button>
             <Button
-              variant="ghost"
+              variant="secondary"
               color="red"
               onClick={handleReject}
               disabled={rejectMutation.isPending}
@@ -176,6 +180,12 @@ const tooltipStyle = css({
   gap: 8,
   zIndex: 10,
 });
-const listStyle = css({ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 });
+const listStyle = css({
+  maxHeight: 200,
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 6,
+});
 const listItemStyle = css({ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 });
 const actionButtonsStyle = css({ display: 'flex', gap: 8 });

@@ -92,11 +92,6 @@ export function HadaRequestListSection({
         rowEventHandlers={rowEventHandlers}
         onSelectedRowsChange={handleSelectedRowsChange}
         onDimmerClick={handleDimmerClick}
-        primaryAction={{
-          label: '신청 수동 등록',
-          onClick: handlers.onAddClick,
-          disabled: isCreating,
-        }}
       />
     </section>
   );
