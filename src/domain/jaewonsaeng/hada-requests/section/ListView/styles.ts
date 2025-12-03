@@ -167,13 +167,23 @@ export const cssObj = {
     gap: 4px;
   `,
 
-  tooltipTrigger: css`
+  selectedItemName: css`
+    ${typography.bodyM};
+    color: ${color.cgrey700};
+  `,
+
+  selectedItemMeta: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey500};
+  `,
+
+  permissionActionContainer: css`
     position: relative;
-    align-self: flex-start;
+    align-items: center;
     z-index: 2;
   `,
 
-  tooltip: css`
+  permissionTooltip: css`
     position: fixed;
     width: 680px;
     background: ${color.white};
@@ -187,40 +197,24 @@ export const cssObj = {
     z-index: 100;
   `,
 
-  tooltipHeader: css`
+  permissionTooltipHeader: css`
     border-bottom: 1px solid ${color.cgrey50};
     padding-bottom: 8px;
   `,
 
-  tooltipContent: css`
+  permissionTooltipContent: css`
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 12px;
     align-items: start;
   `,
 
-  tooltipListSection: css`
+  permissionTooltipTable: css`
     overflow: hidden;
     background: ${color.white};
   `,
 
-  tooltipList: css`
-    max-height: 240px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  `,
-
-  tooltipListItem: css`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    ${typography.bodySmallM};
-    color: ${color.cgrey700};
-  `,
-
-  tooltipSelectedSection: css`
+  permissionTooltipSelected: css`
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;
     padding: 12px;
@@ -230,28 +224,26 @@ export const cssObj = {
     background: ${color.white};
   `,
 
-  selectedItemLabel: css`
+  selectedPermissionLabel: css`
     ${typography.bodySmallSB};
     color: ${color.black};
   `,
 
-  selectedItemBox: css`
+  selectedPermissionList: css`
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
   `,
 
-  selectedItemName: css`
-    ${typography.bodyM};
+  selectedPermissionItem: css`
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: ${color.blue10};
     color: ${color.cgrey700};
-  `,
-
-  selectedItemMeta: css`
     ${typography.bodySmallM};
-    color: ${color.cgrey500};
   `,
 
-  tooltipActions: css`
+  permissionTooltipActions: css`
     display: flex;
     justify-content: flex-end;
     gap: 8px;
