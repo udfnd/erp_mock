@@ -74,9 +74,19 @@ export const cssObj = {
     gap: 12px;
   `,
 
+  desc: css`
+    ${typography.captionR};
+    color: ${color.cgrey500};
+  `,
+
   helperText: css`
     font-size: 13px;
     color: ${color.cgrey400};
+  `,
+
+  sectionActions: css`
+    display: flex;
+    gap: 8px;
   `,
 
   detailList: css`

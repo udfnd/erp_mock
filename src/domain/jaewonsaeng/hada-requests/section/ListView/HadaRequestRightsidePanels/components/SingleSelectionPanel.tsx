@@ -12,8 +12,8 @@ import {
 import { useGetJaewonsaengsQuery } from '@/domain/jaewonsaeng/api';
 import { useBatchLinkJaewonsaengsMutation } from '@/domain/jaewonsaeng-group/api';
 
-import { formatDateTime } from './constants';
-import { cssObj } from './styles';
+import { formatDateTime } from '../../constants';
+import { cssObj } from '../../styles';
 
 type Props = {
   requestNanoId: string;
