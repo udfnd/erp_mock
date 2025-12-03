@@ -1,9 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Button, Textfield } from '@/common/components';
+import {
+  BirthdayIcon,
+  InfoBlackIcon,
+  ParentIcon,
+  PhoneIcon,
+  StudentIcon,
+  TimeIcon,
+} from '@/common/icons';
 import {
   useGetJaewonSincheongDetailQuery,
   useRejectJaewonSincheongMutation,
@@ -38,6 +45,8 @@ export function SingleSelectionPanel({
   const batchLinkMutation = useBatchLinkJaewonsaengsMutation();
 
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(null);
+  const tooltipTriggerRef = useRef<HTMLDivElement>(null);
   const [selectedJaewonsaeng, setSelectedJaewonsaeng] = useState<string>('');
   const [searchValue, setSearchValue] = useState('');
 
@@ -68,11 +77,91 @@ export function SingleSelectionPanel({
   };
 
   const effectiveTitle = detail?.jaewonSincheongName ?? requestName;
-  const bohojaText = useMemo(
-    () =>
-      detail?.bohojaProfiles.map((profile) => `${profile.name} (${profile.gwangye})`).join(', ') ??
-      '-',
-    [detail?.bohojaProfiles],
+
+  const toggleTooltip = () => {
+    setIsTooltipOpen((prev) => {
+      const next = !prev;
+      if (!prev && tooltipTriggerRef.current) {
+        const rect = tooltipTriggerRef.current.getBoundingClientRect();
+        setTooltipPosition({ top: rect.bottom + 8, left: rect.left });
+      } else if (prev) {
+        setTooltipPosition(null);
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!isTooltipOpen) return;
+
+    const updatePosition = () => {
+      if (!tooltipTriggerRef.current) return;
+      const rect = tooltipTriggerRef.current.getBoundingClientRect();
+      setTooltipPosition({ top: rect.bottom + 8, left: rect.left });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [isTooltipOpen]);
+
+  const detailRows = useMemo(
+    () => [
+      {
+        icon: <TimeIcon />,
+        label: '신청 시간',
+        value: formatDateTime(detail?.createdAt),
+      },
+      {
+        icon: <InfoBlackIcon />,
+        label: '신청 상태',
+        value: detail?.jaewonSincheongSangtaeName ?? '-',
+      },
+      {
+        icon: <StudentIcon />,
+        label: '학생 이름',
+        value: detail?.haksaengProfile?.name ?? '-',
+      },
+      {
+        icon: <PhoneIcon />,
+        label: '학생 연락처',
+        value: detail?.haksaengProfile?.phoneNumber ?? '-',
+      },
+      {
+        icon: <BirthdayIcon />,
+        label: '학생 생년월일',
+        value: formatDateTime(detail?.haksaengProfile?.birthDate),
+      },
+      ...
+        (detail?.bohojaProfiles?.flatMap((profile) => [
+          {
+            icon: <ParentIcon />,
+            label: '보호자',
+            value: `${profile.name} (${profile.gwangye})`,
+          },
+          {
+            icon: <PhoneIcon />,
+            label: '보호자 연락처',
+            value: profile.phoneNumber,
+          },
+          {
+            icon: <BirthdayIcon />,
+            label: '보호자 생년월일',
+            value: formatDateTime(profile.birthDate),
+          },
+        ]) ?? []),
+      {
+        icon: <InfoBlackIcon />,
+        label: '신청 제목',
+        value: effectiveTitle,
+      },
+    ],
+    [detail?.bohojaProfiles, detail?.createdAt, detail?.haksaengProfile, detail?.jaewonSincheongSangtaeName, effectiveTitle],
   );
 
   return (
@@ -83,62 +172,76 @@ export function SingleSelectionPanel({
           {detail?.jaewonSincheongSangtaeName ?? '재원 신청 상태를 확인하세요.'}
         </p>
       </div>
-      <div css={contentStyle}>
+      <div css={cssObj.panelContent}>
         {isLoading && <p css={cssObj.helperText}>재원 신청 정보를 불러오는 중입니다...</p>}
         {!isLoading && (
-          <dl css={cssObj.detailList}>
-            <div css={cssObj.detailItem}>
-              <dt css={cssObj.detailLabel}>신청 시간</dt>
-              <dd css={cssObj.detailValue}>{formatDateTime(detail?.createdAt)}</dd>
-            </div>
-            <div css={cssObj.detailItem}>
-              <dt css={cssObj.detailLabel}>하다 프로필</dt>
-              <dd css={cssObj.detailValue}>{detail?.haksaengProfile?.name ?? '-'}</dd>
-            </div>
-            <div css={cssObj.detailItem}>
-              <dt css={cssObj.detailLabel}>보호자</dt>
-              <dd css={cssObj.detailValue}>{bohojaText}</dd>
-            </div>
-          </dl>
+          <div css={cssObj.dataList}>
+            {detailRows.map((row, index) => (
+              <div key={`${row.label}:${index}`} css={cssObj.dataItem}>
+                <span css={cssObj.dataIcon}>{row.icon}</span>
+                <span css={cssObj.dataLabel}>{row.label}</span>
+                <span css={cssObj.dataValue}>{row.value}</span>
+              </div>
+            ))}
+            {!detailRows.length && <p css={cssObj.helperText}>재원 신청 정보를 불러오는 중입니다...</p>}
+          </div>
         )}
-        <div css={actionsStyle}>
-          <div css={tooltipTriggerStyle}>
+        <div css={cssObj.panelActions}>
+          <div css={cssObj.tooltipTrigger} ref={tooltipTriggerRef}>
             <Button
               size="small"
-              onClick={() => setIsTooltipOpen((prev) => !prev)}
+              onClick={toggleTooltip}
               disabled={!isAuthenticated}
+              aria-expanded={isTooltipOpen}
             >
               재원생 선택
             </Button>
-            {isTooltipOpen && (
-              <div css={tooltipStyle}>
-                <Textfield placeholder="재원생 이름 검색" value={searchValue} />
-                <div css={listStyle}>
-                  {jaewonsaengList?.jaewonsaengs.map((item) => (
-                    <label key={item.nanoId} css={listItemStyle}>
-                      <input
-                        type="radio"
-                        name="jaewonsaeng"
-                        value={item.nanoId}
-                        checked={selectedJaewonsaeng === item.nanoId}
-                        onChange={() => setSelectedJaewonsaeng(item.nanoId)}
-                      />
-                      <span>{item.name}</span>
-                    </label>
-                  )) ?? <p css={cssObj.helperText}>재원생을 불러오는 중입니다...</p>}
+            {isTooltipOpen && tooltipPosition && (
+              <div css={cssObj.tooltip} style={tooltipPosition}>
+                <div css={cssObj.tooltipHeader}>
+                  <Textfield
+                    placeholder="재원생 이름 검색"
+                    value={searchValue}
+                    onChange={(event) => setSearchValue(event.target.value)}
+                  />
                 </div>
-                <Button
-                  size="small"
-                  variant="primary"
-                  onClick={handleApprove}
-                  disabled={!selectedJaewonsaeng || updateMutation.isPending}
-                >
-                  연결
-                </Button>
+                <div css={cssObj.tooltipContent}>
+                  <div css={cssObj.tooltipList}>
+                    {jaewonsaengList?.jaewonsaengs?.length ? (
+                      jaewonsaengList.jaewonsaengs.map((item) => (
+                        <label key={item.nanoId} css={cssObj.tooltipListItem}>
+                          <input
+                            type="radio"
+                            name="jaewonsaeng"
+                            value={item.nanoId}
+                            checked={selectedJaewonsaeng === item.nanoId}
+                            onChange={() => setSelectedJaewonsaeng(item.nanoId)}
+                          />
+                          <span>{item.name}</span>
+                        </label>
+                      ))
+                    ) : (
+                      <p css={cssObj.helperText}>재원생을 불러오는 중입니다...</p>
+                    )}
+                  </div>
+                </div>
+                <div css={cssObj.tooltipActions}>
+                  <Button
+                    size="small"
+                    variant="primary"
+                    onClick={handleApprove}
+                    disabled={!selectedJaewonsaeng || updateMutation.isPending}
+                  >
+                    연결
+                  </Button>
+                  <Button size="small" variant="secondary" onClick={toggleTooltip}>
+                    닫기
+                  </Button>
+                </div>
               </div>
             )}
           </div>
-          <div css={actionButtonsStyle}>
+          <div css={cssObj.actionButtons}>
             <Button
               variant="primary"
               onClick={handleApprove}
@@ -160,32 +263,3 @@ export function SingleSelectionPanel({
     </section>
   );
 }
-
-const contentStyle = css({ display: 'flex', flexDirection: 'column', gap: 12 });
-const actionsStyle = css({ display: 'flex', flexDirection: 'column', gap: 12 });
-const tooltipTriggerStyle = css({ position: 'relative', alignSelf: 'flex-start' });
-const tooltipStyle = css({
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  marginTop: 8,
-  padding: 12,
-  width: 260,
-  background: '#fff',
-  border: '1px solid #e5e7eb',
-  borderRadius: 8,
-  boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
-  zIndex: 10,
-});
-const listStyle = css({
-  maxHeight: 200,
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 6,
-});
-const listItemStyle = css({ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 });
-const actionButtonsStyle = css({ display: 'flex', gap: 8 });
