@@ -6,6 +6,7 @@ import type { Row } from '@tanstack/react-table';
 import { ListSection, type ListViewSortProps } from '@/common/lv/component';
 import { ToolbarLayout } from '@/common/lv/layout';
 
+import { cssObj } from './styles';
 import type { HadaRequestListSectionProps } from './useHadaRequestsListViewSections';
 import type { JaewonSincheongListItem } from '@/domain/jaewon-sincheong/api';
 
@@ -65,7 +66,7 @@ export function HadaRequestListSection({
   };
 
   return (
-    <section>
+    <section css={cssObj.listSection}>
       <ToolbarLayout
         search={{
           value: searchTerm,

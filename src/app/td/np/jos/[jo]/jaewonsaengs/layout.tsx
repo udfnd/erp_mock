@@ -22,6 +22,7 @@ const JAEWONSAENGS_BASE = join(ROOT, ID_SEG, 'jaewonsaengs');
 const NAV_ITEMS = [
   { name: '재원생들', href: join(JAEWONSAENGS_BASE, 'home', 'lv') },
   { name: '재원생 그룹들', href: join(JAEWONSAENGS_BASE, 'group', 'lv') },
+  { name: '재원생 하다 신청', href: join(JAEWONSAENGS_BASE, 'hada-requests', 'lv') },
 ] satisfies NavItem[];
 
 type LayoutProps = { children: ReactNode };

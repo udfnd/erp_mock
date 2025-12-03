@@ -41,7 +41,7 @@ export const NoneSelectedPanels = ({ onStartCreate }: NoneSelectedPanelsProps) =
     <div css={cssObj.panelBody}>
       재원 신청을 선택하면 상세 정보를 확인하고 승인/반려할 수 있습니다.
       <br />
-      <Button size="sm" onClick={onStartCreate}>
+      <Button size="small" onClick={onStartCreate}>
         수동 등록 시작
       </Button>
     </div>
@@ -56,7 +56,9 @@ export type OneSelectedPanelsProps = {
   isAuthenticated: boolean;
 };
 
-export const OneSelectedPanels = (props: OneSelectedPanelsProps) => <SingleSelectionPanel {...props} />;
+export const OneSelectedPanels = (props: OneSelectedPanelsProps) => (
+  <SingleSelectionPanel {...props} />
+);
 
 export type MultipleSelectedPanelsProps = { requests: HadaRequestListSectionProps['data'] };
 
