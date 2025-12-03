@@ -17,7 +17,6 @@ export function HadaRequestListSection({
   data,
   state,
   isListLoading,
-  pagination,
   sortByOption,
   totalCount,
   totalPages,
@@ -25,6 +24,7 @@ export function HadaRequestListSection({
   handlers,
   sortOptions,
   columns,
+  searchTerm,
 }: HadaRequestListSectionComponentProps) {
   const sortValue = sortByOption;
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -67,6 +67,11 @@ export function HadaRequestListSection({
   return (
     <section>
       <ToolbarLayout
+        search={{
+          value: searchTerm,
+          onChange: handlers.onSearchChange,
+          placeholder: '이름으로 검색',
+        }}
         filters={[]}
         sort={sortProps}
         totalCount={totalCount}
@@ -86,7 +91,6 @@ export function HadaRequestListSection({
         rowEventHandlers={rowEventHandlers}
         onSelectedRowsChange={handleSelectedRowsChange}
         onDimmerClick={handleDimmerClick}
-        pagination={pagination}
         primaryAction={{
           label: '신청 수동 등록',
           onClick: handlers.onAddClick,

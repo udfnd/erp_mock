@@ -20,6 +20,7 @@ export type HadaRequestListViewHookParams = {
 export type ListSectionState = ListViewState<JaewonSincheongListItem>;
 
 export type HadaRequestListSectionHandlers = {
+  onSearchChange: (value: string) => void;
   onSortChange: (value: string) => void;
   onSelectedChange: (requests: JaewonSincheongListItem[]) => void;
   onAddClick: () => void;
@@ -32,6 +33,7 @@ export type HadaRequestListSectionProps = {
   state: ListSectionState;
   isListLoading: boolean;
   pagination: ListSectionState['pagination'];
+  searchTerm: string;
   sortByOption?: string;
   totalCount: number;
   totalPages: number;
@@ -63,6 +65,8 @@ export function useHadaRequestListViewSections({
     initialSorting: getSortStateFromOption('createdAtDesc'),
     initialPagination: { pageIndex: 0, pageSize: 20 },
   });
+
+  const [searchTerm, setSearchTerm] = useState('');
 
   const setSortingWithReset: typeof baseState.setSorting = (updater) => {
     baseState.setSorting(updater);
@@ -142,11 +146,13 @@ export function useHadaRequestListViewSections({
     state: listViewState,
     isListLoading,
     pagination: listViewState.pagination,
+    searchTerm,
     sortByOption,
     totalCount,
     totalPages,
     isCreating,
     handlers: {
+      onSearchChange: (value) => setSearchTerm(value),
       onSortChange: (value) => setSorting(getSortStateFromOption(value)),
       onSelectedChange: setSelectedRequests,
       onAddClick: startCreate,
