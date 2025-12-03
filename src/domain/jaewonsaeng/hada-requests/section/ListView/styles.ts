@@ -67,6 +67,18 @@ export const cssObj = {
     color: ${color.black};
   `,
 
+  panelContent: css`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  `,
+
+  panelActions: css`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  `,
+
   panelBody: css`
     flex: 1;
     display: flex;
@@ -89,6 +101,12 @@ export const cssObj = {
     gap: 8px;
   `,
 
+  actionButtons: css`
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  `,
+
   detailList: css`
     display: flex;
     flex-direction: column;
@@ -109,5 +127,125 @@ export const cssObj = {
   detailValue: css`
     ${typography.bodyM};
     color: ${color.cgrey700};
+  `,
+
+  dataList: css`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+
+  dataItem: css`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    background: ${color.white};
+  `,
+
+  dataIcon: css`
+    display: flex;
+    align-items: center;
+    color: ${color.cgrey500};
+  `,
+
+  dataLabel: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey500};
+    min-width: 88px;
+  `,
+
+  dataValue: css`
+    ${typography.bodyM};
+    color: ${color.cgrey700};
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  `,
+
+  selectedItemName: css`
+    ${typography.bodyM};
+    color: ${color.cgrey700};
+  `,
+
+  selectedItemMeta: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey500};
+  `,
+
+  permissionActionContainer: css`
+    position: relative;
+    align-items: center;
+    z-index: 2;
+  `,
+
+  permissionTooltip: css`
+    position: fixed;
+    width: 680px;
+    background: ${color.white};
+    border: 1px solid ${color.cgrey100};
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+  `,
+
+  permissionTooltipHeader: css`
+    border-bottom: 1px solid ${color.cgrey50};
+    padding-bottom: 8px;
+  `,
+
+  permissionTooltipContent: css`
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    align-items: start;
+  `,
+
+  permissionTooltipTable: css`
+    overflow: hidden;
+    background: ${color.white};
+  `,
+
+  permissionTooltipSelected: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: ${color.white};
+  `,
+
+  selectedPermissionLabel: css`
+    ${typography.bodySmallSB};
+    color: ${color.black};
+  `,
+
+  selectedPermissionList: css`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  `,
+
+  selectedPermissionItem: css`
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: ${color.blue10};
+    color: ${color.cgrey700};
+    ${typography.bodySmallM};
+  `,
+
+  permissionTooltipActions: css`
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
   `,
 };
