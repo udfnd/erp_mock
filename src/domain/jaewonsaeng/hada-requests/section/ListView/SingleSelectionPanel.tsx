@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import { Button, List, Panel, PanelHeader, PanelTitle, Textfield } from '@/common/components';
+import { Button, Textfield } from '@/common/components';
 import {
   useGetJaewonSincheongDetailQuery,
   useRejectJaewonSincheongMutation,
@@ -13,6 +13,7 @@ import { useGetJaewonsaengsQuery } from '@/domain/jaewonsaeng/api';
 import { useBatchLinkJaewonsaengsMutation } from '@/domain/jaewonsaeng-group/api';
 
 import { formatDateTime } from './constants';
+import { cssObj } from './styles';
 
 type Props = {
   requestNanoId: string;
@@ -73,21 +74,28 @@ export function SingleSelectionPanel({
   );
 
   return (
-    <Panel css={panelStyle}>
-      <PanelHeader>
-        <PanelTitle>{effectiveTitle}</PanelTitle>
-        <p css={subtitleStyle}>{detail?.jaewonSincheongSangtaeName ?? '재원 신청 상태를 확인하세요.'}</p>
-      </PanelHeader>
+    <section css={cssObj.panel}>
+      <div css={cssObj.panelHeader}>
+        <h2 css={cssObj.panelTitle}>{effectiveTitle}</h2>
+        <p css={cssObj.panelSubtitle}>{detail?.jaewonSincheongSangtaeName ?? '재원 신청 상태를 확인하세요.'}</p>
+      </div>
       <div css={contentStyle}>
-        {isLoading && <p css={helperTextStyle}>재원 신청 정보를 불러오는 중입니다...</p>}
+        {isLoading && <p css={cssObj.helperText}>재원 신청 정보를 불러오는 중입니다...</p>}
         {!isLoading && (
-          <List
-            items={[
-              { label: '신청 시간', value: formatDateTime(detail?.createdAt) },
-              { label: '하다 프로필', value: detail?.haksaengProfile?.name ?? '-' },
-              { label: '보호자', value: bohojaText },
-            ]}
-          />
+          <dl css={cssObj.detailList}>
+            <div css={cssObj.detailItem}>
+              <dt css={cssObj.detailLabel}>신청 시간</dt>
+              <dd css={cssObj.detailValue}>{formatDateTime(detail?.createdAt)}</dd>
+            </div>
+            <div css={cssObj.detailItem}>
+              <dt css={cssObj.detailLabel}>하다 프로필</dt>
+              <dd css={cssObj.detailValue}>{detail?.haksaengProfile?.name ?? '-'}</dd>
+            </div>
+            <div css={cssObj.detailItem}>
+              <dt css={cssObj.detailLabel}>보호자</dt>
+              <dd css={cssObj.detailValue}>{bohojaText}</dd>
+            </div>
+          </dl>
         )}
         <div css={actionsStyle}>
           <div css={tooltipTriggerStyle}>
@@ -113,7 +121,7 @@ export function SingleSelectionPanel({
                       />
                       <span>{item.name}</span>
                     </label>
-                  )) ?? <p css={helperTextStyle}>재원생을 불러오는 중입니다...</p>}
+                  )) ?? <p css={cssObj.helperText}>재원생을 불러오는 중입니다...</p>}
                 </div>
                 <Button
                   size="sm"
@@ -145,14 +153,11 @@ export function SingleSelectionPanel({
           </div>
         </div>
       </div>
-    </Panel>
+    </section>
   );
 }
 
-const panelStyle = css({ display: 'flex', flexDirection: 'column', gap: 16 });
 const contentStyle = css({ display: 'flex', flexDirection: 'column', gap: 12 });
-const subtitleStyle = css({ color: '#555', fontSize: 14, marginTop: 4 });
-const helperTextStyle = css({ color: '#777', fontSize: 13 });
 const actionsStyle = css({ display: 'flex', flexDirection: 'column', gap: 12 });
 const tooltipTriggerStyle = css({ position: 'relative', alignSelf: 'flex-start' });
 const tooltipStyle = css({

@@ -1,19 +1,20 @@
 'use client';
 
-import { Button, Panel, PanelBody, PanelHeader, PanelTitle } from '@/common/components';
+import { Button } from '@/common/components';
 
 import { HadaRequestListSectionProps } from './useHadaRequestsListViewSections';
 import { SingleSelectionPanel } from './SingleSelectionPanel';
+import { cssObj } from './styles';
 
 export type MissingJojikPanelsProps = Record<string, unknown>;
 
 export const MissingJojikPanels = (_: MissingJojikPanelsProps) => (
-  <Panel>
-    <PanelHeader>
-      <PanelTitle>조직이 선택되지 않았어요</PanelTitle>
-    </PanelHeader>
-    <PanelBody>상단에서 조직을 선택한 뒤 재원 신청을 확인하세요.</PanelBody>
-  </Panel>
+  <section css={cssObj.panel}>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>조직이 선택되지 않았어요</h2>
+    </div>
+    <div css={cssObj.panelBody}>상단에서 조직을 선택한 뒤 재원 신청을 확인하세요.</div>
+  </section>
 );
 
 export type CreatingPanelsProps = {
@@ -22,29 +23,29 @@ export type CreatingPanelsProps = {
 };
 
 export const CreatingPanels = ({ onAfterMutation: _onAfterMutation }: CreatingPanelsProps) => (
-  <Panel>
-    <PanelHeader>
-      <PanelTitle>신규 재원 신청 등록</PanelTitle>
-    </PanelHeader>
-    <PanelBody>신규 재원 신청 등록 화면이 준비 중입니다.</PanelBody>
-  </Panel>
+  <section css={cssObj.panel}>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>신규 재원 신청 등록</h2>
+    </div>
+    <div css={cssObj.panelBody}>신규 재원 신청 등록 화면이 준비 중입니다.</div>
+  </section>
 );
 
 export type NoneSelectedPanelsProps = { onStartCreate: () => void };
 
 export const NoneSelectedPanels = ({ onStartCreate }: NoneSelectedPanelsProps) => (
-  <Panel>
-    <PanelHeader>
-      <PanelTitle>재원 신청을 선택하세요</PanelTitle>
-    </PanelHeader>
-    <PanelBody>
+  <section css={cssObj.panel}>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>재원 신청을 선택하세요</h2>
+    </div>
+    <div css={cssObj.panelBody}>
       재원 신청을 선택하면 상세 정보를 확인하고 승인/반려할 수 있습니다.
       <br />
       <Button size="sm" onClick={onStartCreate}>
         수동 등록 시작
       </Button>
-    </PanelBody>
-  </Panel>
+    </div>
+  </section>
 );
 
 export type OneSelectedPanelsProps = {
@@ -60,10 +61,10 @@ export const OneSelectedPanels = (props: OneSelectedPanelsProps) => <SingleSelec
 export type MultipleSelectedPanelsProps = { requests: HadaRequestListSectionProps['data'] };
 
 export const MultipleSelectedPanels = ({ requests }: MultipleSelectedPanelsProps) => (
-  <Panel>
-    <PanelHeader>
-      <PanelTitle>다중 선택</PanelTitle>
-    </PanelHeader>
-    <PanelBody>{requests.length}개의 재원 신청이 선택되었습니다.</PanelBody>
-  </Panel>
+  <section css={cssObj.panel}>
+    <div css={cssObj.panelHeader}>
+      <h2 css={cssObj.panelTitle}>다중 선택</h2>
+    </div>
+    <div css={cssObj.panelBody}>{requests.length}개의 재원 신청이 선택되었습니다.</div>
+  </section>
 );
