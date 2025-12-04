@@ -177,7 +177,8 @@ export function useJojikMunuiListViewSections({
   };
 
   const handleStopCreate = () => {
-    setRowSelection({});
+    // 재원생 문의 리스트에서는 생성 모드가 없어 선택 상태를 유지해야 합니다.
+    // 동일한 로직을 사용하는 재원생 리스트 섹션과 일관성을 맞추기 위해 선택 초기화를 제거합니다.
   };
 
   const handleAfterMutation = async () => {
