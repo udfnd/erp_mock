@@ -1,0 +1,98 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import type { Row } from '@tanstack/react-table';
+
+import { ListSection, type ListViewSortProps } from '@/common/lv/component';
+import { ToolbarLayout } from '@/common/lv/layout';
+
+import { cssObj } from './styles';
+import type { JojikMunuiListSectionProps } from './useJojikMunuiListViewSections';
+import type { JojikMunuiListItem } from '@/domain/jaewonsaeng/jojik-munui/api';
+
+export type JojikMunuiListSectionComponentProps = JojikMunuiListSectionProps & {
+  sortOptions: { label: string; value: string }[];
+};
+
+export function JojikMunuiListSection({
+  data,
+  state,
+  isListLoading,
+  sortByOption,
+  totalCount,
+  totalPages,
+  isCreating,
+  handlers,
+  sortOptions,
+  columns,
+  searchTerm,
+}: JojikMunuiListSectionComponentProps) {
+  const sortValue = sortByOption;
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const sortProps: ListViewSortProps = useMemo(
+    () => ({
+      label: '정렬 기준',
+      value: sortValue,
+      placeholder: '정렬 기준',
+      options: sortOptions,
+      onChange: handlers.onSortChange,
+    }),
+    [handlers.onSortChange, sortOptions, sortValue],
+  );
+
+  const rowEventHandlers = useMemo(
+    () => ({
+      selectOnClick: true,
+      onClick: () => {
+        handlers.onStopCreate();
+      },
+    }),
+    [handlers],
+  );
+
+  const handleSelectedRowsChange = (rows: Row<JojikMunuiListItem>[]) => {
+    if (rows.length > 0) {
+      handlers.onStopCreate();
+    }
+    handlers.onSelectedChange(rows.map((row) => row.original));
+  };
+
+  const handleDimmerClick = () => {
+    setIsSearchFocused(false);
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  };
+
+  return (
+    <section css={cssObj.listSection}>
+      <ToolbarLayout
+        search={{
+          value: searchTerm,
+          onChange: handlers.onSearchChange,
+          placeholder: '제목으로 검색',
+        }}
+        filters={[]}
+        sort={sortProps}
+        totalCount={totalCount}
+        onSearchFocusChange={setIsSearchFocused}
+      />
+      <ListSection
+        data={data}
+        columns={columns}
+        state={state}
+        manualPagination
+        manualSorting
+        pageCount={totalPages}
+        isLoading={isListLoading}
+        loadingMessage="조직 문의 목록을 불러오는 중입니다..."
+        emptyMessage="조건에 맞는 조직 문의가 없습니다."
+        isDimmed={isSearchFocused}
+        rowEventHandlers={rowEventHandlers}
+        onSelectedRowsChange={handleSelectedRowsChange}
+        onDimmerClick={handleDimmerClick}
+      />
+    </section>
+  );
+}
