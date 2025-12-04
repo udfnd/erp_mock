@@ -11,7 +11,7 @@ import {
   PhoneIcon,
   StudentIcon,
   TimeIcon,
-  PlusIcon,
+  XCircleBlackIcon,
 } from '@/common/icons';
 import { ListSection, type ListViewSortProps } from '@/common/lv/component';
 import { useListViewState } from '@/common/lv';
@@ -58,7 +58,9 @@ export function SingleSelectionPanel({
   const batchLinkMutation = useBatchLinkJaewonsaengsMutation();
 
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; left: number } | null>(
+    null,
+  );
   const tooltipTriggerRef = useRef<HTMLDivElement>(null);
   const [selectedJaewonsaeng, setSelectedJaewonsaeng] = useState<string>('');
   const [searchValue, setSearchValue] = useState('');
@@ -114,7 +116,28 @@ export function SingleSelectionPanel({
     await onAfterMutation();
   };
 
-  const effectiveTitle = detail?.jaewonSincheongName ?? requestName;
+  const effectiveTitle = detail?.haksaengProfile.name ?? requestName;
+
+  const computeTooltipPosition = useCallback(() => {
+    const trigger = tooltipTriggerRef.current;
+    if (!trigger) return null;
+
+    const rect = trigger.getBoundingClientRect();
+    const TOOLTIP_WIDTH = 675;
+    const MARGIN = 12;
+
+    const left = Math.max(12, rect.left - TOOLTIP_WIDTH - MARGIN);
+    const top = Math.max(12, rect.top);
+
+    return { top, left };
+  }, []);
+
+  const saveTooltip = useCallback(() => {
+    setIsTooltipOpen(false);
+    setTooltipPosition(null);
+    setSearchValue('');
+    setIsSearchFocused(false);
+  }, []);
 
   const closeTooltip = useCallback(() => {
     setIsTooltipOpen(false);
@@ -122,33 +145,37 @@ export function SingleSelectionPanel({
     setSelectedJaewonsaeng('');
     setSearchValue('');
     setJaewonsaengRowSelection({});
-    setIsSearchFocused(false);
   }, [setJaewonsaengRowSelection]);
 
   const toggleTooltip = useCallback(() => {
     setIsTooltipOpen((prev) => {
       const next = !prev;
-      if (!prev && tooltipTriggerRef.current) {
-        const rect = tooltipTriggerRef.current.getBoundingClientRect();
-        setTooltipPosition({ top: rect.bottom + 8, left: rect.left });
-      } else if (prev) {
+
+      if (!prev) {
+        const pos = computeTooltipPosition();
+        if (pos) {
+          setTooltipPosition(pos);
+        }
+      } else {
         setTooltipPosition(null);
         setSelectedJaewonsaeng('');
         setSearchValue('');
         setJaewonsaengRowSelection({});
         setIsSearchFocused(false);
       }
+
       return next;
     });
-  }, [setJaewonsaengRowSelection]);
+  }, [computeTooltipPosition, setJaewonsaengRowSelection]);
 
   useEffect(() => {
     if (!isTooltipOpen) return;
 
     const updatePosition = () => {
-      if (!tooltipTriggerRef.current) return;
-      const rect = tooltipTriggerRef.current.getBoundingClientRect();
-      setTooltipPosition({ top: rect.bottom + 8, left: rect.left });
+      const pos = computeTooltipPosition();
+      if (pos) {
+        setTooltipPosition(pos);
+      }
     };
 
     updatePosition();
@@ -159,9 +186,9 @@ export function SingleSelectionPanel({
       window.removeEventListener('resize', updatePosition);
       window.removeEventListener('scroll', updatePosition, true);
     };
-  }, [isTooltipOpen]);
+  }, [isTooltipOpen, computeTooltipPosition]);
 
-  const detailRows = useMemo(
+  const infoRows = useMemo(
     () => [
       {
         icon: <TimeIcon />,
@@ -173,6 +200,12 @@ export function SingleSelectionPanel({
         label: '신청 상태',
         value: detail?.jaewonSincheongSangtaeName ?? '-',
       },
+    ],
+    [detail?.createdAt, detail?.jaewonSincheongSangtaeName],
+  );
+
+  const studentRows = useMemo(
+    () => [
       {
         icon: <StudentIcon />,
         label: '학생 이름',
@@ -188,12 +221,19 @@ export function SingleSelectionPanel({
         label: '학생 생년월일',
         value: formatDateTime(detail?.haksaengProfile?.birthDate),
       },
-      ...
-        (detail?.bohojaProfiles?.flatMap((profile) => [
+    ],
+    [detail?.haksaengProfile],
+  );
+
+  const bohojaRows = useMemo(
+    () =>
+      detail?.bohojaProfiles?.map((profile) => ({
+        gwangye: profile.gwangye,
+        rows: [
           {
             icon: <ParentIcon />,
             label: '보호자',
-            value: `${profile.name} (${profile.gwangye})`,
+            value: `${profile.name}`,
           },
           {
             icon: <PhoneIcon />,
@@ -205,24 +245,23 @@ export function SingleSelectionPanel({
             label: '보호자 생년월일',
             value: formatDateTime(profile.birthDate),
           },
-        ]) ?? []),
-      {
-        icon: <InfoBlackIcon />,
-        label: '신청 제목',
-        value: effectiveTitle,
-      },
-    ],
-    [detail?.bohojaProfiles, detail?.createdAt, detail?.haksaengProfile, detail?.jaewonSincheongSangtaeName, effectiveTitle],
+        ],
+      })) ?? [],
+    [detail?.bohojaProfiles],
   );
 
   const availableJaewonsaengs = jaewonsaengList?.jaewonsaengs ?? [];
   const totalCount =
-    (jaewonsaengList?.paginationData?.totalItemCount as number | undefined) ?? availableJaewonsaengs.length;
+    (jaewonsaengList?.paginationData?.totalItemCount as number | undefined) ??
+    availableJaewonsaengs.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / Math.max(pagination.pageSize, 1)));
 
-  const jaewonsaengColumns = useMemo<ColumnDef<JaewonsaengListItem, unknown>[]>(
+  const jaewonsaengColumns = useMemo(
     () => [
-      columnHelper.accessor('name', { header: '이름', cell: (info) => info.getValue() }),
+      columnHelper.accessor('name', {
+        header: '이름',
+        cell: (info) => info.getValue(),
+      }),
       columnHelper.accessor('boninPhoneNumber', {
         header: '학생 연락처',
         cell: (info) => info.getValue() ?? '-',
@@ -235,10 +274,13 @@ export function SingleSelectionPanel({
         header: '보호자2 연락처',
         cell: (info) => info.getValue() ?? '-',
       }),
-      columnHelper.accessor('jaewonCategorySangtaeName', { header: '재원 상태', cell: (info) => info.getValue() }),
+      columnHelper.accessor('jaewonCategorySangtaeName', {
+        header: '재원 상태',
+        cell: (info) => info.getValue(),
+      }),
     ],
     [],
-  );
+  ) as ColumnDef<JaewonsaengListItem, unknown>[];
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
@@ -257,19 +299,10 @@ export function SingleSelectionPanel({
     }
   };
 
-  const handleRowsChange = useCallback(
-    (rows: Row<JaewonsaengListItem>[]) => {
-      const selected = rows[0]?.original;
-      setSelectedJaewonsaeng(selected?.nanoId ?? '');
-
-      const selectionState = rows.reduce<Record<string, boolean>>((acc, row) => {
-        acc[row.id] = true;
-        return acc;
-      }, {});
-      setJaewonsaengRowSelection(selectionState);
-    },
-    [setJaewonsaengRowSelection],
-  );
+  const handleRowsChange = useCallback((rows: Row<JaewonsaengListItem>[]) => {
+    const selected = rows[0]?.original;
+    setSelectedJaewonsaeng(selected?.nanoId ?? '');
+  }, []);
 
   const sortProps: ListViewSortProps = {
     options: SORT_OPTIONS,
@@ -281,40 +314,74 @@ export function SingleSelectionPanel({
     <section css={cssObj.panel}>
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>{effectiveTitle} 학생 재원생 신청</h2>
-        <p css={cssObj.panelSubtitle}>
-          {detail?.jaewonSincheongSangtaeName ?? '재원 신청 상태를 확인하세요.'}
-        </p>
       </div>
       <div css={cssObj.panelContent}>
         {isLoading && <p css={cssObj.helperText}>재원 신청 정보를 불러오는 중입니다...</p>}
         {!isLoading && (
           <div css={cssObj.dataList}>
-            {detailRows.map((row, index) => (
+            <p css={cssObj.panelSubtitle}>재원생 신청</p>
+            {infoRows.map((row, index) => (
               <div key={`${row.label}:${index}`} css={cssObj.dataItem}>
                 <span css={cssObj.dataIcon}>{row.icon}</span>
                 <span css={cssObj.dataLabel}>{row.label}</span>
                 <span css={cssObj.dataValue}>{row.value}</span>
               </div>
             ))}
-            {!detailRows.length && <p css={cssObj.helperText}>재원 신청 정보를 불러오는 중입니다...</p>}
+            <div css={cssObj.dataSubsection}>
+              <p>본인</p>
+              {studentRows.map((row, index) => (
+                <div key={`${row.label}:${index}`} css={cssObj.dataItem}>
+                  <span css={cssObj.dataIcon}>{row.icon}</span>
+                  <span css={cssObj.dataLabel}>{row.label}</span>
+                  <span css={cssObj.dataValue}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+            {bohojaRows.map((bohoja, bohojaIndex) => (
+              <div key={`bohoja:${bohojaIndex}`} css={cssObj.dataSubsection}>
+                <p>보호자</p>
+                <span css={cssObj.gwangyeChip}>{bohoja.gwangye}</span>
+                {bohoja.rows.map((row, rowIndex) => (
+                  <div key={`${row.label}:${bohojaIndex}:${rowIndex}`} css={cssObj.dataItem}>
+                    <span css={cssObj.dataIcon}>{row.icon}</span>
+                    <span css={cssObj.dataLabel}>{row.label}</span>
+                    <span css={cssObj.dataValue}>{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         )}
-        <div css={cssObj.panelActions}>
-          <div css={[cssObj.sectionActions, cssObj.permissionActionContainer]} ref={tooltipTriggerRef}>
-            <Button
-              styleType="outlined"
-              variant="assistive"
-              isFull
-              onClick={toggleTooltip}
-              disabled={!isAuthenticated}
-              aria-expanded={isTooltipOpen}
-              iconRight={<PlusIcon />}
+        {detail?.jaewonSincheongSangtaeName !== '수락' ? (
+          <div css={cssObj.panelActions}>
+            <div
+              css={[cssObj.sectionActions, cssObj.permissionActionContainer]}
+              ref={tooltipTriggerRef}
             >
-              재원생 선택
-            </Button>
-            {isTooltipOpen && tooltipPosition && (
-              <div css={cssObj.permissionTooltip} style={tooltipPosition}>
-                <div css={cssObj.permissionTooltipHeader}>
+              <Button
+                styleType="outlined"
+                variant="assistive"
+                size="small"
+                isFull
+                onClick={toggleTooltip}
+                disabled={!isAuthenticated}
+                aria-expanded={isTooltipOpen}
+                iconLeft={<StudentIcon />}
+              >
+                재원생 선택
+              </Button>
+              {isTooltipOpen && tooltipPosition && (
+                <div css={cssObj.permissionTooltip} style={tooltipPosition}>
+                  <div css={cssObj.permissionTooltipHeader}>
+                    <p css={cssObj.tooltipTitle}>재원생 검색</p>
+                    <button
+                      css={cssObj.tooltipCloseButton}
+                      onClick={closeTooltip}
+                      aria-label="닫기"
+                    >
+                      <XCircleBlackIcon />
+                    </button>
+                  </div>
                   <ToolbarLayout
                     search={{
                       value: searchValue,
@@ -325,84 +392,94 @@ export function SingleSelectionPanel({
                     totalCount={totalCount}
                     onSearchFocusChange={setIsSearchFocused}
                   />
-                </div>
-                <div css={cssObj.permissionTooltipContent}>
-                  <div css={cssObj.permissionTooltipTable}>
-                    <ListSection
-                      data={availableJaewonsaengs}
-                      columns={jaewonsaengColumns}
-                      state={jaewonsaengListState}
-                      manualPagination
-                      manualSorting
-                      pageCount={totalPages}
-                      isLoading={isJaewonsaengLoading}
-                      loadingMessage="재원생을 불러오는 중입니다..."
-                      emptyMessage="조건에 맞는 재원생이 없습니다. 검색어나 정렬을 조정해 보세요."
-                      isDimmed={isSearchFocused}
-                      rowEventHandlers={{ selectOnClick: true }}
-                      onSelectedRowsChange={handleRowsChange}
-                      onDimmerClick={handleDimmerClick}
-                    />
-                  </div>
-                  <div css={cssObj.permissionTooltipSelected}>
-                    <span css={cssObj.selectedPermissionLabel}>선택된 재원생</span>
-                    <div css={cssObj.selectedPermissionList}>
-                      {selectedJaewonsaengDetail ? (
-                        <div css={cssObj.selectedPermissionItem}>
-                          <div css={cssObj.selectedItemName}>{selectedJaewonsaengDetail.name}</div>
-                          <div css={cssObj.selectedItemMeta}>{selectedJaewonsaengDetail.phoneNumber}</div>
-                        </div>
-                      ) : (
-                        <p css={cssObj.helperText}>선택된 재원생이 없습니다.</p>
-                      )}
+                  <div css={cssObj.permissionTooltipContent}>
+                    <div css={cssObj.permissionTooltipTable}>
+                      <ListSection
+                        data={availableJaewonsaengs}
+                        columns={jaewonsaengColumns}
+                        state={jaewonsaengListState}
+                        manualPagination
+                        manualSorting
+                        pageCount={totalPages}
+                        isLoading={isJaewonsaengLoading}
+                        loadingMessage="재원생을 불러오는 중입니다..."
+                        emptyMessage="조건에 맞는 재원생이 없습니다. 검색어나 정렬을 조정해 보세요."
+                        isDimmed={isSearchFocused}
+                        rowEventHandlers={{ selectOnClick: true }}
+                        onSelectedRowsChange={handleRowsChange}
+                        onDimmerClick={handleDimmerClick}
+                      />
+                    </div>
+                    <div css={cssObj.permissionTooltipSelected}>
+                      <span css={cssObj.selectedPermissionLabel}>선택된 재원생들</span>
+                      <div css={cssObj.selectedPermissionList}>
+                        {selectedJaewonsaengDetail ? (
+                          <div css={cssObj.selectedPermissionItem}>
+                            <div css={cssObj.selectedPermissionLabel}>
+                              {selectedJaewonsaengDetail.name}
+                            </div>
+                            <button
+                              css={cssObj.deleteItemButton}
+                              onClick={() => setSelectedJaewonsaeng('')}
+                            >
+                              <XCircleBlackIcon />
+                            </button>
+                          </div>
+                        ) : (
+                          <p css={cssObj.helperText}>선택된 재원생이 없습니다.</p>
+                        )}
+                      </div>
+                      <div css={cssObj.permissionTooltipActions}>
+                        <Button
+                          styleType="solid"
+                          variant="secondary"
+                          size="small"
+                          onClick={saveTooltip}
+                          disabled={!selectedJaewonsaeng || updateMutation.isPending}
+                        >
+                          선택 완료
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  {isJaewonsaengError && (
+                    <p css={cssObj.helperText}>재원생 목록을 불러오지 못했습니다.</p>
+                  )}
                 </div>
-
-                {isJaewonsaengError && (
-                  <p css={cssObj.helperText}>재원생 목록을 불러오지 못했습니다.</p>
-                )}
-
-                <div css={cssObj.permissionTooltipActions}>
-                  <Button
-                    styleType="solid"
-                    variant="secondary"
-                    size="small"
-                    onClick={handleApprove}
-                    disabled={!selectedJaewonsaeng || updateMutation.isPending}
-                  >
-                    연결
-                  </Button>
-                  <Button
-                    styleType="outlined"
-                    variant="assistive"
-                    size="small"
-                    onClick={closeTooltip}
-                  >
-                    닫기
-                  </Button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
+            <div css={cssObj.actionButtons}>
+              <Button
+                isFull
+                size="small"
+                variant="primary"
+                onClick={handleApprove}
+                disabled={!selectedJaewonsaeng || updateMutation.isPending}
+              >
+                재원생 연결 및 승인
+              </Button>
+              <Button
+                isFull
+                size="small"
+                variant="red"
+                onClick={handleReject}
+                disabled={rejectMutation.isPending}
+              >
+                재원생 연결 반려
+              </Button>
+            </div>
           </div>
-          <div css={cssObj.actionButtons}>
-            <Button
-              variant="primary"
-              onClick={handleApprove}
-              disabled={!selectedJaewonsaeng || updateMutation.isPending}
-            >
-              재원생 연결 및 승인
-            </Button>
-            <Button
-              variant="secondary"
-              color="red"
-              onClick={handleReject}
-              disabled={rejectMutation.isPending}
-            >
-              반려
-            </Button>
+        ) : (
+          <div>
+            <p css={cssObj.panelSubtitle}>연결된 재원생</p>
+            <div css={cssObj.jaewonsaengInfoSection}>
+              <p>본인 정보</p>
+              <div css={cssObj.jaewonsaengInfoBox}></div>
+              <p>연동 보호자 정보</p>
+              <div css={cssObj.jaewonsaengInfoBox}></div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

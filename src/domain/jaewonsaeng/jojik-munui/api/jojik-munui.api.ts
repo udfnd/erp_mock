@@ -1,7 +1,7 @@
 import { apiClient } from '@/global';
 import { useAuthedQuery, useAuthedMutation } from '@/global/auth';
 
-import { parseOrThrow } from '../../util';
+import { parseOrThrow } from '../../../util';
 import {
   GetJojikMunuisRequestSchema,
   GetJojikMunuisResponseSchema,

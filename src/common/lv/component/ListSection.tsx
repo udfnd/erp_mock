@@ -20,10 +20,12 @@ import type { ListViewTableProps } from './types';
 import { PaginationSection } from './PaginationSection';
 
 const DEFAULT_IGNORE_SELECTOR = 'button, a, label, input, select, textarea';
-const ALLOWED_COLUMN_WIDTHS = [56, 80, 112, 144, 168] as const;
+const ALLOWED_COLUMN_WIDTHS = [0, 56, 80, 112, 144, 168] as const;
 type AllowedWidth = (typeof ALLOWED_COLUMN_WIDTHS)[number];
 
 const DEFAULT_COLUMN_WIDTH: AllowedWidth = ALLOWED_COLUMN_WIDTHS[2];
+
+const COLUMN_GAP_PX = 16;
 
 const getNearestAllowedWidth = (size: number | undefined): AllowedWidth => {
   if (!size || size <= 0) {
@@ -47,7 +49,8 @@ const getColumnWidthStyle = (columnId: string, size: number | undefined) => {
     return undefined;
   }
 
-  const width = getNearestAllowedWidth(size);
+  const baseWidth = getNearestAllowedWidth(size);
+  const width = (baseWidth + COLUMN_GAP_PX) as number;
   const widthPx = `${width}px`;
 
   return {

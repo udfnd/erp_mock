@@ -188,7 +188,12 @@ export function DatePicker({
         </label>
       ) : null}
       <div css={cssObj.trigger(disabled)}>
-        <button type="button" css={cssObj.iconButton(disabled)} onClick={handleOpen} disabled={disabled}>
+        <button
+          type="button"
+          css={cssObj.iconButton(disabled)}
+          onClick={handleOpen}
+          disabled={disabled}
+        >
           <CalendarIcon />
         </button>
         <input
@@ -196,8 +201,6 @@ export function DatePicker({
           css={[cssObj.triggerInput, !displayValue && cssObj.placeholder]}
           placeholder={placeholder}
           value={displayValue}
-          onClick={handleOpen}
-          onFocus={handleOpen}
           readOnly
           disabled={disabled}
         />

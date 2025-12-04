@@ -54,7 +54,7 @@ export const CreateJaewonsaengBoninRequestSchema = z.object({
   birthDate: z.string().nullable(),
   genderNanoId: z.string(),
   phoneNumber: z.string().nullable(),
-  email: z.string(),
+  email: z.string().nullable(),
   bigo: z.string().nullable(),
 });
 export type CreateJaewonsaengBoninRequest = z.infer<typeof CreateJaewonsaengBoninRequestSchema>;
@@ -214,7 +214,7 @@ export const GetJaewonsaengOverallResponseSchema = z.object({
     jaewonCategorySangtaeName: z.string(),
     jaewonCategorySangtaeNanoId: z.string(),
     name: z.string(),
-    nickname: z.string(),
+    nickname: z.string().nullable(),
     isHwalseong: z.boolean(),
   }),
 });
@@ -317,7 +317,6 @@ export const UpsertJaewonCategorySangtaesRequestSchema = z.object({
             nanoId: z.string().optional(),
             name: z.string(),
             isHwalseong: z.boolean(),
-            isGibon: z.boolean().optional(),
           })
           .strict(),
       ),

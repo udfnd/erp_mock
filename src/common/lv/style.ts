@@ -273,7 +273,7 @@ export const cssObj = {
     position: sticky;
     top: 0;
     z-index: 1;
-    padding: 8px;
+    padding: 6px 16px 6px 0;
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -293,6 +293,7 @@ export const cssObj = {
       padding-left: 0;
     }
   `,
+
   columnMaxWidth: (maxWidth: number) => css`
     max-width: ${maxWidth}px;
     width: ${maxWidth}px;
@@ -327,7 +328,7 @@ export const cssObj = {
   `,
 
   tableCell: css`
-    padding: 8px;
+    padding: 8px 16px 8px 0;
     border-bottom: 1px solid ${color.cgrey100};
     overflow: hidden;
     text-overflow: ellipsis;
@@ -378,6 +379,7 @@ export const cssObj = {
     align-items: center;
     justify-content: center;
     background: ${color.white};
+    margin-top: 8px;
   `,
 
   paginationControls: css`

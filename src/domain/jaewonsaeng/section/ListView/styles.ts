@@ -57,6 +57,15 @@ export const cssObj = {
     color: ${color.black};
   `,
 
+  formLabel: css`
+    ${typography.bodySmallM};
+    color: ${color.cgrey600};
+
+    > span {
+      color: ${color.red};
+    }
+  `,
+
   desc: css`
     ${typography.captionR};
     color: ${color.cgrey500};
@@ -213,8 +222,21 @@ export const cssObj = {
   `,
 
   issuedCode: css`
+    display: flex;
+    align-items: center;
+    gap: 8px;
     ${typography.titleSmallB};
     color: ${color.blue600};
+  `,
+
+  codeCopyButton: css`
+    cursor: pointer;
+
+    > svg {
+      width: 16px;
+      height: 16px;
+      color: ${color.cgrey300};
+    }
   `,
 
   issuedDate: css`

@@ -15,7 +15,10 @@ export const MissingJojikPanels = (_: MissingJojikPanelsProps) => (
   </RightsidePanelsContainer>
 );
 
-export type CreatingPanelsProps = { jojikNanoId: string; onAfterMutation: () => Promise<unknown> | void };
+export type CreatingPanelsProps = {
+  jojikNanoId: string;
+  onAfterMutation: () => Promise<unknown> | void;
+};
 
 export const CreatingPanels = ({ onAfterMutation: _onAfterMutation }: CreatingPanelsProps) => (
   <RightsidePanelsContainer>
@@ -26,11 +29,9 @@ export const CreatingPanels = ({ onAfterMutation: _onAfterMutation }: CreatingPa
   </RightsidePanelsContainer>
 );
 
-export type NoneSelectedPanelsProps = { onStartCreate: () => void };
-
-export const NoneSelectedPanels = ({ onStartCreate }: NoneSelectedPanelsProps) => (
+export const NoneSelectedPanels = () => (
   <RightsidePanelsContainer>
-    <QuickActionsPanel onStartCreate={onStartCreate} />
+    <QuickActionsPanel />
   </RightsidePanelsContainer>
 );
 
@@ -53,8 +54,12 @@ export type MultipleSelectedPanelsProps = { requests: HadaRequestListSectionProp
 export const MultipleSelectedPanels = ({ requests }: MultipleSelectedPanelsProps) => (
   <RightsidePanelsContainer>
     <div css={cssObj.panelHeader}>
-      <h2 css={cssObj.panelTitle}>다중 선택</h2>
+      <h2 css={cssObj.panelTitle}>하다 신청 {requests.length}개 설정</h2>
     </div>
-    <div css={cssObj.panelBody}>{requests.length}개의 재원 신청이 선택되었습니다.</div>
+    <div css={cssObj.panelBody}>
+      <div css={cssObj.salesDiv}>
+        <span>준비중입니다.</span>
+      </div>
+    </div>
   </RightsidePanelsContainer>
 );

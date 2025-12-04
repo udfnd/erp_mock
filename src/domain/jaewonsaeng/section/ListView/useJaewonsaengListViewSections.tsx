@@ -144,13 +144,13 @@ export function useJaewonsaengListViewSections({
       columnHelper.accessor('isHadaLinked', {
         header: '하다 연동',
         cell: (info) => (info.getValue() ? '연동' : '미연동'),
-        size: 112,
+        size: 56,
       }),
       columnHelper.display({
         id: 'divider',
-        header: '',
+        header: () => <div style={{ color: color.cgrey100 }}>|</div>,
         cell: () => <div style={{ borderLeft: `1px solid ${color.cgrey100}`, height: '100%' }} />,
-        size: 56,
+        size: 1,
       }),
       columnHelper.accessor('daepyoJaewonsaengGroupName', {
         header: '대표 재원생 그룹',

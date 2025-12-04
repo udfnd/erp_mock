@@ -22,7 +22,7 @@ import { useGetGendersQuery } from '@/domain/system/api';
 import { createLocalId } from '@/domain/gigwan/section/local-id';
 
 import { cssObj } from '../../styles';
-import { ArrowMdRightSingleIcon, PlusIcon, PhoneIcon } from '@/common/icons';
+import { ArrowMdRightSingleIcon, PlusIcon, PhoneIcon, CopyIcon } from '@/common/icons';
 
 const getFirstNonEmptyString = (...values: (string | null | undefined)[]) =>
   values.find((value) => value !== undefined && value !== null && value !== '') ?? '';
@@ -175,6 +175,7 @@ export const SingleSelectionPanel = ({
 
   const [isHadaLinkTooltipOpen, setIsHadaLinkTooltipOpen] = useState(false);
   const hadaLinkActionRef = useRef<HTMLDivElement>(null);
+  const hadaLinkTooltipRef = useRef<HTMLDivElement | null>(null); // 외부 클릭 감지용 ref
   const [hadaLinkTooltipPosition, setHadaLinkTooltipPosition] = useState<{
     left: number;
     top: number;
@@ -225,10 +226,69 @@ export const SingleSelectionPanel = ({
     setHadaLinkTooltipPosition(null);
   }, []);
 
+  // 화면 바깥 클릭 시 툴팁 닫기
+  useEffect(() => {
+    if (!isHadaLinkTooltipOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      // 트리거 영역 또는 툴팁 안을 클릭한 경우는 무시
+      if (
+        hadaLinkActionRef.current?.contains(target) ||
+        hadaLinkTooltipRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      closeHadaLinkTooltip();
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isHadaLinkTooltipOpen, closeHadaLinkTooltip]);
+
   const handleIssueHadaLinkCode = useCallback(async () => {
     await issueHadaLinkCodeMutation.mutateAsync(jaewonsaengNanoId);
     await refetchHadaLinkCode();
   }, [issueHadaLinkCodeMutation, jaewonsaengNanoId, refetchHadaLinkCode]);
+
+  const handleCopyLinkCode = useCallback(() => {
+    if (!issuedLinkCode) return;
+
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(issuedLinkCode).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = issuedLinkCode;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+          document.execCommand('copy');
+        } finally {
+          document.body.removeChild(textarea);
+        }
+      });
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = issuedLinkCode;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+  }, [issuedLinkCode]);
 
   const isHadaLinked = detailData?.isHadaLinked ?? isHadaLinkedFromList;
   const linkedGroups = linkedGroupsData?.jaewonsaengGroups ?? [];
@@ -342,12 +402,15 @@ export const SingleSelectionPanel = ({
               />
             )}
           </form.Field>
+          <p css={cssObj.formLabel}>
+            재원 상태<span> * </span>
+          </p>
           <form.Field name="jaewonsaeng.jaewonCategorySangtaeNanoId">
             {(field) => (
               <Dropdown
                 value={field.state.value}
                 onChange={field.handleChange}
-                placeholder="재원 상태 카테고리 상태를 선택해 주세요"
+                placeholder="재원 상태를 선택해 주세요"
                 options={jaewonCategoryOptions}
               />
             )}
@@ -387,6 +450,7 @@ export const SingleSelectionPanel = ({
               />
             )}
           </form.Field>
+          <p css={cssObj.formLabel}>학생 성별</p>
           <form.Field name="bonin.genderNanoId">
             {(field) => (
               <Dropdown
@@ -451,13 +515,26 @@ export const SingleSelectionPanel = ({
                   하다 연동하러 가기
                 </Button>
                 {isHadaLinkTooltipOpen && hadaLinkTooltipPosition ? (
-                  <div css={cssObj.permissionTooltip} style={hadaLinkTooltipPosition}>
+                  <div
+                    css={cssObj.permissionTooltip}
+                    style={hadaLinkTooltipPosition}
+                    ref={hadaLinkTooltipRef}
+                  >
                     <div css={cssObj.permissionTooltipHeader}>
                       <p css={cssObj.panelSubtitle}>연결 코드</p>
                     </div>
                     {hadaLinkCodeData && issuedLinkCode && (
                       <div css={cssObj.issuedCodeWrapper}>
-                        <p css={cssObj.issuedCode}>{hadaLinkCodeData.linkCode}</p>
+                        <p css={cssObj.issuedCode}>
+                          {hadaLinkCodeData.linkCode}
+                          <span
+                            css={cssObj.codeCopyButton}
+                            onClick={handleCopyLinkCode}
+                            aria-label="코드 복사"
+                          >
+                            <CopyIcon />
+                          </span>
+                        </p>
                         <p css={cssObj.issuedDate}>
                           {hadaLinkCodeData.issuedAt} {hadaLinkCodeData.issuedByName}
                         </p>

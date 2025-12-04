@@ -79,6 +79,7 @@ export const cssObj = {
     ${typography.bodyR};
     color: ${color.black};
     outline: none;
+    cursor: inherit;
 
     &::placeholder {
       color: ${color.cgrey300};

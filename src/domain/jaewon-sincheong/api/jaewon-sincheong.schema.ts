@@ -41,16 +41,16 @@ export type GetJaewonSincheongsResponse = z.infer<typeof GetJaewonSincheongsResp
 
 export const HaksaengProfileSchema = z.object({
   name: z.string(),
-  phoneNumber: z.string().nullable(),
-  birthDate: z.string().nullable(),
+  phoneNumber: z.string().nullable().optional(),
+  birthDate: z.string().nullable().optional(),
 });
 export type HaksaengProfile = z.infer<typeof HaksaengProfileSchema>;
 
 export const BohojaProfileSchema = z.object({
   name: z.string(),
   gwangye: z.string(),
-  phoneNumber: z.string(),
-  birthDate: z.string(),
+  phoneNumber: z.string().nullable().optional(),
+  birthDate: z.string().nullable().optional(),
 });
 export type BohojaProfile = z.infer<typeof BohojaProfileSchema>;
 

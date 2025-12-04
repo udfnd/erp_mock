@@ -6,6 +6,7 @@ import { CacheProvider, Global } from '@emotion/react';
 import { useServerInsertedHTML, useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useShallow } from 'zustand/react/shallow';
 
 import { configureUnauthorizedHandler, setApiClientAuthContext } from '@/global';
@@ -20,7 +21,11 @@ type AppProvidersProps = { children: ReactNode };
 export function Providers({ children }: AppProvidersProps) {
   const router = useRouter();
 
-  const { isReady: isAuthReady, activeUserId, accessToken } = useAuthStore(
+  const {
+    isReady: isAuthReady,
+    activeUserId,
+    accessToken,
+  } = useAuthStore(
     useShallow((state) => ({
       isReady: state.isReady,
       activeUserId: state.activeUserId,
@@ -104,6 +109,7 @@ export function Providers({ children }: AppProvidersProps) {
       <QueryClientProvider client={queryClient}>
         <Global styles={globalStyles} />
         {children}
+        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={true} />}
       </QueryClientProvider>
     </CacheProvider>
   );

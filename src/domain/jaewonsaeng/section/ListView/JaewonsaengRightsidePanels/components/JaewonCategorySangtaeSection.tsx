@@ -98,8 +98,8 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
       const categoriesPayload = (value.categories ?? []).map((category) => {
         const seen = new Set<string>();
         const sangtaes: Array<
-          | { name: string; isHwalseong: boolean; isGibon?: boolean }
-          | { nanoId: string; name: string; isHwalseong: boolean; isGibon?: boolean }
+          | { name: string; isHwalseong: boolean }
+          | { nanoId: string; name: string; isHwalseong: boolean }
         > = [];
 
         for (const sangtae of category.sangtaes) {
@@ -109,14 +109,17 @@ export function JaewonCategorySangtaeSection({ jojikNanoId }: JaewonCategorySang
           if (sangtae.nanoId && !sangtae.nanoId.startsWith('local-')) {
             if (seen.has(sangtae.nanoId)) continue;
             seen.add(sangtae.nanoId);
+
             sangtaes.push({
               nanoId: sangtae.nanoId,
               name,
               isHwalseong: sangtae.isHwalseong,
-              isGibon: sangtae.isGibon,
             });
           } else {
-            sangtaes.push({ name, isHwalseong: sangtae.isHwalseong, isGibon: sangtae.isGibon });
+            sangtaes.push({
+              name,
+              isHwalseong: sangtae.isHwalseong,
+            });
           }
         }
 

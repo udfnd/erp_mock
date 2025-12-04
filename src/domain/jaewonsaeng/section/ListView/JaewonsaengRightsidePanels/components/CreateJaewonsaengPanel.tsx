@@ -128,6 +128,13 @@ export const CreateJaewonsaengPanel = ({
   }));
 
   const formId = 'jaewonsaeng-create-form';
+
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void form.handleSubmit();
+  };
+
   const isDisabled =
     !values.jaewonsaeng.name.trim() ||
     !values.jaewonsaeng.jaewonCategorySangtaeNanoId.trim() ||
@@ -139,7 +146,7 @@ export const CreateJaewonsaengPanel = ({
       <div css={cssObj.panelHeader}>
         <h2 css={cssObj.panelTitle}>재원생 생성</h2>
       </div>
-      <form id={formId} css={cssObj.panelBody} onSubmit={(event) => void form.handleSubmit(event)}>
+      <form id={formId} css={cssObj.panelBody} onSubmit={handleFormSubmit}>
         <div css={cssObj.panelSection}>
           <span css={cssObj.panelSubtitle}>재원생 기본 속성</span>
           <form.Field name="jaewonsaeng.name">
@@ -168,6 +175,9 @@ export const CreateJaewonsaengPanel = ({
               />
             )}
           </form.Field>
+          <p css={cssObj.formLabel}>
+            재원 상태<span> * </span>
+          </p>
           <form.Field name="jaewonsaeng.jaewonCategorySangtaeNanoId">
             {(field) => {
               const options =
@@ -183,7 +193,7 @@ export const CreateJaewonsaengPanel = ({
                 <Dropdown
                   value={field.state.value}
                   onChange={field.handleChange}
-                  placeholder="재원 상태 카테고리 상태를 선택해 주세요"
+                  placeholder="재원 상태를 선택해 주세요"
                   options={options}
                 />
               );
@@ -214,6 +224,7 @@ export const CreateJaewonsaengPanel = ({
               />
             )}
           </form.Field>
+          <p css={cssObj.formLabel}>학생 성별</p>
           <form.Field name="bonin.genderNanoId">
             {(field) => {
               const options =
@@ -232,7 +243,6 @@ export const CreateJaewonsaengPanel = ({
               );
             }}
           </form.Field>
-
           <form.Field name="bonin.phoneNumber">
             {(field) => (
               <Textfield
