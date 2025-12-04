@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type React from 'react';
 import {
   type ColumnDef,
@@ -150,6 +150,16 @@ export function ListSection<TData>({
     () => [selectionColumn, ...columns, ...(primaryActionColumn ? [primaryActionColumn] : [])],
     [columns, primaryActionColumn, selectionColumn],
   );
+  const getRowIdFn = useCallback(
+    (row: TData) => {
+      const rowWithId = row as Record<string, unknown>;
+      if (typeof rowWithId.nanoId === 'string') return rowWithId.nanoId;
+      if (typeof rowWithId.id === 'string') return rowWithId.id;
+      return String(Math.random());
+    },
+    [],
+  );
+
   const table = useReactTable({
     data,
     columns: effectiveColumns,
@@ -158,6 +168,7 @@ export function ListSection<TData>({
       pagination: state.pagination,
       rowSelection: state.rowSelection,
     },
+    getRowId: getRowIdFn,
     manualPagination,
     manualSorting,
     pageCount,
@@ -173,8 +184,9 @@ export function ListSection<TData>({
   const selectedRows = table.getSelectedRowModel().flatRows;
 
   useEffect(() => {
-    onSelectedRowsChange?.(selectedRows);
-  }, [onSelectedRowsChange, selectedRows]);
+    if (!onSelectedRowsChange) return;
+    onSelectedRowsChange(selectedRows);
+  }, [selectedRows, onSelectedRowsChange]);
 
   const visibleColumnsLength = table.getVisibleLeafColumns().length;
   const hasRows = table.getRowModel().rows.length > 0;

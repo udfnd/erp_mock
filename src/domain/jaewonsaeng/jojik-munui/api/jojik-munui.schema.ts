@@ -24,8 +24,8 @@ export const JojikMunuiListItemSchema = z.object({
   createdAt: z.string(),
   jojikMunuiSangtaeName: z.string(),
   jojikMunuiSangtaeNanoId: z.string(),
-  linkedJojikMunuiNanoId: z.string().nullable(),
-  linkedJojikAllimNanoId: z.string().nullable(),
+  linkedJojikMunuiNanoId: z.string().nullish(),
+  linkedJojikAllimNanoId: z.string().nullish(),
   dapbyeon: JojikMunuiDapbyeonListSchema,
 });
 export type JojikMunuiListItem = z.infer<typeof JojikMunuiListItemSchema>;
@@ -55,8 +55,8 @@ export const GetJojikMunuiDetailResponseSchema = z.object({
   jojikMunuiSangtaeNanoId: z.string(),
   createdAt: z.string(),
   jojikNanoId: z.string(),
-  linkedMunuiNanoId: z.string().nullable(),
-  linkedAllimNanoId: z.string().nullable(),
+  linkedMunuiNanoId: z.string().nullish(),
+  linkedAllimNanoId: z.string().nullish(),
   dapbyeon: JojikMunuiDapbyeonDetailSchema,
 });
 export type GetJojikMunuiDetailResponse = z.infer<typeof GetJojikMunuiDetailResponseSchema>;

@@ -7,3 +7,11 @@ export const extractGigwanNanoId = (value: RouteParamValue): string => {
 
   return value ?? '';
 };
+
+export const extractJojikNanoId = (value: RouteParamValue): string => {
+  if (Array.isArray(value)) {
+    return value[0] ?? '';
+  }
+
+  return value ?? '';
+};
