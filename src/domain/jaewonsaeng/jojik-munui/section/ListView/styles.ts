@@ -267,7 +267,7 @@ export const cssObj = {
   `,
 
   panelText: css`
-    font-size: 14px;
+    ${typography.bodySmallR};
     color: ${color.cgrey700};
   `,
 
@@ -281,41 +281,199 @@ export const cssObj = {
     color: ${color.cgrey400};
   `,
 
-  chipList: css`
+  jaewonsaengInfoSection: (isHwalseong: boolean) => css`
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
+    background: ${isHwalseong ? color.white : color.cgrey100};
+  `,
+
+  jaewonsaengName: css`
+    ${typography.bodySmallR};
+  `,
+
+  jaewonsaengNickname: css`
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    ${typography.captionR};
+  `,
+
+  hadaInfoSection: css`
+    border: 1px solid ${color.cgrey200};
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+
+    > p {
+      ${typography.bodySmallM};
+      margin-bottom: 8px;
+    }
+  `,
+
+  hadaInfoBox: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  `,
+
+  hadaProfileWrapper: css`
+    display: flex;
     gap: 8px;
+  `,
+
+  hadaImage: css`
+    border-radius: 4px;
+  `,
+
+  hadaNameBox: css`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    ${typography.bodySmallSB};
+  `,
+
+  hadaName: css`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ${typography.bodySmallSB};
+  `,
+
+  hadaSikbyeolja: css`
+    ${typography.bodySmallR};
   `,
 
   chip: css`
     display: inline-flex;
+    padding: 2px 8px;
+    justify-content: center;
     align-items: center;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: ${color.blue10};
-    color: ${color.blue600};
-    font-size: 13px;
+    gap: 10px;
+    border-radius: 100px;
+    background-color: ${color.cgrey100};
+    ${typography.captionR};
+    color: ${color.cgrey500};
+  `,
+
+  hadaInfo: css`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ${typography.bodySmallR};
+    color: ${color.cgrey600};
+
+    > span {
+      ${typography.bodySmallSB};
+    }
+  `,
+
+  munuiWrapper: css`
+    border: 1px solid ${color.cgrey100};
+    background: ${color.cgrey10};
+    padding: 16px;
+    border-radius: 8px;
+  `,
+
+  munuiTitle: css`
+    ${typography.bodySmallSB};
+    margin-bottom: 4px;
+  `,
+
+  munuiDate: css`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ${typography.captionR};
+    color: ${color.cgrey400};
+    margin-bottom: 8px;
+
+    > span {
+      ${typography.captionR};
+    }
+  `,
+
+  munuiContent: css`
+    ${typography.bodySmallR};
+    display: flex;
+    align-items: stretch;
   `,
 
   linkedObjectItem: css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 12px;
-    border: 1px solid ${color.cgrey100};
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid ${color.cgrey200};
     border-radius: 8px;
-    background: ${color.blue10};
   `,
 
   linkedObjectName: css`
-    font-size: 14px;
-    color: ${color.cgrey700};
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ${typography.bodySmallR};
+  `,
+
+  dapbyeonHeaderWrapper: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   `,
 
   dapbyeonSection: css`
     display: flex;
     flex-direction: column;
     gap: 8px;
+  `,
+
+  chwisojaProfileWrapper: css`
+    > label {
+      ${typography.bodySmallM};
+      color: ${color.cgrey500};
+      margin-bottom: 4px;
+    }
+  `,
+
+  noDapbyeonText: css`
+    padding: 24px 16px;
+    background-color: ${color.cgrey10};
+    border-radius: 8px;
+    ${typography.bodySmallR};
+    color: ${color.cgrey300};
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  `,
+
+  dapbyeonCancelText: css`
+    ${typography.bodySmallSB};
+    color: ${color.cgrey300};
+    margin-bottom: 16px;
+  `,
+
+  dapbyeonDateInfo: css`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    ${typography.captionB};
+    color: ${color.cgrey400};
+    > p {
+      ${typography.captionR};
+    }
   `,
 
   dapbyeonContent: css`
@@ -327,11 +485,83 @@ export const cssObj = {
     color: ${color.cgrey700};
     white-space: pre-wrap;
     word-break: break-word;
+
+    > p {
+      margin-top: 8px;
+    }
   `,
 
   dapbyeonInputArea: css`
     display: flex;
     flex-direction: column;
+    gap: 8px;
+  `,
+
+  dapbyeonWritterImage: css`
+    border: 1px solid ${color.cgrey100};
+    border-radius: 50%;
+  `,
+
+  dapbyeonWritterName: css`
+    ${typography.bodySmallR};
+    flex: 1;
+  `,
+
+  dapbyeonBubbleContainer: css`
+    position: relative;
+    margin-top: 16px;
+  `,
+
+  dapbyeonBubble: css`
+    position: relative;
+    border: 1px solid ${color.blue};
+    border-radius: 8px;
+    padding: 16px;
+    background-color: ${color.cgrey10};
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -11px;
+      left: 20px;
+      width: 20px;
+      height: 20px;
+      background-color: ${color.cgrey10};
+      border: 1px solid ${color.blue};
+      border-radius: 6px 0 0 0;
+      border-right: none;
+      border-bottom: none;
+      transform: rotate(45deg);
+    }
+  `,
+
+  dapbyeonTextarea: css`
+    background-color: ${color.cgrey10};
+    width: 100%;
+    min-height: 200px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: inherit;
+    margin-bottom: 12px;
+  `,
+
+  dapbyeonFooter: css`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  `,
+
+  dapbyeonCharCount: css`
+    ${typography.captionR};
+    color: ${color.cgrey300};
+  `,
+
+  dapbyeonActions: css`
+    display: flex;
     gap: 8px;
   `,
 };

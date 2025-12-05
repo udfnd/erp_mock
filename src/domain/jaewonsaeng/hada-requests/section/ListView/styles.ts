@@ -179,7 +179,7 @@ export const cssObj = {
     display: flex;
     align-items: center;
     gap: 4px;
-    height: 34px;
+    height: 36px;
     padding: 0 12px;
     border: 1px solid ${color.cgrey100};
     border-radius: 8px;

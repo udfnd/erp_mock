@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type ColumnDef } from '@tanstack/react-table';
 
 import { ListViewState, useListViewState } from '@/common/lv';
@@ -106,50 +106,58 @@ export function useJojikMunuiListViewSections({
       columnHelper.accessor('title', {
         header: createSortableHeader('제목'),
         cell: (info) => info.getValue(),
+        size: 112,
       }),
       columnHelper.accessor('jaewonsaengName', {
         header: '재원생 이름',
         cell: (info) => info.getValue(),
         enableSorting: false,
+        size: 80,
       }),
       columnHelper.accessor('gwangye', {
         header: '관계',
         cell: (info) => info.getValue() || '-',
         enableSorting: false,
+        size: 80,
       }),
       columnHelper.accessor('createdAt', {
         header: createSortableHeader('문의 일시'),
         cell: (info) => formatDate(info.getValue()),
+        size: 112,
       }),
       columnHelper.accessor('jojikMunuiSangtaeName', {
         header: '문의 상태',
         cell: (info) => info.getValue(),
         enableSorting: false,
+        size: 112,
       }),
       columnHelper.accessor((row) => row.dapbyeon.dapbyeonByName, {
         id: 'dapbyeonByName',
         header: '답변자 이름',
         cell: (info) => info.getValue() || '-',
         enableSorting: false,
+        size: 80,
       }),
       columnHelper.accessor((row) => row.dapbyeon.dapbyeonAt, {
         id: 'dapbyeonAt',
         header: '답변 일시',
         cell: (info) => formatDate(info.getValue()),
         enableSorting: false,
+        size: 112,
       }),
       columnHelper.accessor((row) => row.dapbyeon.viewedAt, {
         id: 'viewedAt',
         header: '답변 읽음',
-        cell: (info) => (info.getValue() ? '읽음' : '읽지 않음'),
+        cell: (info) => formatDate(info.getValue()),
         enableSorting: false,
+        size: 112,
       }),
       columnHelper.accessor(
         (row) => {
           const links = [];
           if (row.linkedJojikMunuiNanoId) links.push('문의');
           if (row.linkedJojikAllimNanoId) links.push('알림');
-          return links.join(', ') || '-';
+          return links.join('/') || '-';
         },
         {
           id: 'linkedObjects',
@@ -176,9 +184,7 @@ export function useJojikMunuiListViewSections({
     setSelectedJojikMunuis(jojikMunuis);
   };
 
-  const handleStopCreate = () => {
-    setRowSelection({});
-  };
+  const handleStopCreate = () => {};
 
   const handleAfterMutation = async () => {
     await refetch();

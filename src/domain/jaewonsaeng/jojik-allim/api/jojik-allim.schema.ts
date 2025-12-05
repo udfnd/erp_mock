@@ -11,6 +11,7 @@ export const SmsBalsinInfoSchema = z.object({
   smsBalsinBunhoNanoId: z.string(),
   sendScehduleAt: z.string().nullable(),
   isSendIfFailed: z.boolean(),
+  susinPhoneNumber: z.string().optional(),
 });
 export type SmsBalsinInfo = z.infer<typeof SmsBalsinInfoSchema>;
 
@@ -18,6 +19,7 @@ export const EmailBalsinInfoSchema = z.object({
   balsinjaNanoId: z.string(),
   sendScheduleAt: z.string().nullable(),
   isSendIfFailed: z.boolean(),
+  susinEmailAddress: z.string().optional(),
 });
 export type EmailBalsinInfo = z.infer<typeof EmailBalsinInfoSchema>;
 
@@ -25,6 +27,7 @@ export const KakaoBalsinInfoSchema = z.object({
   kakaoChannelNanoId: z.string(),
   sendScheduleAt: z.string().nullable(),
   isSendIfFailed: z.boolean(),
+  susinPhoneNumber: z.string().optional(),
 });
 export type KakaoBalsinInfo = z.infer<typeof KakaoBalsinInfoSchema>;
 
@@ -33,6 +36,18 @@ export const BalsinSangtaeSchema = z.object({
   name: z.string(),
 });
 export type BalsinSangtae = z.infer<typeof BalsinSangtaeSchema>;
+
+const SmsBalsinInfoWithSusinSchema = SmsBalsinInfoSchema.extend({
+  susinPhoneNumber: z.string(),
+});
+
+const EmailBalsinInfoWithSusinSchema = EmailBalsinInfoSchema.extend({
+  susinEmailAddress: z.string(),
+});
+
+const KakaoBalsinInfoWithSusinSchema = KakaoBalsinInfoSchema.extend({
+  susinPhoneNumber: z.string(),
+});
 
 export const GetJojikAllimsRequestSchema = z.object({
   jojikNanoId: z.string(),
@@ -143,9 +158,9 @@ export const CreateJojikBejaewonsaengAllimRequestSchema = z.object({
   title: z.string(),
   content: z.string(),
   allimTypeNanoId: z.string(),
-  smsBalsinInfo: SmsBalsinInfoSchema.nullable(),
-  emailBalsinInfo: EmailBalsinInfoSchema.nullable(),
-  kakaoBalsinInfo: KakaoBalsinInfoSchema.nullable(),
+  smsBalsinInfo: SmsBalsinInfoWithSusinSchema.nullable(),
+  emailBalsinInfo: EmailBalsinInfoWithSusinSchema.nullable(),
+  kakaoBalsinInfo: KakaoBalsinInfoWithSusinSchema.nullable(),
   jojikNanoId: z.string(),
 });
 export type CreateJojikBejaewonsaengAllimRequest = z.infer<
@@ -167,9 +182,9 @@ export type CreateJojikBejaewonsaengAllimResponse = z.infer<
 
 export const CreateJojikBejaewonsaengTemplateAllimRequestSchema = z.object({
   allimTypeNanoId: z.string(),
-  smsBalsinInfo: SmsBalsinInfoSchema.nullable(),
-  emailBalsinInfo: EmailBalsinInfoSchema.nullable(),
-  kakaoBalsinInfo: KakaoBalsinInfoSchema.nullable(),
+  smsBalsinInfo: SmsBalsinInfoWithSusinSchema.nullable(),
+  emailBalsinInfo: EmailBalsinInfoWithSusinSchema.nullable(),
+  kakaoBalsinInfo: KakaoBalsinInfoWithSusinSchema.nullable(),
   allimTemplateNanoId: z.string(),
   allimTemplateParameterInput: z.string(),
   jojikNanoId: z.string(),
@@ -259,7 +274,7 @@ export type GetJojikAllimDetailResponse = z.infer<typeof GetJojikAllimDetailResp
 export const UpdateJojikAllimRequestSchema = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
-  allimTemplateNanoId: z.string(),
+  allimTemplateNanoId: z.string().optional(),
   allimTemplateParameterInput: z.string().optional(),
   allimTypeNanoId: z.string().optional(),
   hadaAllimChannelNanoId: z.string().optional(),

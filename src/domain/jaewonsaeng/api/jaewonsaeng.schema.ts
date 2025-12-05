@@ -333,3 +333,30 @@ export const UpsertJaewonCategorySangtaesResponseSchema = z.object({
 export type UpsertJaewonCategorySangtaesResponse = z.infer<
   typeof UpsertJaewonCategorySangtaesResponseSchema
 >;
+
+export const GetJaewonsaengLinkedHadaProfilesResponseSchema = z.object({
+  haksaengProfile: z
+    .object({
+      name: z.string(),
+      profileSikbyeolja: z.number(),
+      phoneNumber: z.string().nullable(),
+      birthDate: z.string().nullable(),
+      genderNanoId: z.string(),
+      genderName: z.string(),
+      isAdAllowed: z.boolean(),
+    })
+    .nullable(),
+  bohojaProfiles: z.array(
+    z.object({
+      name: z.string(),
+      profileSikbyeolja: z.number(),
+      gwangye: z.string(),
+      phoneNumber: z.string().nullable(),
+      birthDate: z.string().nullable(),
+      isAdAllowed: z.boolean(),
+    }),
+  ),
+});
+export type GetJaewonsaengLinkedHadaProfilesResponse = z.infer<
+  typeof GetJaewonsaengLinkedHadaProfilesResponseSchema
+>;

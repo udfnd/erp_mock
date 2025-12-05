@@ -54,13 +54,14 @@ import {
   BatchLinkJaewonsaengGroupsResponseSchema,
   UnlinkJaewonsaengHadaResponse,
   UnlinkJaewonsaengHadaResponseSchema,
-  JaewonCategorySangtae,
   GetJaewonCategorySangtaesResponse,
   GetJaewonCategorySangtaesResponseSchema,
   UpsertJaewonCategorySangtaesRequest,
   UpsertJaewonCategorySangtaesRequestSchema,
   UpsertJaewonCategorySangtaesResponse,
   UpsertJaewonCategorySangtaesResponseSchema,
+  GetJaewonsaengLinkedHadaProfilesResponse,
+  GetJaewonsaengLinkedHadaProfilesResponseSchema,
 } from './jaewonsaeng.schema';
 
 export const getJaewonsaengs = async (
@@ -274,7 +275,10 @@ export const getJaewonsaengLinkedGroups = async (
   return parseOrThrow(GetJaewonsaengLinkedGroupsResponseSchema, res.data);
 };
 
-export const useGetJaewonsaengLinkedGroupsQuery = (nanoId: string, options?: { enabled?: boolean }) =>
+export const useGetJaewonsaengLinkedGroupsQuery = (
+  nanoId: string,
+  options?: { enabled?: boolean },
+) =>
   useAuthedQuery<GetJaewonsaengLinkedGroupsResponse, unknown>({
     queryKey: ['jaewonsaengLinkedGroups', nanoId],
     queryFn: () => getJaewonsaengLinkedGroups(nanoId),
@@ -302,7 +306,9 @@ export const useBatchLinkJaewonsaengGroupsMutation = () =>
     mutationFn: (params) => batchLinkJaewonsaengGroups(params.nanoId, params.data),
   });
 
-export const unlinkJaewonsaengHada = async (nanoId: string): Promise<UnlinkJaewonsaengHadaResponse> => {
+export const unlinkJaewonsaengHada = async (
+  nanoId: string,
+): Promise<UnlinkJaewonsaengHadaResponse> => {
   const res = await apiClient.post(`/T/dl/jaewonsaeng/${nanoId}`, {});
   return parseOrThrow(UnlinkJaewonsaengHadaResponseSchema, res.data);
 };
@@ -319,7 +325,10 @@ export const getJaewonCategorySangtaes = async (
   return parseOrThrow(GetJaewonCategorySangtaesResponseSchema, res.data);
 };
 
-export const useGetJaewonCategorySangtaesQuery = (nanoId: string, options?: { enabled?: boolean }) =>
+export const useGetJaewonCategorySangtaesQuery = (
+  nanoId: string,
+  options?: { enabled?: boolean },
+) =>
   useAuthedQuery<GetJaewonCategorySangtaesResponse, unknown>({
     queryKey: ['jaewonCategorySangtaes', nanoId],
     queryFn: () => getJaewonCategorySangtaes(nanoId),
@@ -336,8 +345,27 @@ export const upsertJaewonCategorySangtaes = async (
 };
 
 export const useUpsertJaewonCategorySangtaesMutation = (nanoId: string) =>
-  useAuthedMutation<UpsertJaewonCategorySangtaesResponse, unknown, UpsertJaewonCategorySangtaesRequest>(
-    {
-      mutationFn: (data) => upsertJaewonCategorySangtaes(nanoId, data),
-    },
-  );
+  useAuthedMutation<
+    UpsertJaewonCategorySangtaesResponse,
+    unknown,
+    UpsertJaewonCategorySangtaesRequest
+  >({
+    mutationFn: (data) => upsertJaewonCategorySangtaes(nanoId, data),
+  });
+
+export const getJaewonsaengLinkedHadaProfiles = async (
+  nanoId: string,
+): Promise<GetJaewonsaengLinkedHadaProfilesResponse> => {
+  const res = await apiClient.get(`/T/feat/jaewonsaengs/${nanoId}/linked-hada-profiles`);
+  return parseOrThrow(GetJaewonsaengLinkedHadaProfilesResponseSchema, res.data);
+};
+
+export const useGetJaewonsaengLinkedHadaProfilesQuery = (
+  nanoId: string,
+  options?: { enabled?: boolean },
+) =>
+  useAuthedQuery<GetJaewonsaengLinkedHadaProfilesResponse, unknown>({
+    queryKey: ['jaewonsaengLinkedHadaProfiles', nanoId],
+    queryFn: () => getJaewonsaengLinkedHadaProfiles(nanoId),
+    enabled: !!nanoId && (options?.enabled ?? true),
+  });

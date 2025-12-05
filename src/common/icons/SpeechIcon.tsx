@@ -1,0 +1,21 @@
+import * as React from 'react';
+import type { SVGProps } from 'react';
+
+const SpeechIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="1em"
+    height="1em"
+    fill="none"
+    viewBox="0 0 24 24"
+    {...props}
+  >
+    <path
+      fill="currentColor"
+      fillOpacity={0.87}
+      d="M12 2C9.61305 2 7.32387 2.94821 5.63604 4.63604C3.94821 6.32387 3 8.61305 3 11C3 13.3869 3.94821 15.6761 5.63604 17.364C7.32387 19.0518 9.61305 20 12 20V22.5C12 22.881 12.4122 23.1246 12.7422 22.9336C14.6815 21.8109 19.8091 18.1074 20.8145 12.8105C20.8198 12.7806 20.825 12.7507 20.8301 12.7207C20.8737 12.4788 20.9158 12.2367 20.9414 11.9883C20.9791 11.6602 20.9986 11.3303 21 11C21 8.61305 20.0518 6.32387 18.364 4.63604C16.6761 2.94821 14.3869 2 12 2Z"
+    />
+  </svg>
+);
+
+export default SpeechIcon;

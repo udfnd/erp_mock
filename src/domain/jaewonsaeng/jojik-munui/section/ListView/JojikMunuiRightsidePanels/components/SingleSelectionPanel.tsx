@@ -1,6 +1,6 @@
 import { type FormEvent, useCallback, useState } from 'react';
 
-import { Button, Textfield } from '@/common/components';
+import { Button } from '@/common/components';
 import {
   useGetJojikMunuiDetailQuery,
   useUpdateJojikMunuiMutation,
@@ -8,8 +8,26 @@ import {
 import type { JojikMunuiListItem } from '@/domain/jaewonsaeng/jojik-munui/api';
 import { useJojikQuery } from '@/domain/jojik/api';
 import { useGetJojikAllimDetailQuery } from '@/domain/jaewonsaeng/jojik-allim/api';
+import {
+  useGetJaewonsaengOverallQuery,
+  useGetJaewonsaengLinkedHadaProfilesQuery,
+} from '@/domain/jaewonsaeng/api';
+import { useGetMyProfileQuery } from '@/domain/auth/api';
+import { useGetSayongjaDetailQuery } from '@/domain/sayongja/api';
 
 import { cssObj } from '../../styles';
+import {
+  AcademyIcon,
+  AlarmIcon,
+  BirthdayIcon,
+  EditIcon,
+  PhoneIcon,
+  SaveIcon,
+  SendIcon,
+  SpeechIcon,
+  StudentIcon,
+} from '@/common/icons';
+import Image from 'next/image';
 
 export type SingleSelectionPanelProps = {
   jojikMunuiNanoId: string;
@@ -34,6 +52,7 @@ export type SingleSelectionPanelContentProps = {
   dapbyeonGesiAt: string | null;
   dapbyeonViewedAt: string | null;
   dapbyeonChwisoAt: string | null;
+  dapbyeonChwisoByNanoId: string | null;
   onAfterMutation: () => Promise<unknown> | void;
   updateMutation: ReturnType<typeof useUpdateJojikMunuiMutation>;
   isAuthenticated: boolean;
@@ -78,6 +97,7 @@ export function SingleSelectionPanel({
   const effectiveDapbyeonGesiAt = jojikMunuiDetail?.dapbyeon.dapbyeonGesiAt ?? null;
   const effectiveDapbyeonViewedAt = jojikMunuiDetail?.dapbyeon.dapbyeonViewedAt ?? null;
   const effectiveDapbyeonChwisoAt = jojikMunuiDetail?.dapbyeon.dapbyeonChwisoAt ?? null;
+  const effectiveDapbyeonChwisoByNanoId = jojikMunuiDetail?.dapbyeon.dapbyeonChwisoByNanoId ?? null;
 
   return (
     <SingleSelectionPanelContent
@@ -96,6 +116,7 @@ export function SingleSelectionPanel({
       dapbyeonGesiAt={effectiveDapbyeonGesiAt}
       dapbyeonViewedAt={effectiveDapbyeonViewedAt}
       dapbyeonChwisoAt={effectiveDapbyeonChwisoAt}
+      dapbyeonChwisoByNanoId={effectiveDapbyeonChwisoByNanoId}
       onAfterMutation={onAfterMutation}
       updateMutation={updateMutation}
       isAuthenticated={isAuthenticated}
@@ -118,6 +139,7 @@ export function SingleSelectionPanelContent({
   dapbyeonGesiAt,
   dapbyeonViewedAt,
   dapbyeonChwisoAt,
+  dapbyeonChwisoByNanoId,
   onAfterMutation,
   updateMutation,
   isAuthenticated,
@@ -135,6 +157,25 @@ export function SingleSelectionPanelContent({
 
   const { data: linkedAllimDetail } = useGetJojikAllimDetailQuery(linkedAllimNanoId ?? '', {
     enabled: isAuthenticated && Boolean(linkedAllimNanoId),
+  });
+
+  const { data: jaewonsaengOverall } = useGetJaewonsaengOverallQuery(jaewonsaengNanoId, {
+    enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
+  });
+
+  const { data: jaewonsaengHadaProfiles } = useGetJaewonsaengLinkedHadaProfilesQuery(
+    jaewonsaengNanoId,
+    {
+      enabled: isAuthenticated && Boolean(jaewonsaengNanoId),
+    },
+  );
+
+  const { data: myProfile } = useGetMyProfileQuery({
+    enabled: isAuthenticated,
+  });
+
+  const { data: chwisojaProfile } = useGetSayongjaDetailQuery(dapbyeonChwisoByNanoId ?? '', {
+    enabled: isAuthenticated && Boolean(dapbyeonChwisoByNanoId),
   });
 
   const isUpdating = updateMutation.isPending;
@@ -184,7 +225,6 @@ export function SingleSelectionPanelContent({
     await updateMutation.mutateAsync({
       nanoId: jojikMunuiNanoId,
       data: {
-        dapbyeonContent: null,
         munuiSangtae: 'chwiso',
       },
     });
@@ -194,18 +234,24 @@ export function SingleSelectionPanelContent({
     await onAfterMutation();
   };
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    if (Number.isNaN(date.getTime())) return dateStr;
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
+  const formatDate = (value: string | null) => {
+    if (!value) return '-';
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    const hour = String(parsed.getHours()).padStart(2, '0');
+    const minute = String(parsed.getMinutes()).padStart(2, '0');
+
+    return `${year}.${month}.${day} ${hour}:${minute}`;
   };
+
+  const PROFILE_PLACEHOLDER_IMAGE = 'https://placehold.co/48x48';
 
   return (
     <>
@@ -214,40 +260,129 @@ export function SingleSelectionPanelContent({
       </div>
       <div css={cssObj.panelBody}>
         <div css={cssObj.panelSection}>
-          <h3 css={cssObj.panelSubtitle}>문의 정보</h3>
-          <div css={cssObj.panelLabelSection}>
-            <label css={cssObj.panelLabel}>문의 내용</label>
-            <p css={cssObj.panelText}>{content}</p>
-          </div>
-          <div css={cssObj.panelLabelSection}>
-            <label css={cssObj.panelLabel}>재원생 아이디</label>
-            <p css={cssObj.panelText}>{jaewonsaengNanoId}</p>
-          </div>
-          <div css={cssObj.panelLabelSection}>
-            <label css={cssObj.panelLabel}>문의 일시</label>
-            <p css={cssObj.panelText}>{formatDate(createdAt)}</p>
-          </div>
-          <div css={cssObj.panelLabelSection}>
-            <label css={cssObj.panelLabel}>문의 상태</label>
-            <p css={cssObj.panelText}>{jojikMunuiSangtaeName}</p>
-          </div>
+          <h3 css={cssObj.panelSubtitle}>문의 재원생/수강생 정보</h3>
+          {jaewonsaengOverall ? (
+            <div css={cssObj.jaewonsaengInfoSection(jaewonsaengOverall.jaewonsaeng.isHwalseong)}>
+              <StudentIcon />
+              <p css={cssObj.jaewonsaengName}>{jaewonsaengOverall.jaewonsaeng.name}</p>
+              <p css={cssObj.jaewonsaengNickname}>
+                {jaewonsaengOverall.jaewonsaeng.nickname ?? '-'}
+              </p>
+              <p css={cssObj.chip}>{jaewonsaengOverall.jaewonsaeng.jaewonCategorySangtaeName}</p>
+            </div>
+          ) : (
+            <p css={cssObj.helperText}>재원생 정보를 불러오는 중입니다...</p>
+          )}
         </div>
 
         <div css={cssObj.panelSection}>
+          <h3 css={cssObj.panelSubtitle}>하다 연동 정보</h3>
+          {jaewonsaengHadaProfiles ? (
+            <>
+              {jaewonsaengHadaProfiles.haksaengProfile ? (
+                <>
+                  <div>
+                    <p css={cssObj.panelSubtitle}>연결된 재원생</p>
+                    <div css={cssObj.hadaInfoSection}>
+                      <p>본인 정보</p>
+                      <div css={cssObj.hadaInfoBox}>
+                        <div css={cssObj.hadaProfileWrapper}>
+                          <Image
+                            src={PROFILE_PLACEHOLDER_IMAGE}
+                            alt="내 프로필 이미지"
+                            width={48}
+                            height={48}
+                            unoptimized
+                            css={cssObj.hadaImage}
+                          />
+                          <div css={cssObj.hadaNameBox}>
+                            <div css={cssObj.hadaName}>
+                              {jaewonsaengHadaProfiles.haksaengProfile.name}
+                              <span css={cssObj.chip}>
+                                {jaewonsaengHadaProfiles.haksaengProfile.genderName}
+                              </span>
+                            </div>
+                            <p css={cssObj.hadaSikbyeolja}>
+                              {jaewonsaengHadaProfiles.haksaengProfile.profileSikbyeolja}
+                            </p>
+                          </div>
+                        </div>
+                        <p css={cssObj.hadaInfo}>
+                          <PhoneIcon />
+                          {jaewonsaengHadaProfiles.haksaengProfile.phoneNumber ?? '-'}
+                        </p>
+                        <p css={cssObj.hadaInfo}>
+                          <BirthdayIcon />
+                          {jaewonsaengHadaProfiles.haksaengProfile.birthDate ?? '-'}
+                        </p>
+                        <p css={cssObj.hadaInfo}>
+                          광고성 수신
+                          <span>
+                            {jaewonsaengHadaProfiles.haksaengProfile.isAdAllowed
+                              ? '동의'
+                              : '비동의'}
+                          </span>
+                        </p>
+                      </div>
+                      <p>연동 보호자 정보</p>
+                      {jaewonsaengHadaProfiles.bohojaProfiles.length > 0 ? (
+                        <>
+                          {jaewonsaengHadaProfiles.bohojaProfiles.map((profile) => (
+                            <div key={profile.profileSikbyeolja} css={cssObj.hadaInfoBox}>
+                              <div css={cssObj.hadaName}>
+                                <p css={cssObj.panelText}>{profile.name}</p>
+                                <p css={cssObj.chip}>{profile.gwangye}</p>
+                              </div>
+                              <p css={cssObj.hadaInfo}>
+                                <PhoneIcon />
+                                {profile.phoneNumber ?? '-'}
+                              </p>
+                            </div>
+                          ))}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p css={cssObj.helperText}>학생 프로필이 연동되지 않았습니다.</p>
+              )}
+            </>
+          ) : (
+            <p css={cssObj.helperText}>하다 연동 정보를 불러오는 중입니다...</p>
+          )}
+        </div>
+        <div css={cssObj.panelSection}>
+          <p css={cssObj.panelSubtitle}>문의 정보</p>
+          <div css={cssObj.munuiWrapper}>
+            <strong css={cssObj.munuiTitle}>{jojikMunuiTitle}</strong>
+            <div css={cssObj.munuiDate}>
+              문의 일시
+              <span>{formatDate(createdAt)}</span>
+            </div>
+            <p css={cssObj.munuiContent}>{content}</p>
+          </div>
           <h3 css={cssObj.panelSubtitle}>관련 객체</h3>
           {jojikDetail ? (
             <div css={cssObj.linkedObjectItem}>
-              <span css={cssObj.linkedObjectName}>조직: {jojikDetail.name}</span>
+              <span css={cssObj.linkedObjectName}>
+                <AcademyIcon /> <p>{jojikDetail.name}</p>
+              </span>
             </div>
           ) : null}
           {linkedMunuiDetail ? (
             <div css={cssObj.linkedObjectItem}>
-              <span css={cssObj.linkedObjectName}>연결 문의: {linkedMunuiDetail.title}</span>
+              <span css={cssObj.linkedObjectName}>
+                <SpeechIcon />
+                <p>{linkedMunuiDetail.title}</p>
+              </span>
             </div>
           ) : null}
           {linkedAllimDetail ? (
             <div css={cssObj.linkedObjectItem}>
-              <span css={cssObj.linkedObjectName}>연결 알림: {linkedAllimDetail.title}</span>
+              <span css={cssObj.linkedObjectName}>
+                <AlarmIcon /> <p>{linkedAllimDetail.title}</p>
+              </span>
             </div>
           ) : null}
           {!jojikDetail && !linkedMunuiDetail && !linkedAllimDetail ? (
@@ -256,89 +391,148 @@ export function SingleSelectionPanelContent({
         </div>
 
         <div css={cssObj.panelSection}>
-          <h3 css={cssObj.panelSubtitle}>답변 정보</h3>
-          {hasDapbyeon && !isEditingDapbyeon ? (
+          <div css={cssObj.dapbyeonHeaderWrapper}>
+            <h3 css={cssObj.panelSubtitle}>답변</h3>
+            {!isEditingDapbyeon && (
+              <Button
+                size="small"
+                styleType="text"
+                variant="assistive"
+                iconRight={<EditIcon />}
+                onClick={handleStartEdit}
+              >
+                {hasDapbyeon ? '답변 수정' : '답변 작성'}
+              </Button>
+            )}
+          </div>
+          {dapbyeonChwisoAt && !isEditingDapbyeon ? (
             <>
-              <div css={cssObj.dapbyeonContent}>{dapbyeonContent}</div>
-              <div css={cssObj.panelLabelSection}>
-                <label css={cssObj.panelLabel}>답변 작성 일시</label>
-                <p css={cssObj.panelText}>{formatDate(dapbyeonAt)}</p>
-              </div>
-              <div css={cssObj.panelLabelSection}>
-                <label css={cssObj.panelLabel}>답변 게시 일시</label>
-                <p css={cssObj.panelText}>{formatDate(dapbyeonGesiAt)}</p>
-              </div>
-              <div css={cssObj.panelLabelSection}>
-                <label css={cssObj.panelLabel}>답변 읽음 일시</label>
-                <p css={cssObj.panelText}>{formatDate(dapbyeonViewedAt)}</p>
-              </div>
-              {dapbyeonChwisoAt ? (
-                <div css={cssObj.panelLabelSection}>
-                  <label css={cssObj.panelLabel}>답변 취소 일시</label>
-                  <p css={cssObj.panelText}>{formatDate(dapbyeonChwisoAt)}</p>
+              <div css={cssObj.noDapbyeonText}>
+                <p css={cssObj.dapbyeonCancelText}>답변이 취소되었습니다.</p>
+                <div css={cssObj.dapbyeonDateInfo}>
+                  <label>답변 취소 일시</label>
+                  <p>{formatDate(dapbyeonChwisoAt)}</p>
                 </div>
-              ) : null}
-              <div css={cssObj.sectionActions}>
-                <Button size="small" variant="assistive" onClick={handleStartEdit}>
-                  답변 수정
-                </Button>
-                <Button
-                  size="small"
-                  variant="red"
-                  onClick={handleChwisoDapbyeon}
-                  disabled={isUpdating}
-                >
-                  답변 취소
-                </Button>
               </div>
+              {chwisojaProfile && (
+                <div css={cssObj.chwisojaProfileWrapper}>
+                  <label>취소자</label>
+                  <div css={cssObj.jaewonsaengInfoSection(true)}>
+                    <Image
+                      src={PROFILE_PLACEHOLDER_IMAGE}
+                      alt="내 프로필 이미지"
+                      width={16}
+                      height={16}
+                      unoptimized
+                      css={cssObj.dapbyeonWritterImage}
+                    />
+                    <p css={cssObj.dapbyeonWritterName}>{chwisojaProfile.name}</p>
+                    <p css={cssObj.chip}>{chwisojaProfile.employmentSangtae?.name ?? '-'}</p>
+                  </div>
+                </div>
+              )}
             </>
           ) : null}
-
-          {!hasDapbyeon && !isEditingDapbyeon ? (
+          {hasDapbyeon && !dapbyeonChwisoAt && !isEditingDapbyeon ? (
             <>
-              <p css={cssObj.helperText}>아직 답변이 작성되지 않았습니다.</p>
-              <div css={cssObj.sectionActions}>
-                <Button size="small" onClick={handleStartEdit}>
-                  답변 작성
-                </Button>
+              <div css={cssObj.dapbyeonContent}>
+                <div css={cssObj.dapbyeonDateInfo}>
+                  <label>답변 일시</label>
+                  <p>{formatDate(dapbyeonGesiAt)}</p>
+                </div>
+                <div css={cssObj.dapbyeonDateInfo}>
+                  <label>답변 읽음</label>
+                  <p>{formatDate(dapbyeonViewedAt)}</p>
+                </div>
+                <p>{dapbyeonContent}</p>
               </div>
             </>
           ) : null}
-
+          {!hasDapbyeon && !dapbyeonChwisoAt && !isEditingDapbyeon ? (
+            <>
+              <div css={cssObj.noDapbyeonText}>작성된 답변이 존재하지 않습니다.</div>
+            </>
+          ) : null}
           {isEditingDapbyeon ? (
             <form css={cssObj.dapbyeonInputArea} onSubmit={handleSaveDraft}>
-              <Textfield
-                label="답변 내용"
-                value={dapbyeonInputValue}
-                onValueChange={setDapbyeonInputValue}
-                rows={8}
-                placeholder="답변을 입력하세요"
-              />
-              <div css={cssObj.sectionActions}>
-                <Button type="submit" size="small" disabled={isUpdating}>
-                  저장
-                </Button>
-                <Button
-                  type="button"
-                  size="small"
-                  variant="assistive"
-                  onClick={handlePublishDapbyeon}
-                  disabled={isUpdating}
-                >
-                  답변 게시
-                </Button>
-                <Button
-                  type="button"
-                  size="small"
-                  variant="assistive"
-                  onClick={handleCancelEdit}
-                  disabled={isUpdating}
-                >
-                  취소
-                </Button>
+              {myProfile && (
+                <div css={cssObj.jaewonsaengInfoSection(true)}>
+                  <Image
+                    src={PROFILE_PLACEHOLDER_IMAGE}
+                    alt="내 프로필 이미지"
+                    width={16}
+                    height={16}
+                    unoptimized
+                    css={cssObj.dapbyeonWritterImage}
+                  />
+                  <p css={cssObj.dapbyeonWritterName}>{myProfile.name}</p>
+                  <p css={cssObj.chip}>{myProfile.employmentSangtae?.name ?? '-'}</p>
+                </div>
+              )}
+              <div css={cssObj.dapbyeonBubbleContainer}>
+                <div css={cssObj.dapbyeonBubble}>
+                  <textarea
+                    value={dapbyeonInputValue}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 1000) {
+                        setDapbyeonInputValue(e.target.value);
+                      }
+                    }}
+                    placeholder="답변을 입력하세요"
+                    css={cssObj.dapbyeonTextarea}
+                  />
+                  <div css={cssObj.dapbyeonFooter}>
+                    <div css={cssObj.dapbyeonCharCount}>{dapbyeonInputValue.length} / 1000</div>
+                    <div css={cssObj.dapbyeonActions}>
+                      <Button
+                        type="submit"
+                        size="small"
+                        styleType="text"
+                        iconLeft={<SaveIcon />}
+                        disabled={isUpdating}
+                      >
+                        저장
+                      </Button>
+                      <Button
+                        type="button"
+                        size="small"
+                        styleType="text"
+                        onClick={handlePublishDapbyeon}
+                        iconLeft={<SendIcon />}
+                        disabled={isUpdating}
+                      >
+                        답변 게시
+                      </Button>
+                      <Button
+                        type="button"
+                        size="small"
+                        styleType="text"
+                        variant="assistive"
+                        onClick={handleCancelEdit}
+                        disabled={isUpdating}
+                      >
+                        취소
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </form>
           ) : null}
+          {!isEditingDapbyeon && (
+            <div css={cssObj.sectionActions}>
+              <Button
+                size="small"
+                styleType="text"
+                variant="red"
+                onClick={handleChwisoDapbyeon}
+                disabled={isUpdating}
+                isFull
+              >
+                {hasDapbyeon ? '문의 답변 취소' : '문의 답변 안함'}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </>
